@@ -1,0 +1,15 @@
+import {api} from '@shared/api/axios';
+import {Task} from '../types/tasks';
+
+export async function getTasks(): Promise<Task[]> {
+  const response = await api.get('/tasks');
+  return response.data;
+}
+
+export async function createTask(data: {
+  text: string;
+  type: string;
+}): Promise<Task> {
+  const response = await api.post('/tasks', data);
+  return response.data;
+}
