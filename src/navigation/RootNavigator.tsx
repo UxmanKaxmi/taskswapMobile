@@ -1,19 +1,21 @@
 // src/navigation/RootNavigator.tsx
 import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AddTaskScreen from '@features/tasks/screens/AddTaskScreen';
-
-export type RootStackParamList = {
-    Tasks: undefined;
-    AddTask: undefined;
-};
-
-const Stack = createNativeStackNavigator<RootStackParamList>();
+import { NavigationContainer } from '@react-navigation/native';
+import AppNavigator from './AppNavigator';
+import AuthNavigator from './AuthNavigator';
+import { ActivityIndicator, View } from 'react-native';
+import { useAuth } from '@features/auth/authProvider';
 
 export default function RootNavigator() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
     return (
-        <Stack.Navigator>
-            <Stack.Screen name="AddTask" component={AddTaskScreen} options={{ title: 'Add New Task' }} />
-        </Stack.Navigator>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
     );
+  }
+
+  return <NavigationContainer>{user ? <AppNavigator /> : <AuthNavigator />}</NavigationContainer>;
 }

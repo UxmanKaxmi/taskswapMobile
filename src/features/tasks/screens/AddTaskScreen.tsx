@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { createTask } from '../api/tasks';
+import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
+import SecondaryButton from '@shared/components/Buttons/SecondaryButton';
+import { Layout } from '@shared/components/Layout';
+import Row from '@shared/components/Layout/Row';
+import Column from '@shared/components/Layout/Column';
+import Icon from '@shared/components/Icons/Icon';
 
 export default function AddTaskScreen() {
   const [text, setText] = useState('');
@@ -22,20 +28,45 @@ export default function AddTaskScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Task Text</Text>
-      <TextInput style={styles.input}  value={text} onChangeText={setText} placeholder="e.g., Drink water" />
+    <Layout style={{ backgroundColor: '#000' }} centered>
+      <Column style={{ backgroundColor: '#eee' }}>
+        <Text style={styles.label}>Task</Text>
+        <Text style={styles.label}>Task Text</Text>
+        <TextInput
+          style={styles.input}
+          value={text}
+          onChangeText={setText}
+          placeholder="Enter task text"
+        />
+        {<Icon name="" iconStyle="solid" size={50} color="blue" />}
+      </Column>
 
-      <Text style={styles.label}>Task Type</Text>
-      <TextInput style={styles.input} value={type} onChangeText={setType} placeholder="e.g., reminder, motivation" />
+      {/* <Column gap={16}>
+        <Text>Top</Text>
+        <Text>Bottom</Text>
+      </Column> */}
+      {/* <PrimaryButton
+        title="Save Task"
+        onPress={handleSubmit}
+        disabled
+      // icon={<Feather name="check" size={18} color="#fff" />}
+      />
+      <SecondaryButton
+        title="Cancel"
+        onPress={() => navigation.goBack()}
+        disabled
+      // icon={<Feather name="x" size={18} color="#fff" />}
+      /> */}
 
-      <Button title="Create Task" onPress={handleSubmit} />
-    </View>
+      {/* Uncomment if you want to use a custom button */}
+      {/* <Button title="Save Task" onPress={handleSubmit} /> */}
+      {/* <Button title="Cancel" onPress={() => navigation.goBack()} /> */}
+    </Layout>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
-  label: { fontWeight: 'bold', marginTop: 16 },
+  label: { fontWeight: 'bold' },
   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 5, padding: 8, marginTop: 4 },
 });
