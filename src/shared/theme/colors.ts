@@ -1,13 +1,25 @@
 export const colors = {
-  primary: '#5C6BC0',      // Indigo – buttons, highlights
-  accent: '#FF7043',       // Deep orange – motivation
-  background: '#FAFAFA',   // Light grey – app background
-  text: '#212121',         // Near-black – readability
-  success: '#66BB6A',      // Green – gamification
+  // Brand
+  primary: '#5C6BC0', // Indigo – buttons, highlights
+  onPrimary: '#FFFFFF', // Text/iconography on primary backgrounds
 
-  // Optional utility colors
-  error: '#E53935',
-  warning: '#FFA726',
-  info: '#42A5F5',
-  border: '#E0E0E0',
+  accent: '#FF7043', // Deep orange – motivation actions
+  onAccent: '#FFFFFF', // Text/iconography on accent backgrounds
+
+  // Neutral
+  background: '#FAFAFA', // Light grey – app background
+  surface: '#FFFFFF', // White surfaces (cards, sheets)
+  onSurface: '#212121', // Default text/icon on surface
+
+  text: '#212121', // Near-black – main text
+  muted: '#757575', // Mid-grey – placeholders, secondary text
+
+  // Semantic
+  success: '#66BB6A', // Green – success states
+  error: '#E53935', // Red – error states
+  warning: '#FFA726', // Amber – warnings
+  info: '#42A5F5', // Blue – informational
+
+  // Dividers / Borders
+  border: '#E0E0E0', // Light grey – separators
 };

@@ -1,111 +1,198 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Alert, StyleSheet, TextInput } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { createTask, getTasks } from '../api/home';
-import { Layout } from '@shared/components/Layout';
-import Column from '@shared/components/Layout/Column';
-import { useAuth } from '@features/auth/authProvider';
+import React, { useCallback, useState } from 'react';
+import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { useFocusEffect, useNavigation, NavigationProp } from '@react-navigation/native';
+
+import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
-import { Task } from '../types/home';
-import { theme } from '@shared/theme/theme';
+import ListView from '@shared/components/ListView/ListView';
+import { getTasks } from '@features/home/api/home';
+import { Task } from '@features/home/types/home';
+import { TaskType } from '@features/tasks/types/tasks';
+import { AppStackParamList } from '@features/tasks/types/navigation';
+import OutlineButton from '@shared/components/Buttons/OutlineButton';
+import HeadingText from '@shared/components/HeadingText';
+import { spacing, typography } from '@shared/theme';
+import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
+import { Layout } from '@shared/components/Layout';
+import { vs } from 'react-native-size-matters';
+import { Height } from '@shared/components/Spacing';
+import Row from '@shared/components/Layout/Row';
 
 export default function HomeScreen() {
-  const [text, setText] = useState('');
-  const [type] = useState('reminder'); // hardcoded for now
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const navigation = useNavigation();
-  const { signOut } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState<TaskType | 'all'>('all');
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchTasks();
+    }, [filter]),
+  );
 
   const fetchTasks = async () => {
     try {
-      const data = await getTasks();
-      setTasks(data);
-    } catch (error) {
-      console.error('[Get Tasks Error]', error);
-      Alert.alert('Error', 'Could not fetch tasks');
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!text.trim()) {
-      Alert.alert('Validation', 'Please enter task text');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await createTask({ text, type });
-      Alert.alert('Success', 'Task created');
-      fetchTasks();
+      const all = await getTasks();
+      setTasks(filter === 'all' ? all : all.filter(t => t.type === filter));
     } catch (err) {
-      Alert.alert('Error', 'Could not create task');
-      console.error(err);
-    } finally {
-      setLoading(false);
+      console.error('Failed to fetch tasks', err);
     }
   };
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+  const navigateToDetails = (task: Task) => {
+    navigation.navigate('TaskDetail', { task: { ...task, type: task.type as TaskType } });
+  };
+
+  const renderTask = ({ item }: { item: Task }) => (
+    <TouchableOpacity style={styles.taskRow} onPress={() => navigateToDetails(item)}>
+      <TextElement variant="body" weight="600">
+        {item.text}
+      </TextElement>
+      <TextElement variant="caption" color="muted">
+        Type: {item.type}
+      </TextElement>
+      {item.type === 'decision' && item.options?.length > 0 && (
+        <View style={styles.optionsContainer}>
+          {item.options.map(
+            (
+              opt:
+                | string
+                | number
+                | bigint
+                | boolean
+                | React.ReactElement<unknown, string | React.JSXElementConstructor<any>>
+                | Iterable<React.ReactNode>
+                | React.ReactPortal
+                | Promise<
+                    | string
+                    | number
+                    | bigint
+                    | boolean
+                    | React.ReactPortal
+                    | React.ReactElement<unknown, string | React.JSXElementConstructor<any>>
+                    | Iterable<React.ReactNode>
+                    | null
+                    | undefined
+                  >
+                | null
+                | undefined,
+              idx: React.Key | null | undefined,
+            ) => (
+              <TextElement key={idx} variant="body" color="muted">
+                • {opt}
+              </TextElement>
+            ),
+          )}
+        </View>
+      )}
+    </TouchableOpacity>
+  );
 
   return (
-    <Layout centered>
-      <FlatList
+    <View style={styles.container}>
+      <Height size={15} />
+      <HeadingText level={1}>Your Tasks</HeadingText>
+      <View style={styles.filters}>
+        <ListView
+          scrollViewProps={{
+            horizontal: true,
+            showsHorizontalScrollIndicator: false,
+            contentContainerStyle: {
+              marginLeft: 20,
+            },
+          }}
+        >
+          <OutlineButton
+            type={filter === 'all' ? 'alt' : 'default'}
+            style={styles.tagsButton}
+            textStyle={styles.tagsText}
+            title="All"
+            onPress={() => setFilter('all')}
+          />
+
+          <OutlineButton
+            type={filter === 'reminder' ? 'alt' : 'default'}
+            style={styles.tagsButton}
+            textStyle={styles.tagsText}
+            title="Reminders"
+            onPress={() => setFilter('reminder')}
+          />
+          <OutlineButton
+            type={filter === 'decision' ? 'alt' : 'default'}
+            style={styles.tagsButton}
+            textStyle={styles.tagsText}
+            title="Decisions"
+            onPress={() => setFilter('decision')}
+          />
+          <OutlineButton
+            type={filter === 'motivation' ? 'alt' : 'default'}
+            style={styles.tagsButton}
+            textStyle={styles.tagsText}
+            title="Motivation"
+            onPress={() => setFilter('motivation')}
+          />
+          <OutlineButton
+            type={filter === 'advice' ? 'alt' : 'default'}
+            style={styles.tagsButton}
+            textStyle={styles.tagsText}
+            title="Advice"
+            onPress={() => setFilter('advice')}
+          />
+        </ListView>
+      </View>
+
+      <ListView
         data={tasks}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{ gap: 12 }}
-        renderItem={({ item }) => (
-          <View style={styles.taskCard}>
-            <Text style={styles.taskText}>{item.text}</Text>
-            <Text style={styles.taskType}>{item.type}</Text>
-          </View>
-        )}
+        renderItem={renderTask}
+        flatListProps={{
+          keyExtractor: item => item.id,
+          ListEmptyComponent: (
+            <View style={{ flex: 1, alignItems: 'flex-start', marginLeft: 20 }}>
+              <Height size={20} />
+              <TextElement variant="body" color="muted">
+                No tasks found.
+              </TextElement>
+            </View>
+          ),
+          ListFooterComponent: <View style={{ marginBottom: vs(60) }} />,
+          ItemSeparatorComponent: () => <View style={styles.borderSeparator} />,
+        }}
       />
 
-      <TextInput
-        placeholder="Enter task text..."
-        placeholderTextColor={theme.colors.text}
-        value={text}
-        onChangeText={setText}
-        style={[styles.input, { borderColor: theme.colors.primary }]}
+      <AnimatedBottomButton
+        title="Add Task"
+        onPress={() => navigation.navigate('AddTask')}
+        style={styles.addButton}
+        visible={true}
       />
-
-      {/* Optional: Add type selector */}
-      {/* <Dropdown or segmented control here for "type" */}
-
-      <PrimaryButton title="Create Task" onPress={handleSubmit} isLoading={loading} />
-
-      <PrimaryButton title="Sign Out" onPress={signOut} />
-    </Layout>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    color: '#000',
+  container: { flex: 1 },
+  filters: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    // marginBottom: spacing.md,
+    // marginStart: spacing.md,
   },
-  taskCard: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+  taskRow: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
   },
-  taskText: {
-    fontSize: 16,
-    fontWeight: '600',
+  borderSeparator: {
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
   },
-  taskType: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 4,
+  optionsContainer: { paddingLeft: 16, marginTop: 4 },
+  addButton: { marginTop: 16 },
+  tagsButton: {
+    marginEnd: spacing.sm,
+    borderRadius: 50,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  tagsText: {
+    fontSize: typography.small,
   },
 });

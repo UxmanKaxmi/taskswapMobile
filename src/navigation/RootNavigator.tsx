@@ -1,21 +1,26 @@
 // src/navigation/RootNavigator.tsx
 import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import AppNavigator from './AppNavigator';
 import AuthNavigator from './AuthNavigator';
-import { ActivityIndicator, View } from 'react-native';
+import { AppNavigator } from './AppNavigator';
+import { MainStackParamList } from '@features/tasks/types/navigation';
 import { useAuth } from '@features/auth/authProvider';
 
+const Stack = createNativeStackNavigator<MainStackParamList>();
+
 export default function RootNavigator() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth(); // Your auth logic here
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  return <NavigationContainer>{user ? <AppNavigator /> : <AuthNavigator />}</NavigationContainer>;
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {user ? (
+          <Stack.Screen name="App" component={AppNavigator} />
+        ) : (
+          <Stack.Screen name="Auth" component={AuthNavigator} />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 }

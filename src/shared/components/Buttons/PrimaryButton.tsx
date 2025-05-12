@@ -15,11 +15,5 @@ type Props = {
 
 export default function PrimaryButton(props: Props) {
   const theme = useTheme();
-  return (
-    <ButtonBase
-      {...props}
-      backgroundColor={theme.colors.primary}
-      textColor="#fff"
-    />
-  );
+  return <ButtonBase {...props} backgroundColor={theme.colors.primary} textColor="#fff" />;
 }

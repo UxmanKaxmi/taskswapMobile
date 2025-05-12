@@ -7,7 +7,19 @@ export async function getTasks(): Promise<Task[]> {
   return response.data;
 }
 
-export async function createTask(data: { text: string; type: string }): Promise<Task> {
-  const response = await api.post('/tasks', data);
-  return response.data;
-}
+// export async function createTask(data: { text: string; type: string }): Promise<Task> {
+//   const response = await api.post('/tasks', data);
+//   return response.data;
+// }
+
+// export async function updateTask(
+//   id: string,
+//   data: { text?: string; type?: number },
+// ): Promise<Task> {
+//   const response = await api.put(`/tasks/${id}`, data);
+//   return response.data;
+// }
+
+// export async function deleteTask(id: string): Promise<void> {
+//   await api.delete(`/tasks/${id}`);
+// }
