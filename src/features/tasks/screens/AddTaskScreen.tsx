@@ -12,6 +12,7 @@ import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButto
 import { createTask, updateTask } from '@features/tasks/api/taskApi';
 import { AppStackParamList } from '@features/tasks/types/navigation';
 import { TaskType, Task } from '@features/tasks/types/tasks';
+import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
 
@@ -95,7 +96,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
       } else {
         await createTask(payload as any);
       }
-      navigation.goBack();
+      navigation.navigate('Home');
     } catch (error) {
       console.error('[SUBMIT_TASK_ERROR]', error);
       Alert.alert('Error', existingTask ? 'Failed to update task' : 'Failed to create task');
@@ -243,8 +244,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
         />
       )}
 
-      <AnimatedBottomButton
-        visible={true}
+      <PrimaryButton
         title={existingTask ? 'Save Changes' : 'Post Task'}
         onPress={handleSubmit}
         style={styles.postButton}
@@ -296,12 +296,7 @@ const styles = StyleSheet.create({
   listDetail: {
     marginRight: 12,
   },
-  postButton: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
+  postButton: {},
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',

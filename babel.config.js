@@ -10,6 +10,7 @@ module.exports = function (api) {
             '@app': './src/app',
             '@features': './src/features',
             '@shared': './src/shared',
+            '@assets': './src/assets',
           },
           extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
         },

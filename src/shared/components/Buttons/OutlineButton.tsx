@@ -56,7 +56,7 @@ export default function OutlineButton({
       textColor={textColor}
       borderColor={borderColor}
       style={StyleSheet.flatten([
-        { paddingVertical: moderateScale(10), paddingHorizontal: moderateScale(20) },
+        { paddingVertical: moderateScale(10), paddingHorizontal: moderateScale(20), width: 100 },
         style,
       ])}
       textStyle={StyleSheet.flatten([{ fontSize: typography.body }, textStyle])}

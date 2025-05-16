@@ -6,11 +6,20 @@ import AuthNavigator from './AuthNavigator';
 import { AppNavigator } from './AppNavigator';
 import { MainStackParamList } from '@features/tasks/types/navigation';
 import { useAuth } from '@features/auth/authProvider';
+import { ActivityIndicator, View } from 'react-native';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
 export default function RootNavigator() {
-  const { user } = useAuth(); // Your auth logic here
+  const { user, loading } = useAuth(); // Your auth logic here
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer>

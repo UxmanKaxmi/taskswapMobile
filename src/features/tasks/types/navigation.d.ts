@@ -17,6 +17,7 @@ export type MainStackParamList = {
 // App stack (after login)
 export type AppStackParamList = {
   Home: undefined;
+  FindFriendsScreen: undefined;
   AddTask: { task?: Task } | undefined;
   TaskDetail: { task: Task };
 };

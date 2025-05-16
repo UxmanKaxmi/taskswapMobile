@@ -8,6 +8,7 @@ import { AppStackParamList, MainStackParamList } from '@features/tasks/types/nav
 import AddTaskScreen from '@features/tasks/screens/AddTaskScreen';
 import { LogoutButton } from '@features/auth/components/LogoutButton';
 import TaskDetailScreen from '@features/tasks/screens/TaskDetailScreen';
+import FindFriendsScreen from '@features/findFriend/screens/FindFriendsScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -21,6 +22,16 @@ export const AppNavigator = () => {
           headerRight: () => <LogoutButton />,
         }}
       />
+      <Stack.Screen
+        name="FindFriendsScreen"
+        component={FindFriendsScreen}
+        options={{
+          title: 'Find Friends',
+
+          headerRight: () => <LogoutButton />,
+        }}
+      />
+
       <Stack.Screen
         name="AddTask"
         component={AddTaskScreen}

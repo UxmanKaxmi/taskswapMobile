@@ -7,7 +7,7 @@ import React, {
   PropsWithChildren,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { signInWithGoogle, signOutGoogle } from './googleSignIn';
+import { signInWithGoogle, signOutGoogle } from '../../shared/utils/googleAuth';
 import { api } from '@shared/api/axios';
 
 type User = {

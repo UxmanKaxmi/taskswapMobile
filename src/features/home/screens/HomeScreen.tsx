@@ -17,6 +17,7 @@ import { Layout } from '@shared/components/Layout';
 import { vs } from 'react-native-size-matters';
 import { Height } from '@shared/components/Spacing';
 import Row from '@shared/components/Layout/Row';
+import DecisionCard, { DecisionTask } from '../components/DecisionCard';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
@@ -87,6 +88,17 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
+  const renderTaskNew = ({ item }: { item: DecisionTask }) =>
+    item.type === 'decision' && (
+      <DecisionCard
+        key={item.id}
+        task={item}
+        onPressCard={t => console.log('Card pressed', t.id)}
+        onPressSuggest={t => console.log('Suggest for', t.id)}
+        onPressView={t => console.log('View for', t.id)}
+      />
+    );
+
   return (
     <View style={styles.container}>
       <Height size={15} />
@@ -142,7 +154,7 @@ export default function HomeScreen() {
 
       <ListView
         data={tasks}
-        renderItem={renderTask}
+        renderItem={renderTaskNew}
         flatListProps={{
           keyExtractor: item => item.id,
           ListEmptyComponent: (
@@ -187,6 +199,7 @@ const styles = StyleSheet.create({
   optionsContainer: { paddingLeft: 16, marginTop: 4 },
   addButton: { marginTop: 16 },
   tagsButton: {
+    width: 120,
     marginEnd: spacing.sm,
     borderRadius: 50,
     paddingVertical: spacing.sm,

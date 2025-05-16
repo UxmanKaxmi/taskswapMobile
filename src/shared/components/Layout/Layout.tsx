@@ -3,6 +3,7 @@ import React, { ReactNode } from 'react';
 import { View, ViewStyle, StyleSheet } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@shared/theme/useTheme';
+import AnimatedBackground from './AnimatedBackground';
 
 type Props = {
   children: ReactNode;
@@ -29,7 +30,9 @@ export default function Layout({ children, centered = false, style }: Props) {
 
   return (
     <SafeAreaView edges={['right', 'bottom', 'left']} style={[containerStyle, style]}>
+      {/* <AnimatedBackground> */}
       {children}
+      {/* </AnimatedBackground> */}
     </SafeAreaView>
   );
 }

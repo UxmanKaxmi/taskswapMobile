@@ -7,7 +7,7 @@ export const colors = {
   onAccent: '#FFFFFF', // Text/iconography on accent backgrounds
 
   // Neutral
-  background: '#FAFAFA', // Light grey – app background
+  background: '#FFFFFF', // Light grey – app background
   surface: '#FFFFFF', // White surfaces (cards, sheets)
   onSurface: '#212121', // Default text/icon on surface
 
