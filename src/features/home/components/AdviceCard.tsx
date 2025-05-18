@@ -1,27 +1,26 @@
-// src/shared/components/DecisionCard.tsx
+// src/shared/components/AdviceCard.tsx
 
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { ms, vs } from 'react-native-size-matters';
+import { moderateScale, ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import Row from '@shared/components/Layout/Row';
 import { colors, spacing, typography } from '@shared/theme';
-import { DecisionTask } from '../types/home';
-import { timeAgo, capitalizeFirstLetter } from '@shared/utils/helperFunctions';
-import Column from '@shared/components/Layout/Column';
+import { AdviceTask } from '../types/home';
+import { capitalizeFirstLetter, simpleTimeAgo, timeAgo } from '@shared/utils/helperFunctions';
 import TypeTag from '@shared/components/TypeTag/TypeTag';
 
 type Props = {
-  task: DecisionTask;
-  onPressCard: (task: DecisionTask) => void;
-  onPressSuggest: (task: DecisionTask) => void;
-  onPressView: (task: DecisionTask) => void;
+  task: AdviceTask;
+  onPressCard: (task: AdviceTask) => void;
+  onPressSuggest: (task: AdviceTask) => void;
+  onPressView: (task: AdviceTask) => void;
 };
 
-export default function DecisionCard({ task, onPressCard, onPressSuggest, onPressView }: Props) {
-  const { avatar, name = 'John Doe', createdAt, text, options, type } = task;
+export default function AdviceCard({ task, onPressCard, onPressSuggest, onPressView }: Props) {
+  const { avatar, name = 'John Doe', createdAt, text, type } = task;
 
   return (
     <TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={() => onPressCard(task)}>
@@ -32,7 +31,7 @@ export default function DecisionCard({ task, onPressCard, onPressSuggest, onPres
             <TextElement variant="subtitle" style={styles.name}>
               {name}
             </TextElement>
-            <TextElement variant="caption" style={styles.timeAgo} color="muted">
+            <TextElement style={styles.timeAgo} color="muted">
               {timeAgo(createdAt)}
             </TextElement>
           </View>
@@ -44,14 +43,14 @@ export default function DecisionCard({ task, onPressCard, onPressSuggest, onPres
       <View style={styles.messageRow}>
         <TextElement variant="body">{text}</TextElement>
         {/* {emoji && (
-          <TextElement variant="body" style={styles.emoji}>
-            {emoji}
-          </TextElement>
-        )} */}
+              <TextElement variant="body" style={styles.emoji}>
+                {emoji}
+              </TextElement>
+            )} */}
       </View>
 
       {/* Action buttons */}
-      <Row style={styles.actions}>
+      {/* <Row style={styles.actions}>
         {options.map((val, index) => (
           <OutlineButton
             key={index}
@@ -61,7 +60,7 @@ export default function DecisionCard({ task, onPressCard, onPressSuggest, onPres
             textStyle={styles.buttonText}
           />
         ))}
-      </Row>
+      </Row> */}
     </TouchableOpacity>
   );
 }

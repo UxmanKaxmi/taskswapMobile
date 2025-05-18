@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 
 import HomeScreen from '@features/home/screens/HomeScreen';
-import { AppStackParamList, MainStackParamList } from '@features/tasks/types/navigation';
+import { AppStackParamList, MainStackParamList } from '@shared/types/navigation';
 import AddTaskScreen from '@features/tasks/screens/AddTaskScreen';
 import { LogoutButton } from '@features/auth/components/LogoutButton';
 import TaskDetailScreen from '@features/tasks/screens/TaskDetailScreen';

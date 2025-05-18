@@ -3,7 +3,7 @@ import React from 'react';
 import { Button, Alert } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MainStackParamList } from '@features/tasks/types/navigation';
+import { MainStackParamList } from '@shared/types/navigation';
 import { useAuth } from '../authProvider';
 
 export const LogoutButton = () => {

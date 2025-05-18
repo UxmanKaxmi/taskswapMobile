@@ -29,6 +29,7 @@ export default function Icon({
   return (
     <FontAwesome6
       name={name as any}
+      // name={"dec"}
       size={size}
       iconStyle={iconStyle}
       color={iconColor}

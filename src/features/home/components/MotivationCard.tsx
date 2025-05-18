@@ -1,4 +1,4 @@
-// src/shared/components/DecisionCard.tsx
+// src/shared/components/MotivationCard.tsx
 
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Image } from 'react-native';
@@ -8,20 +8,19 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import Row from '@shared/components/Layout/Row';
 import { colors, spacing, typography } from '@shared/theme';
-import { DecisionTask } from '../types/home';
-import { timeAgo, capitalizeFirstLetter } from '@shared/utils/helperFunctions';
-import Column from '@shared/components/Layout/Column';
+import { MotivationTask } from '../types/home';
+import { capitalizeFirstLetter, simpleTimeAgo, timeAgo } from '@shared/utils/helperFunctions';
 import TypeTag from '@shared/components/TypeTag/TypeTag';
 
 type Props = {
-  task: DecisionTask;
-  onPressCard: (task: DecisionTask) => void;
-  onPressSuggest: (task: DecisionTask) => void;
-  onPressView: (task: DecisionTask) => void;
+  task: MotivationTask;
+  onPressCard: (task: MotivationTask) => void;
+  onPressSuggest: (task: MotivationTask) => void;
+  onPressView: (task: MotivationTask) => void;
 };
 
-export default function DecisionCard({ task, onPressCard, onPressSuggest, onPressView }: Props) {
-  const { avatar, name = 'John Doe', createdAt, text, options, type } = task;
+export default function MotivationCard({ task, onPressCard, onPressSuggest, onPressView }: Props) {
+  const { avatar, name = 'John Doe', createdAt, text, type } = task;
 
   return (
     <TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={() => onPressCard(task)}>
@@ -44,24 +43,11 @@ export default function DecisionCard({ task, onPressCard, onPressSuggest, onPres
       <View style={styles.messageRow}>
         <TextElement variant="body">{text}</TextElement>
         {/* {emoji && (
-          <TextElement variant="body" style={styles.emoji}>
-            {emoji}
-          </TextElement>
-        )} */}
+              <TextElement variant="body" style={styles.emoji}>
+                {emoji}
+              </TextElement>
+            )} */}
       </View>
-
-      {/* Action buttons */}
-      <Row style={styles.actions}>
-        {options.map((val, index) => (
-          <OutlineButton
-            key={index}
-            title={val}
-            onPress={() => onPressSuggest(task)}
-            style={styles.button}
-            textStyle={styles.buttonText}
-          />
-        ))}
-      </Row>
     </TouchableOpacity>
   );
 }

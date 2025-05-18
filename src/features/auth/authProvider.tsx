@@ -1,3 +1,4 @@
+// src/features/auth/authProvider.tsx
 import React, {
   createContext,
   useState,
@@ -7,8 +8,10 @@ import React, {
   PropsWithChildren,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { signInWithGoogle, signOutGoogle } from '../../shared/utils/googleAuth';
+import { signOutGoogle } from '@shared/utils/googleAuth';
 import { api } from '@shared/api/axios';
+import { useGoogleAuth } from './api/useGoogleAuth';
+import { showToast } from '@shared/utils/toast';
 
 type User = {
   id: string;
@@ -35,7 +38,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔁 Load user and token from AsyncStorage
+  const { mutateAsync: googleAuth, isPending: authLoading, error: authError } = useGoogleAuth();
+
   useEffect(() => {
     const loadSession = async () => {
       const savedUser = await AsyncStorage.getItem(STORAGE_USER);
@@ -51,33 +55,28 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   const signIn = async () => {
-    const result = await signInWithGoogle();
-    const idToken = result.data?.idToken;
+    try {
+      const { user, token } = await googleAuth();
+      setUser(user);
+      setToken(token);
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      await AsyncStorage.setItem(STORAGE_USER, JSON.stringify(user));
+      await AsyncStorage.setItem(STORAGE_TOKEN, token);
 
-    const userInfo: User = {
-      id: result.data?.user?.id ?? '',
-      name: result.data?.user?.name ?? '',
-      email: result.data?.user?.email ?? '',
-      photo: result.data?.user?.photo ?? '',
-    };
-
-    const response = await api.post('/users', userInfo, {
-      headers: {
-        Authorization: `Bearer ${idToken}`,
-      },
-    });
-
-    const jwt = response.data.token;
-
-    setUser(response.data.user);
-    setToken(jwt);
-    api.defaults.headers.common['Authorization'] = `Bearer ${jwt}`;
-
-    console.log('[Client Token]', jwt);
-    console.log('[Axios Header]', api.defaults.headers.common['Authorization']);
-
-    await AsyncStorage.setItem(STORAGE_USER, JSON.stringify(response.data.user));
-    await AsyncStorage.setItem(STORAGE_TOKEN, jwt);
+      showToast({
+        type: 'success',
+        title: 'Welcome back!',
+        message: `Hello, ${user.name}`,
+      });
+    } catch (err: any) {
+      console.error('🔐 Sign in failed', err);
+      showToast({
+        type: 'error',
+        title: 'Sign-in Failed',
+        message: err?.response?.data?.message || 'Something went wrong.',
+      });
+      throw err;
+    }
   };
 
   const signOut = async () => {
@@ -86,6 +85,12 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     setUser(null);
     setToken(null);
     delete api.defaults.headers.common['Authorization'];
+
+    showToast({
+      type: 'info',
+      title: 'Signed out',
+      message: 'See you again soon!',
+    });
   };
 
   return (

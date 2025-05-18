@@ -1,32 +1,35 @@
 // src/types/task.ts
-export type Task = {
-  options: any;
-  id: string;
-  text: string;
-  type: string;
-  createdAt: string;
-};
 
-export type DecisionTask = {
+export type BaseTask = {
   id: string;
   avatar: string; // image URI
   name: string;
   time: string;
   text: string;
   emoji?: string;
-  options: string[]; // decision options
   type: string;
   createdAt: string;
+  userId: string;
+  completed: boolean; // ✅ from BaseTask
 };
 
-export type ReminderTask = {
-  id: string;
-  avatar: string; // image URI
-  name: string;
-  time: string;
-  text: string;
-  emoji?: string;
-  options: string[]; // decision options
-  type: string;
-  createdAt: string;
+export type DecisionTask = BaseTask & {
+  type: 'decision';
+  options: string[];
 };
+
+export type ReminderTask = BaseTask & {
+  type: 'reminder';
+  remindAt: string; // ISO time to trigger
+};
+
+export type AdviceTask = BaseTask & {
+  type: 'advice';
+};
+
+export type MotivationTask = BaseTask & {
+  type: 'motivation';
+  deliverAt?: string;
+};
+
+export type Task = DecisionTask | ReminderTask | AdviceTask | MotivationTask;

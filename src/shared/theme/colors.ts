@@ -22,4 +22,9 @@ export const colors = {
 
   // Dividers / Borders
   border: '#E0E0E0', // Light grey – separators
+
+  reminderBg: '#FFF0C8',
+  adviceBg: '#E0F7FA',
+  decisionBg: '#EDE7FF',
+  motivationBg: '#E3FCEF',
 };

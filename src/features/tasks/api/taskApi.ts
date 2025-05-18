@@ -1,6 +1,5 @@
 import { api } from '@shared/api/axios';
-import { Task } from '../types/tasks';
-import { TaskType } from '../types/tasks';
+import { Task, TaskType } from '../types/tasks';
 
 /**
  * Fetch all tasks for the authenticated user.
@@ -16,18 +15,13 @@ export async function getTasks(): Promise<Task[]> {
 export interface CreateTaskPayload {
   text: string;
   type: TaskType;
-  /** Only set for reminder tasks */
-  remindAt?: string;
-  /** Only set for decision tasks */
-  options?: string[];
-  /** Only set for motivation tasks */
-  deliverAt?: string;
+  remindAt?: string; // For reminder tasks
+  options?: string[]; // For decision tasks
+  deliverAt?: string; // For motivation tasks
 }
 
 /**
- * Create a new task of various types.
- * @param data the new task payload.
- * @returns the created Task.
+ * Create a new task of any supported type.
  */
 export async function createTask(data: CreateTaskPayload): Promise<Task> {
   const response = await api.post('/tasks', data);
@@ -35,7 +29,7 @@ export async function createTask(data: CreateTaskPayload): Promise<Task> {
 }
 
 /**
- * Update an existing task.
+ * Update an existing task by ID.
  */
 export async function updateTask(
   id: string,

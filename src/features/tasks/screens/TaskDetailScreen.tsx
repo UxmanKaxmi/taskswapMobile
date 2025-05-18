@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppStackParamList } from '@features/tasks/types/navigation';
+import { AppStackParamList } from '@shared/types/navigation';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';

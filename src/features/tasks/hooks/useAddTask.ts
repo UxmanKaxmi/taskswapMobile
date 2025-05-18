@@ -1,24 +1,19 @@
 // src/features/tasks/hooks/useAddTask.ts
-import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createTask } from '../api/taskApi';
-import { TaskPayload } from '../types/tasks';
+import { CreateTaskPayload } from '../api/taskApi';
+import { Task } from '../types/tasks';
 
 export function useAddTask() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const addTask = async (data: TaskPayload) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      await createTask(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create task');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { addTask, loading, error };
+  return useMutation<Task, Error, CreateTaskPayload>({
+    mutationFn: createTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: error => {
+      console.error('❌ Failed to add task:', error);
+    },
+  });
 }

@@ -1,29 +1,29 @@
 // src/features/tasks/screens/AddTaskScreen.tsx
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, StyleSheet, Platform, Alert, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, TextInput, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '@shared/theme/useTheme';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
 import ListView from '@shared/components/ListView/ListView';
-import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
-import { createTask, updateTask } from '@features/tasks/api/taskApi';
-import { AppStackParamList } from '@features/tasks/types/navigation';
-import { TaskType, Task } from '@features/tasks/types/tasks';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
+import { AppStackParamList } from '@shared/types/navigation';
+import { TaskType, Task } from '@features/tasks/types/tasks';
+import { updateTask } from '@features/tasks/api/taskApi';
+import { useAddTask } from '../hooks/useAddTask';
+import { showToast } from '@shared/utils/toast';
+import Icon from '@shared/components/Icons/Icon';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
 
-// ListItem component for row entries
 function ListItem({
   icon,
   label,
   detail,
   onPress,
 }: {
-  icon: React.ComponentProps<typeof FontAwesome6>['name'];
+  icon: React.ComponentProps<typeof Icon>['name'];
   label: string;
   detail?: string;
   onPress: () => void;
@@ -32,7 +32,7 @@ function ListItem({
   return (
     <View style={[styles.listItem, { paddingVertical: spacing.sm }]}>
       <TouchableOpacity onPress={onPress}>
-        <FontAwesome6 name={icon as any} iconStyle="solid" size={spacing.lg} color={colors.text} />
+        <Icon name={icon} iconStyle="solid" size={spacing.lg} color={colors.text} />
       </TouchableOpacity>
       <TextElement style={[styles.listText, { marginLeft: spacing.md, color: colors.text }]}>
         {label}
@@ -43,12 +43,7 @@ function ListItem({
         </TextElement>
       )}
       <TouchableOpacity onPress={onPress}>
-        <FontAwesome6
-          name="chevron-right"
-          iconStyle="solid"
-          size={spacing.lg}
-          color={colors.muted}
-        />
+        <Icon name="chevron-right" iconStyle="solid" size={spacing.lg} color={colors.muted} />
       </TouchableOpacity>
     </View>
   );
@@ -58,7 +53,6 @@ export default function AddTaskScreen({ route, navigation }: Props) {
   const theme = useTheme();
   const existingTask = route.params?.task;
 
-  // State defaults or existing values
   const [type, setType] = useState<TaskType>(existingTask?.type ?? 'reminder');
   const [description, setDescription] = useState(existingTask?.text ?? '');
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -67,41 +61,43 @@ export default function AddTaskScreen({ route, navigation }: Props) {
   );
   const [options, setOptions] = useState<string[]>(existingTask?.options ?? []);
   const [newOption, setNewOption] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  // Handle date picker update
+  const { mutate: addTask, isPending } = useAddTask();
+
   const onDateChange = (_: any, date?: Date) => {
     setShowDatePicker(Platform.OS === 'ios');
     if (date) setRemindAt(date);
   };
 
-  // Submit handler: create or update
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!description.trim()) {
-      Alert.alert('Validation', 'Please enter a task description');
+      showToast({ type: 'error', title: 'Description required' });
       return;
     }
-    setLoading(true);
-    try {
-      const payload: Partial<Task> = {
-        text: description.trim(),
-        type,
-        remindAt: type === 'reminder' ? remindAt.toISOString() : remindAt.toISOString(),
-        options: type === 'decision' ? options : undefined,
-        deliverAt: type === 'motivation' ? remindAt.toISOString() : remindAt.toISOString(),
-      };
 
-      if (existingTask) {
-        await updateTask(existingTask.id, payload);
-      } else {
-        await createTask(payload as any);
-      }
-      navigation.navigate('Home');
-    } catch (error) {
-      console.error('[SUBMIT_TASK_ERROR]', error);
-      Alert.alert('Error', existingTask ? 'Failed to update task' : 'Failed to create task');
-    } finally {
-      setLoading(false);
+    const payload: Partial<Task> = {
+      text: description.trim(),
+      type,
+      remindAt: remindAt.toISOString(),
+      options: type === 'decision' ? options : undefined,
+      deliverAt: type === 'motivation' ? remindAt.toISOString() : undefined,
+    };
+
+    if (existingTask) {
+      updateTask(existingTask.id, payload)
+        .then(() => {
+          showToast({ type: 'success', title: 'Task updated!' });
+          navigation.navigate('Home');
+        })
+        .catch(() => {});
+    } else {
+      addTask(payload as any, {
+        onSuccess: () => {
+          showToast({ type: 'success', title: 'Task posted!' });
+          navigation.navigate('Home');
+        },
+        onError: () => {},
+      });
     }
   };
 
@@ -112,48 +108,50 @@ export default function AddTaskScreen({ route, navigation }: Props) {
           Task Type
         </TextElement>
         <View style={styles.grid}>
-          {(
-            [
-              { key: 'reminder', label: 'Reminder', icon: 'clock' },
-              { key: 'decision', label: 'Decision', icon: 'circle-question' },
-              { key: 'motivation', label: 'Motivation', icon: 'bolt' },
-              { key: 'advice', label: 'Advice', icon: 'comment-dots' },
-            ] as Array<{ key: TaskType; label: string; icon: string }>
-          ).map(({ key, label, icon }) => (
-            <TouchableOpacity
-              key={key}
-              disabled={existingTask && existingTask.type !== key}
-              style={[
-                styles.card,
-                {
-                  borderColor: theme.colors.border,
-                  padding: theme.spacing.sm,
-                  marginBottom: theme.spacing.md,
-                },
-                type === key && {
-                  backgroundColor: theme.colors.primary,
-                  borderColor: theme.colors.primary,
-                },
-              ]}
-              onPress={() => setType(key)}
-            >
-              <FontAwesome6
-                name={icon as any}
-                iconStyle="solid"
-                size={theme.spacing.lg}
-                color={type === key ? theme.colors.onPrimary : theme.colors.text}
-              />
-              <TextElement
+          {(['reminder', 'decision', 'motivation', 'advice'] as TaskType[]).map(key => {
+            const iconMap: Record<TaskType, string> = {
+              reminder: 'clock',
+              decision: 'circle-question',
+              motivation: 'bolt',
+              advice: 'comment-dots',
+            };
+
+            return (
+              <TouchableOpacity
+                key={key}
+                disabled={existingTask && existingTask.type !== key}
                 style={[
-                  styles.cardText,
-                  { marginLeft: theme.spacing.md },
-                  type === key && { color: theme.colors.onPrimary },
+                  styles.card,
+                  {
+                    borderColor: theme.colors.border,
+                    padding: theme.spacing.sm,
+                    marginBottom: theme.spacing.md,
+                  },
+                  type === key && {
+                    backgroundColor: theme.colors.primary,
+                    borderColor: theme.colors.primary,
+                  },
                 ]}
+                onPress={() => setType(key)}
               >
-                {label}
-              </TextElement>
-            </TouchableOpacity>
-          ))}
+                <Icon
+                  name={iconMap[key]}
+                  iconStyle="solid"
+                  size={theme.spacing.lg}
+                  color={type === key ? theme.colors.onPrimary : theme.colors.text}
+                />
+                <TextElement
+                  style={[
+                    styles.cardText,
+                    { marginLeft: theme.spacing.md },
+                    type === key && { color: theme.colors.onPrimary },
+                  ]}
+                >
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </TextElement>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <TextElement color="text" weight="600" style={styles.label}>
@@ -189,7 +187,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
                   onPress={() => setOptions(options.filter((_, i) => i !== idx))}
                   style={{ marginLeft: theme.spacing.sm }}
                 >
-                  <FontAwesome6
+                  <Icon
                     name="trash"
                     iconStyle="solid"
                     size={theme.spacing.lg}
@@ -214,7 +212,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
                 }}
                 style={{ marginLeft: theme.spacing.sm }}
               >
-                <FontAwesome6
+                <Icon
                   name="plus"
                   iconStyle="solid"
                   size={theme.spacing.lg}
@@ -248,19 +246,15 @@ export default function AddTaskScreen({ route, navigation }: Props) {
         title={existingTask ? 'Save Changes' : 'Post Task'}
         onPress={handleSubmit}
         style={styles.postButton}
-        isLoading={loading}
+        isLoading={isPending}
       />
     </Layout>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
-    padding: 16,
-  },
-  label: {
-    marginBottom: 8,
-  },
+  content: { padding: 16 },
+  label: { marginBottom: 8 },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

@@ -1,6 +1,6 @@
 // src/types/navigation.d.ts
 import { NavigatorScreenParams } from '@react-navigation/native';
-import { Task } from './tasks';
+import { Task } from '../../features/tasks/types/tasks';
 
 declare global {
   namespace ReactNavigation {

@@ -1,46 +1,62 @@
-// src/api/axios.ts
-import axios from 'axios';
+// src/shared/api/axios.ts
+import { showToast } from '@shared/utils/toast';
+import axios, { AxiosRequestConfig, AxiosError, InternalAxiosRequestConfig } from 'axios';
+
+export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
+  skipToast?: boolean;
+}
+interface CustomAxiosError extends Omit<AxiosError, 'config'> {
+  config: CustomAxiosRequestConfig & { headers?: Record<string, string> };
+}
 
 export const api = axios.create({
-  baseURL: 'http://localhost:3001',
+  baseURL: 'http://localhost:3001', // 🔁 Update to production/staging later
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// 📦 Request Interceptor
+// ✅ Request Interceptor
 api.interceptors.request.use(
-  config => {
-    console.log('➡️ [API Request]', {
-      method: config.method,
-      url: (config.baseURL || '') + config.url,
-      headers: config.headers,
-      data: config.data,
-    });
+  async (config: InternalAxiosRequestConfig) => {
+    // const token = await AsyncStorage.getItem('accessToken');
+    // if (token) config.headers.Authorization = `Bearer ${token}`;
+
+    console.log(`➡️ [${config.method?.toUpperCase()}] ${config.baseURL}${config.url}`);
+    if (config.data) console.log('Payload:', config.data);
+
     return config;
   },
-  error => {
+  (error: AxiosError) => {
     console.error('❌ [Request Error]', error);
     return Promise.reject(error);
   },
 );
 
-// 📩 Response Interceptor
+// ✅ Response Interceptor
 api.interceptors.response.use(
   response => {
-    console.log('✅ [API Response]', {
-      url: response.config.url,
-      status: response.status,
-      data: response.data,
-    });
+    console.log(`✅ [Response] ${response.status} ${response.config.url}`);
     return response;
   },
-  error => {
+  (error: CustomAxiosError) => {
     console.error('❌ [Response Error]', {
       message: error.message,
-      response: error.response?.data,
+      url: error.config?.url,
       status: error.response?.status,
+      data: error.response?.data,
     });
+    const message =
+      (error.response?.data as any)?.message ||
+      (error.response?.data as { error?: string })?.error || // safely access .message
+      error.message ||
+      'Something went wrong. Please try again.';
+
+    console.log(message, 'ttt');
+    // 🍞 Global toast
+    if (!error.config?.skipToast) {
+      showToast({ type: 'error', title: 'Error', message });
+    }
     return Promise.reject(error);
   },
 );

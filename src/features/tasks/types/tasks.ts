@@ -12,6 +12,14 @@ export type Task = {
   remindAt?: string; // Only for reminder tasks
   options?: string[]; // Only for decision tasks
   deliverAt?: string; // Only for motivation tasks
+  userId: string;
+};
+
+export const typeEmojis: Record<TaskType, string> = {
+  reminder: '🕒',
+  decision: '🧠',
+  motivation: '🚀',
+  advice: '💡',
 };
 
 // ✅ Define TaskPayload for creating a task

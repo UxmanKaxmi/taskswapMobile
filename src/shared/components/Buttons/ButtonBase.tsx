@@ -11,12 +11,14 @@ import {
 } from 'react-native';
 import { moderateScale, vs } from 'react-native-size-matters';
 import Row from '../Layout/Row';
+import { hexToRgba } from '@shared/utils/helperFunctions';
+import { colors } from '@shared/theme';
 
 const AnimatedTouchable = Animated.createAnimatedComponent(Animated.View);
 
 type Props = {
   title: string;
-  onPress: (event: GestureResponderEvent) => void;
+  onPress: (event?: GestureResponderEvent) => void;
   isLoading?: boolean;
   icon?: React.ReactNode;
   backgroundColor: string;
@@ -40,40 +42,61 @@ export default function ButtonBase({
   textStyle,
 }: Props) {
   const pressAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
-    Animated.timing(pressAnim, {
-      toValue: 1,
-      duration: 150,
-      useNativeDriver: false,
-    }).start();
+    Animated.parallel([
+      Animated.timing(pressAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 0.95,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
   const handlePressOut = () => {
-    Animated.timing(pressAnim, {
-      toValue: 0,
-      duration: 150,
-      useNativeDriver: false,
-    }).start();
+    Animated.parallel([
+      Animated.timing(pressAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 4,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
   const bgColor = pressAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [
       disabled ? '#ccc' : backgroundColor,
-      disabled ? '#bbb' : shadeColor(backgroundColor, -20),
+      disabled
+        ? '#bbb'
+        : backgroundColor === 'transparent'
+          ? hexToRgba(borderColor ?? colors.primary, 0.08) // 👈 light pressed tint
+          : shadeColor(backgroundColor, -20),
     ],
   });
 
   return (
     <AnimatedTouchable
       style={[
+        {
+          transform: [{ scale: scaleAnim }],
+        },
         styles.button,
         {
           backgroundColor: bgColor,
           borderColor: disabled ? '#ccc' : borderColor,
         },
-        style, // custom style overrides
+        style,
       ]}
       onTouchStart={handlePressIn}
       onTouchEnd={handlePressOut}
@@ -82,6 +105,7 @@ export default function ButtonBase({
       onStartShouldSetResponder={() => true}
       onResponderRelease={e => {
         handlePressOut();
+        e.stopPropagation(); // ✅ prevents nested press event leak
         if (!isLoading && !disabled) onPress(e);
       }}
       pointerEvents={isLoading || disabled ? 'none' : 'auto'}
