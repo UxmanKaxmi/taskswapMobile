@@ -1,11 +1,13 @@
 import { api } from '@shared/api/axios';
 import { Task, TaskType } from '../types/tasks';
+import { ApiRoute, buildRoute } from '@shared/api/apiRoutes';
 
 /**
  * Fetch all tasks for the authenticated user.
  */
 export async function getTasks(): Promise<Task[]> {
-  const response = await api.get('/tasks');
+  const response = await api.get(ApiRoute.TASKS);
+  console.log(response.data);
   return response.data;
 }
 
@@ -24,7 +26,7 @@ export interface CreateTaskPayload {
  * Create a new task of any supported type.
  */
 export async function createTask(data: CreateTaskPayload): Promise<Task> {
-  const response = await api.post('/tasks', data);
+  const response = await api.post(ApiRoute.TASKS, data);
   return response.data;
 }
 
@@ -35,7 +37,7 @@ export async function updateTask(
   id: string,
   data: Partial<Pick<CreateTaskPayload, 'text' | 'type' | 'remindAt' | 'options' | 'deliverAt'>>,
 ): Promise<Task> {
-  const response = await api.patch(`/tasks/${id}`, data);
+  const response = await api.patch(buildRoute.task(id), data);
   return response.data;
 }
 
@@ -43,5 +45,5 @@ export async function updateTask(
  * Delete a task by ID.
  */
 export async function deleteTask(id: string): Promise<void> {
-  await api.delete(`/tasks/${id}`);
+  await api.delete(buildRoute.task(id));
 }

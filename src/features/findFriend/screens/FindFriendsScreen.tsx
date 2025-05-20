@@ -24,15 +24,17 @@ export default function FindFriendsScreen() {
         const resp = await api.post('/users/match', { emails });
         const matchedUsers = resp.data;
 
+        console.log(resp);
+
         console.log('[MATCHES]', matchedUsers);
         setMatches(matchedUsers);
 
         if (matchedUsers.length === 0) {
-          navigation.navigate('App', { screen: 'Home' });
+          // navigation.navigate('App', { screen: 'Home' });
         }
       } catch (err) {
         console.error('[MATCH ERR]', err);
-        navigation.navigate('App', { screen: 'Home' });
+        // navigation.navigate('App', { screen: 'Home' });
       } finally {
         setLoading(false);
       }

@@ -52,7 +52,6 @@ api.interceptors.response.use(
       error.message ||
       'Something went wrong. Please try again.';
 
-    console.log(message, 'ttt');
     // 🍞 Global toast
     if (!error.config?.skipToast) {
       showToast({ type: 'error', title: 'Error', message });

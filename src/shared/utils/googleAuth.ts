@@ -52,7 +52,7 @@ export async function fetchGoogleContacts(): Promise<string[]> {
   const connections = resp.data.connections || [];
   const emails = new Set<string>();
 
-  console.log(`Fetched ${connections.length} connections from Google Contacts`);
+  console.log(`Fetched ${connections} connections from Google Contacts`);
   console.log(`Fetched ${emails} connections from Google Contacts`);
 
   for (const person of connections) {

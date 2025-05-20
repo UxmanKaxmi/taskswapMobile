@@ -5,7 +5,7 @@ import React from 'react';
 
 type Props = {
   title: string;
-  onPress: (event: GestureResponderEvent) => void;
+  onPress: (event: GestureResponderEvent | undefined) => void;
   isLoading?: boolean;
   icon?: React.ReactNode;
   style?: ViewStyle;

@@ -21,6 +21,7 @@ export type DecisionTask = BaseTask & {
 export type ReminderTask = BaseTask & {
   type: 'reminder';
   remindAt: string; // ISO time to trigger
+  hasReminded: boolean;
 };
 
 export type AdviceTask = BaseTask & {

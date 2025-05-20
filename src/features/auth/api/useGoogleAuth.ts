@@ -1,7 +1,7 @@
-// src/features/auth/api/useGoogleAuth.ts
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { signInWithGoogle } from '@shared/utils/googleAuth';
 import { api } from '@shared/api/axios';
+import { buildQueryKey } from '@shared/constants/queryKeys';
 
 type GoogleSignInResponse = {
   user: {
@@ -14,6 +14,8 @@ type GoogleSignInResponse = {
 };
 
 export function useGoogleAuth() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (): Promise<GoogleSignInResponse> => {
       const result = await signInWithGoogle();
@@ -36,6 +38,9 @@ export function useGoogleAuth() {
         user: response.data.user,
         token: response.data.token,
       };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: buildQueryKey.user() });
     },
   });
 }

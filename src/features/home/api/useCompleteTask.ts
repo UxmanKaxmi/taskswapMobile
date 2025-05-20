@@ -1,4 +1,8 @@
+// src/features/tasks/api/useCompleteTask.ts
+
+import { buildRoute } from '@shared/api/apiRoutes';
 import { api } from '@shared/api/axios';
+import { buildQueryKey } from '@shared/constants/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export function useCompleteTask() {
@@ -6,12 +10,12 @@ export function useCompleteTask() {
 
   return useMutation({
     mutationFn: async (taskId: string) => {
-      const response = await api.patch(`/tasks/${taskId}/complete`);
+      const response = await api.patch(buildRoute.completeTask(taskId));
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate task lists or individual task queries if needed
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    onSuccess: (_data, taskId) => {
+      queryClient.invalidateQueries({ queryKey: buildQueryKey.tasks() });
+      queryClient.invalidateQueries({ queryKey: buildQueryKey.taskById(taskId) });
     },
   });
 }

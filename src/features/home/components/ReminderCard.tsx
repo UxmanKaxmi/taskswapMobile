@@ -1,7 +1,7 @@
 // src/shared/components/ReminderCard.tsx
 
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Image, Modal } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -19,6 +19,8 @@ import { showToast } from '@shared/utils/toast';
 import { useInCompleteTask } from '../api/useInCompleteTask';
 import Icon from '@shared/components/Icons/Icon';
 import { Width } from '@shared/components/Spacing';
+import ReminderMessageModal from '@shared/components/Modals/ReminderMessageModal';
+import { useAddReminder } from '../api/useAddReminder'; // adjust path
 
 type Props = {
   task: ReminderTask;
@@ -26,7 +28,7 @@ type Props = {
   onPressCard: (task: ReminderTask) => void;
   onPressSuggest: (task: ReminderTask) => void;
   onPressView: (task: ReminderTask) => void;
-  onRemind: (task: ReminderTask) => void; // ✅ Add this prop
+  onRemind: (task: ReminderTask, msg: string) => void;
 };
 
 export default function ReminderCard({
@@ -37,20 +39,60 @@ export default function ReminderCard({
   onRemind,
   currentUserId,
 }: Props) {
-  const { avatar, name = 'John Doe', createdAt, text, type, userId, completed } = task;
+  const { avatar, name = 'John Doe', createdAt, text, type, userId, completed, hasReminded } = task;
 
   const isOwner = userId === currentUserId;
   const [isCompleted, setCompleted] = useState(completed);
-  const [hasReminded, setReminded] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [customMessage, setCustomMessage] = useState('');
 
   const { mutate: completeTask, isPending } = useCompleteTask();
   const { mutate: incompleteTask, isPending: isIncompletePending } = useInCompleteTask();
+  const { mutate: addReminder, isPending: isSendingReminder } = useAddReminder();
+
+  const handleRemind = () => {
+    if (!hasReminded) {
+      setShowModal(true);
+    }
+  };
+
+  const handleSendReminder = (msg: string) => {
+    if (!msg.trim()) {
+      showToast({
+        type: 'error',
+        title: 'Oops!',
+        message: 'Reminder message cannot be empty.',
+      });
+      return;
+    }
+
+    addReminder(
+      { taskId: task.id, message: msg },
+      {
+        onSuccess: () => {
+          setShowModal(false);
+          setCustomMessage('');
+          showToast({
+            type: 'success',
+            title: 'Sent 🎉',
+            message: 'Your reminder has been sent!',
+          });
+        },
+        onError: (err: any) => {
+          showToast({
+            type: 'error',
+            title: 'Error',
+            message: err?.response?.data?.error || 'Failed to send reminder.',
+          });
+        },
+      },
+    );
+  };
 
   const handleMarkDone = () => {
     completeTask(task.id, {
       onSuccess: val => {
-        console.log(val);
-        setCompleted(true); // local state update for UI
+        setCompleted(true);
         showToast({
           type: 'success',
           title: 'Success',
@@ -70,7 +112,7 @@ export default function ReminderCard({
   const handleMarkUnDone = () => {
     incompleteTask(task.id, {
       onSuccess: val => {
-        setCompleted(false); //
+        setCompleted(false);
         showToast({
           type: 'success',
           title: 'Success',
@@ -85,13 +127,6 @@ export default function ReminderCard({
         });
       },
     });
-  };
-
-  const handleRemind = () => {
-    if (!hasReminded) {
-      onRemind(task);
-      setReminded(true);
-    }
   };
 
   return (
@@ -128,12 +163,6 @@ export default function ReminderCard({
               <Icon name="circle-check" size={ms(16)} color={colors.success} />
               <Width size={10} />
               Marked Completed
-              {/* <OutlineButton
-                title="Mark as Done"
-                style={cardStyles.buttonFull}
-                onPress={handleMarkUnDone}
-                isLoading={isIncompletePending}
-              /> */}
             </TextElement>
           ) : (
             <OutlineButton
@@ -152,6 +181,16 @@ export default function ReminderCard({
           />
         )}
       </View>
+
+      <ReminderMessageModal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        onSend={handleSendReminder}
+        message={customMessage}
+        setMessage={setCustomMessage}
+        taskName={task.name}
+        taskText={task.text}
+      />
     </TouchableOpacity>
   );
 }

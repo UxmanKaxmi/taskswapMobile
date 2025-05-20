@@ -16,18 +16,19 @@ export const AppNavigator = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          headerRight: () => <LogoutButton />,
-        }}
-      />
-      <Stack.Screen
         name="FindFriendsScreen"
         component={FindFriendsScreen}
         options={{
           title: 'Find Friends',
 
+          headerRight: () => <LogoutButton />,
+        }}
+      />
+
+      <Stack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
           headerRight: () => <LogoutButton />,
         }}
       />
