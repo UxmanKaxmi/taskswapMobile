@@ -3,7 +3,7 @@
 import React from 'react';
 import { StyleSheet, TextStyle, View, Text } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { TaskType } from '@features/tasks/types/tasks';
+import { TaskType } from '@features/Tasks/types/tasks';
 import { capitalizeFirstLetter } from '@shared/utils/helperFunctions';
 import { colors } from '@shared/theme';
 import { moderateScale, moderateVerticalScale } from 'react-native-size-matters';
@@ -38,6 +38,7 @@ export default function TypeTag({ type, iconEnabled = true, styleOverride }: Pro
     <View style={[styles.container, { backgroundColor }, styleOverride]}>
       {iconEnabled && (
         <Icon
+          set="fa6"
           name={iconName}
           size={moderateScale(12)}
           color={colors.text}

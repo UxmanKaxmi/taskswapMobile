@@ -15,13 +15,6 @@ export type Task = {
   userId: string;
 };
 
-export const typeEmojis: Record<TaskType, string> = {
-  reminder: '🕒',
-  decision: '🧠',
-  motivation: '🚀',
-  advice: '💡',
-};
-
 // ✅ Define TaskPayload for creating a task
 export interface TaskPayload {
   text: string;

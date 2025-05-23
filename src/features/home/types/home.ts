@@ -34,3 +34,11 @@ export type MotivationTask = BaseTask & {
 };
 
 export type Task = DecisionTask | ReminderTask | AdviceTask | MotivationTask;
+
+export interface ReminderNoteDTO {
+  id: string;
+  taskId: string;
+  senderId: string;
+  message: string;
+  createdAt: string;
+}

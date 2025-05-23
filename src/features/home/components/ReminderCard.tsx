@@ -11,20 +11,19 @@ import { ReminderTask } from '../types/home';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import TypeTag from '@shared/components/TypeTag/TypeTag';
 import { cardStyles } from './styles';
-import { typeEmojis } from '@features/tasks/types/tasks';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
-import { useCompleteTask } from '../api/useCompleteTask';
+import { useCompleteTask } from '../hooks/useCompleteTask';
 import { showToast } from '@shared/utils/toast';
-import { useInCompleteTask } from '../api/useInCompleteTask';
+import { useInCompleteTask } from '../hooks/useInCompleteTask';
 import Icon from '@shared/components/Icons/Icon';
 import { Width } from '@shared/components/Spacing';
 import ReminderMessageModal from '@shared/components/Modals/ReminderMessageModal';
-import { useAddReminder } from '../api/useAddReminder'; // adjust path
-
+import { useAuth } from '@features/Auth/authProvider';
+import { useAddReminder } from '../hooks/useAddReminder';
+import { getNotificationTypeVisual } from '@shared/utils/getNotificationTypeVisual';
 type Props = {
   task: ReminderTask;
-  currentUserId: string;
   onPressCard: (task: ReminderTask) => void;
   onPressSuggest: (task: ReminderTask) => void;
   onPressView: (task: ReminderTask) => void;
@@ -37,19 +36,19 @@ export default function ReminderCard({
   onPressSuggest,
   onPressView,
   onRemind,
-  currentUserId,
 }: Props) {
   const { avatar, name = 'John Doe', createdAt, text, type, userId, completed, hasReminded } = task;
+  const { user } = useAuth();
+  const isOwner = userId === user?.id;
 
-  const isOwner = userId === currentUserId;
   const [isCompleted, setCompleted] = useState(completed);
   const [showModal, setShowModal] = useState(false);
   const [customMessage, setCustomMessage] = useState('');
+  const { emoji } = getNotificationTypeVisual(type);
 
   const { mutate: completeTask, isPending } = useCompleteTask();
   const { mutate: incompleteTask, isPending: isIncompletePending } = useInCompleteTask();
-  const { mutate: addReminder, isPending: isSendingReminder } = useAddReminder();
-
+  const { mutate: addReminder, isPending: isSendingReminder } = useAddReminder(task.id);
   const handleRemind = () => {
     if (!hasReminded) {
       setShowModal(true);
@@ -66,27 +65,24 @@ export default function ReminderCard({
       return;
     }
 
-    addReminder(
-      { taskId: task.id, message: msg },
-      {
-        onSuccess: () => {
-          setShowModal(false);
-          setCustomMessage('');
-          showToast({
-            type: 'success',
-            title: 'Sent 🎉',
-            message: 'Your reminder has been sent!',
-          });
-        },
-        onError: (err: any) => {
-          showToast({
-            type: 'error',
-            title: 'Error',
-            message: err?.response?.data?.error || 'Failed to send reminder.',
-          });
-        },
+    addReminder(msg, {
+      onSuccess: () => {
+        setShowModal(false);
+        setCustomMessage('');
+        showToast({
+          type: 'success',
+          title: 'Sent 🎉',
+          message: 'Your reminder has been sent!',
+        });
       },
-    );
+      onError: (err: any) => {
+        showToast({
+          type: 'error',
+          title: 'Error',
+          message: err?.response?.data?.error || 'Failed to send reminder.',
+        });
+      },
+    });
   };
 
   const handleMarkDone = () => {
@@ -130,7 +126,17 @@ export default function ReminderCard({
   };
 
   return (
-    <TouchableOpacity style={cardStyles.card} activeOpacity={0.7} onPress={() => onPressCard(task)}>
+    <TouchableOpacity
+      style={[
+        cardStyles.card,
+        {
+          // backgroundColor: isOwner ? '#F3F4FF' : '#FFFFFF',
+          // borderColor: isOwner ? colors.primary : '#E0E0E0',
+        },
+      ]}
+      activeOpacity={0.7}
+      onPress={() => onPressCard(task)}
+    >
       <Row justify="space-between" style={cardStyles.cardHeader}>
         <Row>
           <Image source={{ uri: avatar }} style={cardStyles.avatar} />
@@ -145,13 +151,11 @@ export default function ReminderCard({
         </Row>
         <TypeTag type={type} />
       </Row>
-
       <View style={cardStyles.messageRow}>
         <TextElement variant="title">
-          {typeEmojis[type]} {text}
+          {emoji} {text}
         </TextElement>
       </View>
-
       <View style={cardStyles.buttonRow}>
         {isOwner ? (
           isCompleted ? (
@@ -160,7 +164,7 @@ export default function ReminderCard({
               variant="caption"
               style={{ color: colors.success }}
             >
-              <Icon name="circle-check" size={ms(16)} color={colors.success} />
+              {/* <Icon name="" size={ms(16)} color={colors.success} /> */}
               <Width size={10} />
               Marked Completed
             </TextElement>
@@ -181,7 +185,6 @@ export default function ReminderCard({
           />
         )}
       </View>
-
       <ReminderMessageModal
         visible={showModal}
         onClose={() => setShowModal(false)}
@@ -189,6 +192,7 @@ export default function ReminderCard({
         message={customMessage}
         setMessage={setCustomMessage}
         taskName={task.name}
+        isLoading={isSendingReminder}
         taskText={task.text}
       />
     </TouchableOpacity>

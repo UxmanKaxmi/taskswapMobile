@@ -4,14 +4,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import AuthNavigator from './AuthNavigator';
 import { AppNavigator } from './AppNavigator';
-import { MainStackParamList } from '@shared/types/navigation';
-import { useAuth } from '@features/auth/authProvider';
+import { MainStackParamList } from 'navigation/navigation';
+import { useAuth } from '@features/Auth/authProvider';
 import { ActivityIndicator, View } from 'react-native';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
 export default function RootNavigator() {
-  const { user, loading } = useAuth();
+  const { user, loading, hasSeenFindFriendsScreen } = useAuth();
 
   if (loading) {
     return (
@@ -25,7 +25,11 @@ export default function RootNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          <Stack.Screen name="App" component={AppNavigator} />
+          <Stack.Screen
+            name="App"
+            component={AppNavigator}
+            initialParams={{ showFindFriends: !hasSeenFindFriendsScreen }}
+          />
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         )}

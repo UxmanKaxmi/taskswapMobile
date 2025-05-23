@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { useTasksQuery } from '@features/tasks/hooks/useTasksQuery';
-import { Task, TaskType } from '@features/tasks/types/tasks';
+import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
+import { Task, TaskType } from '@features/Tasks/types/tasks';
 
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
@@ -13,7 +13,7 @@ import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButto
 import { Layout } from '@shared/components/Layout';
 import { Height } from '@shared/components/Spacing';
 import { spacing, typography } from '@shared/theme';
-import { AppStackParamList } from '@shared/types/navigation';
+import { AppStackParamList } from 'navigation/navigation';
 
 import ReminderCard from '../components/ReminderCard';
 import DecisionCard from '../components/DecisionCard';
@@ -26,8 +26,8 @@ import AdviceCard from '../components/AdviceCard';
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const [filter, setFilter] = useState<TaskType | 'all'>('all');
-
   const { data: allTasks = [], isLoading, isError, error } = useTasksQuery();
+  // const { user, signOut } = useAuth();
 
   const tasks = useMemo(() => {
     if (filter === 'all') return allTasks;
@@ -66,7 +66,6 @@ export default function HomeScreen() {
           <ReminderCard
             onRemind={() => {}}
             key={item.id}
-            currentUserId={item.userId}
             task={item as ReminderTask}
             onPressCard={navigateToDetails}
             onPressSuggest={t => console.log('Suggest for', t.id)}
@@ -99,10 +98,9 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <Layout allowPadding={false}>
       <Height size={15} />
       <HeadingText level={1}>Your Tasks</HeadingText>
-
       <View style={styles.filters}>
         <ListView
           scrollViewProps={{
@@ -123,7 +121,6 @@ export default function HomeScreen() {
           ))}
         </ListView>
       </View>
-
       <ListView
         data={tasks}
         renderItem={renderTaskNew}
@@ -137,23 +134,23 @@ export default function HomeScreen() {
               </TextElement>
             </View>
           ),
-          ListFooterComponent: <View style={{ marginBottom: vs(60) }} />,
+          ListFooterComponent: <View style={{ backgroundColor: 'red' }} />,
           ItemSeparatorComponent: () => <View style={styles.borderSeparator} />,
         }}
       />
-
-      <AnimatedBottomButton
+      {/* <AnimatedBottomButton
         title="Add Task"
-        onPress={() => navigation.navigate('AddTask')}
+        onPress={() => signOut()}
+        // onPress={() => navigation.navigate('FindFriendsScreen')}
         style={styles.addButton}
         visible={true}
-      />
-    </View>
+      /> */}
+    </Layout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {},
   filters: {
     flexDirection: 'row',
   },

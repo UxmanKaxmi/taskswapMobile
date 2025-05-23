@@ -1,8 +1,12 @@
 export enum QueryKeys {
   Tasks = 'tasks',
-  ReminderNotes = 'reminderNotes',
+  ReminderNotes = 'reminders',
   User = 'user',
   Auth = 'auth',
+  Followers = 'followers',
+  Following = 'following',
+  MatchedUsers = 'matched-users',
+  Notification = 'notification',
 }
 
 export const buildQueryKey = {
@@ -11,4 +15,8 @@ export const buildQueryKey = {
   remindersForTask: (taskId: string) => [QueryKeys.ReminderNotes, taskId],
   user: () => [QueryKeys.User],
   auth: () => [QueryKeys.Auth],
+  followers: () => [QueryKeys.Followers],
+  following: () => [QueryKeys.Following],
+  matchedUsers: () => [QueryKeys.MatchedUsers],
+  notifications: () => [QueryKeys.Notification],
 };

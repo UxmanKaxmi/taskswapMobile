@@ -1,7 +1,8 @@
 // src/shared/components/Layout.tsx
+
 import React, { ReactNode } from 'react';
-import { View, ViewStyle, StyleSheet } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, ViewStyle } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets, Edge } from 'react-native-safe-area-context';
 import { useTheme } from '@shared/theme/useTheme';
 import AnimatedBackground from './AnimatedBackground';
 
@@ -9,30 +10,36 @@ type Props = {
   children: ReactNode;
   centered?: boolean;
   style?: ViewStyle;
+  allowPadding?: boolean;
+  edges?: Edge[]; // configurable safe area edges
 };
 
-export default function Layout({ children, centered = false, style }: Props) {
+export default function Layout({
+  children,
+  centered = false,
+  style,
+  allowPadding = true,
+  edges = ['top', 'right', 'left'], // default safe-area edges
+}: Props) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  // Compose a container style that:
-  // • Respects the top & bottom safe-area insets
-  // • Always applies horizontal padding from the theme
-  // • Optionally centers content
   const containerStyle: ViewStyle = {
     flex: 1,
     backgroundColor: theme.colors.background,
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.md,
+    paddingHorizontal: allowPadding ? theme.spacing.sm : 0,
+    paddingTop: allowPadding ? theme.spacing.md : 0,
     justifyContent: centered ? 'center' : 'flex-start',
     alignItems: centered ? 'center' : 'flex-start',
   };
 
   return (
-    <SafeAreaView edges={['right', 'bottom', 'left']} style={[containerStyle, style]}>
-      {/* <AnimatedBackground> */}
-      {children}
-      {/* </AnimatedBackground> */}
-    </SafeAreaView>
+    <View style={containerStyle}>
+      <SafeAreaView edges={edges} style={[containerStyle, style]}>
+        {/* <AnimatedBackground> */}
+        {children}
+        {/* </AnimatedBackground> */}
+      </SafeAreaView>
+    </View>
   );
 }

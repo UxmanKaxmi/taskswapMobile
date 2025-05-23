@@ -25,6 +25,7 @@ interface ReminderMessageModalProps {
   setMessage: (val: string) => void;
   taskName: string;
   taskText: string;
+  isLoading?: boolean;
 }
 
 //#TODO: Add pre generated message bubbles
@@ -37,6 +38,7 @@ export default function ReminderMessageModal({
   setMessage,
   taskName,
   taskText,
+  isLoading,
 }: ReminderMessageModalProps) {
   const [isValid, setIsValid] = useState(false);
 
@@ -84,6 +86,7 @@ export default function ReminderMessageModal({
             title="Send Reminder"
             onPress={() => onSend(message)}
             disabled={!isValid}
+            isLoading={isLoading}
           />
         </View>
       </KeyboardAvoidingView>

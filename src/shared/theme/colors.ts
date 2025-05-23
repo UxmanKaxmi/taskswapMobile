@@ -27,4 +27,9 @@ export const colors = {
   adviceBg: '#E0F7FA',
   decisionBg: '#EDE7FF',
   motivationBg: '#E3FCEF',
+
+  tabActive: '#000',
+  tabInactive: '#757575',
+
+  inputBackground: '#F2F2F2',
 };

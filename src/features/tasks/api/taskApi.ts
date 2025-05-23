@@ -7,7 +7,7 @@ import { ApiRoute, buildRoute } from '@shared/api/apiRoutes';
  */
 export async function getTasks(): Promise<Task[]> {
   const response = await api.get(ApiRoute.TASKS);
-  console.log(response.data);
+  console.log(response.data, 'getTasks');
   return response.data;
 }
 

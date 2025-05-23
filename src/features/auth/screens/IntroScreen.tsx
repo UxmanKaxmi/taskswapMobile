@@ -5,6 +5,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { Layout } from '@shared/components/Layout';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import TextElement from '@shared/components/TextElement/TextElement';
+import { Height } from '@shared/components/Spacing';
 
 const { width, height } = Dimensions.get('window');
 
@@ -39,7 +40,7 @@ const IntroSliderScreen = ({ navigation }: { navigation: any }) => {
           justifyContent: 'center',
           alignItems: 'center',
           alignSelf: 'center',
-          top: height * 0.08,
+          top: height * 0.02,
         }}
       >
         <Image
@@ -69,6 +70,7 @@ const IntroSliderScreen = ({ navigation }: { navigation: any }) => {
       </Swiper>
 
       <PrimaryButton onPress={handleStart} title="Let’s Start ➜" />
+      <Height size={20} />
     </Layout>
   );
 };

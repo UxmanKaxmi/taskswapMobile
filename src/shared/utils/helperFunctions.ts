@@ -1,5 +1,6 @@
 // utils/humanizeDate.ts
 import { parseISO, formatDistanceToNow, format } from 'date-fns';
+import { Dimensions } from 'react-native';
 
 /**
  * Returns a relative string like "3 hours ago"
@@ -53,3 +54,13 @@ export function hexToRgba(hex: string, alpha: number): string {
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+/**
+ * Creates a flattened array by repeating the given data a specified number of times.
+ */
+export function repeatAndFlatten<T>(data: T): T[] {
+  return Array(12).fill(data).flat();
+}
+
+export const deviceWidth = Dimensions.get('window').width;
+export const deviceHeight = Dimensions.get('window').height;

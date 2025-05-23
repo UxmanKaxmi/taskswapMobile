@@ -1,0 +1,87 @@
+// src/features/friends/components/FriendFollowRow.tsx
+
+import React from 'react';
+import { Image, View, StyleSheet } from 'react-native';
+import TextElement from '@shared/components/TextElement/TextElement';
+import OutlineButton from '@shared/components/Buttons/OutlineButton';
+import { useTheme } from '@shared/theme/useTheme';
+import { ms, vs } from 'react-native-size-matters';
+import { typography } from '@shared/theme';
+import Avatar from '@shared/components/Avatar/Avatar';
+
+type Props = {
+  name: string;
+  email: string;
+  isFollowing: boolean;
+  onToggleFollow: () => void;
+  photo?: string;
+  isLoading: boolean;
+};
+
+export default function FriendFollowRow({
+  name,
+  email,
+  isFollowing,
+  photo,
+  isLoading,
+  onToggleFollow,
+}: Props) {
+  const { colors, spacing } = useTheme();
+
+  return (
+    <View style={[styles.container, { borderColor: colors.border, paddingVertical: spacing.sm }]}>
+      <View style={styles.leftSection}>
+        <Avatar uri={photo} size={45} borderColor="#5C6BC0" />
+        <View style={styles.textContainer}>
+          <TextElement variant="body" weight="600">
+            {name}
+          </TextElement>
+          <TextElement variant="caption" color="muted">
+            {email}
+          </TextElement>
+        </View>
+      </View>
+
+      <OutlineButton
+        isLoading={isLoading}
+        title={isFollowing ? 'Unfollow' : 'Follow'}
+        onPress={onToggleFollow}
+        type={isFollowing ? 'alt' : 'default'}
+        textStyle={{
+          color: isFollowing ? colors.onAccent : colors.primary,
+          fontSize: typography.small,
+        }}
+        style={styles.button}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  leftSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: ms(10),
+  },
+  avatar: {
+    width: ms(40),
+    height: ms(40),
+    borderRadius: ms(20),
+    marginRight: ms(10),
+  },
+  textContainer: {
+    flexShrink: 1,
+    marginLeft: 10,
+  },
+  button: {
+    width: ms(100),
+    height: vs(30),
+  },
+});

@@ -1,8 +1,8 @@
 // src/navigation/AuthNavigator.tsx
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginScreen from '@features/auth/screens/LoginScreen';
-import IntroScreen from '@features/auth/screens/IntroScreen';
+import LoginScreen from '@features/Auth/screens/LoginScreen';
+import IntroScreen from '@features/Auth/screens/IntroScreen';
 
 const Stack = createNativeStackNavigator();
 

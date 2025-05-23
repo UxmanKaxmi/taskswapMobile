@@ -8,9 +8,9 @@ import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
 import ListView from '@shared/components/ListView/ListView';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
-import { AppStackParamList } from '@shared/types/navigation';
-import { TaskType, Task } from '@features/tasks/types/tasks';
-import { updateTask } from '@features/tasks/api/taskApi';
+import { AppStackParamList } from 'navigation/navigation';
+import { TaskType, Task } from '@features/Tasks/types/tasks';
+import { updateTask } from '@features/Tasks/api/taskApi';
 import { useAddTask } from '../hooks/useAddTask';
 import { showToast } from '@shared/utils/toast';
 import Icon from '@shared/components/Icons/Icon';
@@ -32,7 +32,7 @@ function ListItem({
   return (
     <View style={[styles.listItem, { paddingVertical: spacing.sm }]}>
       <TouchableOpacity onPress={onPress}>
-        <Icon name={icon} iconStyle="solid" size={spacing.lg} color={colors.text} />
+        <Icon set="fa6" name={icon} iconStyle="solid" size={spacing.lg} color={colors.text} />
       </TouchableOpacity>
       <TextElement style={[styles.listText, { marginLeft: spacing.md, color: colors.text }]}>
         {label}
@@ -43,7 +43,13 @@ function ListItem({
         </TextElement>
       )}
       <TouchableOpacity onPress={onPress}>
-        <Icon name="chevron-right" iconStyle="solid" size={spacing.lg} color={colors.muted} />
+        <Icon
+          set="fa6"
+          name="chevron-right"
+          iconStyle="solid"
+          size={spacing.lg}
+          color={colors.muted}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -135,6 +141,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
                 onPress={() => setType(key)}
               >
                 <Icon
+                  set="fa6"
                   name={iconMap[key]}
                   iconStyle="solid"
                   size={theme.spacing.lg}
@@ -188,6 +195,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
                   style={{ marginLeft: theme.spacing.sm }}
                 >
                   <Icon
+                    set="fa6"
                     name="trash"
                     iconStyle="solid"
                     size={theme.spacing.lg}
@@ -213,6 +221,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
                 style={{ marginLeft: theme.spacing.sm }}
               >
                 <Icon
+                  set="fa6"
                   name="plus"
                   iconStyle="solid"
                   size={theme.spacing.lg}

@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppStackParamList } from '@shared/types/navigation';
+import { AppStackParamList } from 'navigation/navigation';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
@@ -10,7 +10,7 @@ import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import { deleteTask } from '../api/taskApi';
 import { Layout } from '@shared/components/Layout';
 import Row from '@shared/components/Layout/Row';
-
+import ReminderNoteList from '../components/ReminderNoteList';
 // Route expects a `task` param of Task type
 export default function TaskDetailScreen({
   route,
@@ -94,6 +94,12 @@ export default function TaskDetailScreen({
           <TextElement variant="body">{new Date(task.deliverAt).toLocaleString()}</TextElement>
         </View>
       )}
+      <View style={styles.field}>
+        <TextElement variant="caption" color="muted">
+          Reminders
+        </TextElement>
+        <ReminderNoteList taskId={task.id} />
+      </View>
 
       <Row style={{}}>
         <PrimaryButton

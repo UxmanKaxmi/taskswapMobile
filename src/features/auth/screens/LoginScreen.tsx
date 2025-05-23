@@ -126,6 +126,7 @@ export default function LoginScreen() {
           // icon={<Icon name="google" color={'white'} iconStyle="brand" />}
         />
       </View>
+      <Height size={20} />
     </Layout>
   );
 }

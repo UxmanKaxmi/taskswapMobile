@@ -26,10 +26,13 @@ type AuthContextType = {
   signOut: () => Promise<void>;
   loading: boolean;
   token: string | null;
+  hasSeenFindFriendsScreen: boolean;
+  setHasSeenFindFriendsScreen: (seen: boolean) => void;
 };
 
 const STORAGE_USER = 'auth:user';
 const STORAGE_TOKEN = 'auth:token';
+const STORAGE_HAS_SEEN_FIND_FRIENDS = 'auth:hasSeenFindFriends';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -37,13 +40,23 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasSeenFindFriendsScreen, setHasSeenFindFriendsScreenState] = useState(false);
 
   const { mutateAsync: googleAuth, isPending: authLoading, error: authError } = useGoogleAuth();
+
+  const setHasSeenFindFriendsScreen = async (seen: boolean) => {
+    await AsyncStorage.setItem(STORAGE_HAS_SEEN_FIND_FRIENDS, JSON.stringify(seen));
+    setHasSeenFindFriendsScreenState(seen);
+  };
 
   useEffect(() => {
     const loadSession = async () => {
       const savedUser = await AsyncStorage.getItem(STORAGE_USER);
       const savedToken = await AsyncStorage.getItem(STORAGE_TOKEN);
+
+      const seenFlag = await AsyncStorage.getItem(STORAGE_HAS_SEEN_FIND_FRIENDS);
+      if (seenFlag) setHasSeenFindFriendsScreenState(JSON.parse(seenFlag));
+
       if (savedUser && savedToken) {
         setUser(JSON.parse(savedUser));
         setToken(savedToken);
@@ -81,11 +94,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   const signOut = async () => {
     await signOutGoogle();
-    await AsyncStorage.multiRemove([STORAGE_USER, STORAGE_TOKEN]);
+    await AsyncStorage.multiRemove([STORAGE_USER, STORAGE_TOKEN, STORAGE_HAS_SEEN_FIND_FRIENDS]);
     setUser(null);
     setToken(null);
     delete api.defaults.headers.common['Authorization'];
-
+    setHasSeenFindFriendsScreenState(false);
     showToast({
       type: 'info',
       title: 'Signed out',
@@ -94,7 +107,17 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, signIn, signOut, loading, token }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        signIn,
+        signOut,
+        loading,
+        token,
+        hasSeenFindFriendsScreen,
+        setHasSeenFindFriendsScreen,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
