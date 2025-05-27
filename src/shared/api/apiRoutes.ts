@@ -16,9 +16,11 @@ export const buildRoute = {
   uncompleteTask: (id: string) => `${ApiRoute.TASKS}/${id}/incomplete`,
 
   // 📌 User Routes
+
   user: (id: string) => `${ApiRoute.USERS}/${id}`,
-  syncUser: () => `${ApiRoute.USERS}/sync`,
+  syncUserToDb: () => `${ApiRoute.USERS}`,
   matchUsers: () => `${ApiRoute.USERS}/match`,
+  me: () => `${ApiRoute.USERS}/me`,
 
   // 📌 Reminder Note Routes (via Task)
   sendReminder: (taskId: string) => `${ApiRoute.REMINDER_NOTES}/${taskId}/remind`,

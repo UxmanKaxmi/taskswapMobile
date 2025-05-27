@@ -30,3 +30,14 @@ export const getFollowing = async () => {
 
   return res.data; // Array of User
 };
+
+// export const syncUserToDb = async () => {
+//   const res = await api.post(buildRoute.syncUserToDb());
+
+//   return res.data; // Array of User
+// };
+
+export const syncUserToDb = async (userId: string, fcmToken: string) => {
+  const res = await api.post(buildRoute.syncUserToDb(), { userId, fcmToken });
+  return res.data;
+};

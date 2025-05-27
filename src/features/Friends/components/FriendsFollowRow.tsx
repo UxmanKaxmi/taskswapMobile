@@ -5,7 +5,7 @@ import { Image, View, StyleSheet } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import { useTheme } from '@shared/theme/useTheme';
-import { ms, vs } from 'react-native-size-matters';
+import { moderateScale, ms, vs } from 'react-native-size-matters';
 import { typography } from '@shared/theme';
 import Avatar from '@shared/components/Avatar/Avatar';
 
@@ -36,7 +36,7 @@ export default function FriendFollowRow({
           <TextElement variant="body" weight="600">
             {name}
           </TextElement>
-          <TextElement variant="caption" color="muted">
+          <TextElement variant="caption" style={styles.emailText} color="muted">
             {email}
           </TextElement>
         </View>
@@ -49,7 +49,7 @@ export default function FriendFollowRow({
         type={isFollowing ? 'alt' : 'default'}
         textStyle={{
           color: isFollowing ? colors.onAccent : colors.primary,
-          fontSize: typography.small,
+          fontSize: moderateScale(10),
         }}
         style={styles.button}
       />
@@ -58,6 +58,9 @@ export default function FriendFollowRow({
 }
 
 const styles = StyleSheet.create({
+  emailText: {
+    fontSize: moderateScale(13),
+  },
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -81,7 +84,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   button: {
-    width: ms(100),
+    width: ms(90),
     height: vs(30),
   },
 });

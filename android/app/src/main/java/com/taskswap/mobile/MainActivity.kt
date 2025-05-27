@@ -1,4 +1,4 @@
-package com.taskswapmobile
+package com.taskswap.mobile
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

@@ -9,6 +9,8 @@ import { colors } from '@shared/theme';
 import { moderateScale, moderateVerticalScale } from 'react-native-size-matters';
 import Icon from '../Icons/Icon';
 
+//only used home screen type
+
 type Props = {
   type: TaskType;
   iconEnabled?: boolean;

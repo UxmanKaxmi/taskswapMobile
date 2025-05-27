@@ -33,6 +33,8 @@ export function useToggleFollow() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: buildQueryKey.matchedUsers() });
       queryClient.invalidateQueries({ queryKey: buildQueryKey.tasks() });
+      queryClient.invalidateQueries({ queryKey: buildQueryKey.myProfile() });
+
       queryClient.invalidateQueries({ queryKey: buildQueryKey.followers() });
       queryClient.invalidateQueries({ queryKey: buildQueryKey.following() });
     },

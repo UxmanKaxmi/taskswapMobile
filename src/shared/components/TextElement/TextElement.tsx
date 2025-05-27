@@ -78,7 +78,7 @@ export function TextElement({
   };
 
   return (
-    <RNText style={[styles.base, textStyle, style]} {...rest}>
+    <RNText allowFontScaling={false} style={[styles.base, textStyle, style]} {...rest}>
       {children}
     </RNText>
   );

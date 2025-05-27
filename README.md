@@ -76,3 +76,6 @@ cd ios && pod install && cd ..
 yarn start
 npx react-native run-ios
 ```
+
+<!-- IMPORTANT -->
+<!-- export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH" source /Users/usmankazmi/.zshrc -->

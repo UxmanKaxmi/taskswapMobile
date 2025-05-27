@@ -1,4 +1,4 @@
-package com.taskswapmobile
+package com.taskswap.mobile
 
 import android.app.Application
 import com.facebook.react.PackageList

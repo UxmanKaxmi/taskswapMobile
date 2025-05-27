@@ -15,7 +15,6 @@ import { NotificationDTO } from '../types/notification.types';
 import Row from '@shared/components/Layout/Row';
 import { ms, vs } from 'react-native-size-matters';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
-import { getNotificationTypeVisual } from '@shared/utils/getNotificationTypeVisual';
 import Avatar from '@shared/components/Avatar/Avatar';
 import NotificationCard from '../components/DefaultNotification';
 
@@ -58,7 +57,9 @@ export default function NotificationMainScreen() {
   return (
     <Layout allowPadding={false}>
       {sections.length === 0 ? (
-        <EmptyState title="No notifications" subtitle="You're all caught up!" />
+        <Row align="center" justify="center" flex>
+          <EmptyState title="No notifications" subtitle="You're all caught up!" />
+        </Row>
       ) : (
         <SectionList
           sections={sections}

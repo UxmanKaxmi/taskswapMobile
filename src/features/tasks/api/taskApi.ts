@@ -19,7 +19,7 @@ export interface CreateTaskPayload {
   type: TaskType;
   remindAt?: string; // For reminder tasks
   options?: string[]; // For decision tasks
-  deliverAt?: string; // For motivation tasks
+  deliverAt?: string | null; // for motivation tasks
 }
 
 /**

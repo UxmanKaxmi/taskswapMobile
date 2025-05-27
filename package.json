@@ -10,8 +10,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-community/datetimepicker": "^8.3.0",
+    "@react-native-firebase/app": "^22.2.0",
+    "@react-native-firebase/messaging": "^22.2.0",
     "@react-native-google-signin/google-signin": "^13.2.0",
     "@react-native-picker/picker": "^2.11.0",
     "@react-native-vector-icons/common": "^11.0.0",
@@ -26,6 +29,7 @@
     "react": "19.0.0",
     "react-native": "0.79.2",
     "react-native-animatable": "^1.4.0",
+    "react-native-date-picker": "^5.0.12",
     "react-native-gesture-handler": "^2.25.0",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-reanimated": "^3.17.5",

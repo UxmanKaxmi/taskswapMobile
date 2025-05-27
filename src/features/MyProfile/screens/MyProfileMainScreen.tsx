@@ -12,6 +12,7 @@ import { useAuth } from '@features/Auth/authProvider';
 import ListView from '@shared/components/ListView/ListView';
 import StatsAchievements from '../components/StatsAchievements';
 import ProfileMenu from '../components/ProfileMenu';
+import { useMyProfileData } from '../hooks/useMyProfileData';
 
 export const mockProfile = {
   avatarUri: 'https://i.pravatar.cc/150?img=47',
@@ -42,26 +43,30 @@ export const mockStats = {
 
 export default function MyProfileMainScreen() {
   const { user } = useAuth();
-
+  const { data: MyProfileData, isLoading, isError, error } = useMyProfileData();
   return (
-    <Layout allowPadding centered style={{}}>
+    <Layout allowPadding style={{ marginTop: 0, paddingTop: 0 }}>
       <ListView
+        style={{}}
         scrollViewProps={{
           contentContainerStyle: { width: '100%' },
         }}
       >
         <ProfileHeader
-          {...mockProfile}
-          // avatarUri={user.avatarUri}
-          // name={user.name}
-          // username={user.username}
-          // following={user.following}
-          // followers={user.followers}
-          // onEditProfile={() => /* navigate to edit */ }
-          // onShareProfile={() => /* share link */ }
+          avatarUri={MyProfileData?.photo}
+          name={MyProfileData?.name || 'No Name'}
+          username={MyProfileData?.name || 'no username'}
+          following={MyProfileData?.followingCount ?? 0}
+          followers={MyProfileData?.followersCount ?? 0}
+          onEditProfile={() => {}}
+          onShareProfile={() => {}}
         />
 
-        <StatsAchievements {...mockStats} />
+        <StatsAchievements
+          tasksDone={MyProfileData?.tasksDone ?? 0}
+          dayStreak={MyProfileData?.dayStreak ?? 0}
+          taskSuccessRate={MyProfileData?.taskSuccessRate ?? 0}
+        />
         <ProfileMenu />
       </ListView>
     </Layout>

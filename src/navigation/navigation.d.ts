@@ -8,6 +8,14 @@ declare global {
   }
 }
 
+export type BottomTabParamList = {
+  Home: undefined;
+  Friends: undefined;
+  AddTask: { task?: Task } | undefined;
+  Notification: undefined;
+  Profile: undefined;
+};
+
 // Main stack for authenticated users
 export type MainStackParamList = {
   App: {
@@ -18,7 +26,7 @@ export type MainStackParamList = {
 
 // App stack (after login)
 export type AppStackParamList = {
-  Tabs: undefined;
+  Tabs: NavigatorScreenParams<BottomTabParamList>; // 👈 fix here
   Home: undefined;
   FindFriendsScreen: undefined;
   AddTask: { task?: Task } | undefined;
@@ -26,6 +34,7 @@ export type AppStackParamList = {
   FriendsMainScreen: undefined;
   NotificationMainScreen: undefined;
   MyProfileMainScreen: undefined;
+  MainDebugScreen: undefined;
 };
 
 // Auth stack (login, register)

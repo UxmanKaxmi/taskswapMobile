@@ -13,6 +13,8 @@ import HomeScreen from '@features/Home/screens/HomeScreen';
 import FriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
+import MainDebugScreen from '@features/debug/MainDebugScreen';
+import { isAndroid, isIOS } from '@shared/utils/constants';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -21,7 +23,7 @@ export function AppNavigator() {
   const showFindFriends = route?.params?.showFindFriends;
 
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName={showFindFriends ? 'FindFriendsScreen' : 'Tabs'}>
       {/* Main tab navigator */}
       <Stack.Screen name="Tabs" component={BottomTabs} options={{ headerShown: false }} />
 
@@ -31,7 +33,7 @@ export function AppNavigator() {
         component={FindFriendsScreen}
         options={{
           title: 'Find Friends',
-          headerRight: () => <LogoutButton />,
+          headerShown: false,
         }}
       />
       <Stack.Screen
@@ -41,6 +43,14 @@ export function AppNavigator() {
           title: 'Friends',
 
           headerRight: () => <LogoutButton />,
+        }}
+      />
+
+      <Stack.Screen
+        name="MainDebugScreen"
+        component={MainDebugScreen}
+        options={{
+          title: 'Debug',
         }}
       />
       <Stack.Screen
@@ -72,10 +82,12 @@ export function AppNavigator() {
         name="AddTask"
         component={AddTaskScreen}
         options={{
-          title: 'Create New Task',
-          headerRight: () => <LogoutButton />,
+          presentation: isAndroid ? 'modal' : 'containedTransparentModal',
+          animation: 'slide_from_bottom',
+          headerShown: false,
         }}
       />
+
       <Stack.Screen
         name="TaskDetail"
         component={TaskDetailScreen}

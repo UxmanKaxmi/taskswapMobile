@@ -9,24 +9,26 @@ import { spacing, colors, typography } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 
 export type StatsAchievementsProps = {
-  karmaPoints: number;
+  // karmaPoints: number;
   tasksDone: number;
   dayStreak: number;
-  achievements?: {
-    icon: React.ComponentProps<typeof Icon>['name'];
-    label: string;
-  }[];
+  taskSuccessRate: number;
+  // achievements?: {
+  //   icon: React.ComponentProps<typeof Icon>['name'];
+  //   label: string;
+  // }[];
 };
 
 export default function StatsAchievements({
-  karmaPoints,
+  // karmaPoints,
   tasksDone,
   dayStreak,
-  achievements = [
-    { icon: 'trophy', label: 'Super Helper' },
-    { icon: 'fire', label: '7 Day Streak' },
-    { icon: 'star', label: 'Top Rated' },
-  ],
+  taskSuccessRate,
+  // achievements = [
+  //   { icon: 'trophy', label: 'Super Helper' },
+  //   { icon: 'fire', label: '7 Day Streak' },
+  //   { icon: 'star', label: 'Top Rated' },
+  // ],
 }: StatsAchievementsProps) {
   return (
     <View style={styles.card}>
@@ -38,7 +40,7 @@ export default function StatsAchievements({
       <Row justify="space-around" style={styles.statsRow}>
         <View style={styles.statItem}>
           <TextElement variant="title" weight="700" style={styles.statNumber}>
-            90%
+            {taskSuccessRate}
           </TextElement>
           <TextElement variant="caption" color="muted">
             Task Success

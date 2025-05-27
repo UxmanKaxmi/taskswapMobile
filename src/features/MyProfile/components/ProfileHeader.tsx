@@ -18,6 +18,7 @@ type Props = {
   username: string;
   following: number;
   followers: number;
+
   onEditProfile: () => void;
   onShareProfile: () => void;
 };
@@ -28,6 +29,9 @@ export default function ProfileHeader({
   username,
   following,
   followers,
+  tasksDone,
+  taskSuccessRate,
+  dayStreak,
   onEditProfile,
   onShareProfile,
 }: Props) {

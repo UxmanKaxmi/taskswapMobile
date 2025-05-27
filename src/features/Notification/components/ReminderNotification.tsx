@@ -3,9 +3,9 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Avatar from '@shared/components/Avatar/Avatar';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors, spacing } from '@shared/theme';
-import { getNotificationTypeVisual } from '@shared/utils/getNotificationTypeVisual';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import { NotificationDTO } from '../types/notification.types';
+import { getTypeVisual } from '@shared/utils/typeVisuals';
 
 interface Props {
   item: NotificationDTO;
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function ReminderNotification({ item, onPress }: Props) {
-  const { emoji, color } = getNotificationTypeVisual(item.type);
+  const { emoji, color } = getTypeVisual(item.type);
 
   return (
     <TouchableOpacity

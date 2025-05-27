@@ -22,6 +22,7 @@ import { vs } from 'react-native-size-matters';
 import { showToast } from '@shared/utils/toast';
 import MotivationCard from '../components/MotivationCard';
 import AdviceCard from '../components/AdviceCard';
+import NotificationTester from '@features/debug/NotificationTester';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
@@ -121,6 +122,7 @@ export default function HomeScreen() {
           ))}
         </ListView>
       </View>
+
       <ListView
         data={tasks}
         renderItem={renderTaskNew}

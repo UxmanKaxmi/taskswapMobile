@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Avatar from '@shared/components/Avatar/Avatar';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
-import { getNotificationTypeVisual } from '@shared/utils/getNotificationTypeVisual';
+import { getTypeVisual } from '@shared/utils/typeVisuals';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
 
@@ -13,7 +13,7 @@ type Props = {
 };
 
 export default function FollowNotification({ item, onPress }: Props) {
-  const { emoji, color } = getNotificationTypeVisual(item.type);
+  const { emoji } = getTypeVisual(item.type);
 
   return (
     <TouchableOpacity onPress={onPress} style={[styles.row, {}]}>

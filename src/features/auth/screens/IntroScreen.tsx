@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import Swiper from 'react-native-swiper';
 import LinearGradient from 'react-native-linear-gradient';
@@ -6,6 +6,7 @@ import { Layout } from '@shared/components/Layout';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Height } from '@shared/components/Spacing';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const { width, height } = Dimensions.get('window');
 
@@ -32,7 +33,6 @@ const IntroSliderScreen = ({ navigation }: { navigation: any }) => {
   const handleStart = () => {
     navigation.replace('Login'); // Or navigation.navigate
   };
-
   return (
     <Layout>
       <View
@@ -49,6 +49,7 @@ const IntroSliderScreen = ({ navigation }: { navigation: any }) => {
           resizeMode="contain"
         />
       </View>
+
       <Swiper
         autoplay
         loop={true}

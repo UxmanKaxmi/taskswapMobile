@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "424884151196",
+    "project_id": "taskswap-ac888",
+    "storage_bucket": "taskswap-ac888.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:424884151196:android:3a347863561596a44a5e59",
+        "android_client_info": {
+          "package_name": "com.taskswap.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "424884151196-6v6bd3q6jf37em0o985305jefbd71fv8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.taskswap.mobile",
+            "certificate_hash": "92548a15af381a4d506aa2c0c7d6a51b7cf3fc12"
+          }
+        },
+        {
+          "client_id": "424884151196-8b2midonidm3m1u77konerbc6its5knv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFNzQPgKxyJNlXQ2GJzR78gwDgnPk6Y6M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "424884151196-8b2midonidm3m1u77konerbc6its5knv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "424884151196-gam80dreofqfq59prluvfdn7l98lvpqc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.taskswap.mobile"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -7,6 +7,8 @@ import Icon from '@shared/components/Icons/Icon';
 import Row from '@shared/components/Layout/Row';
 import { spacing, colors, typography } from '@shared/theme';
 import { useAuth } from '@features/Auth/authProvider';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { AppNavigationProp, MainStackParamList } from 'navigation/navigation';
 
 export type MenuItem = {
   label: string;
@@ -14,16 +16,14 @@ export type MenuItem = {
   onPress: () => void;
 };
 
-type Props = {
-  items: MenuItem[];
-};
+type Props = {};
 
 /**
  * Profile menu that takes a dynamic list of items with icons and callbacks.
  */
-export default function ProfileMenu({ items }: Props) {
+export default function ProfileMenu({}: Props) {
   const { signOut } = useAuth();
-
+  const navigation = useNavigation<AppNavigationProp>();
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
@@ -35,13 +35,13 @@ export default function ProfileMenu({ items }: Props) {
     ]);
   };
   const menuItems = [
-    // {
-    //   label: 'Settings',
-    //   icon: 'settings',
-    //   onPress: () => {
-    //     /* go to settings */
-    //   },
-    // },
+    {
+      label: 'Find your friends..',
+      icon: 'people-circle',
+      onPress: () => {
+        navigation.navigate('FindFriendsScreen');
+      },
+    },
     {
       label: 'Saved Tasks',
       icon: 'bookmark',
@@ -62,6 +62,11 @@ export default function ProfileMenu({ items }: Props) {
       onPress: () => {
         /* go to help  */
       },
+    },
+    {
+      label: 'Debug Notification',
+      icon: 'debug',
+      onPress: () => navigation.navigate('MainDebugScreen'),
     },
     {
       label: 'Log Out',

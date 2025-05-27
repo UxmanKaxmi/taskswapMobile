@@ -1,7 +1,5 @@
 // src/features/tasks/api/useAddReminder.ts
 
-import { buildRoute } from '@shared/api/apiRoutes';
-import { api } from '@shared/api/axios';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { sendReminderNoteAPI } from '../api/api';
@@ -22,8 +20,9 @@ export function useAddReminder(taskId: string) {
       queryClient.invalidateQueries({ queryKey: buildQueryKey.taskById(taskId) }); // ✅ Add this line
       queryClient.invalidateQueries({ queryKey: buildQueryKey.tasks() });
     },
-    onError: () => {
-      showToast({ title: 'Error', message: 'Failed to send reminder.', type: 'error' });
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || 'Failed to send reminder.';
+      showToast({ title: 'Error', message, type: 'error' });
     },
   });
 }

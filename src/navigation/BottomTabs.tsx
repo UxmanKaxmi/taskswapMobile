@@ -1,6 +1,10 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import {
+  getFocusedRouteNameFromRoute,
+  NavigationProp,
+  useNavigation,
+} from '@react-navigation/native';
 import Icon from '@shared/components/Icons/Icon'; // ✅ your custom Icon component
 import HomeScreen from '@features/Home/screens/HomeScreen';
 import FindFriendsScreen from '@features/Friends/screens/FindFriendsScreen';
@@ -12,8 +16,9 @@ import { ms } from 'react-native-size-matters';
 import FriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
+import { AppStackParamList } from './navigation';
 
-export type BottomTabParamList = {
+type BottomTabParamList = {
   Home: undefined;
   Friends: undefined;
   AddTask: undefined;
@@ -25,6 +30,7 @@ const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 export default function BottomTabs({ route }: any) {
   const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home';
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
   const shouldHideTabBar = ['SomeScreenYouWantToHideOn'].includes(routeName);
 
@@ -73,19 +79,21 @@ export default function BottomTabs({ route }: any) {
       <Tab.Screen name="Friends" component={FriendsMainScreen} />
       <Tab.Screen
         name="AddTask"
-        // options={{
-        //   tabBarButton: props => (
-        //     <TouchableOpacity
-        //       onPress={() => {}}
-        //       style={styles.addButtonContainer}
-        //       activeOpacity={0.9}
-        //     >
-        //       <View style={styles.addButton}>
-        //         <Icon name="plus" color="#fff" size={24} iconStyle="solid" />
-        //       </View>
-        //     </TouchableOpacity>
-        //   ),
-        // }}
+        options={{
+          headerShown: false,
+
+          tabBarButton: props => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('AddTask')}
+              style={styles.addButtonContainer}
+              activeOpacity={0.9}
+            >
+              <View style={styles.addButton}>
+                <Icon set="fa6" name="plus" color="#fff" size={24} iconStyle="solid" />
+              </View>
+            </TouchableOpacity>
+          ),
+        }}
         component={AddTaskScreen}
       />
       <Tab.Screen name="Notification" component={NotificationMainScreen} />

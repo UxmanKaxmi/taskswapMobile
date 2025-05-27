@@ -32,7 +32,7 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
     isLoading: _,
     isError: __,
   } = type === 'followers' ? useFollowers() : useFollowing();
-  const { mutate: toggleFollow, isPending, variables } = useToggleFollow(); // Removed unused 'error'
+  const { mutate: toggleFollow, isPending, variables } = useToggleFollow();
 
   const filteredData = useMemo(() => {
     return data.filter((user: { name: string }) =>

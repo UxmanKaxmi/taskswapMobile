@@ -72,7 +72,7 @@ export default function ReminderMessageModal({
           <AppTextInput
             label="Share a customized message for them:"
             placeholder=""
-            value={message}
+            value={message || ''}
             onChangeText={setMessage}
             multiline
             numberOfLines={3}

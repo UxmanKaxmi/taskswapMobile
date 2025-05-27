@@ -11,27 +11,30 @@ import Column from '@shared/components/Layout/Column';
 import { Height } from '@shared/components/Spacing';
 import AnimatedTextRotatorWithTitle from '../components/AnimatedTextRotatorWithTitle';
 import AnimatedBackground from '@shared/components/Layout/AnimatedBackground';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const { width, height } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const { user, signIn, signOut, loading } = useAuth();
 
-  // async function pingServer() {
-  //   try {
-  //     const res = await api.get('/health');
-  //     if (res.status === 200 && res.data.ok) {
-  //       console.log('✅ Backend is reachable!', res.data);
-  //     } else {
-  //       console.warn('⚠️ Health check returned non-OK', res);
-  //     }
-  //   } catch (err) {
-  //     console.error('❌ Cannot reach backend:', err);
-  //   }
-  // }
-  // useEffect(() => {
-  //   pingServer();
-  // }, []);
+  async function pingServer() {
+    console.log('Google Signin config:', await GoogleSignin.getCurrentUser());
+
+    try {
+      const res = await api.get('/health');
+      if (res.status === 200 && res.data.ok) {
+        console.log('✅ Backend is reachable!', res.data);
+      } else {
+        console.warn('⚠️ Health check returned non-OK', res);
+      }
+    } catch (err) {
+      console.error('❌ Cannot reach backend:', err);
+    }
+  }
+  useEffect(() => {
+    pingServer();
+  }, []);
 
   // if (user) {
   //   return (

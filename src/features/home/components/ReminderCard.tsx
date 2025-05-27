@@ -20,8 +20,9 @@ import Icon from '@shared/components/Icons/Icon';
 import { Width } from '@shared/components/Spacing';
 import ReminderMessageModal from '@shared/components/Modals/ReminderMessageModal';
 import { useAuth } from '@features/Auth/authProvider';
-import { useAddReminder } from '../hooks/useAddReminder';
-import { getNotificationTypeVisual } from '@shared/utils/getNotificationTypeVisual';
+import { useAddReminder } from '../hooks/useAddTask';
+import { getTypeVisual } from '@shared/utils/typeVisuals';
+import { formatDistanceToNow, isBefore, parseISO } from 'date-fns';
 type Props = {
   task: ReminderTask;
   onPressCard: (task: ReminderTask) => void;
@@ -44,7 +45,7 @@ export default function ReminderCard({
   const [isCompleted, setCompleted] = useState(completed);
   const [showModal, setShowModal] = useState(false);
   const [customMessage, setCustomMessage] = useState('');
-  const { emoji } = getNotificationTypeVisual(type);
+  const { emoji } = getTypeVisual(type);
 
   const { mutate: completeTask, isPending } = useCompleteTask();
   const { mutate: incompleteTask, isPending: isIncompletePending } = useInCompleteTask();
@@ -156,6 +157,13 @@ export default function ReminderCard({
           {emoji} {text}
         </TextElement>
       </View>
+      <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
+        {isBefore(new Date(task.remindAt), new Date())
+          ? '⏰ Reminder time passed'
+          : `⏳ ${formatDistanceToNow(parseISO(task.remindAt), {
+              addSuffix: true,
+            })}`}
+      </TextElement>
       <View style={cardStyles.buttonRow}>
         {isOwner ? (
           isCompleted ? (
