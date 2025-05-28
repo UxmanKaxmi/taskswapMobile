@@ -20,6 +20,7 @@ target 'taskswapMobile' do
   config = use_native_modules!
 
   use_frameworks! :linkage => :static
+  # pod 'react-native-contacts', :path => '../node_modules/react-native-contacts' 
 
 
   use_react_native!(

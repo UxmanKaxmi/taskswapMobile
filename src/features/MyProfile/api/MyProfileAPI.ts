@@ -8,6 +8,5 @@ import { UserProfile } from '../types/myProfile.types';
 export async function getMe(): Promise<UserProfile> {
   const response = await api.get<UserProfile>(buildRoute.me());
 
-  console.log('ttt', response.data);
   return response.data;
 }

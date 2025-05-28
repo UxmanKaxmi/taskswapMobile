@@ -79,3 +79,10 @@ npx react-native run-ios
 
 <!-- IMPORTANT -->
 <!-- export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH" source /Users/usmankazmi/.zshrc -->
+<!-- open -a "Android Studio.app";    -->
+<!-- https://github.com/morenoh149/react-native-contacts/issues/785 -->
+
+<!-- Building on Ilya Saunkin's answer, here's a command that should output your IP address formatted as a hyperlink - just substitute 3000 for whatever your port number is:
+
+ifconfig | grep "inet " | grep -v 127.0.0.1 | sed 's/netmask.*//g' | sed 's/inet//g' | awk '{print "http://"$1":3000/"}'
+Depending on where you're running the command, you should be able to (on a Mac) hold the command key and click/double-click to open the links. -->

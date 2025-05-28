@@ -26,6 +26,7 @@ export type MainStackParamList = {
 
 // App stack (after login)
 export type AppStackParamList = {
+  replace(arg0: string, arg1: { screen: string }): void;
   Tabs: NavigatorScreenParams<BottomTabParamList>; // 👈 fix here
   Home: undefined;
   FindFriendsScreen: undefined;

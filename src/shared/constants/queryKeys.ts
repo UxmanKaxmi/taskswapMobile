@@ -8,6 +8,7 @@ export enum QueryKeys {
   MatchedUsers = 'matched-users',
   Notification = 'notification',
   MyProfile = 'my-profile',
+  SearchFriends = 'search-friends',
 }
 
 export const buildQueryKey = {
@@ -21,4 +22,9 @@ export const buildQueryKey = {
   matchedUsers: () => [QueryKeys.MatchedUsers],
   notifications: () => [QueryKeys.Notification],
   myProfile: () => [QueryKeys.MyProfile],
+  searchFriends: (query: string, includeFollowed: boolean = true) => [
+    QueryKeys.SearchFriends,
+    query,
+    includeFollowed,
+  ],
 };

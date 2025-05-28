@@ -29,9 +29,9 @@ export default function ProfileHeader({
   username,
   following,
   followers,
-  tasksDone,
-  taskSuccessRate,
-  dayStreak,
+  // tasksDone,
+  // taskSuccessRate,
+  // dayStreak,
   onEditProfile,
   onShareProfile,
 }: Props) {

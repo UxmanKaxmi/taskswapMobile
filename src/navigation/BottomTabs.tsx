@@ -12,7 +12,7 @@ import AddTaskScreen from '@features/Tasks/screens/AddTaskScreen';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { colors } from '@shared/theme';
 import AnimatedTabIcon from '@shared/components/AnimatedTabBarIcon/AnimatedTabBarIcon';
-import { ms } from 'react-native-size-matters';
+import { ms, vs } from 'react-native-size-matters';
 import FriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
@@ -40,16 +40,17 @@ export default function BottomTabs({ route }: any) {
         headerShown: false,
         tabBarStyle: [
           {
-            paddingTop: 8,
-            paddingHorizontal: 15,
+            paddingTop: vs(8),
+            height: vs(60),
+            paddingBottom: vs(6),
           },
           shouldHideTabBar ? { display: 'none' } : undefined,
         ],
         tabBarActiveTintColor: colors.primary, // ✅ your brand's active color
         tabBarInactiveTintColor: colors.tabInactive,
         tabBarLabelStyle: {
-          paddingTop: 2,
-          fontSize: 11,
+          paddingTop: vs(2),
+          fontSize: ms(11),
         },
 
         tabBarIcon: ({ color, size, focused }) => {
@@ -104,7 +105,7 @@ export default function BottomTabs({ route }: any) {
 
 const styles = StyleSheet.create({
   addButtonContainer: {
-    top: -18, // raise the button
+    top: -30, // raise the button
     justifyContent: 'center',
     alignItems: 'center',
   },

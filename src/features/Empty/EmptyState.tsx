@@ -3,6 +3,8 @@ import { View, Image, StyleSheet } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
+import { Width } from '@shared/components/Spacing';
+import { deviceWidth } from '@shared/utils/helperFunctions';
 
 type Props = {
   title?: string;
@@ -40,12 +42,12 @@ export default function EmptyState({ title, subtitle, icon }: Props) {
 }
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    alignContent: 'center',
     backgroundColor: 'transparent',
-    paddingHorizontal: spacing.lg,
+    alignSelf: 'center',
+    flex: 1,
   },
   image: {
     width: 250,
@@ -60,5 +62,7 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: 'center',
     color: '#777',
+    width: deviceWidth, // ✅ allow flexibility within the parent
+    alignSelf: 'center',
   },
 });

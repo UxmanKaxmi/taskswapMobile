@@ -2464,6 +2464,11 @@
   dependencies:
     nanoid "^3.3.11"
 
+"@s77rt/react-native-contacts@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@s77rt/react-native-contacts/-/react-native-contacts-0.1.1.tgz#3e423462d4ac161589d3aea262f102c128b8dcb9"
+  integrity sha512-5N+yK3vdDP9yYdKoxuPeHRFgBIuZYeCCrvScCmTgS6MVWrDQWLHb/3Go2dz/yfLBk2lWLc9la8/uRL8ufTaYPg==
+
 "@sideway/address@^4.1.5":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@sideway/address/-/address-4.1.5.tgz#4bc149a0076623ced99ca8208ba780d65a99b9d5"
@@ -6789,6 +6794,11 @@ react-native-animatable@^1.4.0:
   dependencies:
     prop-types "^15.8.1"
 
+react-native-contacts@^8.0.5:
+  version "8.0.5"
+  resolved "https://registry.yarnpkg.com/react-native-contacts/-/react-native-contacts-8.0.5.tgz#61c6a77f10e4229b3bdbe539baba36d1046cb369"
+  integrity sha512-MhZOAa2IZyJTqtaa7xo1twU2A1ygt4eD2IF+0Hl9P+HhnvxlFCwQBzCmZvpOwaSpW6QSLyHzM5BWKxWyMcSxog==
+
 react-native-date-picker@^5.0.12:
   version "5.0.12"
   resolved "https://registry.yarnpkg.com/react-native-date-picker/-/react-native-date-picker-5.0.12.tgz#12540b6a58500811ee7e4fc0244e3accc7cca9c1"
@@ -7783,6 +7793,11 @@ uri-js@^4.2.2:
   integrity sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==
   dependencies:
     punycode "^2.1.0"
+
+use-debounce@^10.0.4:
+  version "10.0.4"
+  resolved "https://registry.yarnpkg.com/use-debounce/-/use-debounce-10.0.4.tgz#2135be498ad855416c4495cfd8e0e130bd33bb24"
+  integrity sha512-6Cf7Yr7Wk7Kdv77nnJMf6de4HuDE4dTxKij+RqE9rufDsI6zsbjyAxcH5y2ueJCQAnfgKbzXbZHYlkFwmBlWkw==
 
 use-latest-callback@^0.2.3:
   version "0.2.3"

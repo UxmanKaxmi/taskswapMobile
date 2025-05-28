@@ -82,7 +82,7 @@ export function AppNavigator() {
         name="AddTask"
         component={AddTaskScreen}
         options={{
-          presentation: isAndroid ? 'modal' : 'containedTransparentModal',
+          presentation: isAndroid ? 'modal' : 'modal',
           animation: 'slide_from_bottom',
           headerShown: false,
         }}

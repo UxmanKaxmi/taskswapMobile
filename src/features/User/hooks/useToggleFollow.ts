@@ -3,8 +3,9 @@ import { buildQueryKey } from '@shared/constants/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { toggleFollow } from '../api/userApi';
+import { MatchedUser } from '@features/Friends/hooks/useMatchUsers';
 
-export function useToggleFollow() {
+export function useToggleFollow(searchQuery?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -13,10 +14,16 @@ export function useToggleFollow() {
     onMutate: async (userId: string) => {
       await queryClient.cancelQueries({ queryKey: buildQueryKey.matchedUsers() });
 
-      const previous = queryClient.getQueryData<any[]>(buildQueryKey.matchedUsers());
+      const previous = queryClient.getQueryData<MatchedUser[]>(buildQueryKey.matchedUsers());
 
-      queryClient.setQueryData(buildQueryKey.matchedUsers(), (old: any[] | undefined) =>
-        old?.map(user => (user.id === userId ? { ...user, isFollowing: !user.isFollowing } : user)),
+      if (!previous?.some(u => u.id === userId)) {
+        console.warn('⚠️ No matching user found in matchedUsers cache for toggleFollow');
+      }
+
+      queryClient.setQueryData(buildQueryKey.matchedUsers(), (old = []) =>
+        (old as any[]).map(user =>
+          user.id === userId ? { ...user, isFollowing: !user.isFollowing } : user,
+        ),
       );
 
       return { previous };
@@ -29,14 +36,22 @@ export function useToggleFollow() {
       }
     },
 
-    // ✅ Refetch on success
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: buildQueryKey.matchedUsers() });
-      queryClient.invalidateQueries({ queryKey: buildQueryKey.tasks() });
-      queryClient.invalidateQueries({ queryKey: buildQueryKey.myProfile() });
-
+    onSuccess: (_, userId) => {
       queryClient.invalidateQueries({ queryKey: buildQueryKey.followers() });
       queryClient.invalidateQueries({ queryKey: buildQueryKey.following() });
+      queryClient.invalidateQueries({ queryKey: buildQueryKey.matchedUsers() });
+      queryClient.invalidateQueries({ queryKey: buildQueryKey.myProfile() });
+      queryClient.invalidateQueries({ queryKey: buildQueryKey.tasks() });
+
+      if (searchQuery?.trim()) {
+        queryClient.setQueryData(
+          buildQueryKey.searchFriends(searchQuery.trim(), true),
+          (oldData: SearchResultFriend[] = []) =>
+            oldData.map(friend =>
+              friend.id === userId ? { ...friend, isFollowing: !friend.isFollowing } : friend,
+            ),
+        );
+      }
     },
   });
 }

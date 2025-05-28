@@ -21,6 +21,8 @@ export const buildRoute = {
   syncUserToDb: () => `${ApiRoute.USERS}`,
   matchUsers: () => `${ApiRoute.USERS}/match`,
   me: () => `${ApiRoute.USERS}/me`,
+  searchFriends: (query: string, includeFollowed: boolean = true) =>
+    `${ApiRoute.USERS}/search-friends?query=${encodeURIComponent(query)}&includeFollowed=${includeFollowed}`,
 
   // 📌 Reminder Note Routes (via Task)
   sendReminder: (taskId: string) => `${ApiRoute.REMINDER_NOTES}/${taskId}/remind`,

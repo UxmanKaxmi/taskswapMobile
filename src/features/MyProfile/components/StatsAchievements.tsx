@@ -40,7 +40,7 @@ export default function StatsAchievements({
       <Row justify="space-around" style={styles.statsRow}>
         <View style={styles.statItem}>
           <TextElement variant="title" weight="700" style={styles.statNumber}>
-            {taskSuccessRate}
+            {taskSuccessRate}%
           </TextElement>
           <TextElement variant="caption" color="muted">
             Task Success

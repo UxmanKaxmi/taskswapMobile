@@ -160,7 +160,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <Animated.View style={{ flex: 1, transform: [{ scale }], opacity }}>
-        <Layout edges={['right', 'left']}>
+        <Layout edges={['right', 'left', 'top', 'bottom']}>
           <View style={styles.header}>
             <View style={{ flex: 1 }} />
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
@@ -239,7 +239,6 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.md,
   },
   header: {
-    paddingTop: verticalScale(25),
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',

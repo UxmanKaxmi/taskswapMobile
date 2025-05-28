@@ -15,6 +15,8 @@ import { Image } from 'react-native';
 import { vs } from 'react-native-size-matters';
 import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
 import { useToggleFollow } from '@features/User/hooks/useToggleFollow';
+import { queryClient } from '@lib/react-query/client';
+import { buildQueryKey } from '@shared/constants/queryKeys';
 
 export default function FindFriendsScreen() {
   const navigation = useNavigation<AppStackParamList>();
@@ -24,6 +26,7 @@ export default function FindFriendsScreen() {
   const [isVisible, setIsVisible] = useState(false);
   const { mutate: toggleFollow, isPending, variables, error } = useToggleFollow();
 
+  console.log(matches, 'matches');
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true);
@@ -49,25 +52,44 @@ export default function FindFriendsScreen() {
   //remove own self
   const filteredMatches = matches.filter(match => match.id !== user?.id);
 
+  const googleMatches = filteredMatches.filter(match => match.source === 'google');
+  const phoneMatches = filteredMatches.filter(match => match.source === 'phone');
+
+  console.log('googleMatches', googleMatches);
+  console.log('phoneMatches', phoneMatches);
+
   if (isLoading) return <ActivityIndicator style={{ flex: 1 }} />;
 
   if (isError) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <TextElement variant="title" color="text">
-          Something went wrong.
-        </TextElement>
-      </View>
+      <Layout edges={['bottom', 'top']}>
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.md }}
+        >
+          <TextElement variant="title" style={{ marginBottom: spacing.sm }}>
+            Failed to load friends
+          </TextElement>
+          <TextElement variant="body" color="muted" style={{ marginBottom: spacing.md }}>
+            Please check your internet connection or try again.
+          </TextElement>
+          <PrimaryButton
+            title="Retry"
+            onPress={() => {
+              queryClient.invalidateQueries({ queryKey: buildQueryKey.matchedUsers() });
+            }}
+          />
+        </View>
+      </Layout>
     );
   }
 
   return (
     <Layout edges={['bottom', 'top']}>
       <ListView
-        data={filteredMatches}
+        data={[...googleMatches, ...phoneMatches]} // flat list of both
         flatListProps={{
           ListHeaderComponent: () => (
-            <View style={{}}>
+            <View>
               <TextElement variant="title" style={{ fontWeight: '700' }}>
                 Find your people <TextElement style={{ fontSize: 20 }}>👋</TextElement>
               </TextElement>
@@ -78,6 +100,12 @@ export default function FindFriendsScreen() {
               >
                 Add friends so TaskSwap feels a little more familiar.
               </TextElement>
+
+              {googleMatches.length > 0 && (
+                <TextElement style={{ marginTop: spacing.md, fontWeight: '600' }}>
+                  From Google Contacts
+                </TextElement>
+              )}
             </View>
           ),
           ItemSeparatorComponent: () => <AppBorder />,
@@ -89,12 +117,24 @@ export default function FindFriendsScreen() {
               </TextElement>
               <PrimaryButton
                 title="Let's continue"
-                onPress={() => navigation.replace('Home')}
+                onPress={() =>
+                  navigation?.replace('Tabs', {
+                    screen: 'Home',
+                  })
+                }
                 style={{ paddingHorizontal: spacing.md }}
               />
             </View>
           ),
-          ListFooterComponent: <View style={{ marginBottom: vs(40) }} />,
+          ListFooterComponent: (
+            <View style={{ marginBottom: vs(40) }}>
+              {phoneMatches.length > 0 && (
+                <TextElement style={{ marginTop: spacing.md, fontWeight: '600' }}>
+                  From Phone Contacts
+                </TextElement>
+              )}
+            </View>
+          ),
         }}
         renderItem={({ item }) => (
           <FriendFollowRow
@@ -109,7 +149,7 @@ export default function FindFriendsScreen() {
       />
       {matches.length > 0 && (
         <PrimaryButton
-          title="Next"
+          title="Go to Home"
           onPress={() =>
             navigation?.replace('Tabs', {
               screen: 'Home',

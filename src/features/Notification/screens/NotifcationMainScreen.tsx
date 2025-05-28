@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, SectionList, Image, TouchableOpacity } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  SectionList,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { format, isToday, isYesterday, isThisWeek, isThisYear } from 'date-fns';
 
@@ -53,6 +60,14 @@ export default function NotificationMainScreen() {
   const handlePress = (id: string) => {
     markAsRead(id);
   };
+
+  if (isLoading) {
+    return (
+      <View style={{ alignSelf: 'center', justifyContent: 'center', flex: 1 }}>
+        <ActivityIndicator size="small" />
+      </View>
+    );
+  }
 
   return (
     <Layout allowPadding={false}>

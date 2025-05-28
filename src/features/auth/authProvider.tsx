@@ -15,6 +15,7 @@ import { showToast } from '@shared/utils/toast';
 import { initializeNotifications } from '@lib/notifications/initNotifications';
 import { getMessaging } from '@react-native-firebase/messaging';
 import { isAndroid } from '@shared/utils/constants';
+import { queryClient } from '@lib/react-query/client';
 
 type User = {
   id: string;
@@ -120,6 +121,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     setToken(null);
     delete api.defaults.headers.common['Authorization'];
     setHasSeenFindFriendsScreenState(false);
+    queryClient.clear(); // <-- this line is key
     showToast({
       type: 'info',
       title: 'Signed out',

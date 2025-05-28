@@ -109,7 +109,7 @@ export default function ListTaskOptionSelector({
         onConfirm={handleConfirm}
         onCancel={() => setShowPicker(false)}
         minimumDate={new Date()}
-        theme={isIOS ? 'auto' : 'light'}
+        theme={'light'}
       />
 
       {errorText && (
