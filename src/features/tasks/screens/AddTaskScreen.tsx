@@ -32,6 +32,7 @@ import ListTaskOptionSelector from '../components/ListTaskOptionSelector';
 import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CreateTaskPayload } from '../api/taskApi';
+import SelectHelpersModal from '../components/SelectHelpersModal';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
 
@@ -91,6 +92,13 @@ export default function AddTaskScreen({ route, navigation }: Props) {
   const now = new Date();
   const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
+  const [helperIds, setHelperIds] = useState<string[]>([]);
+  const [helperModalVisible, setHelperModalVisible] = useState(false);
+
+  useEffect(() => {
+    console.log(helperIds, 'helper');
+  }, [helperIds]);
+
   useEffect(() => {
     Animated.parallel([
       Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
@@ -108,6 +116,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
       remindAt: ['reminder', 'motivation'].includes(type) ? remindAt.toISOString() : undefined,
       deliverAt: type === 'motivation' ? remindAt.toISOString() : undefined,
       options: type === 'decision' ? options : undefined,
+      helpers: helperIds,
     };
 
     if (existingTask) {
@@ -197,6 +206,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
                   setErrors(prev => ({ ...prev, remindAt: undefined }));
                 }
               }}
+              valueType="date"
               errorText={errors.remindAt}
               error={!!errors.remindAt}
             />
@@ -205,9 +215,9 @@ export default function AddTaskScreen({ route, navigation }: Props) {
           <ListTaskOptionSelector
             icon="people"
             label="Who can help?"
-            onPress={() => {
-              // open user selector
-            }}
+            valueType="text"
+            onPress={() => setHelperModalVisible(true)}
+            value={helperIds.length ? `${helperIds.length} selected` : undefined}
           />
 
           {/* <ListTaskOptionSelector
@@ -227,6 +237,12 @@ export default function AddTaskScreen({ route, navigation }: Props) {
             onPress={() => handleSubmit()}
           />
         </View>
+        <SelectHelpersModal
+          visible={helperModalVisible}
+          onClose={() => setHelperModalVisible(false)}
+          selected={helperIds}
+          onConfirm={setHelperIds}
+        />
       </Animated.View>
     </TouchableWithoutFeedback>
   );

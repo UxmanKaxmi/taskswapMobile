@@ -4,7 +4,7 @@ import React from 'react';
 import { View, TextInput, StyleSheet, TextInputProps, TouchableOpacity } from 'react-native';
 import { colors, spacing } from '@shared/theme';
 import Icon from '../Icons/Icon';
-import { vs } from 'react-native-size-matters';
+import { ms, vs } from 'react-native-size-matters';
 
 interface SearchProps extends TextInputProps {
   value: string;
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.inputBackground || '#F2F2F2',
     borderRadius: 12,
     paddingHorizontal: spacing.md,
-    paddingVertical: vs(8),
+    paddingVertical: ms(6),
     marginBottom: spacing.md,
   },
   icon: {

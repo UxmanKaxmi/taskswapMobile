@@ -48,7 +48,7 @@ export const cardStyles = StyleSheet.create({
   messageRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: vs(12),
+    marginBottom: vs(0),
   },
 
   emoji: {

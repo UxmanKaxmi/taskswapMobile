@@ -41,6 +41,7 @@ type Props = {
   label: string;
   iconSet?: 'ion' | 'fa6';
   value?: string;
+  valueType?: 'date' | 'text'; // 👈 Add this
   onPress?: () => void;
   showDateTimePicker?: boolean;
   dateTimeValue?: Date;
@@ -54,6 +55,7 @@ export default function ListTaskOptionSelector({
   icon,
   label,
   value,
+  valueType,
   iconSet,
   onPress,
   showDateTimePicker = false,
@@ -94,7 +96,12 @@ export default function ListTaskOptionSelector({
           </TextElement>
         </View>
         <View style={styles.row}>
-          {value && <TaskOptionValue value={value} />}
+          {value && valueType === 'date' && <TaskOptionValue value={value} />}
+          {value && valueType === 'text' && (
+            <TextElement variant="subtitle" style={[styles.value, { color: colors.primary }]}>
+              {value}
+            </TextElement>
+          )}
           {!showDateTimePicker && !showPicker && !dateTimeValue && (
             <Icon set="ion" name="chevron-forward" size={spacing.md} color={colors.muted} />
           )}

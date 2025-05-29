@@ -17,12 +17,13 @@ import { useCompleteTask } from '../hooks/useCompleteTask';
 import { showToast } from '@shared/utils/toast';
 import { useInCompleteTask } from '../hooks/useInCompleteTask';
 import Icon from '@shared/components/Icons/Icon';
-import { Width } from '@shared/components/Spacing';
+import { Height, Width } from '@shared/components/Spacing';
 import ReminderMessageModal from '@shared/components/Modals/ReminderMessageModal';
 import { useAuth } from '@features/Auth/authProvider';
 import { useAddReminder } from '../hooks/useAddTask';
 import { getTypeVisual } from '@shared/utils/typeVisuals';
 import { formatDistanceToNow, isBefore, parseISO } from 'date-fns';
+import HelperAvatarGroup from './HelperAvatarGroup';
 type Props = {
   task: ReminderTask;
   onPressCard: (task: ReminderTask) => void;
@@ -38,7 +39,17 @@ export default function ReminderCard({
   onPressView,
   onRemind,
 }: Props) {
-  const { avatar, name = 'John Doe', createdAt, text, type, userId, completed, hasReminded } = task;
+  const {
+    avatar,
+    name = 'John Doe',
+    createdAt,
+    text,
+    type,
+    userId,
+    completed,
+    hasReminded,
+    helpers,
+  } = task;
   const { user } = useAuth();
   const isOwner = userId === user?.id;
 
@@ -152,11 +163,14 @@ export default function ReminderCard({
         </Row>
         <TypeTag type={type} />
       </Row>
+
       <View style={cardStyles.messageRow}>
         <TextElement variant="title">
           {emoji} {text}
         </TextElement>
       </View>
+      <Height size={8} />
+
       <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
         {isBefore(new Date(task.remindAt), new Date())
           ? '⏰ Reminder time passed'
@@ -193,6 +207,15 @@ export default function ReminderCard({
           />
         )}
       </View>
+      {helpers && helpers.length > 0 && (
+        <View style={{ flex: 1 }}>
+          <TextElement weight="500" variant="subtitle" style={{ fontSize: ms(16) }}>
+            Helpers
+          </TextElement>
+          <HelperAvatarGroup helpers={helpers} />
+        </View>
+      )}
+
       <ReminderMessageModal
         visible={showModal}
         onClose={() => setShowModal(false)}

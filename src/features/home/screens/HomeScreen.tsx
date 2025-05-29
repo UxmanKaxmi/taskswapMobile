@@ -27,15 +27,25 @@ import NotificationTester from '@features/debug/NotificationTester';
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const [filter, setFilter] = useState<TaskType | 'all'>('all');
-  const { data: allTasks = [], isLoading, isError, error } = useTasksQuery();
+  const { data: allTasks = [], isLoading, isError, error, refetch } = useTasksQuery();
   // const { user, signOut } = useAuth();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await refetch();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const tasks = useMemo(() => {
     if (filter === 'all') return allTasks;
     return allTasks.filter(task => task.type === filter);
   }, [allTasks, filter]);
 
-  const navigateToDetails = (task: Task) => {
+  const navigateToDetails = (task: any) => {
     navigation.navigate('TaskDetail', { task });
   };
 
@@ -56,7 +66,7 @@ export default function HomeScreen() {
         return (
           <DecisionCard
             key={item.id}
-            task={item as DecisionTask}
+            task={item as any}
             onPressCard={navigateToDetails}
             onPressSuggest={t => console.log('Suggest for', t.id)}
             onPressView={t => console.log('View for', t.id)}
@@ -67,7 +77,7 @@ export default function HomeScreen() {
           <ReminderCard
             onRemind={() => {}}
             key={item.id}
-            task={item as ReminderTask}
+            task={item as any}
             onPressCard={navigateToDetails}
             onPressSuggest={t => console.log('Suggest for', t.id)}
             onPressView={t => console.log('View for', t.id)}
@@ -77,7 +87,7 @@ export default function HomeScreen() {
         return (
           <MotivationCard
             key={item.id}
-            task={item as MotivationTask}
+            task={item as any}
             onPressCard={navigateToDetails}
             onPressSuggest={t => console.log('Suggest for', t.id)}
             onPressView={t => console.log('View for', t.id)}
@@ -87,7 +97,7 @@ export default function HomeScreen() {
         return (
           <AdviceCard
             key={item.id}
-            task={item as AdviceTask}
+            task={item as any}
             onPressCard={navigateToDetails}
             onPressSuggest={t => console.log('Suggest for', t.id)}
             onPressView={t => console.log('View for', t.id)}
@@ -139,6 +149,8 @@ export default function HomeScreen() {
           ListFooterComponent: <View style={{ backgroundColor: 'red' }} />,
           ItemSeparatorComponent: () => <View style={styles.borderSeparator} />,
         }}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
       />
       {/* <AnimatedBottomButton
         title="Add Task"

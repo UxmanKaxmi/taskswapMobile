@@ -20,6 +20,7 @@ export interface CreateTaskPayload {
   remindAt?: string; // For reminder tasks
   options?: string[]; // For decision tasks
   deliverAt?: string | null; // for motivation tasks
+  helperIds?: string[]; // ✅ IDs of users to assign as helpers
 }
 
 /**

@@ -1,16 +1,36 @@
-// src/types/task.ts
+// ✅ Define all task types strictly
+export type TaskType = 'reminder' | 'decision' | 'motivation' | 'advice';
 
+export type TaskHelper = {
+  id: string;
+  name: string;
+  photo?: string;
+};
+
+// ✅ Shared fields for all tasks
 export type BaseTask = {
   id: string;
-  avatar: string; // image URI
+  avatar?: string;
   name: string;
-  time: string;
   text: string;
-  emoji?: string;
-  type: string;
+  type: TaskType;
   createdAt: string;
   userId: string;
-  completed: boolean; // ✅ from BaseTask
+  completed?: boolean;
+  helpers: TaskHelper[];
+
+  // UI-only enhancements
+  time?: string;
+  emoji?: string;
+};
+
+// ✅ Specific task types
+export type ReminderTask = BaseTask & {
+  type: 'reminder';
+  remindAt: string;
+  hasReminded: boolean;
+  completed: boolean;
+  completedAt?: string;
 };
 
 export type DecisionTask = BaseTask & {
@@ -18,23 +38,19 @@ export type DecisionTask = BaseTask & {
   options: string[];
 };
 
-export type ReminderTask = BaseTask & {
-  type: 'reminder';
-  remindAt: string; // ISO time to trigger
-  hasReminded: boolean;
+export type MotivationTask = BaseTask & {
+  type: 'motivation';
+  deliverAt?: string;
 };
 
 export type AdviceTask = BaseTask & {
   type: 'advice';
 };
 
-export type MotivationTask = BaseTask & {
-  type: 'motivation';
-  deliverAt?: string;
-};
+// ✅ Union of all tasks
+export type Task = ReminderTask | DecisionTask | MotivationTask | AdviceTask;
 
-export type Task = DecisionTask | ReminderTask | AdviceTask | MotivationTask;
-
+// ✅ Reminder notes
 export interface ReminderNoteDTO {
   id: string;
   taskId: string;

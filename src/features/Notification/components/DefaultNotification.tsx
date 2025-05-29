@@ -6,6 +6,7 @@ import TaskNotification from './TaskNotification';
 import DefaultNotification from './DefaultNotification';
 
 import type { NotificationDTO } from '../types/notification.types';
+import GenericNotification from './GenericNotification';
 
 type Props = {
   item: NotificationDTO;
@@ -21,6 +22,6 @@ export default function NotificationCard({ item, onPress }: Props) {
     case 'task':
       return <TaskNotification item={item} onPress={onPress} />;
     default:
-      return <DefaultNotification item={item} onPress={onPress} />;
+      return <GenericNotification item={item} onPress={onPress} />;
   }
 }

@@ -39,4 +39,5 @@ export const buildRoute = {
   getAllNotifications: () => `${ApiRoute.NOTIFICATION}`,
   markNotificationAsReadById: (notificationId: string) =>
     `${ApiRoute.NOTIFICATION}/${notificationId}/read`,
+  markNotificationBatch: () => `${ApiRoute.NOTIFICATION}/mark-many-read`, // ✅ Add this
 };

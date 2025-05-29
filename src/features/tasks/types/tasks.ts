@@ -13,6 +13,8 @@ export type Task = {
   deliverAt?: string; // for motivation tasks
   avatar?: string;
   name?: string;
+
+  helpers?: string[];
 };
 
 // ✅ Payload used for task creation
@@ -24,6 +26,7 @@ export interface TaskPayload {
   deliverAt?: string;
   avatar?: string;
   name?: string;
+  helpers?: string[]; // ✅ unified name with backend
 }
 
 // ✅ Payload used for task updates (partial and flexible)
@@ -37,5 +40,6 @@ export interface UpdateTaskInput {
     deliverAt?: string | null;
     avatar?: string;
     name?: string;
+    helpers?: string[]; // ✅ unified name with backend
   }>;
 }

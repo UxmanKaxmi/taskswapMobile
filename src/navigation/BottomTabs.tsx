@@ -17,6 +17,8 @@ import FriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
 import { AppStackParamList } from './navigation';
+import TextElement from '@shared/components/TextElement/TextElement';
+import { useUnreadNotificationCount } from '@features/Notification/hooks/useUnreadNotificationCount';
 
 type BottomTabParamList = {
   Home: undefined;
@@ -65,13 +67,23 @@ export default function BottomTabs({ route }: any) {
           const iconName =
             iconMap[route.name as keyof BottomTabParamList] ?? 'house-chimney-medical';
 
+          // Show badge only on Notification tab
+          const { count } = useUnreadNotificationCount();
+
           return (
-            <AnimatedTabIcon
-              name={iconName}
-              size={route.name === 'AddTask' ? 24 : 18}
-              color={color}
-              focused={focused}
-            />
+            <View style={{ position: 'relative' }}>
+              <AnimatedTabIcon
+                name={iconName}
+                size={route.name === 'AddTask' ? 24 : 18}
+                color={color}
+                focused={focused}
+              />
+              {route.name === 'Notification' && count > 0 && (
+                <View style={styles.badge}>
+                  <TextElement style={styles.badgeText}>{count > 99 ? '99+' : count}</TextElement>
+                </View>
+              )}
+            </View>
           );
         },
       })}
@@ -121,5 +133,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -10,
+    backgroundColor: colors.error,
+    borderRadius: 10,
+    minWidth: ms(16),
+    height: ms(16),
+    paddingHorizontal: ms(5),
+    justifyContent: 'center', // ✅ Center vertically
+    alignItems: 'center', // ✅ Center horizontally
+    zIndex: 1,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: ms(10),
+    fontWeight: 'bold',
+    lineHeight: ms(12), // optional for fine-tuning
+
+    textAlign: 'center',
   },
 });

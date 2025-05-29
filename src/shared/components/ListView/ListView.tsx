@@ -9,6 +9,7 @@ import {
   StyleSheet,
   ViewStyle,
   View,
+  RefreshControl,
 } from 'react-native';
 
 export type ListViewProps<ItemT> = {
@@ -18,6 +19,8 @@ export type ListViewProps<ItemT> = {
   scrollViewProps?: ScrollViewProps;
   children?: ReactNode;
   style?: ViewStyle;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 
   /**
    * Optional component to show when the data array is empty.
@@ -40,14 +43,19 @@ export function ListView<ItemT>(props: ListViewProps<ItemT>) {
   if (data && renderItem) {
     return (
       <FlatList
-        bounces={false}
+        bounces={!!props.onRefresh}
         style={style}
         data={data}
         renderItem={renderItem}
         ListEmptyComponent={renderEmpty()}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }} // ensures empty state centers vertically
+        contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={
+          props.onRefresh ? (
+            <RefreshControl refreshing={!!props.refreshing} onRefresh={props.onRefresh} />
+          ) : undefined
+        }
         {...flatListProps}
       />
     );
@@ -55,11 +63,16 @@ export function ListView<ItemT>(props: ListViewProps<ItemT>) {
 
   return (
     <ScrollView
-      bounces={false}
+      bounces={!!props.onRefresh}
       showsVerticalScrollIndicator={false}
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ flexGrow: 1 }}
       style={[styles.scroll, style]}
+      refreshControl={
+        props.onRefresh ? (
+          <RefreshControl refreshing={!!props.refreshing} onRefresh={props.onRefresh} />
+        ) : undefined
+      }
       {...scrollViewProps}
     >
       {children ? children : renderEmpty()}
