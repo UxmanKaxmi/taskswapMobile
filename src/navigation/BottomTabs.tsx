@@ -13,7 +13,7 @@ import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { colors } from '@shared/theme';
 import AnimatedTabIcon from '@shared/components/AnimatedTabBarIcon/AnimatedTabBarIcon';
 import { ms, vs } from 'react-native-size-matters';
-import FriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
+import FindFriendsMainScreen from '@features/Friends/screens/FindFriendsMainScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
 import { AppStackParamList } from './navigation';
@@ -89,7 +89,7 @@ export default function BottomTabs({ route }: any) {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Friends" component={FriendsMainScreen} />
+      <Tab.Screen name="Friends" component={FindFriendsMainScreen} />
       <Tab.Screen
         name="AddTask"
         options={{

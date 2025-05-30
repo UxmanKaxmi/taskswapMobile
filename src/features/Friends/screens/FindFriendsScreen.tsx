@@ -55,9 +55,6 @@ export default function FindFriendsScreen() {
   const googleMatches = filteredMatches.filter(match => match.source === 'google');
   const phoneMatches = filteredMatches.filter(match => match.source === 'phone');
 
-  console.log('googleMatches', googleMatches);
-  console.log('phoneMatches', phoneMatches);
-
   if (isLoading) return <ActivityIndicator style={{ flex: 1 }} />;
 
   if (isError) {
@@ -138,6 +135,7 @@ export default function FindFriendsScreen() {
         }}
         renderItem={({ item }) => (
           <FriendFollowRow
+            onPressRow={() => {}}
             isLoading={isPending && variables === item.id}
             photo={item.photo}
             name={item.name}

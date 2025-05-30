@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { toggleFollow } from '../api/userApi';
 import { MatchedUser } from '@features/Friends/hooks/useMatchUsers';
+import { SearchResultFriend } from '@features/Friends/types/friends';
 
 export function useToggleFollow(searchQuery?: string) {
   const queryClient = useQueryClient();
@@ -42,6 +43,7 @@ export function useToggleFollow(searchQuery?: string) {
       queryClient.invalidateQueries({ queryKey: buildQueryKey.matchedUsers() });
       queryClient.invalidateQueries({ queryKey: buildQueryKey.myProfile() });
       queryClient.invalidateQueries({ queryKey: buildQueryKey.tasks() });
+      queryClient.invalidateQueries({ queryKey: buildQueryKey.friendProfile(userId) });
 
       if (searchQuery?.trim()) {
         queryClient.setQueryData(

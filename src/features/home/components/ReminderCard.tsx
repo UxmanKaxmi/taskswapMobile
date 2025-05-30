@@ -1,7 +1,7 @@
 // src/shared/components/ReminderCard.tsx
 
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Image, Modal } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Image, Modal, Pressable } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -27,7 +27,7 @@ import HelperAvatarGroup from './HelperAvatarGroup';
 type Props = {
   task: ReminderTask;
   onPressCard: (task: ReminderTask) => void;
-  onPressSuggest: (task: ReminderTask) => void;
+  onPressProfile: (task: ReminderTask) => void;
   onPressView: (task: ReminderTask) => void;
   onRemind: (task: ReminderTask, msg: string) => void;
 };
@@ -35,7 +35,7 @@ type Props = {
 export default function ReminderCard({
   task,
   onPressCard,
-  onPressSuggest,
+  onPressProfile,
   onPressView,
   onRemind,
 }: Props) {
@@ -66,6 +66,10 @@ export default function ReminderCard({
       setShowModal(true);
     }
   };
+
+  const handleProfilePress = React.useCallback(() => {
+    return onPressProfile(task);
+  }, [onPressProfile, task]);
 
   const handleSendReminder = (msg: string) => {
     if (!msg.trim()) {
@@ -150,17 +154,19 @@ export default function ReminderCard({
       onPress={() => onPressCard(task)}
     >
       <Row justify="space-between" style={cardStyles.cardHeader}>
-        <Row>
-          <Image source={{ uri: avatar }} style={cardStyles.avatar} />
-          <View>
-            <TextElement variant="subtitle" style={cardStyles.name}>
-              {name}
-            </TextElement>
-            <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
-              {timeAgo(createdAt)}
-            </TextElement>
-          </View>
-        </Row>
+        <Pressable onPress={() => handleProfilePress()}>
+          <Row>
+            <Image source={{ uri: avatar }} style={cardStyles.avatar} />
+            <View>
+              <TextElement variant="subtitle" style={cardStyles.name}>
+                {name}
+              </TextElement>
+              <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
+                {timeAgo(createdAt)}
+              </TextElement>
+            </View>
+          </Row>
+        </Pressable>
         <TypeTag type={type} />
       </Row>
 

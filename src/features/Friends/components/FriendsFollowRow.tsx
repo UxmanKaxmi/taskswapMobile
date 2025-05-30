@@ -1,13 +1,15 @@
 // src/features/friends/components/FriendFollowRow.tsx
 
 import React from 'react';
-import { Image, View, StyleSheet } from 'react-native';
+import { Image, View, StyleSheet, Pressable } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import { useTheme } from '@shared/theme/useTheme';
 import { moderateScale, ms, vs } from 'react-native-size-matters';
 import { typography } from '@shared/theme';
 import Avatar from '@shared/components/Avatar/Avatar';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { AppStackParamList } from 'navigation/navigation';
 
 type Props = {
   name: string;
@@ -16,6 +18,7 @@ type Props = {
   onToggleFollow: () => void;
   photo?: string;
   isLoading: boolean;
+  onPressRow: () => void;
 };
 
 export default function FriendFollowRow({
@@ -25,11 +28,15 @@ export default function FriendFollowRow({
   photo,
   isLoading,
   onToggleFollow,
+  onPressRow,
 }: Props) {
   const { colors, spacing } = useTheme();
 
   return (
-    <View style={[styles.container, { borderColor: colors.border, paddingVertical: spacing.sm }]}>
+    <Pressable
+      onPress={() => onPressRow()}
+      style={[styles.container, { borderColor: colors.border, paddingVertical: spacing.sm }]}
+    >
       <View style={styles.leftSection}>
         <Avatar uri={photo} size={45} borderColor="#5C6BC0" />
         <View style={styles.textContainer}>
@@ -44,7 +51,7 @@ export default function FriendFollowRow({
 
       <OutlineButton
         isLoading={isLoading}
-        title={isFollowing ? 'Unfollow' : 'Follow'}
+        title={isFollowing ? 'Following' : 'Follow'}
         onPress={onToggleFollow}
         type={isFollowing ? 'alt' : 'default'}
         textStyle={{
@@ -53,7 +60,7 @@ export default function FriendFollowRow({
         }}
         style={styles.button}
       />
-    </View>
+    </Pressable>
   );
 }
 

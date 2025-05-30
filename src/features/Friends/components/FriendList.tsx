@@ -10,6 +10,8 @@ import { useToggleFollow } from '@features/User/hooks/useToggleFollow';
 import EmptyState from '@features/Empty/EmptyState';
 import { useSearchFriends } from '../hooks/useSearchFriends';
 import { useDebounce } from 'use-debounce';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { AppStackParamList } from 'navigation/navigation';
 
 type Friend = {
   id: string;
@@ -27,6 +29,7 @@ type Props = {
 export default function FriendList({ type, searchQuery = '' }: Props) {
   const [debouncedQuery] = useDebounce(searchQuery.trim(), 300);
   const usingSearch = !!debouncedQuery;
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
   const {
     data: searchData = [],
@@ -88,6 +91,11 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
       }
       renderItem={({ item }: { item: Friend }) => (
         <FriendFollowRow
+          onPressRow={() =>
+            navigation.navigate('FriendsScreen', {
+              id: item.id,
+            })
+          }
           isLoading={isPending && variables === item.id}
           photo={item.photo}
           name={item.name}

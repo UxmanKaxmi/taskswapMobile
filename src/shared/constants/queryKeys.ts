@@ -9,6 +9,7 @@ export enum QueryKeys {
   Notification = 'notification',
   MyProfile = 'my-profile',
   SearchFriends = 'search-friends',
+  FriendProfile = 'friend-profile', // ✅ NEW
 }
 
 export const buildQueryKey = {
@@ -27,4 +28,5 @@ export const buildQueryKey = {
     query,
     includeFollowed,
   ],
+  friendProfile: (id: string) => [QueryKeys.FriendProfile, id],
 };

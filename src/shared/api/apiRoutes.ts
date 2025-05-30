@@ -14,7 +14,6 @@ export const buildRoute = {
   task: (id: string) => `${ApiRoute.TASKS}/${id}`,
   completeTask: (id: string) => `${ApiRoute.TASKS}/${id}/complete`,
   uncompleteTask: (id: string) => `${ApiRoute.TASKS}/${id}/incomplete`,
-
   // 📌 User Routes
 
   user: (id: string) => `${ApiRoute.USERS}/${id}`,
@@ -23,6 +22,7 @@ export const buildRoute = {
   me: () => `${ApiRoute.USERS}/me`,
   searchFriends: (query: string, includeFollowed: boolean = true) =>
     `${ApiRoute.USERS}/search-friends?query=${encodeURIComponent(query)}&includeFollowed=${includeFollowed}`,
+  friendProfile: (id: string) => `${ApiRoute.USERS}/${id}/profile`,
 
   // 📌 Reminder Note Routes (via Task)
   sendReminder: (taskId: string) => `${ApiRoute.REMINDER_NOTES}/${taskId}/remind`,

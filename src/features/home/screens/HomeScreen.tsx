@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
@@ -23,12 +23,13 @@ import { showToast } from '@shared/utils/toast';
 import MotivationCard from '../components/MotivationCard';
 import AdviceCard from '../components/AdviceCard';
 import NotificationTester from '@features/debug/NotificationTester';
+import { useAuth } from '@features/Auth/authProvider';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const [filter, setFilter] = useState<TaskType | 'all'>('all');
   const { data: allTasks = [], isLoading, isError, error, refetch } = useTasksQuery();
-  // const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -60,6 +61,20 @@ export default function HomeScreen() {
     }
   }, [isError]);
 
+  const openFriendsProfileScreen = useCallback(
+    (id: string) => {
+      if (id === user?.id) {
+        // ✅ Navigate to last profile tab instead
+        navigation.navigate('Tabs', {
+          screen: 'Profile',
+        });
+      } else {
+        navigation.navigate('FriendsScreen', { id });
+      }
+    },
+    [navigation, user?.id],
+  );
+
   const renderTaskNew = ({ item }: { item: Task }) => {
     switch (item.type) {
       case 'decision':
@@ -68,7 +83,7 @@ export default function HomeScreen() {
             key={item.id}
             task={item as any}
             onPressCard={navigateToDetails}
-            onPressSuggest={t => console.log('Suggest for', t.id)}
+            onPressSuggest={t => console.log('onPressProfile', t.id)}
             onPressView={t => console.log('View for', t.id)}
           />
         );
@@ -79,7 +94,7 @@ export default function HomeScreen() {
             key={item.id}
             task={item as any}
             onPressCard={navigateToDetails}
-            onPressSuggest={t => console.log('Suggest for', t.id)}
+            onPressProfile={t => openFriendsProfileScreen(t.userId)}
             onPressView={t => console.log('View for', t.id)}
           />
         );

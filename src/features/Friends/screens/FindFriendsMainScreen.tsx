@@ -14,7 +14,7 @@ import { LayoutAnimation, Platform, UIManager } from 'react-native';
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-export default function FriendsMainScreen() {
+export default function FindFriendsMainScreen() {
   const [activeTab, setActiveTab] = useState<'following' | 'followers'>('following');
   const [searchQuery, setSearchQuery] = useState('');
   const isSearching = !!searchQuery.trim();

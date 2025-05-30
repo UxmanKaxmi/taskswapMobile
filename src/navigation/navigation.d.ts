@@ -32,10 +32,13 @@ export type AppStackParamList = {
   FindFriendsScreen: undefined;
   AddTask: { task?: Task } | undefined;
   TaskDetail: { task: Task };
-  FriendsMainScreen: undefined;
+  FindFriendsMainScreen: undefined;
   NotificationMainScreen: undefined;
   MyProfileMainScreen: undefined;
   MainDebugScreen: undefined;
+  FriendsScreen: {
+    id: string;
+  };
 };
 
 // Auth stack (login, register)

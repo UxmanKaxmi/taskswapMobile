@@ -10,11 +10,12 @@ import BottomTabs from './BottomTabs';
 import { LogoutButton } from '@features/Auth/components/LogoutButton';
 import FindFriendsScreen from '@features/Friends/screens/FindFriendsScreen';
 import HomeScreen from '@features/Home/screens/HomeScreen';
-import FriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
+import FindFriendsMainScreen from '@features/Friends/screens/FindFriendsMainScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
 import MainDebugScreen from '@features/debug/MainDebugScreen';
 import { isAndroid, isIOS } from '@shared/utils/constants';
+import FriendsScreen from '@features/Friends/screens/FriendsScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -23,7 +24,12 @@ export function AppNavigator() {
   const showFindFriends = route?.params?.showFindFriends;
 
   return (
-    <Stack.Navigator initialRouteName={showFindFriends ? 'FindFriendsScreen' : 'Tabs'}>
+    <Stack.Navigator
+      initialRouteName={showFindFriends ? 'FindFriendsScreen' : 'Tabs'}
+      screenOptions={{
+        headerShown: false, // ✅ disable all default headers
+      }}
+    >
       {/* Main tab navigator */}
       <Stack.Screen name="Tabs" component={BottomTabs} options={{ headerShown: false }} />
 
@@ -37,8 +43,8 @@ export function AppNavigator() {
         }}
       />
       <Stack.Screen
-        name="FriendsMainScreen"
-        component={FriendsMainScreen}
+        name="FindFriendsMainScreen"
+        component={FindFriendsMainScreen}
         options={{
           title: 'Friends',
 
@@ -95,6 +101,8 @@ export function AppNavigator() {
           title: 'Task Details',
         }}
       />
+
+      <Stack.Screen name="FriendsScreen" component={FriendsScreen} />
     </Stack.Navigator>
   );
 }
