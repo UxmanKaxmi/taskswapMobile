@@ -12,7 +12,6 @@ interface CustomAxiosError extends Omit<AxiosError, 'config'> {
 export const api = axios.create({
   baseURL: 'https://taskswapbackend.onrender.com', // 🔁 Update to production/staging later
   // baseURL: 'http://localhost:3001', // 🔁 Update to production/staging later
-  // baseURL: 'http://localhost:3001', // 🔁 Update to production/staging later
 
   headers: {
     'Content-Type': 'application/json',

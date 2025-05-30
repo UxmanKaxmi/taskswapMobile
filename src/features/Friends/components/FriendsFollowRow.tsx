@@ -92,6 +92,6 @@ const styles = StyleSheet.create({
   },
   button: {
     width: ms(90),
-    height: vs(30),
+    height: ms(40),
   },
 });

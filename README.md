@@ -86,3 +86,11 @@ npx react-native run-ios
 
 ifconfig | grep "inet " | grep -v 127.0.0.1 | sed 's/netmask.*//g' | sed 's/inet//g' | awk '{print "http://"$1":3000/"}'
 Depending on where you're running the command, you should be able to (on a Mac) hold the command key and click/double-click to open the links. -->
+
+<!-- yarn react-native-bootsplash generate icon.png \
+ --platforms=android \
+ --background=5C6BC0 \
+ --logo-width=200 \
+ --assets-output=assets/bootsplash \
+ --flavor=main \
+ --html=public/index.html -->
