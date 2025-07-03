@@ -1,17 +1,22 @@
-// src/shared/components/DecisionCard.tsx
-
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { ms, vs } from 'react-native-size-matters';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, TouchableOpacity, StyleSheet, Image, Animated } from 'react-native';
+import { ms } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import Row from '@shared/components/Layout/Row';
 import { colors, spacing, typography } from '@shared/theme';
 import { DecisionTask } from '../types/home';
-import { timeAgo, capitalizeFirstLetter } from '@shared/utils/helperFunctions';
-import Column from '@shared/components/Layout/Column';
+import { timeAgo } from '@shared/utils/helperFunctions';
 import TypeTag from '@shared/components/TypeTag/TypeTag';
+import { cardStyles } from './styles';
+import HelperAvatarGroup from './HelperAvatarGroup';
+import { getTypeVisual } from '@shared/utils/typeVisuals';
+import { useGetVotes } from '@features/Tasks/hooks/useGetVotes';
+import { useCastVote } from '@features/Tasks/hooks/useVote';
+import Icon from '@shared/components/Icons/Icon';
+import Column from '@shared/components/Layout/Column';
+import VoteProgressBar from './VoteProgressBar';
 
 type Props = {
   task: DecisionTask;
@@ -21,18 +26,55 @@ type Props = {
 };
 
 export default function DecisionCard({ task, onPressCard, onPressSuggest, onPressView }: Props) {
-  const { avatar, name = 'John Doe', createdAt, text, options, type } = task;
+  const { avatar, name = 'John Doe', createdAt, text, options, type, helpers, id } = task;
+  const { emoji } = getTypeVisual(type);
+
+  const { mutate: castVote, isPending } = useCastVote(id);
+  const votedOption = task.votedOption;
+  // const totalVotes = Object.values(task.votes || {}).reduce((a, b) => a + b, 0);
+  const [option1, option2] = task.options;
+  const vote1 = task.votes?.[option1]?.count ?? 0;
+  const vote2 = task.votes?.[option2]?.count ?? 0;
+  const totalVotes = vote1 + vote2;
+
+  const percent1 = totalVotes > 0 ? (vote1 / totalVotes) * 100 : 0;
+  const percent2 = totalVotes > 0 ? (vote2 / totalVotes) * 100 : 0;
+
+  console.log('vote1,', vote1)
+  console.log('vote2,', vote2)
+
+  console.log('percent1', percent1)
+  console.log('percent2', percent2)
+  console.log({ vote1, vote2, totalVotes, percent1, percent2 });
+  const progress1 = useRef(new Animated.Value(0)).current;
+  const progress2 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(progress1, {
+      toValue: percent1,
+      duration: 600,
+      useNativeDriver: false,
+    }).start();
+
+    Animated.timing(progress2, {
+      toValue: percent2,
+      duration: 600,
+      useNativeDriver: false,
+    }).start();
+  }, [percent1, percent2]);
 
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={() => onPressCard(task)}>
-      <Row justify="space-between" style={styles.cardHeader}>
+    <TouchableOpacity style={cardStyles.card} activeOpacity={0.7} onPress={() => onPressCard(task)}>
+      {/* Header with avatar and time */}
+
+      <Row justify="space-between" style={cardStyles.cardHeader}>
         <Row>
-          <Image source={{ uri: avatar }} style={styles.avatar} />
+          <Image source={{ uri: avatar }} style={cardStyles.avatar} />
           <View>
-            <TextElement variant="subtitle" style={styles.name}>
+            <TextElement variant="subtitle" style={cardStyles.name}>
               {name}
             </TextElement>
-            <TextElement variant="caption" style={styles.timeAgo} color="muted">
+            <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
               {timeAgo(createdAt)}
             </TextElement>
           </View>
@@ -40,95 +82,99 @@ export default function DecisionCard({ task, onPressCard, onPressSuggest, onPres
         <TypeTag type={type} />
       </Row>
 
-      {/* Task text + optional emoji */}
-      <View style={styles.messageRow}>
-        <TextElement variant="body">{text}</TextElement>
-        {/* {emoji && (
-          <TextElement variant="body" style={styles.emoji}>
-            {emoji}
-          </TextElement>
-        )} */}
+      {/* Question text */}
+      <View style={cardStyles.messageRow}>
+        <TextElement variant="title">
+          {emoji} {text}
+        </TextElement>
       </View>
 
-      {/* Action buttons */}
-      <Row style={styles.actions}>
-        {options.map((val, index) => (
-          <OutlineButton
-            key={index}
-            title={val}
-            onPress={() => onPressSuggest(task)}
-            style={styles.button}
-            textStyle={styles.buttonText}
+      {/* Options OR Vote Results */}
+      {votedOption ? (
+        // ✅ Show vote results
+        <View style={{ marginTop: spacing.sm }}>
+          <VoteProgressBar
+            option1={option1}
+            option2={option2}
+            percent1={percent1}
+            percent2={percent2}
+            votedOption={votedOption}
           />
-        ))}
-      </Row>
+        </View>
+      ) : (
+        // ❌ No vote yet — show buttons
+        <Row style={styles.buttonGroup}>
+          {options.map((val, index) => {
+            const voteCount = task.votes?.[val]?.count ?? 0;
+            const percent = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+
+            return (
+              <OutlineButton
+                key={index}
+                title={`${val} (${percent}%)`}
+                onPress={() => castVote(val)}
+                disabled={isPending}
+                style={StyleSheet.flatten([
+                  styles.buttonHalf,
+                  { marginRight: index === 0 ? spacing.sm : 0 },
+                ])}
+              />
+            );
+          })}
+        </Row>
+      )}
+
+      {/* Helpers section (optional) */}
+      {helpers && helpers.length > 0 && (
+        <View style={{ flex: 1, marginTop: spacing.md }}>
+          <TextElement weight="500" variant="subtitle" style={{ fontSize: ms(16) }}>
+            Helpers
+          </TextElement>
+          <HelperAvatarGroup helpers={helpers} />
+        </View>
+      )}
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  type: {
-    fontSize: ms(12),
-    fontWeight: '500',
-    backgroundColor: colors.border,
-    paddingVertical: ms(4),
-    paddingHorizontal: ms(12),
-    borderRadius: 20,
+  checkIcon: {},
+  checkIconView: {},
+  voteText: {
+    fontSize: ms(14),
+    // fontWeight: '600',
+
     color: colors.text,
   },
-  card: {
-    backgroundColor: '#fff',
-    marginHorizontal: spacing.md,
-    marginVertical: vs(8),
-    padding: spacing.md,
-    borderRadius: spacing.sm,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-  },
-
-  cardHeader: {
-    marginBottom: vs(8),
-  },
-
-  avatar: {
-    width: ms(50),
-    height: ms(50),
-    borderRadius: ms(50) / 2,
-  },
-
-  name: {
-    marginLeft: spacing.xs,
-  },
-  timeAgo: {
-    marginLeft: spacing.xs,
-    margin: 0,
-    padding: 0,
-  },
-
-  messageRow: {
+  buttonGroup: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: vs(12),
-  },
-
-  emoji: {
-    marginLeft: spacing.sm,
-  },
-
-  actions: {
     justifyContent: 'space-between',
+    marginTop: spacing.sm,
   },
 
-  button: {
+  buttonHalf: {
     flex: 1,
-    marginRight: spacing.sm,
-    borderRadius: spacing.xs,
     paddingVertical: spacing.sm,
   },
+  resultRow: {
+    marginTop: spacing.xs,
+  },
+  progressTrack: {
+    flexDirection: 'row',
+    height: ms(10),
+    width: '100%',
+    borderRadius: ms(5),
+    overflow: 'hidden',
+    backgroundColor: colors.border, // fallback if no votes
+    marginTop: spacing.xs,
+    marginBottom: spacing.sm,
+  },
 
-  buttonText: {
-    fontSize: typography.small,
+  progressSegment: {
+    height: '100%',
+  },
+  neutralColor: {
+    color: colors.muted, // or gray
+    fontWeight: 'normal',
   },
 });

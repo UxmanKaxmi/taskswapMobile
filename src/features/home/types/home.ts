@@ -7,6 +7,13 @@ export type TaskHelper = {
   photo?: string;
 };
 
+
+export type Voter = {
+  id: string;
+  name: string;
+  photo?: string;
+};
+
 // ✅ Shared fields for all tasks
 export type BaseTask = {
   id: string;
@@ -36,6 +43,13 @@ export type ReminderTask = BaseTask & {
 export type DecisionTask = BaseTask & {
   type: 'decision';
   options: string[];
+  votes: {
+    [option: string]: {
+      count: number;
+      preview: Voter[];
+    };
+  };
+  votedOption?: string | null;
 };
 
 export type MotivationTask = BaseTask & {
@@ -57,4 +71,6 @@ export interface ReminderNoteDTO {
   senderId: string;
   message: string;
   createdAt: string;
+  senderName: string;
+  senderPhoto?: string | null;
 }

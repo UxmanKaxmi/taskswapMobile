@@ -27,12 +27,14 @@ import AppTextInput from '@shared/components/Inputs/AppTextInput';
 import Row from '@shared/components/Layout/Row';
 import { colors, spacing } from '@shared/theme';
 import TaskDescriptionInput from '../components/TaskDescriptionInput';
-import { verticalScale, vs } from 'react-native-size-matters';
+import { ms, verticalScale, vs } from 'react-native-size-matters';
 import ListTaskOptionSelector from '../components/ListTaskOptionSelector';
 import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CreateTaskPayload } from '../api/taskApi';
 import SelectHelpersModal from '../components/SelectHelpersModal';
+import { isIOS } from '@shared/utils/constants';
+import Ripple from '@shared/components/Buttons/Ripple';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
 
@@ -77,13 +79,13 @@ type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
 export default function AddTaskScreen({ route, navigation }: Props) {
   const theme = useTheme();
   const existingTask = route.params?.task;
-
+  const [optionErrors, setOptionErrors] = useState<string[]>(['', '']);
   const [type, setType] = useState<TaskType>(existingTask?.type ?? 'reminder');
   const [description, setDescription] = useState(existingTask?.text ?? '');
   const [remindAt, setRemindAt] = useState<Date>(
     existingTask?.remindAt ? new Date(existingTask.remindAt) : new Date(),
   );
-  const [options, setOptions] = useState<string[]>(existingTask?.options ?? []);
+  const [options, setOptions] = useState<string[]>(existingTask?.options ?? ['', '']);
   const { mutate: createTask, isPending } = useCreateTask();
 
   const scale = useRef(new Animated.Value(0.9)).current;
@@ -91,13 +93,8 @@ export default function AddTaskScreen({ route, navigation }: Props) {
   const [errors, setErrors] = useState<{ description?: string; remindAt?: string }>({});
   const now = new Date();
   const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
-
   const [helperIds, setHelperIds] = useState<string[]>([]);
   const [helperModalVisible, setHelperModalVisible] = useState(false);
-
-  useEffect(() => {
-    console.log(helperIds, 'helper');
-  }, [helperIds]);
 
   useEffect(() => {
     Animated.parallel([
@@ -118,6 +115,8 @@ export default function AddTaskScreen({ route, navigation }: Props) {
       options: type === 'decision' ? options : undefined,
       helpers: helperIds,
     };
+
+    console.log(payload);
 
     if (existingTask) {
       // updateTask(existingTask.id, payload)
@@ -150,11 +149,12 @@ export default function AddTaskScreen({ route, navigation }: Props) {
     // if (['reminder', 'motivation'].includes(type) && remindAt < twoHoursLater) {
     //   newErrors.remindAt = 'Please select a time at least 2 hours from now.';
     // }
+    if (type === 'decision') {
+      const newOptionErrors = options.map(opt => (opt.trim() === '' ? 'Required' : ''));
 
-    if (type === 'decision' && options.filter(opt => opt.trim()).length < 2) {
-      showToast({ type: 'error', title: 'At least 2 options are required.' });
-      setErrors(newErrors);
-      return false;
+      setOptionErrors(newOptionErrors);
+
+      if (newOptionErrors.some(err => err)) return false;
     }
 
     setErrors(newErrors);
@@ -169,7 +169,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <Animated.View style={{ flex: 1, transform: [{ scale }], opacity }}>
-        <Layout edges={['right', 'left', 'top', 'bottom']}>
+        <Layout>
           <View style={styles.header}>
             <View style={{ flex: 1 }} />
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
@@ -210,6 +210,35 @@ export default function AddTaskScreen({ route, navigation }: Props) {
               errorText={errors.remindAt}
               error={!!errors.remindAt}
             />
+          )}
+
+          {type === 'decision' && (
+            <View style={{ marginBottom: spacing.md }}>
+              <TextElement weight="600" style={{ marginBottom: spacing.sm }}>
+                Decision Options
+              </TextElement>
+
+              {options.map((opt, index) => (
+                <View key={index} style={styles.optionRow}>
+                  <AppTextInput
+                    placeholder={`Option ${index + 1}`}
+                    value={opt}
+                    onChangeText={text => {
+                      const updated = [...options];
+                      updated[index] = text;
+                      setOptions(updated);
+                    }}
+                    containerStyle={{ flex: 1 }}
+                    inputStyle={{ height: 44 }}
+                    error={!!optionErrors[index]}
+                    errorText={optionErrors[index]}
+                  />
+                  {/* ❌ Hide delete button since we are enforcing only 2 options */}
+                </View>
+              ))}
+
+              {/* ➕ Hidden because only 2 allowed for now */}
+            </View>
           )}
 
           <ListTaskOptionSelector
@@ -260,7 +289,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  closeButton: {},
+  closeButton: {
+    paddingTop: isIOS ? ms(20) : 0,
+  },
   container: {
     width: '100%',
     backgroundColor: 'red',
@@ -310,9 +341,6 @@ const styles = StyleSheet.create({
   },
   optionInput: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    width: '100%',
   },
 });

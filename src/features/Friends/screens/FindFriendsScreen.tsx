@@ -21,7 +21,7 @@ import { buildQueryKey } from '@shared/constants/queryKeys';
 export default function FindFriendsScreen() {
   const navigation = useNavigation<AppStackParamList>();
   const { colors, spacing } = useTheme();
-  const { data: matches = [], isLoading, isError } = useMatchUsers();
+  const { data: matches = [], isLoading, isError, refetch } = useMatchUsers();
   const { setHasSeenFindFriendsScreen, user } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
   const { mutate: toggleFollow, isPending, variables, error } = useToggleFollow();
@@ -55,11 +55,11 @@ export default function FindFriendsScreen() {
   const googleMatches = filteredMatches.filter(match => match.source === 'google');
   const phoneMatches = filteredMatches.filter(match => match.source === 'phone');
 
-  if (isLoading) return <ActivityIndicator style={{ flex: 1 }} />;
+  // if (isLoading) return <ActivityIndicator style={{ flex: 1 }} />;
 
   if (isError) {
     return (
-      <Layout edges={['bottom', 'top']}>
+      <Layout>
         <View
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.md }}
         >
@@ -73,6 +73,7 @@ export default function FindFriendsScreen() {
             title="Retry"
             onPress={() => {
               queryClient.invalidateQueries({ queryKey: buildQueryKey.matchedUsers() });
+              refetch();
             }}
           />
         </View>
@@ -81,7 +82,7 @@ export default function FindFriendsScreen() {
   }
 
   return (
-    <Layout edges={['bottom', 'top']}>
+    <Layout>
       <ListView
         data={[...googleMatches, ...phoneMatches]} // flat list of both
         flatListProps={{

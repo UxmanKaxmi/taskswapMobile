@@ -3,6 +3,9 @@ export type TaskType = 'reminder' | 'decision' | 'motivation' | 'advice';
 
 // ✅ Full Task object (received from API)
 export type Task = {
+  votedOption: any;
+  completedAt: string;
+  completed: boolean;
   id: string;
   text: string;
   type: TaskType;
@@ -15,6 +18,12 @@ export type Task = {
   name?: string;
 
   helpers?: string[];
+  votes: {
+    [option: string]: {
+      count: number;
+      preview: Voter[];
+    };
+  };
 };
 
 // ✅ Payload used for task creation
@@ -43,3 +52,9 @@ export interface UpdateTaskInput {
     helpers?: string[]; // ✅ unified name with backend
   }>;
 }
+
+export type Voter = {
+  id: string;
+  name: string;
+  photo?: string;
+};

@@ -32,4 +32,6 @@ export const colors = {
   tabInactive: '#757575',
 
   inputBackground: '#F2F2F2',
+
+  secondary: '#F59E0B', // amber-500
 };

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
 import { Task, TaskType } from '@features/Tasks/types/tasks';
 
@@ -50,6 +50,11 @@ export default function HomeScreen() {
     navigation.navigate('TaskDetail', { task });
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
   useEffect(() => {
     if (isError) {
       showToast({
@@ -69,7 +74,7 @@ export default function HomeScreen() {
           screen: 'Profile',
         });
       } else {
-        navigation.navigate('FriendsScreen', { id });
+        navigation.navigate('FriendsProfileScreen', { id });
       }
     },
     [navigation, user?.id],

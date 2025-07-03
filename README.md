@@ -94,3 +94,9 @@ Depending on where you're running the command, you should be able to (on a Mac) 
  --assets-output=assets/bootsplash \
  --flavor=main \
  --html=public/index.html -->
+
+<!-- FOR THIS ERROR in ANDROID STUDIO
+public class ContactsManager extends NativeContactsSpec implements ActivityEventListener
+
+Go to react native contacts/src/NativeContacts
+and comment the line from 25 to 38 -->

@@ -1,6 +1,6 @@
 // src/shared/components/ReminderCard.tsx
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Image, Modal, Pressable } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
@@ -66,6 +66,10 @@ export default function ReminderCard({
       setShowModal(true);
     }
   };
+
+  useEffect(() => {
+    setCompleted(task.completed);
+  }, [task.completed]);
 
   const handleProfilePress = React.useCallback(() => {
     return onPressProfile(task);

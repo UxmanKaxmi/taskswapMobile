@@ -36,7 +36,7 @@ export type AppStackParamList = {
   NotificationMainScreen: undefined;
   MyProfileMainScreen: undefined;
   MainDebugScreen: undefined;
-  FriendsScreen: {
+  FriendsProfileScreen: {
     id: string;
   };
 };

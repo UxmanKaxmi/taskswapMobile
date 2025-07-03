@@ -49,7 +49,7 @@ export default function FindFriendsMainScreen() {
         </>
       ) : (
         <>
-          <Row>
+          <Row justify="flex-start">
             <TabButton
               title="Following"
               isActive={activeTab === 'following'}

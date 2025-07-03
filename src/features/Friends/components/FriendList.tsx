@@ -12,6 +12,7 @@ import { useSearchFriends } from '../hooks/useSearchFriends';
 import { useDebounce } from 'use-debounce';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from 'navigation/navigation';
+import { openFriendsProfile } from '@navigation/navigationUtils';
 
 type Friend = {
   id: string;
@@ -91,11 +92,7 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
       }
       renderItem={({ item }: { item: Friend }) => (
         <FriendFollowRow
-          onPressRow={() =>
-            navigation.navigate('FriendsScreen', {
-              id: item.id,
-            })
-          }
+          onPressRow={() => openFriendsProfile(navigation, item.id)}
           isLoading={isPending && variables === item.id}
           photo={item.photo}
           name={item.name}

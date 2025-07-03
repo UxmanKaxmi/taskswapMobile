@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     padding: spacing.md,
     borderRadius: spacing.sm,
-    marginHorizontal: spacing.md,
     marginBottom: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,

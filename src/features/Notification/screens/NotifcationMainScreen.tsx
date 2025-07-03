@@ -111,7 +111,11 @@ export default function NotificationMainScreen() {
     const sortOrder = ['Today', 'Yesterday', 'This Week', 'Earlier'];
 
     return Object.entries(grouped)
-      .sort(([a], [b]) => sortOrder.indexOf(a) - sortOrder.indexOf(b))
+      .sort(([a], [b]) => {
+        const indexA = sortOrder.indexOf(a) !== -1 ? sortOrder.indexOf(a) : sortOrder.length;
+        const indexB = sortOrder.indexOf(b) !== -1 ? sortOrder.indexOf(b) : sortOrder.length;
+        return indexA - indexB;
+      })
       .map(([title, data]) => ({ title, data }));
   }
 

@@ -133,7 +133,7 @@ export async function fetchAllContacts(): Promise<ContactEmail[]> {
   // Deduplicate by email
   const emailMap = new Map<string, ContactEmail>();
   [...googleContacts, ...phoneContacts].forEach(contact => {
-    console.log('contact', contact);
+    // console.log('contact', contact);
     if (!emailMap.has(contact.email)) {
       emailMap.set(contact.email, contact);
     }

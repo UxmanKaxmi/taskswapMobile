@@ -74,6 +74,14 @@ export const cardStyles = StyleSheet.create({
     alignItems: 'center',
     // marginBottom: ;
   },
+  buttonRowDecision: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flex: 1,
+    width: '48%', // when wrapping inside flexWrap row
+    // marginBottom: ;
+  },
   buttonFull: {
     width: '100%',
   },

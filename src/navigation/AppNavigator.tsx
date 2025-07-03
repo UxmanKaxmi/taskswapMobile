@@ -10,12 +10,12 @@ import BottomTabs from './BottomTabs';
 import { LogoutButton } from '@features/Auth/components/LogoutButton';
 import FindFriendsScreen from '@features/Friends/screens/FindFriendsScreen';
 import HomeScreen from '@features/Home/screens/HomeScreen';
-import FindFriendsMainScreen from '@features/Friends/screens/FindFriendsMainScreen';
+import FindFriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
 import MainDebugScreen from '@features/debug/MainDebugScreen';
 import { isAndroid, isIOS } from '@shared/utils/constants';
-import FriendsScreen from '@features/Friends/screens/FriendsScreen';
+import FriendsProfileScreen from '@features/Friends/screens/FriendsProfileScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -88,7 +88,7 @@ export function AppNavigator() {
         name="AddTask"
         component={AddTaskScreen}
         options={{
-          presentation: isAndroid ? 'modal' : 'modal',
+          presentation: isAndroid ? 'modal' : 'containedModal',
           animation: 'slide_from_bottom',
           headerShown: false,
         }}
@@ -102,7 +102,7 @@ export function AppNavigator() {
         }}
       />
 
-      <Stack.Screen name="FriendsScreen" component={FriendsScreen} />
+      <Stack.Screen name="FriendsProfileScreen" component={FriendsProfileScreen} />
     </Stack.Navigator>
   );
 }

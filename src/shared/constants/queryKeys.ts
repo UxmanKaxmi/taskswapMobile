@@ -10,6 +10,7 @@ export enum QueryKeys {
   MyProfile = 'my-profile',
   SearchFriends = 'search-friends',
   FriendProfile = 'friend-profile', // ✅ NEW
+  Votes = 'votes', // ✅ NEW for vote feature
 }
 
 export const buildQueryKey = {
@@ -29,4 +30,5 @@ export const buildQueryKey = {
     includeFollowed,
   ],
   friendProfile: (id: string) => [QueryKeys.FriendProfile, id],
+  votesForTask: (taskId: string) => [QueryKeys.Votes, taskId],
 };

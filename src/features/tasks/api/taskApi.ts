@@ -48,3 +48,13 @@ export async function updateTask(
 export async function deleteTask(id: string): Promise<void> {
   await api.delete(buildRoute.task(id));
 }
+
+export async function voteOnTask(taskId: string, option: string) {
+  const res = await api.post(buildRoute.castVote(taskId), { option });
+  return res.data;
+}
+
+export async function getVotesForTask(taskId: string) {
+  const res = await api.get(buildRoute.getVotes(taskId));
+  return res.data as Record<string, number>;
+}

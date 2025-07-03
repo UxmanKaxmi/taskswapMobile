@@ -42,7 +42,7 @@ export default function FriendsProfileHeader({
     <Row fullWidth style={{}}>
       <View style={styles.card}>
         {/* <Avatar uri={avatarUri} size={100} /> */}
-        <Row align="flex-start" justify="flex-start">
+        <Row style={{}} align="flex-start" justify="flex-start">
           <Avatar uri={avatarUri} size={vs(80)} />
 
           <Column style={{ marginLeft: spacing.md }}>
@@ -119,9 +119,9 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     borderRadius: spacing.sm,
-    padding: spacing.md,
     paddingBottom: 0,
     paddingTop: 0,
+    alignItems: 'flex-start',
     // elevation: 2,
     // shadowColor: '#000',
     // shadowOpacity: 0.05,

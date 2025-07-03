@@ -6,6 +6,7 @@ export enum ApiRoute {
   USERS = '/users',
   REMINDER_NOTES = '/reminderNote',
   NOTIFICATION = '/notification',
+  VOTE = '/vote', // ✅ Added
 }
 
 // ✅ Builder functions for dynamic API routes
@@ -40,4 +41,8 @@ export const buildRoute = {
   markNotificationAsReadById: (notificationId: string) =>
     `${ApiRoute.NOTIFICATION}/${notificationId}/read`,
   markNotificationBatch: () => `${ApiRoute.NOTIFICATION}/mark-many-read`, // ✅ Add this
+
+  // 📌 Vote Routes ✅
+  castVote: (taskId: string) => `${ApiRoute.VOTE}/tasks/${taskId}/vote`,
+  getVotes: (taskId: string) => `${ApiRoute.VOTE}/tasks/${taskId}/votes`,
 };

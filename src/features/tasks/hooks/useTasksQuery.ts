@@ -11,6 +11,6 @@ export function useTasksQuery() {
     refetchOnMount: true, // Refetch every time screen remounts
     refetchOnReconnect: true, // Refetch when device regains internet
     refetchOnWindowFocus: true,
-    staleTime: 1000 * 60, // 1 min: prevents refetching if data is recent
+    // staleTime: 1000 * 60, // 1 min: prevents refetching if data is recent
   });
 }

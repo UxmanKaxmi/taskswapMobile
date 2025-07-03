@@ -19,6 +19,7 @@ import RecentTaskCard from '../components/RecentTaskCard';
 import { useToggleFollow } from '@features/User/hooks/useToggleFollow';
 import FriendsStatsAchievements from '../components/FriendsStatsAchievements';
 import { Height } from '@shared/components/Spacing';
+import AppLoader from '@shared/components/Loader/Loader';
 // export const mockProfile = {
 //   avatarUri: 'https://i.pravatar.cc/150?img=47',
 //   name: 'Jane Doe',
@@ -46,7 +47,7 @@ import { Height } from '@shared/components/Spacing';
 //   ],
 // };
 
-export default function FriendsScreen() {
+export default function FriendsProfileScreen() {
   const route = useRoute<any>();
   const friendId = route.params?.id;
 
@@ -58,67 +59,57 @@ export default function FriendsScreen() {
     toggleFollow(userId);
   };
 
-  if (!friendId) {
-    return <TextElement style={styles.errorText}>Invalid profile ID</TextElement>;
-  }
-
-  if (isLoading) {
-    return <ActivityIndicator style={{ marginTop: spacing.lg }} size="large" />;
-  }
-
-  if (isError || !profile) {
-    return <TextElement style={styles.errorText}>Failed to load profile</TextElement>;
-  }
-
-  const edges: Edge[] = isAndroid
-    ? ['right', 'left', 'bottom', 'top']
-    : ['right', 'left', 'bottom'];
-
   return (
-    <Layout allowPadding edges={edges} style={{}}>
-      <AppHeader showTitle={false} />
-      <ListView
-        style={{}}
-        scrollViewProps={{
-          contentContainerStyle: { width: '100%' },
-        }}
-      >
-        <FriendsProfileHeader
-          avatarUri={profile.photo}
-          name={profile?.name || 'No Name'}
-          username={profile?.name || 'no username'}
-          following={profile?.followingCount ?? 0}
-          followers={profile?.followersCount ?? 0}
-          email={profile.email}
-          heFollowsYou={profile.isFollowedBy}
-          youFollowHim={profile.isFollowing}
-          onPressToggleFollow={() => handleToggleFollow(profile.id)}
-        />
+    <Layout>
+      <AppHeader />
 
-        <FriendsStatsAchievements
-          tasksDone={profile?.tasksDone ?? 0}
-          dayStreak={profile?.dayStreak ?? 0}
-          taskSuccessRate={profile?.taskSuccessRate ?? 0}
-        />
-        <Height size={20} />
+      {isLoading && <AppLoader visible />}
 
-        <TextElement
-          variant="subtitle"
-          style={{ marginTop: spacing.xs, marginLeft: spacing.md, fontWeight: '600' }}
+      {!friendId ? (
+        <TextElement style={styles.errorText}>Invalid profile ID</TextElement>
+      ) : isError || !profile ? (
+        <TextElement style={styles.errorText}>Failed to load profile</TextElement>
+      ) : (
+        <ListView
+          style={{}}
+          scrollViewProps={{
+            contentContainerStyle: { width: '100%' },
+          }}
         >
-          Recent Tasks
-        </TextElement>
+          <FriendsProfileHeader
+            avatarUri={profile.photo}
+            name={profile?.name || 'No Name'}
+            username={profile?.name || 'no username'}
+            following={profile?.followingCount ?? 0}
+            followers={profile?.followersCount ?? 0}
+            email={profile.email}
+            heFollowsYou={profile.isFollowedBy}
+            youFollowHim={profile.isFollowing}
+            onPressToggleFollow={() => handleToggleFollow(profile.id)}
+          />
 
-        <View style={{ gap: spacing.sm, marginVertical: spacing.md }}>
-          {profile.recentTasks.length === 0 ? (
-            <TextElement variant="caption" color="muted" style={{ textAlign: 'center' }}>
-              No recent tasks...
-            </TextElement>
-          ) : (
-            profile.recentTasks.map(task => <RecentTaskCard key={task.id} task={task} />)
-          )}
-        </View>
-      </ListView>
+          <FriendsStatsAchievements
+            tasksDone={profile?.tasksDone ?? 0}
+            dayStreak={profile?.dayStreak ?? 0}
+            taskSuccessRate={profile?.taskSuccessRate ?? 0}
+          />
+          <Height size={20} />
+
+          <TextElement variant="subtitle" style={{ marginTop: spacing.xs, fontWeight: '600' }}>
+            Recent Tasks
+          </TextElement>
+
+          <View style={{ gap: spacing.sm, marginVertical: spacing.md }}>
+            {profile.recentTasks.length === 0 ? (
+              <TextElement variant="caption" color="muted" style={{ textAlign: 'center' }}>
+                No recent tasks...
+              </TextElement>
+            ) : (
+              profile.recentTasks.map(task => <RecentTaskCard key={task.id} task={task} />)
+            )}
+          </View>
+        </ListView>
+      )}
     </Layout>
   );
 }

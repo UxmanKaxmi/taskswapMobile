@@ -13,7 +13,7 @@ import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { colors } from '@shared/theme';
 import AnimatedTabIcon from '@shared/components/AnimatedTabBarIcon/AnimatedTabBarIcon';
 import { ms, vs } from 'react-native-size-matters';
-import FindFriendsMainScreen from '@features/Friends/screens/FindFriendsMainScreen';
+import FindFriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
 import { AppStackParamList } from './navigation';
@@ -148,11 +148,10 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   badgeText: {
-    color: '#fff',
     fontSize: ms(10),
     fontWeight: 'bold',
     lineHeight: ms(12), // optional for fine-tuning
-
+    color: 'white',
     textAlign: 'center',
   },
 });

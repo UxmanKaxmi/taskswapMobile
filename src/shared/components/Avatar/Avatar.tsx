@@ -1,7 +1,16 @@
 // src/shared/components/Avatar.tsx
 
 import React from 'react';
-import { Image, StyleSheet, Text, View, ImageStyle, ViewStyle, TextStyle } from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  View,
+  ImageStyle,
+  ViewStyle,
+  TextStyle,
+  StyleProp,
+} from 'react-native';
 import { colors } from '@shared/theme';
 
 export type AvatarProps = {
@@ -19,6 +28,8 @@ export type AvatarProps = {
   fallbackStyle?: ViewStyle;
   /** Style overrides for the fallback Text. */
   textStyle?: TextStyle;
+  /** Optional wrapper style for avatar container */
+  style?: StyleProp<ImageStyle>;
 };
 
 /**
@@ -51,6 +62,7 @@ export default function Avatar({
   imageStyle,
   fallbackStyle,
   textStyle,
+  style,
 }: AvatarProps) {
   const radius = size / 2;
 
@@ -67,6 +79,7 @@ export default function Avatar({
             borderColor,
           },
           imageStyle,
+          style,
         ]}
       />
     );
@@ -83,6 +96,7 @@ export default function Avatar({
           borderColor,
         },
         fallbackStyle,
+        style,
       ]}
     >
       <Text style={[styles.fallbackText, { fontSize: size * 0.4 }, textStyle]}>{fallback}</Text>

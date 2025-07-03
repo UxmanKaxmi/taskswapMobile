@@ -1,6 +1,6 @@
 // utils/humanizeDate.ts
 import { hasNotificationPermission } from '../../lib/notifications/NotificationPermissionPrompt';
-import { parseISO, formatDistanceToNow, format, isBefore } from 'date-fns';
+import { parseISO, formatDistanceToNow, format, isBefore, isToday } from 'date-fns';
 import { Dimensions } from 'react-native';
 
 /**
@@ -126,4 +126,15 @@ export function getRemainingTime(remindAt: string | Date): string {
   }
 
   return `⏳ ${formatDistanceToNow(date, { addSuffix: true })}`;
+}
+
+export function formatReminderTime(isoDate: string): string {
+  const date = parseISO(isoDate);
+  const time = format(date, 'h:mm a'); // => "9:00 PM"
+
+  if (isToday(date)) {
+    return `Today at ${time}`;
+  }
+
+  return format(date, 'MMM d, yyyy • h:mm a'); // e.g., "Jun 1, 2025 • 9:00 PM"
 }

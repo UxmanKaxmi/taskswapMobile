@@ -1,45 +1,69 @@
-// src/shared/components/Layout.tsx
-
 import React, { ReactNode } from 'react';
-import { View, ViewStyle } from 'react-native';
+import { View, StatusBar, StyleSheet, ViewStyle } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets, Edge } from 'react-native-safe-area-context';
-import { useTheme } from '@shared/theme/useTheme';
-import AnimatedBackground from './AnimatedBackground';
+import { colors, spacing } from '@shared/theme';
+import { isAndroid } from '@shared/utils/constants';
 
-type Props = {
-  children: ReactNode;
-  centered?: boolean;
+type LayoutProps = {
+  children?: ReactNode;
   style?: ViewStyle;
+  variant?: 'light' | 'dark' | 'auto';
+  backgroundColor?: string;
+  useSafeArea?: boolean;
+  statusBarHidden?: boolean;
+  scrollable?: boolean;
+  scrollViewProps?: object;
   allowPadding?: boolean;
-  edges?: Edge[]; // configurable safe area edges
 };
 
 export default function Layout({
-  children,
-  centered = false,
-  style,
+  children = null,
+  style = {},
+  variant = 'auto',
+  backgroundColor = colors.background,
+  useSafeArea = true,
+  statusBarHidden = false,
+  scrollable = false,
+  scrollViewProps = {},
   allowPadding = true,
-  edges = ['top', 'right', 'left'], // default safe-area edges
-}: Props) {
-  const theme = useTheme();
+  ...otherProps
+}: LayoutProps) {
   const insets = useSafeAreaInsets();
-
-  const containerStyle: ViewStyle = {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-    paddingHorizontal: allowPadding ? theme.spacing.sm : 0,
-    paddingTop: allowPadding ? theme.spacing.md : 0,
-    justifyContent: centered ? 'center' : 'flex-start',
-    alignItems: centered ? 'center' : 'flex-start',
-  };
+  const Container = useSafeArea ? SafeAreaView : View;
 
   return (
-    <View style={containerStyle}>
-      <SafeAreaView edges={edges} style={[containerStyle, style]}>
-        {/* <AnimatedBackground> */}
+    <View style={[styles.outerContainer, { backgroundColor }]}>
+      {/* <StatusBar
+        barStyle={variant === 'light' ? 'dark-content' : 'light-content'}
+        backgroundColor="transparent"
+        hidden={statusBarHidden}
+        translucent
+      /> */}
+
+      <Container
+        edges={['top', 'left', 'right', 'top']}
+        style={[styles.container, allowPadding && styles.padded, style]}
+        {...otherProps}
+      >
         {children}
-        {/* </AnimatedBackground> */}
-      </SafeAreaView>
+      </Container>
+
+      {/* {insets.bottom > 0 && <View style={{ height: insets.bottom, backgroundColor }} />} */}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+    // paddingTop: isAndroid ? spacing.md : 0,
+  },
+  container: {
+    flex: 1,
+  },
+  padded: {
+    paddingVertical: isAndroid ? spacing.md : 0,
+    paddingHorizontal: spacing.md,
+  },
+});
