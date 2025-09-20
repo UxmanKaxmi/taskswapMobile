@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RouteProp, useRoute } from '@react-navigation/native';
 
 import { AppStackParamList, MainStackParamList } from 'navigation/navigation';
-import AddTaskScreen from '@features/Tasks/screens/AddTaskScreen';
 import TaskDetailScreen from '@features/Tasks/screens/TaskDetailScreen';
 import BottomTabs from './BottomTabs';
 import { LogoutButton } from '@features/Auth/components/LogoutButton';
@@ -13,9 +12,10 @@ import HomeScreen from '@features/Home/screens/HomeScreen';
 import FindFriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
-import MainDebugScreen from '@features/debug/MainDebugScreen';
+import MainDebugScreen from '@features/Debug/MainDebugScreen';
 import { isAndroid, isIOS } from '@shared/utils/constants';
 import FriendsProfileScreen from '@features/Friends/screens/FriendsProfileScreen';
+import AddTaskScreen from '@features/Tasks/screens/AddTaskScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 

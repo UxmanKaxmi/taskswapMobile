@@ -5,7 +5,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import { Height } from '@shared/components/Spacing';
 import notifee from '@notifee/react-native';
-import { useAuth } from '@features/Auth/authProvider';
+import { useAuth } from '@features/Auth/AuthProvider';
 import { sendTestNotificationAPI } from '@features/Notification/api/NotificationApi';
 
 export default function MainDebugScreen() {

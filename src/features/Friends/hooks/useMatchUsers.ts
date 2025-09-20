@@ -5,7 +5,7 @@ import { api } from '@shared/api/axios';
 import { fetchAllContacts, fetchGoogleContacts } from '@shared/utils/googleAuth';
 import { buildRoute } from '@shared/api/apiRoutes';
 import { buildQueryKey } from '@shared/constants/queryKeys';
-import { useAuth } from '@features/Auth/authProvider'; // Adjust path as needed
+import { useAuth } from '@features/Auth/AuthProvider'; // Adjust path as needed
 
 export interface MatchedUser {
   id: string;

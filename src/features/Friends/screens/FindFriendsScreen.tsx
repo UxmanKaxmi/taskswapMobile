@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Image, SectionList } from 'react-native';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { useMatchUsers } from '../hooks/useMatchUsers';
@@ -7,11 +7,10 @@ import FriendFollowRow from '../components/FriendsFollowRow';
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigationProp, AppStackParamList, MainNavigationProp } from 'navigation/navigation';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
-import { useAuth } from '@features/Auth/authProvider';
+import { useAuth } from '@features/Auth/AuthProvider';
 import ListView from '@shared/components/ListView/ListView';
 import { Layout } from '@shared/components/Layout';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
-import { Image } from 'react-native';
 import { vs } from 'react-native-size-matters';
 import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
 import { useToggleFollow } from '@features/User/hooks/useToggleFollow';
@@ -55,7 +54,7 @@ export default function FindFriendsScreen() {
   const googleMatches = filteredMatches.filter(match => match.source === 'google');
   const phoneMatches = filteredMatches.filter(match => match.source === 'phone');
 
-  // if (isLoading) return <ActivityIndicator style={{ flex: 1 }} />;
+  if (isLoading) return <ActivityIndicator style={{ flex: 1 }} />;
 
   if (isError) {
     return (
@@ -83,60 +82,20 @@ export default function FindFriendsScreen() {
 
   return (
     <Layout>
-      <ListView
-        data={[...googleMatches, ...phoneMatches]} // flat list of both
-        flatListProps={{
-          ListHeaderComponent: () => (
-            <View>
-              <TextElement variant="title" style={{ fontWeight: '700' }}>
-                Find your people <TextElement style={{ fontSize: 20 }}>👋</TextElement>
-              </TextElement>
-              <TextElement
-                variant="body"
-                color="muted"
-                style={{ textAlign: 'left', marginTop: spacing.xs }}
-              >
-                Add friends so TaskSwap feels a little more familiar.
-              </TextElement>
-
-              {googleMatches.length > 0 && (
-                <TextElement style={{ marginTop: spacing.md, fontWeight: '600' }}>
-                  From Google Contacts
-                </TextElement>
-              )}
-            </View>
-          ),
-          ItemSeparatorComponent: () => <AppBorder />,
-          keyExtractor: user => user.id,
-          ListEmptyComponent: (
-            <View style={{ alignItems: 'center', marginTop: spacing.lg }}>
-              <TextElement variant="body" color="muted" style={{ marginBottom: spacing.sm }}>
-                No friends found on this device.
-              </TextElement>
-              <PrimaryButton
-                title="Let's continue"
-                onPress={() =>
-                  navigation?.replace('Tabs', {
-                    screen: 'Home',
-                  })
-                }
-                style={{ paddingHorizontal: spacing.md }}
-              />
-            </View>
-          ),
-          ListFooterComponent: (
-            <View style={{ marginBottom: vs(40) }}>
-              {phoneMatches.length > 0 && (
-                <TextElement style={{ marginTop: spacing.md, fontWeight: '600' }}>
-                  From Phone Contacts
-                </TextElement>
-              )}
-            </View>
-          ),
-        }}
+      <SectionList
+        sections={[
+          { title: 'From Google Contacts', data: googleMatches },
+          { title: 'From Phone Contacts', data: phoneMatches },
+        ].filter(section => section.data.length > 0)}
+        keyExtractor={item => item.id}
+        renderSectionHeader={({ section }) => (
+          <TextElement variant="subtitle" style={{ marginTop: spacing.sm, fontWeight: '600' }}>
+            {section.title}
+          </TextElement>
+        )}
         renderItem={({ item }) => (
           <FriendFollowRow
-            onPressRow={() => {}}
+            onPressRow={() => { }}
             isLoading={isPending && variables === item.id}
             photo={item.photo}
             name={item.name}
@@ -145,7 +104,40 @@ export default function FindFriendsScreen() {
             onToggleFollow={() => handleToggleFollow(item.id)}
           />
         )}
+        ItemSeparatorComponent={AppBorder}
+        ListHeaderComponent={() => (
+          <View style={{ marginVertical: spacing.sm }}>
+            <TextElement variant="title" style={{ fontWeight: '700' }}>
+              Find your people <TextElement style={{ fontSize: 20 }}>👋</TextElement>
+            </TextElement>
+            <TextElement
+              variant="body"
+              color="muted"
+              style={{ textAlign: 'left', marginTop: spacing.xs }}
+            >
+              Add friends so TaskSwap feels a little more familiar.
+            </TextElement>
+          </View>
+        )}
+        ListEmptyComponent={() => (
+          <View style={{ alignItems: 'center', marginTop: spacing.lg }}>
+            <TextElement variant="body" color="muted" style={{ marginBottom: spacing.sm }}>
+              No friends found on this device.
+            </TextElement>
+            <PrimaryButton
+              title="Let's continue"
+              onPress={() =>
+                navigation?.replace('Tabs', {
+                  screen: 'Home',
+                })
+              }
+              style={{ paddingHorizontal: spacing.md }}
+            />
+          </View>
+        )}
+        contentContainerStyle={{ paddingBottom: vs(40) }}
       />
+
       {matches.length > 0 && (
         <PrimaryButton
           title="Go to Home"

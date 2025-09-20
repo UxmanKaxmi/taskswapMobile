@@ -52,7 +52,6 @@ export default function AnimatedTextRotatorWithTitle({
 
   useEffect(() => {
     animate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   const { mainTitle, title, subtitle, image } = messages[index];

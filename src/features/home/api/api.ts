@@ -19,6 +19,5 @@ export async function getRemindersByTaskAPI(taskId: string) {
 
 export async function getTaskByIdAPI(taskId: string) {
   const res = await api.get(buildRoute.task(taskId));
-
   return res.data;
 }

@@ -4,7 +4,7 @@ import { Button, Alert } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MainStackParamList } from 'navigation/navigation';
-import { useAuth } from '../authProvider';
+import { useAuth } from '../AuthProvider';
 
 export const LogoutButton = () => {
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();

@@ -8,7 +8,9 @@ import {
   TouchableOpacity,
   Animated,
   TouchableWithoutFeedback,
+  KeyboardAvoidingView,
   Keyboard,
+  ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -134,7 +136,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
             screen: 'Home',
           });
         },
-        onError: () => {},
+        onError: () => { },
       });
     }
   };
@@ -167,89 +169,96 @@ export default function AddTaskScreen({ route, navigation }: Props) {
   }, [navigation]);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <Animated.View style={{ flex: 1, transform: [{ scale }], opacity }}>
-        <Layout>
-          <View style={styles.header}>
-            <View style={{ flex: 1 }} />
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
-              <Icon set="ion" name="close" size={30} color={colors.text} />
-            </TouchableOpacity>
-          </View>
-          <TextElement color="text" weight="600" variant="title" style={styles.label}>
-            Task Type
-          </TextElement>
-          <TaskTypeSelector selected={type} onSelect={setType} />
-
-          <TaskDescriptionInput
-            error={errors.description}
-            type={type}
-            value={description}
-            onChange={text => {
-              setDescription(text);
-              if (errors.description && text.trim()) {
-                setErrors(prev => ({ ...prev, description: undefined }));
-              }
-            }}
-          />
-          {['reminder', 'motivation'].includes(type) && (
-            <ListTaskOptionSelector
-              icon="time"
-              label="Set Time"
-              value={remindAt.toISOString()}
-              showDateTimePicker
-              defaultPickerOpen
-              dateTimeValue={remindAt}
-              onDateTimeChange={date => {
-                setRemindAt(date);
-                if (errors.remindAt && date.getTime() >= Date.now() + 2 * 60 * 60 * 1000) {
-                  setErrors(prev => ({ ...prev, remindAt: undefined }));
-                }
-              }}
-              valueType="date"
-              errorText={errors.remindAt}
-              error={!!errors.remindAt}
-            />
-          )}
-
-          {type === 'decision' && (
-            <View style={{ marginBottom: spacing.md }}>
-              <TextElement weight="600" style={{ marginBottom: spacing.sm }}>
-                Decision Options
-              </TextElement>
-
-              {options.map((opt, index) => (
-                <View key={index} style={styles.optionRow}>
-                  <AppTextInput
-                    placeholder={`Option ${index + 1}`}
-                    value={opt}
-                    onChangeText={text => {
-                      const updated = [...options];
-                      updated[index] = text;
-                      setOptions(updated);
-                    }}
-                    containerStyle={{ flex: 1 }}
-                    inputStyle={{ height: 44 }}
-                    error={!!optionErrors[index]}
-                    errorText={optionErrors[index]}
-                  />
-                  {/* ❌ Hide delete button since we are enforcing only 2 options */}
+    <Layout>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // Adjust as needed
+        >
+          <Animated.View style={{ flex: 1, transform: [{ scale }], opacity }}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+              <Animated.View style={{ flex: 1, transform: [{ scale }], opacity }}>
+                <View style={styles.header}>
+                  <View style={{ flex: 1 }} />
+                  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
+                    <Icon set="ion" name="close" size={30} color={colors.text} />
+                  </TouchableOpacity>
                 </View>
-              ))}
+                <TextElement color="text" weight="600" variant="title" style={styles.label}>
+                  Task Type
+                </TextElement>
+                <TaskTypeSelector selected={type} onSelect={setType} />
 
-              {/* ➕ Hidden because only 2 allowed for now */}
-            </View>
-          )}
+                <TaskDescriptionInput
+                  error={errors.description}
+                  type={type}
+                  value={description}
+                  onChange={text => {
+                    setDescription(text);
+                    if (errors.description && text.trim()) {
+                      setErrors(prev => ({ ...prev, description: undefined }));
+                    }
+                  }}
+                />
+                {['reminder', 'motivation'].includes(type) && (
+                  <ListTaskOptionSelector
+                    icon="time"
+                    label="Set Time"
+                    value={remindAt.toISOString()}
+                    showDateTimePicker
+                    defaultPickerOpen
+                    dateTimeValue={remindAt}
+                    onDateTimeChange={date => {
+                      setRemindAt(date);
+                      if (errors.remindAt && date.getTime() >= Date.now() + 2 * 60 * 60 * 1000) {
+                        setErrors(prev => ({ ...prev, remindAt: undefined }));
+                      }
+                    }}
+                    valueType="date"
+                    errorText={errors.remindAt}
+                    error={!!errors.remindAt}
+                  />
+                )}
 
-          <ListTaskOptionSelector
-            icon="people"
-            label="Who can help?"
-            valueType="text"
-            onPress={() => setHelperModalVisible(true)}
-            value={helperIds.length ? `${helperIds.length} selected` : undefined}
-          />
+                {type === 'decision' && (
+                  <View style={{ marginBottom: spacing.md }}>
+                    <TextElement weight="600" style={{ marginBottom: spacing.sm }}>
+                      Decision Options
+                    </TextElement>
 
-          {/* <ListTaskOptionSelector
+                    {options.map((opt, index) => (
+                      <View key={index} style={styles.optionRow}>
+                        <AppTextInput
+                          placeholder={`Option ${index + 1}`}
+                          value={opt}
+                          onChangeText={text => {
+                            const updated = [...options];
+                            updated[index] = text;
+                            setOptions(updated);
+                          }}
+                          containerStyle={{ flex: 1 }}
+                          inputStyle={{ height: 44 }}
+                          error={!!optionErrors[index]}
+                          errorText={optionErrors[index]}
+                        />
+                        {/* ❌ Hide delete button since we are enforcing only 2 options */}
+                      </View>
+                    ))}
+
+                    {/* ➕ Hidden because only 2 allowed for now */}
+                  </View>
+                )}
+
+                <ListTaskOptionSelector
+                  icon="people"
+                  label="Who can help?"
+                  valueType="text"
+                  onPress={() => setHelperModalVisible(true)}
+                  value={helperIds.length ? `${helperIds.length} selected` : undefined}
+                />
+
+                {/* <ListTaskOptionSelector
             icon="globe-outline"
             label="Visibility"
             value="Public"
@@ -257,31 +266,35 @@ export default function AddTaskScreen({ route, navigation }: Props) {
               // toggle between public/private
             }}
           /> */}
-        </Layout>
-        <View style={styles.footer}>
-          <PrimaryButton
-            title="Create Task"
-            isLoading={isPending}
-            disabled={hasError}
-            onPress={() => handleSubmit()}
-          />
-        </View>
-        <SelectHelpersModal
-          visible={helperModalVisible}
-          onClose={() => setHelperModalVisible(false)}
-          selected={helperIds}
-          onConfirm={setHelperIds}
-        />
-      </Animated.View>
-    </TouchableWithoutFeedback>
+              </Animated.View>
+            </ScrollView>
+
+            {/* Footer remains fixed outside scroll */}
+            <View style={styles.footer}>
+              <PrimaryButton
+                title="Create Task"
+                isLoading={isPending}
+                disabled={hasError}
+                onPress={() => handleSubmit()}
+              />
+            </View>
+
+            <SelectHelpersModal
+              visible={helperModalVisible}
+              onClose={() => setHelperModalVisible(false)}
+              selected={helperIds}
+              onConfirm={setHelperIds}
+            />
+          </Animated.View>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+    </Layout>
   );
 }
 
 const styles = StyleSheet.create({
   footer: {
     backgroundColor: colors.background,
-    marginBottom: verticalScale(20),
-    marginHorizontal: spacing.md,
   },
   header: {
     flexDirection: 'row',

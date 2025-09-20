@@ -7,7 +7,6 @@ export type TaskHelper = {
   photo?: string;
 };
 
-
 export type Voter = {
   id: string;
   name: string;

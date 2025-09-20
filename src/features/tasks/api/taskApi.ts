@@ -7,7 +7,6 @@ import { ApiRoute, buildRoute } from '@shared/api/apiRoutes';
  */
 export async function getTasks(): Promise<Task[]> {
   const response = await api.get(ApiRoute.TASKS);
-  console.log(response.data, 'getTasks');
   return response.data;
 }
 
@@ -19,8 +18,8 @@ export interface CreateTaskPayload {
   type: TaskType;
   remindAt?: string; // For reminder tasks
   options?: string[]; // For decision tasks
-  deliverAt?: string | null; // for motivation tasks
-  helperIds?: string[]; // ✅ IDs of users to assign as helpers
+  deliverAt?: string | null; // For motivation tasks
+  helperIds?: string[]; // IDs of users to assign as helpers
 }
 
 /**
@@ -49,8 +48,16 @@ export async function deleteTask(id: string): Promise<void> {
   await api.delete(buildRoute.task(id));
 }
 
-export async function voteOnTask(taskId: string, option: string) {
-  const res = await api.post(buildRoute.castVote(taskId), { option });
+/** ---------- Votes ---------- */
+
+export type VotePayload = {
+  nextOption: string;
+  prevOption?: string;
+};
+
+export async function voteOnTask(taskId: string, payload: VotePayload) {
+  // ✅ sends { nextOption, prevOption }
+  const res = await api.post(buildRoute.castVote(taskId), payload);
   return res.data;
 }
 

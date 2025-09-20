@@ -22,8 +22,9 @@ import { vs } from 'react-native-size-matters';
 import { showToast } from '@shared/utils/toast';
 import MotivationCard from '../components/MotivationCard';
 import AdviceCard from '../components/AdviceCard';
-import NotificationTester from '@features/debug/NotificationTester';
-import { useAuth } from '@features/Auth/authProvider';
+import NotificationTester from '@features/Debug/NotificationTester';
+import { useAuth } from '@features/Auth/AuthProvider';
+import { navigateToTaskDetails } from '@navigation/navigationUtils';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
@@ -45,10 +46,6 @@ export default function HomeScreen() {
     if (filter === 'all') return allTasks;
     return allTasks.filter(task => task.type === filter);
   }, [allTasks, filter]);
-
-  const navigateToDetails = (task: any) => {
-    navigation.navigate('TaskDetail', { task });
-  };
 
   useFocusEffect(
     useCallback(() => {
@@ -81,13 +78,15 @@ export default function HomeScreen() {
   );
 
   const renderTaskNew = ({ item }: { item: Task }) => {
+    console.log(item, 'ttt');
+
     switch (item.type) {
       case 'decision':
         return (
           <DecisionCard
             key={item.id}
             task={item as any}
-            onPressCard={navigateToDetails}
+            onPressCard={() => navigateToTaskDetails(navigation, item)}
             onPressSuggest={t => console.log('onPressProfile', t.id)}
             onPressView={t => console.log('View for', t.id)}
           />
@@ -98,7 +97,7 @@ export default function HomeScreen() {
             onRemind={() => {}}
             key={item.id}
             task={item as any}
-            onPressCard={navigateToDetails}
+            onPressCard={() => navigateToTaskDetails(navigation, item)}
             onPressProfile={t => openFriendsProfileScreen(t.userId)}
             onPressView={t => console.log('View for', t.id)}
           />
@@ -108,7 +107,7 @@ export default function HomeScreen() {
           <MotivationCard
             key={item.id}
             task={item as any}
-            onPressCard={navigateToDetails}
+            onPressCard={() => navigateToTaskDetails(navigation, item)}
             onPressSuggest={t => console.log('Suggest for', t.id)}
             onPressView={t => console.log('View for', t.id)}
           />
@@ -118,7 +117,7 @@ export default function HomeScreen() {
           <AdviceCard
             key={item.id}
             task={item as any}
-            onPressCard={navigateToDetails}
+            onPressCard={() => navigateToTaskDetails(navigation, item)}
             onPressSuggest={t => console.log('Suggest for', t.id)}
             onPressView={t => console.log('View for', t.id)}
           />

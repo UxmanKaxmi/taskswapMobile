@@ -2,37 +2,44 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Avatar from '@shared/components/Avatar/Avatar';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { spacing } from '@shared/theme';
-import { getTypeVisual } from '@shared/utils/typeVisuals';
+import { colors, spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '@navigation/navigation';
+import { getTypeVisual } from '@shared/utils/typeVisuals';
 
-type Props = {
+interface Props {
   item: NotificationDTO;
   onPress: () => void;
-};
+}
 
-export default function FollowNotification({ item }: Props) {
-  const { emoji } = getTypeVisual(item.type);
-  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+export default function DecisionDone({ item, onPress }: Props) {
+  const { emoji, color } = getTypeVisual(item.type);
 
-  const handlePress = () => {
-    navigation.navigate('FriendsProfileScreen', { id: item?.sender?.id ?? '' });
-  };
   return (
-    <TouchableOpacity onPress={handlePress} style={styles.row}>
-      <Avatar uri={item.sender?.photo} fallback={item.sender?.name} />
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        styles.row,
+        {
+          backgroundColor: item.read ? colors.background : colors.adviceBg,
+        },
+      ]}
+    >
+      <Avatar
+        uri={item.metadata?.senderPhoto || item?.sender?.photo}
+        fallback={item.metadata?.senderName?.[0]}
+      />
       <View style={styles.textContainer}>
         <TextElement variant="body">
-          <TextElement weight="bold">{item.sender?.name || 'Someone'}</TextElement> followed you
+          <TextElement weight="bold">
+            {item.metadata?.senderName || item?.sender?.name || 'Someone'}
+          </TextElement>{' '}
+          {item.message}
         </TextElement>
         <TextElement variant="caption" color="muted">
           {timeAgo(item.createdAt)}
         </TextElement>
       </View>
-
       <TextElement variant="title">{emoji}</TextElement>
     </TouchableOpacity>
   );
@@ -47,11 +54,5 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     marginLeft: spacing.md,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginLeft: spacing.sm,
   },
 });

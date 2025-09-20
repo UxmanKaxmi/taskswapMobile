@@ -1,7 +1,18 @@
 export interface NotificationDTO {
   id: string;
   userId: string;
-  type: string;
+  type:
+    | 'remainder'
+    | 'decision'
+    | 'motivation'
+    | 'advice'
+    | 'follow'
+    | 'comment'
+    | 'task'
+    | 'task-helper'
+    | 'reminder'
+    | 'decision-done';
+
   message: string;
   read: boolean;
   createdAt: string;

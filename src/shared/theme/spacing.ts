@@ -1,4 +1,4 @@
-import { moderateScale, scale } from 'react-native-size-matters';
+import { moderateScale } from 'react-native-size-matters';
 
 export const spacing = {
   xs: moderateScale(4),

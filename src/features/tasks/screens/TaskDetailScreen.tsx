@@ -1,274 +1,397 @@
 // src/features/tasks/screens/TaskDetailScreen.tsx
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Alert, Pressable } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Modal,
+  Platform,
+  TextInput,
+  Keyboard,
+  ScrollView,
+  Task,
+} from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from 'navigation/navigation';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '@shared/components/TextElement/TextElement';
-import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
-import OutlineButton from '@shared/components/Buttons/OutlineButton';
-import { deleteTask } from '../api/taskApi';
 import { Layout } from '@shared/components/Layout';
 import Row from '@shared/components/Layout/Row';
 import ReminderNoteList from '../components/ReminderNoteList';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
-import {
-  capitalizeFirstLetter,
-  formatAbsolute,
-  formatReminderTime,
-  timeAgo,
-} from '@shared/utils/helperFunctions';
-import TaskDetailHeading from '../components/TaskDetailHeading';
+import { formatReminderTime, timeAgo } from '@shared/utils/helperFunctions';
 import { cardStyles } from '@features/Home/components/styles';
 import Avatar from '@shared/components/Avatar/Avatar';
 import TypeTag from '@shared/components/TypeTag/TypeTag';
 import { Height } from '@shared/components/Spacing';
 import { getTypeVisual } from '@shared/utils/typeVisuals';
 import Column from '@shared/components/Layout/Column';
-import HelperAvatarGroup from '@features/Home/components/HelperAvatarGroup';
-import { ms } from 'react-native-size-matters';
 import HelpersRow from '../components/HelpersRow';
-import { formatDistanceToNow, parseISO, set } from 'date-fns';
+import { ms } from 'react-native-size-matters';
 import CompletionStatus from '../components/CompletionStatus';
-import { useAuth } from '@features/Auth/authProvider';
+import { useAuth } from '@features/Auth/AuthProvider';
 import { showToast } from '@shared/utils/toast';
 import { useCompleteTask } from '@features/Home/hooks/useCompleteTask';
 import { queryClient } from '@lib/react-query/client';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import { openFriendsProfile } from '@navigation/navigationUtils';
-import VoteProgressBar from '@features/Home/components/VoteProgressBar';
-import { colors } from '@shared/theme';
+import { colors, spacing } from '@shared/theme';
 import StackedVoteBar from '../components/StackedVoteBar';
 import AppLoader from '@shared/components/Loader/Loader';
+import { useInCompleteTask } from '@features/Home/hooks/useInCompleteTask';
+import { useCastVote } from '@features/Tasks/hooks/useVote';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getTaskByIdAPI } from '@features/Home/api/api';
+import CommentsSection from '../components/CommentSection';
+import Icon from '@shared/components/Icons/Icon';
+import { useAddComment, useToggleCommentLike } from '../hooks/useComment';
+import { useFollowers } from '@features/User/hooks/useFollowers';
+import { useFollowing } from '@features/User/hooks/useFollowing';
+import { parseISO, formatDistanceToNow } from 'date-fns';
+import { fetchComments } from '../api/commentApi';
+import { useVoteStats } from '@features/Home/hooks/useVoteStats';
+import { isAndroid } from '@shared/utils/constants';
 
 export default function TaskDetailScreen({
   route,
   navigation,
 }: NativeStackScreenProps<AppStackParamList, 'TaskDetail'>) {
-  const { task } = route.params;
-  const { colors, spacing } = useTheme();
-  const { emoji } = getTypeVisual(task.type);
+  const { task: initialTask, taskId: taskIdParam, highlightCommentId } = route.params ?? {};
+  const taskId = initialTask?.id ?? taskIdParam ?? '';
+
+  const scrollRef = useRef<ScrollView>(null);
+  const theme = useTheme();
   const { user } = useAuth();
-  const isOwner = task.userId === user?.id;
-  const [isCompleted, setCompleted] = useState(task.completed);
-  const { mutate: completeTask, isPending } = useCompleteTask();
-  const [isLoading, setIsLoading] = useState(false);
-  const votedOption = task.votedOption;
-  const totalVotes = Object.values(task.votes || {}).reduce((a, b) => a + (b.count || 0), 0);
-  const [option1, option2] = task.options || [];
-  const vote1 = task.votes?.[option1] || 0;
-  const vote2 = task.votes?.[option2] || 0;
 
-  // const percent1 = totalVotes > 0 ? (vote1 / totalVotes) * 100 : 50;
-  // const percent2 = totalVotes > 0 ? (vote2 / totalVotes) * 100 : 50;
+  const [newComment, setNewComment] = useState('');
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [showMentionList, setShowMentionList] = useState(false);
 
-  const handleDelete = () => {
-    Alert.alert('Delete Task', 'Are you sure you want to delete this task?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          setIsLoading(true);
-          try {
-            await deleteTask(task.id).finally(() => {
-              setIsLoading(false);
-            });
-            navigation.goBack();
-          } catch (err) {
-            console.error('[DELETE_TASK_ERROR]', err);
-            Alert.alert('Error', 'Failed to delete task');
-          }
-        },
-      },
-    ]);
+  const { data: followers = [] } = useFollowers();
+  const { data: following = [] } = useFollowing();
+
+  const qc = useQueryClient();
+  const tasks = qc.getQueryData<any[]>(buildQueryKey.tasks());
+
+  const { data: comments = [] } = useQuery({
+    queryKey: buildQueryKey.commentsForTask(taskId),
+    queryFn: () => fetchComments(taskId),
+    enabled: !!taskId,
+  });
+
+  const task = tasks?.find(t => t.id === taskId) ?? initialTask;
+
+  // friends for @mentions
+  const friendsMap = new Map<string, { id: string; name: string; photo?: string }>();
+  [...followers, ...following].forEach(f =>
+    friendsMap.set(f.id, { id: f.id, name: f.name, photo: f.photo }),
+  );
+  const friendsList = Array.from(friendsMap.values());
+
+  const handleSelectMention = (friend: { id: string; name: string }) => {
+    const words = newComment.split(/\s/);
+    words[words.length - 1] = `@${friend.name}`;
+    setNewComment(words.join(' ') + ' ');
+    setMentionQuery('');
+    setShowMentionList(false);
   };
+
+  const handleChangeComment = (text: string) => {
+    setNewComment(text);
+    const lastWord = text.split(/\s/).slice(-1)[0] || '';
+    if (lastWord.startsWith('@')) {
+      setMentionQuery(lastWord.slice(1));
+      setShowMentionList(true);
+    } else {
+      setMentionQuery('');
+      setShowMentionList(false);
+    }
+  };
+
+  const emoji = task ? getTypeVisual(task.type).emoji : '';
+  const isOwner = !!task && task.userId === user?.id;
+
+  const [isCompleted, setCompleted] = useState<boolean>(!!task?.completed);
+  useEffect(() => setCompleted(!!task?.completed), [task?.completed]);
+
+  const voteMutation = useCastVote(taskId);
+  const { mutate: completeTask } = useCompleteTask();
+  const { mutate: incompleteTask } = useInCompleteTask();
+
+  const addComment = useAddComment(taskId);
+  const toggleLike = useToggleCommentLike(taskId);
+
+  const { option1, option2, percent1, percent2, vote1, vote2, totalVotes } = useVoteStats(task);
+
+  const commentYMapRef = useRef<Record<string, number>>({});
+  const [pendingScrollId, setPendingScrollId] = useState<string | null>(highlightCommentId ?? null);
+
+  const extractMentions = (text: string) =>
+    friendsList.filter(f => text.includes(`@${f.name}`)).map(f => f.id);
 
   useEffect(() => {
-    setCompleted(task.completed);
-  }, [task.completed]);
+    if (!pendingScrollId) return;
+    const y = commentYMapRef.current[pendingScrollId];
+    if (y != null && scrollRef.current) {
+      scrollRef.current.scrollTo({ y: Math.max(0, y - 100), animated: true });
+      setPendingScrollId(null);
+    }
+  }, [comments, pendingScrollId]);
 
-  const handleMarkDone = () => {
-    completeTask(task.id, {
-      onSuccess: val => {
-        setCompleted(true);
-        queryClient.invalidateQueries({ queryKey: buildQueryKey.taskById(task.id) });
-
-        showToast({
-          type: 'success',
-          title: 'Success',
-          message: `Task marked as done!`,
-        });
-      },
-      onError: () => {
-        showToast({
-          type: 'error',
-          title: 'Error',
-          message: `Failed to mark task as done!`,
-        });
-      },
+  useEffect(() => {
+    const sub = Keyboard.addListener('keyboardDidShow', () => {
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150);
     });
-  };
-  return isLoading ? (
-    <AppLoader visible />
-  ) : (
-    <Layout allowPadding>
-      <AppHeader title="Task Details" />
+    return () => sub.remove();
+  }, []);
 
-      <Row justify="space-between" style={cardStyles.cardHeader}>
-        <Pressable onPress={() => { }}>
-          <Row>
-            <Avatar uri={task.avatar} />
-            <View>
-              <TextElement variant="subtitle" style={cardStyles.name}>
-                {task.name}
-              </TextElement>
-              <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
-                {timeAgo(task.createdAt)}
+  const stillLoading = !task; // no flicker on refetch
+  return (
+    <Layout
+      allowPadding
+      useSafeArea={isAndroid ? false : true}
+      footerContent={
+        <View style={{ flexDirection: 'column' }}>
+          {showMentionList && mentionQuery.length > 0 && (
+            <View style={styles.suggestionBox}>
+              {friendsList.map(friend => (
+                <Pressable
+                  key={friend.id}
+                  style={styles.suggestionItem}
+                  onPress={() => handleSelectMention(friend)}
+                >
+                  <Avatar uri={friend.photo} size={28} />
+                  <TextElement style={{ marginLeft: 8 }} weight="500">
+                    {friend.name}
+                  </TextElement>
+                </Pressable>
+              ))}
+            </View>
+          )}
+          <Row align="center">
+            <TextInput
+              placeholder="Write a comment..."
+              value={newComment}
+              onChangeText={handleChangeComment}
+              style={styles.textInput}
+              placeholderTextColor={colors.muted}
+            />
+            <Pressable
+              disabled={!task || !newComment.trim() || addComment.isPending}
+              onPress={() => {
+                if (!task || !newComment.trim()) return;
+                const mentionedIds = extractMentions(newComment);
+                addComment.mutate(
+                  { text: newComment, mentions: mentionedIds },
+                  {
+                    onSuccess: () => {
+                      setNewComment('');
+                      showToast({
+                        type: 'success',
+                        title: 'Comment Added',
+                        message: 'Your comment has been posted!',
+                      });
+                    },
+                    onError: () =>
+                      showToast({
+                        type: 'error',
+                        title: 'Failed',
+                        message: 'Could not post comment. Try again!',
+                      }),
+                  },
+                );
+              }}
+              hitSlop={10}
+              style={{ padding: 8 }}
+            >
+              <Icon name="send" set="ion" size={20} color={theme.colors.primary} />
+            </Pressable>
+          </Row>
+        </View>
+      }
+    >
+      <ScrollView showsVerticalScrollIndicator={false} ref={scrollRef}>
+        {stillLoading ? (
+          <AppLoader visible />
+        ) : (
+          <>
+            <AppHeader
+              title="Task Details"
+              right={
+                isOwner ? (
+                  <Pressable onPress={() => {}} hitSlop={10} style={{ paddingHorizontal: 4 }}>
+                    <Icon set="ion" name="ellipsis-vertical" size={20} color={theme.colors.text} />
+                  </Pressable>
+                ) : null
+              }
+            />
+
+            <Row justify="space-between" style={cardStyles.cardHeader}>
+              <Pressable onPress={() => {}}>
+                <Row>
+                  <Avatar uri={task.avatar} />
+                  <View>
+                    <TextElement variant="subtitle" style={cardStyles.name}>
+                      {task.name}
+                    </TextElement>
+                    <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
+                      {timeAgo(task.createdAt)}
+                    </TextElement>
+                  </View>
+                </Row>
+              </Pressable>
+              <TypeTag type={task.type} />
+            </Row>
+
+            <View style={cardStyles.messageRow}>
+              <TextElement variant="title">
+                {emoji} {task.text}
               </TextElement>
             </View>
-          </Row>
-        </Pressable>
-        <TypeTag type={task.type} />
-      </Row>
 
-      <View style={cardStyles.messageRow}>
-        <TextElement variant="title">
-          {emoji} {task.text}
-        </TextElement>
-      </View>
+            {task.type === 'reminder' && (
+              <>
+                <Height size={12} />
+                <TextElement variant="caption" style={styles.reminderTimeKey}>
+                  Reminder Time
+                </TextElement>
+                <TextElement variant="subtitle" weight="500" style={styles.reminderTimeValue}>
+                  {task.remindAt ? formatReminderTime(task.remindAt) : 'No reminder set'}
+                </TextElement>
+                <TextElement color="muted" variant="subtitle" style={styles.detailFromNow}>
+                  ⏳{' '}
+                  {task.remindAt &&
+                    formatDistanceToNow(parseISO(task.remindAt), { addSuffix: true })}
+                </TextElement>
+              </>
+            )}
 
-      {task.type === 'reminder' && (
-        <>
-          <Height size={12} />
+            <Height size={12} />
 
-          <TextElement variant="caption" style={styles.reminderTimeKey}>
-            Reminder Time
-          </TextElement>
+            {task.type === 'decision' && task.options?.length === 2 && (
+              <StackedVoteBar
+                option1={option1}
+                option2={option2}
+                percent1={percent1}
+                percent2={percent2}
+                vote1={vote1}
+                vote2={vote2}
+                voters1={task.votes?.[option1]?.preview ?? []}
+                voters2={task.votes?.[option2]?.preview ?? []}
+                votedOption={task.votedOption}
+                canChange
+                isSubmitting={voteMutation.isPending}
+                onChangeVote={next => {
+                  if (!user?.id) return;
+                  voteMutation.mutate({
+                    nextOption: next,
+                    prevOption: task.votedOption,
+                    me: { id: user.id, name: user.name, photo: user.photo || '' },
+                  });
+                }}
+              />
+            )}
 
-          <TextElement variant="subtitle" weight="500" style={styles.reminderTimeValue}>
-            {task.remindAt ? formatReminderTime(task.remindAt) : 'No reminder set'}
-          </TextElement>
-          <TextElement color="muted" variant="subtitle" style={styles.detailFromNow}>
-            ⏳{' '}
-            {task.remindAt &&
-              formatDistanceToNow(parseISO(task.remindAt), {
-                addSuffix: true,
-              })}
-          </TextElement>
-        </>
-      )}
-      <Height size={12} />
+            {task.helpers && task.helpers.length > 0 && (
+              <View>
+                <TextElement variant="caption" weight="500" style={styles.reminderTimeKey}>
+                  Helpers
+                </TextElement>
+                <HelpersRow
+                  maxVisible={3}
+                  helpers={task.helpers as any}
+                  onPressAvatar={helper => openFriendsProfile(navigation, helper.id)}
+                />
+              </View>
+            )}
 
-      {task.type === 'decision' && task.options?.length === 2 && (
-        <StackedVoteBar
-          option1={task.options[0]}
-          option2={task.options[1]}
-          percent1={
-            totalVotes > 0 ? ((task.votes?.[task.options[0]]?.count ?? 0) / totalVotes) * 100 : 50
-          }
-          percent2={
-            totalVotes > 0 ? ((task.votes?.[task.options[1]]?.count ?? 0) / totalVotes) * 100 : 50
-          }
-          vote1={task.votes?.[task.options[0]]?.count ?? 0}
-          vote2={task.votes?.[task.options[1]]?.count ?? 0}
-          voters1={task.votes?.[task.options[0]]?.preview ?? []}
-          voters2={task.votes?.[task.options[1]]?.preview ?? []}
-          votedOption={task.votedOption}
-        />
-      )}
+            <Height size={12} />
 
-      {task.helpers && task.helpers.length > 0 && (
-        <View style={{}}>
-          <TextElement variant="caption" weight="500" style={styles.reminderTimeKey}>
-            Helpers
-          </TextElement>
-          <HelpersRow
-            maxVisible={3}
-            helpers={task.helpers as any}
-            onPressAvatar={helper => {
-              openFriendsProfile(navigation, helper.id);
-            }}
-          />
-        </View>
-      )}
-      <Height size={12} />
+            <Row justify="space-between">
+              <Column gap={-1} style={{ marginEnd: 10 }}>
+                <TextElement variant="caption" weight="500" style={styles.reminderTimeKey}>
+                  Status
+                </TextElement>
+                <CompletionStatus completed={task.completed} />
+              </Column>
+            </Row>
 
-      <Row justify="space-between">
-        {/* {task?.completed && (
-          <Column gap={-1}>
-            <TextElement variant="caption" weight="500" style={styles.reminderTimeKey}>
-              Completed at
-            </TextElement>
-            <TextElement variant="subtitle" weight="600" style={styles.reminderTimeValue}>
-              {task.completedAt ? formatReminderTime(task.completedAt) : 'No reminder set'}
-            </TextElement>
-          </Column>
-        )} */}
-        <Column gap={-1} style={{ marginEnd: 10 }}>
-          <TextElement variant="caption" weight="500" style={styles.reminderTimeKey}>
-            Status
-          </TextElement>
-          <CompletionStatus completed={task?.completed} />
-        </Column>
-      </Row>
-      <Height size={25} />
-      {task.type === 'reminder' && (
-        <>
-          <TextElement variant="subtitle" weight="500" style={{}}>
-            Friendly Reminders
-          </TextElement>
-          <ReminderNoteList
-            onPressFriendProfile={friendId => openFriendsProfile(navigation, friendId)}
-            taskId={task.id}
-          />
-        </>
-      )}
+            {!isOwner && task.completed && (
+              <View style={{ marginTop: spacing.md }}>
+                <TextElement variant="caption" weight="500" style={styles.reminderTimeKey}>
+                  Task marked completed at
+                </TextElement>
+                <TextElement variant="subtitle" weight="600" style={styles.reminderTimeValue}>
+                  {task.completedAt ? formatReminderTime(task.completedAt) : 'Date not available'}
+                </TextElement>
+              </View>
+            )}
 
-      {/* Action buttons */}
-      {isOwner && isCompleted && (
-        <Row style={{}}>
-          <OutlineButton
-            title="Edit"
-            onPress={() => navigation.navigate('AddTask', { task })}
-            style={{ flex: 1, marginRight: spacing.sm }}
-          />
-        </Row>
-      )}
+            <Height size={25} />
 
-      {isOwner && !isCompleted && (
-        <Row style={{}}>
-          <PrimaryButton
-            title="Mark as Done"
-            onPress={() => handleMarkDone()}
-            style={{ flex: 1, marginRight: spacing.sm }}
-          />
-        </Row>
-      )}
-      <Row style={{}}>
-        <PrimaryButton
-          title="Delete"
-          onPress={() => handleDelete()}
-          style={{ flex: 1, marginRight: spacing.sm, backgroundColor: colors.error }}
-        />
-      </Row>
+            {task.type === 'reminder' && (
+              <>
+                <TextElement variant="subtitle" weight="500">
+                  Friendly Reminders
+                </TextElement>
+                <ReminderNoteList
+                  onPressFriendProfile={friendId => openFriendsProfile(navigation, friendId)}
+                  taskId={task.id}
+                />
+              </>
+            )}
+
+            <CommentsSection
+              comments={comments ?? []} // 👈 ensures always array
+              friends={friendsList}
+              onPressCommentUser={comment => openFriendsProfile(navigation, comment.user.id)}
+              onPressMentionUser={friend => openFriendsProfile(navigation, friend.id)}
+              highlightId={highlightCommentId}
+              scrollRef={scrollRef} // 👈 pass down
+              onToggleLike={(commentId, nextLike) => {
+                toggleLike.mutate({ commentId, like: nextLike });
+              }}
+            />
+          </>
+        )}
+      </ScrollView>
     </Layout>
   );
 }
 
 const styles = StyleSheet.create({
+  suggestionBox: {},
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
   reminderTimeKey: { fontSize: ms(12), color: colors.muted },
   detailFromNow: { fontSize: ms(11) },
   reminderTimeValue: { fontSize: ms(16) },
-  card: {
+  sheetOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.25)' },
+  sheet: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 24,
-    shadowColor: 'rgba(0, 0, 0, 0.05)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 2,
+    paddingTop: 8,
+    paddingBottom: Platform.select({ ios: 24, android: 16 }),
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 12,
+  },
+  textInput: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#f1f1f1',
+    borderRadius: 20,
+    marginRight: 8,
   },
 });

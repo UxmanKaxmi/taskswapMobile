@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import RootNavigator from './navigation/RootNavigator';
-import { AuthProvider } from '@features/Auth/authProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '@shared/components/Toast/toastConfig';
@@ -10,6 +9,7 @@ import NotificationPermissionPrompt from './lib/notifications/NotificationPermis
 import firebase from '@react-native-firebase/app';
 import { Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { AnimatedBootSplash } from '@features/Splash/AnimatedBootSplash';
+import { AuthProvider } from '@features/Auth/AuthProvider';
 
 const queryClient = new QueryClient();
 

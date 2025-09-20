@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Image, Animated } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Image, Animated, Dimensions } from 'react-native';
 import { ms } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -17,6 +17,9 @@ import { useCastVote } from '@features/Tasks/hooks/useVote';
 import Icon from '@shared/components/Icons/Icon';
 import Column from '@shared/components/Layout/Column';
 import VoteProgressBar from './VoteProgressBar';
+import StackedVoteBar from '@features/Tasks/components/StackedVoteBar';
+import { useAuth } from '@features/Auth/AuthProvider';
+import { useVoteStats } from '../hooks/useVoteStats';
 
 type Props = {
   task: DecisionTask;
@@ -25,44 +28,32 @@ type Props = {
   onPressView: (task: DecisionTask) => void;
 };
 
+const screenWidth = Dimensions.get('window').width;
+const buttonWidth = (screenWidth - spacing.md * 2 - spacing.sm) / 2;
+
 export default function DecisionCard({ task, onPressCard, onPressSuggest, onPressView }: Props) {
   const { avatar, name = 'John Doe', createdAt, text, options, type, helpers, id } = task;
   const { emoji } = getTypeVisual(type);
-
   const { mutate: castVote, isPending } = useCastVote(id);
   const votedOption = task.votedOption;
   // const totalVotes = Object.values(task.votes || {}).reduce((a, b) => a + b, 0);
-  const [option1, option2] = task.options;
-  const vote1 = task.votes?.[option1]?.count ?? 0;
-  const vote2 = task.votes?.[option2]?.count ?? 0;
-  const totalVotes = vote1 + vote2;
 
-  const percent1 = totalVotes > 0 ? (vote1 / totalVotes) * 100 : 0;
-  const percent2 = totalVotes > 0 ? (vote2 / totalVotes) * 100 : 0;
+  const { option1, option2, vote1, vote2, percent1, percent2, totalVotes } = useVoteStats(task);
 
-  console.log('vote1,', vote1)
-  console.log('vote2,', vote2)
+  // const [option1, option2] = task.options;
+  // const vote1 = task.votes?.[option1]?.count ?? 0;
+  // const vote2 = task.votes?.[option2]?.count ?? 0;
+  // const totalVotes = vote1 + vote2;
+  const { user } = useAuth();
+  console.log('task' + task.text, task);
+  // const percent1 = totalVotes > 0 ? (vote1 / totalVotes) * 100 : 0;
+  // const percent2 = totalVotes > 0 ? (vote2 / totalVotes) * 100 : 0;
 
-  console.log('percent1', percent1)
-  console.log('percent2', percent2)
-  console.log({ vote1, vote2, totalVotes, percent1, percent2 });
-  const progress1 = useRef(new Animated.Value(0)).current;
-  const progress2 = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(progress1, {
-      toValue: percent1,
-      duration: 600,
-      useNativeDriver: false,
-    }).start();
-
-    Animated.timing(progress2, {
-      toValue: percent2,
-      duration: 600,
-      useNativeDriver: false,
-    }).start();
-  }, [percent1, percent2]);
-
+  const getFontSize = (text: string) => {
+    if (text.length > 18) return ms(12); // very long
+    if (text.length > 14) return ms(13); // medium
+    return ms(14); // short
+  };
   return (
     <TouchableOpacity style={cardStyles.card} activeOpacity={0.7} onPress={() => onPressCard(task)}>
       {/* Header with avatar and time */}
@@ -90,15 +81,15 @@ export default function DecisionCard({ task, onPressCard, onPressSuggest, onPres
       </View>
 
       {/* Options OR Vote Results */}
-      {votedOption ? (
-        // ✅ Show vote results
+      {/* Results */}
+      {votedOption || task.completed ? (
         <View style={{ marginTop: spacing.sm }}>
           <VoteProgressBar
             option1={option1}
             option2={option2}
             percent1={percent1}
             percent2={percent2}
-            votedOption={votedOption}
+            votedOption={votedOption ?? undefined}
           />
         </View>
       ) : (
@@ -112,12 +103,25 @@ export default function DecisionCard({ task, onPressCard, onPressSuggest, onPres
               <OutlineButton
                 key={index}
                 title={`${val} (${percent}%)`}
-                onPress={() => castVote(val)}
+                onPress={() =>
+                  castVote({
+                    nextOption: val,
+                    prevOption: votedOption ?? undefined,
+                    me: {
+                      id: user!.id,
+                      name: user!.name,
+                      photo: user!.photo,
+                    },
+                  })
+                }
                 disabled={isPending}
                 style={StyleSheet.flatten([
                   styles.buttonHalf,
                   { marginRight: index === 0 ? spacing.sm : 0 },
                 ])}
+                textStyle={{
+                  fontSize: getFontSize(`${val} (${percent}%)`),
+                }}
               />
             );
           })}
@@ -147,6 +151,8 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   buttonGroup: {
+    flexWrap: 'nowrap', // 👈 ensure they don’t wrap
+
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: spacing.sm,

@@ -48,9 +48,9 @@ export default function NotificationMainScreen() {
   const seenIdsRef = useRef<Set<string>>(new Set());
 
   const flushSeenIds = () => {
-    console.log('📦', queryClient.getQueryData([QueryKeys.Notification]));
+    // console.log('📦', queryClient.getQueryData([QueryKeys.Notification]));
     const ids = Array.from(seenIdsRef.current).filter(Boolean);
-    console.log('📌 Seen IDs:', ids);
+    // console.log('📌 Seen IDs:', ids);
     if (ids.length === 0) return;
     // ✅ Optimistically update cache
 

@@ -100,9 +100,9 @@ export async function fetchPhoneContacts(): Promise<ContactEmail[]> {
           console.log(contacts, 'from phone');
           for (const contact of contacts) {
             if (contact.emailAddresses?.length) {
-              for (const { email } of contact.emailAddresses) {
-                if (email) {
-                  result.push({ email: email.toLowerCase(), source: 'phone' });
+              for (const { value } of contact.emailAddresses) {
+                if (value) {
+                  result.push({ email: value.toLowerCase(), source: 'phone' });
                 }
               }
             }

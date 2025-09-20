@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text, Button, Alert, Image, StyleSheet, Dimensions } from 'react-native';
-import { useAuth } from '../authProvider';
+import { View, Text, Button, Alert, Image, StyleSheet, Dimensions, Platform } from 'react-native';
+import { useAuth } from '../AuthProvider';
 import { api } from '@shared/api/axios';
 import { moderateScale } from 'react-native-size-matters';
 import { Layout } from '@shared/components/Layout';
@@ -17,6 +17,7 @@ const { width, height } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const { user, signIn, signOut, loading } = useAuth();
+  const LOCALHOST = Platform.OS === 'android' ? 'http://10.0.2.2:3001' : 'http://localhost:3001';
 
   async function pingServer() {
     console.log('Google Signin config:', await GoogleSignin.getCurrentUser());
@@ -29,7 +30,20 @@ export default function LoginScreen() {
         console.warn('⚠️ Health check returned non-OK', res);
       }
     } catch (err) {
-      console.error('❌ Cannot reach backend:', err);
+      console.error('❌ Cannot reach backend via axios baseURL:', err);
+    }
+
+    try {
+      const res = await fetch(`${LOCALHOST}/test-db`);
+      const data = await res.json();
+
+      if (data.connected) {
+        console.log('✅ Mobile app connected to backend + DB', data.users);
+      } else {
+        console.log('❌ Connection failed:', data.error);
+      }
+    } catch (err) {
+      console.error('❌ Error fetching /test-db:', err);
     }
   }
   useEffect(() => {
@@ -126,7 +140,7 @@ export default function LoginScreen() {
               // setIsLoading(true);
             }
           }}
-          // icon={<Icon name="google" color={'white'} iconStyle="brand" />}
+        // icon={<Icon name="google" color={'white'} iconStyle="brand" />}
         />
       </View>
       <Height size={20} />

@@ -9,8 +9,9 @@ export enum QueryKeys {
   Notification = 'notification',
   MyProfile = 'my-profile',
   SearchFriends = 'search-friends',
-  FriendProfile = 'friend-profile', // ✅ NEW
-  Votes = 'votes', // ✅ NEW for vote feature
+  FriendProfile = 'friend-profile',
+  Votes = 'votes',
+  Comments = 'comments', // ✅ NEW for comments
 }
 
 export const buildQueryKey = {
@@ -31,4 +32,5 @@ export const buildQueryKey = {
   ],
   friendProfile: (id: string) => [QueryKeys.FriendProfile, id],
   votesForTask: (taskId: string) => [QueryKeys.Votes, taskId],
+  commentsForTask: (taskId: string) => [QueryKeys.Comments, taskId],
 };

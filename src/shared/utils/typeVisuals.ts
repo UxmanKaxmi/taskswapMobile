@@ -3,6 +3,7 @@
 export type TaskCategoryType =
   | 'reminder'
   | 'decision'
+  | 'decision-done'
   | 'motivation'
   | 'advice'
   | 'follow'
@@ -28,8 +29,9 @@ export type VisualInfo = {
 export const typeVisuals: Record<TaskCategoryType, VisualInfo> = {
   reminder: { emoji: '🕒', color: '#FF9800' },
   decision: { emoji: '🧠', color: '#00BCD4' },
+  'decision-done': { emoji: '✅', color: '#00BCD4' },
   motivation: { emoji: '🚀', color: '#4CAF50' },
-  advice: { emoji: '💡', color: '#FFC107' }, // 💡 is a yellow bulb emoji
+  advice: { emoji: '💡', color: '#FFC107' },
   follow: { emoji: '➕', color: '#4CAF50' },
   comment: { emoji: '💬', color: '#2196F3' },
   task: { emoji: '📝', color: '#9C27B0' },

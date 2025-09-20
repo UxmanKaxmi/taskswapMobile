@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import AuthNavigator from './AuthNavigator';
 import { AppNavigator } from './AppNavigator';
 import { MainStackParamList } from 'navigation/navigation';
-import { useAuth } from '@features/Auth/authProvider';
+import { useAuth } from '@features/Auth/AuthProvider';
 import { ActivityIndicator, View } from 'react-native';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();

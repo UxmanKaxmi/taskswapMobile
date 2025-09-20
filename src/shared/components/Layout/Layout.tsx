@@ -1,6 +1,13 @@
-import React, { ReactNode } from 'react';
-import { View, StatusBar, StyleSheet, ViewStyle } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets, Edge } from 'react-native-safe-area-context';
+import React, { ReactNode, forwardRef } from 'react';
+import {
+  View,
+  StyleSheet,
+  ViewStyle,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '@shared/theme';
 import { isAndroid } from '@shared/utils/constants';
 
@@ -14,44 +21,77 @@ type LayoutProps = {
   scrollable?: boolean;
   scrollViewProps?: object;
   allowPadding?: boolean;
+  footerContent?: ReactNode;
+  footerHeight?: number;
 };
 
-export default function Layout({
-  children = null,
-  style = {},
-  variant = 'auto',
-  backgroundColor = colors.background,
-  useSafeArea = true,
-  statusBarHidden = false,
-  scrollable = false,
-  scrollViewProps = {},
-  allowPadding = true,
-  ...otherProps
-}: LayoutProps) {
-  const insets = useSafeAreaInsets();
-  const Container = useSafeArea ? SafeAreaView : View;
+// ✅ forwardRef so parent can call scrollToEnd
+const Layout = forwardRef<ScrollView, LayoutProps>(
+  (
+    {
+      children = null,
+      style = {},
+      variant = 'auto',
+      backgroundColor = colors.background,
+      useSafeArea = true,
+      statusBarHidden = false,
+      scrollable = false,
+      scrollViewProps = {},
+      allowPadding = true,
+      footerContent = null,
+      footerHeight = 64,
+      ...otherProps
+    },
+    ref,
+  ) => {
+    const insets = useSafeAreaInsets();
+    const Container = useSafeArea ? SafeAreaView : View;
 
-  return (
-    <View style={[styles.outerContainer, { backgroundColor }]}>
-      {/* <StatusBar
-        barStyle={variant === 'light' ? 'dark-content' : 'light-content'}
-        backgroundColor="transparent"
-        hidden={statusBarHidden}
-        translucent
-      /> */}
-
-      <Container
-        edges={['top', 'left', 'right', 'top']}
-        style={[styles.container, allowPadding && styles.padded, style]}
-        {...otherProps}
+    const content = scrollable ? (
+      <ScrollView
+        ref={ref} // 👈 expose ref here
+        bounces={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[
+          allowPadding && styles.padded,
+          { paddingBottom: footerContent ? insets.bottom : insets.bottom },
+        ]}
+        showsVerticalScrollIndicator={false}
+        {...scrollViewProps}
       >
         {children}
-      </Container>
+      </ScrollView>
+    ) : (
+      <View style={[styles.flex, allowPadding && styles.padded]}>{children}</View>
+    );
 
-      {/* {insets.bottom > 0 && <View style={{ height: insets.bottom, backgroundColor }} />} */}
-    </View>
-  );
-}
+    return (
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
+        <View style={[styles.outerContainer, { backgroundColor }]}>
+          <Container
+            edges={['top', 'left', 'right']}
+            style={[styles.container, allowPadding && styles.padded, style]}
+            {...otherProps}
+          >
+            {content}
+
+            {footerContent && (
+              <View style={[styles.footer, { paddingBottom: insets.bottom || spacing.sm }]}>
+                {footerContent}
+              </View>
+            )}
+          </Container>
+        </View>
+      </KeyboardAvoidingView>
+    );
+  },
+);
+
+export default Layout;
 
 const styles = StyleSheet.create({
   outerContainer: {
@@ -64,6 +104,15 @@ const styles = StyleSheet.create({
   },
   padded: {
     paddingVertical: isAndroid ? spacing.md : 0,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
+  },
+  footer: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+    backgroundColor: colors.background,
+    paddingTop: spacing.sm,
+  },
+  flex: {
+    flex: 1,
   },
 });

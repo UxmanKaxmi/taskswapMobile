@@ -3,21 +3,20 @@ import { View, ViewStyle, StyleSheet } from 'react-native';
 import { useTheme } from '@shared/theme/useTheme';
 
 type Props = {
-    /** Child components to display inside the row */
-    children: ReactNode;
-    /** Spacing between children */
-    gap?: number;
-    /** Horizontal alignment of children */
-    align?: ViewStyle['alignItems'];
-    /** Main-axis distribution of children */
-    justify?: ViewStyle['justifyContent'];
-    /** Custom styles to override or extend the row */
-    style?: ViewStyle;
-    /** Flex value to apply to the row container */
-    flex?: boolean | number;
-    /** Whether the row should take full width */
-    fullWidth?: boolean;
-
+  /** Child components to display inside the row */
+  children: ReactNode;
+  /** Spacing between children */
+  gap?: number;
+  /** Horizontal alignment of children */
+  align?: ViewStyle['alignItems'];
+  /** Main-axis distribution of children */
+  justify?: ViewStyle['justifyContent'];
+  /** Custom styles to override or extend the row */
+  style?: ViewStyle;
+  /** Flex value to apply to the row container */
+  flex?: boolean | number;
+  /** Whether the row should take full width */
+  fullWidth?: boolean;
 };
 
 /**
@@ -33,39 +32,38 @@ type Props = {
  * </Row>
  */
 export default function Row({
-    children,
-    gap = 0,
-    align = 'center',
-    justify = 'center',
-    style,
-    flex = false,
-    fullWidth = false,
+  children,
+  gap = 0,
+  align = 'center',
+  justify = 'center',
+  style,
+  flex = false,
+  fullWidth = false,
 }: Props) {
-    const theme = useTheme();
+  const theme = useTheme();
 
-    return (
-        <View
-            style={[
-                styles.row,
+  return (
+    <View
+      style={[
+        styles.row,
 
-                {
-                    gap: gap || theme.spacing.sm,
-                    alignItems: align,
-                    justifyContent: justify,
-                    flex: typeof flex === 'boolean' ? (flex ? 1 : 0) : flex,
-                    ...(fullWidth && { width: '100%', alignSelf: 'stretch' }),
-
-                },
-                style,
-            ]}
-        >
-            {children}
-        </View>
-    );
+        {
+          gap: gap || theme.spacing.sm,
+          alignItems: align,
+          justifyContent: justify,
+          flex: typeof flex === 'boolean' ? (flex ? 1 : 0) : flex,
+          ...(fullWidth && { width: '100%', alignSelf: 'stretch' }),
+        },
+        style,
+      ]}
+    >
+      {children}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    row: {
-        flexDirection: 'row',
-    },
+  row: {
+    flexDirection: 'row',
+  },
 });

@@ -137,7 +137,9 @@ function shadeColor(hex: string, percent: number) {
 const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
-    paddingVertical: moderateScale(15),
+    alignItems: 'center', // 👈 Add this
+    justifyContent: 'center', // 👈 Ensure centered
+    paddingVertical: moderateScale(12), // 👈 Optional tweak
     paddingHorizontal: moderateScale(24),
     borderRadius: 10,
     borderWidth: 1,
@@ -146,13 +148,13 @@ const styles = StyleSheet.create({
   },
   content: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'center', // 👈 Crucial for vertical centering
     justifyContent: 'center',
     width: '100%',
   },
   text: {
-    fontSize: moderateScale(16),
-    fontWeight: '700',
+    fontSize: moderateScale(16), // 👈 Slightly smaller may help
+    fontWeight: '600', // 👈 Optional tweak for balance
   },
   iconWrapper: {
     marginRight: 8,

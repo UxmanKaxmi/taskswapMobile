@@ -8,7 +8,7 @@ import { spacing, colors } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 import TextElement from '@shared/components/TextElement/TextElement';
 import ProfileHeader from '../components/ProfileHeader';
-import { useAuth } from '@features/Auth/authProvider';
+import { useAuth } from '@features/Auth/AuthProvider';
 import ListView from '@shared/components/ListView/ListView';
 import StatsAchievements from '../components/StatsAchievements';
 import ProfileMenu from '../components/ProfileMenu';

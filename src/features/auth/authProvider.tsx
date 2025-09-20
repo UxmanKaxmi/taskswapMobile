@@ -1,4 +1,4 @@
-// src/features/auth/authProvider.tsx
+// src/features/auth/AuthProvider.tsx
 import React, {
   createContext,
   useState,
@@ -16,6 +16,7 @@ import { initializeNotifications } from '@lib/notifications/initNotifications';
 import { getMessaging } from '@react-native-firebase/messaging';
 import { isAndroid } from '@shared/utils/constants';
 import { queryClient } from '@lib/react-query/client';
+import { registerSignOut } from '@shared/api/authBridge';
 
 type User = {
   id: string;
@@ -128,6 +129,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       message: 'See you again soon!',
     });
   };
+
+  useEffect(() => {
+    registerSignOut(signOut);
+  }, [signOut]);
 
   return (
     <AuthContext.Provider

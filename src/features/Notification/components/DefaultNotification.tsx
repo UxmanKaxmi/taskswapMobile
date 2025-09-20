@@ -7,6 +7,8 @@ import DefaultNotification from './DefaultNotification';
 
 import type { NotificationDTO } from '../types/notification.types';
 import GenericNotification from './GenericNotification';
+import DecisionDone from './DecisionDone';
+import CommentMention from './CommentMention';
 
 type Props = {
   item: NotificationDTO;
@@ -14,6 +16,7 @@ type Props = {
 };
 
 export default function NotificationCard({ item, onPress }: Props) {
+  console.log(item.type);
   switch (item.type) {
     case 'follow':
       return <FollowNotification item={item} onPress={onPress} />;
@@ -21,6 +24,10 @@ export default function NotificationCard({ item, onPress }: Props) {
       return <ReminderNotification item={item} onPress={onPress} />;
     case 'task':
       return <TaskNotification item={item} onPress={onPress} />;
+    case 'decision-done':
+      return <DecisionDone item={item} onPress={onPress} />;
+    case 'comment':
+      return <CommentMention item={item} onPress={onPress} />;
     default:
       return <GenericNotification item={item} onPress={onPress} />;
   }

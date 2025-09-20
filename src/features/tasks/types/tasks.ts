@@ -58,3 +58,24 @@ export type Voter = {
   name: string;
   photo?: string;
 };
+
+// comment.ts
+export type TaskComment = {
+  id: string;
+  taskId: string;
+  userId: string;
+  text: string;
+  createdAt: string;
+  updatedAt?: string;
+  user: { id: string; name: string; photo?: string };
+
+  // 👍 likes
+  likesCount: number; // total hearts
+  likedByMe: boolean; // current user liked?
+};
+
+// For toggling like
+export interface ToggleCommentLikePayload {
+  commentId: string;
+  like: boolean; // true = like, false = unlike
+}

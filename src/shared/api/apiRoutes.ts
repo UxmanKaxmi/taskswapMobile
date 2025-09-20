@@ -6,7 +6,8 @@ export enum ApiRoute {
   USERS = '/users',
   REMINDER_NOTES = '/reminderNote',
   NOTIFICATION = '/notification',
-  VOTE = '/vote', // ✅ Added
+  VOTE = '/vote',
+  COMMENTS = '/comments',
 }
 
 // ✅ Builder functions for dynamic API routes
@@ -15,8 +16,8 @@ export const buildRoute = {
   task: (id: string) => `${ApiRoute.TASKS}/${id}`,
   completeTask: (id: string) => `${ApiRoute.TASKS}/${id}/complete`,
   uncompleteTask: (id: string) => `${ApiRoute.TASKS}/${id}/incomplete`,
-  // 📌 User Routes
 
+  // 📌 User Routes
   user: (id: string) => `${ApiRoute.USERS}/${id}`,
   syncUserToDb: () => `${ApiRoute.USERS}`,
   matchUsers: () => `${ApiRoute.USERS}/match`,
@@ -40,9 +41,15 @@ export const buildRoute = {
   getAllNotifications: () => `${ApiRoute.NOTIFICATION}`,
   markNotificationAsReadById: (notificationId: string) =>
     `${ApiRoute.NOTIFICATION}/${notificationId}/read`,
-  markNotificationBatch: () => `${ApiRoute.NOTIFICATION}/mark-many-read`, // ✅ Add this
+  markNotificationBatch: () => `${ApiRoute.NOTIFICATION}/mark-many-read`,
 
   // 📌 Vote Routes ✅
   castVote: (taskId: string) => `${ApiRoute.VOTE}/tasks/${taskId}/vote`,
   getVotes: (taskId: string) => `${ApiRoute.VOTE}/tasks/${taskId}/votes`,
+
+  // 📌 Comment Routes ✅
+  getComments: (taskId: string) => `${ApiRoute.COMMENTS}/${taskId}`,
+  addComment: () => `${ApiRoute.COMMENTS}`,
+  likeComment: (commentId: string) => `${ApiRoute.COMMENTS}/${commentId}/like`,
+  toggleCommentLike: () => `${ApiRoute.COMMENTS}/like`,
 };

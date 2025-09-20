@@ -7,7 +7,7 @@ import { spacing, colors } from '@shared/theme';
 
 import { ms, vs } from 'react-native-size-matters';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { useAuth } from '@features/Auth/authProvider';
+import { useAuth } from '@features/Auth/AuthProvider';
 import ListView from '@shared/components/ListView/ListView';
 import FriendsProfileHeader from '../components/FriendsProfileHeader';
 import { useFriendProfile } from '../hooks/useFriendProfile';

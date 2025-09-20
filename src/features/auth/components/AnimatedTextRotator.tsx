@@ -32,7 +32,6 @@ export default function AnimatedTextRotator({ messages, interval = 3000, textSty
 
   useEffect(() => {
     animate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   return (

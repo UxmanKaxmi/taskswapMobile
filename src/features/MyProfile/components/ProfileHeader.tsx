@@ -109,6 +109,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: spacing.sm,
     padding: spacing.md,
+    paddingHorizontal: 0,
+
     paddingBottom: 0,
     // elevation: 2,
     // shadowColor: '#000',

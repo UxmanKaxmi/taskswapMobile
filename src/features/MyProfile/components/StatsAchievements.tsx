@@ -86,7 +86,6 @@ const styles = StyleSheet.create({
     borderRadius: spacing.sm,
     paddingBottom: 0,
     paddingTop: 10,
-
     // shadow
   },
   header: {
@@ -98,6 +97,7 @@ const styles = StyleSheet.create({
   statsRow: {},
   statItem: {
     alignItems: 'center',
+    // backgroundColor: 'red',
     flex: 1,
   },
   statNumber: {

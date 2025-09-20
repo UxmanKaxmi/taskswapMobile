@@ -19,7 +19,7 @@ import { useInCompleteTask } from '../hooks/useInCompleteTask';
 import Icon from '@shared/components/Icons/Icon';
 import { Height, Width } from '@shared/components/Spacing';
 import ReminderMessageModal from '@shared/components/Modals/ReminderMessageModal';
-import { useAuth } from '@features/Auth/authProvider';
+import { useAuth } from '@features/Auth/AuthProvider';
 import { useAddReminder } from '../hooks/useAddTask';
 import { getTypeVisual } from '@shared/utils/typeVisuals';
 import { formatDistanceToNow, isBefore, parseISO } from 'date-fns';

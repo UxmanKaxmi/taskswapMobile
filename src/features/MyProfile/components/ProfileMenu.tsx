@@ -6,7 +6,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import Row from '@shared/components/Layout/Row';
 import { spacing, colors, typography } from '@shared/theme';
-import { useAuth } from '@features/Auth/authProvider';
+import { useAuth } from '@features/Auth/AuthProvider';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppNavigationProp, MainStackParamList } from 'navigation/navigation';
 
@@ -21,7 +21,7 @@ type Props = {};
 /**
  * Profile menu that takes a dynamic list of items with icons and callbacks.
  */
-export default function ProfileMenu({}: Props) {
+export default function ProfileMenu() {
   const { signOut } = useAuth();
   const navigation = useNavigation<AppNavigationProp>();
   const handleLogout = async () => {
@@ -87,7 +87,7 @@ export default function ProfileMenu({}: Props) {
           <Row align="center" justify="space-between" style={styles.innerRow}>
             <Row align="center">
               <Icon
-                set="ion"
+                set="fa6"
                 name={item.icon}
                 size={20}
                 color={colors.primary}
@@ -113,6 +113,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: spacing.sm,
     overflow: 'hidden',
+    paddingHorizontal: 0,
     // subtle shadow
   },
   row: {
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderColor: colors.border,
@@ -131,7 +132,6 @@ const styles = StyleSheet.create({
   innerRow: {
     flex: 1,
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
   },
   icon: {

@@ -9,6 +9,7 @@ import {
   ViewStyle,
   TextStyle,
   Animated,
+  Platform,
 } from 'react-native';
 import { colors, spacing, typography } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -164,11 +165,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   input: {
-    padding: spacing.sm,
+    paddingHorizontal: spacing.sm,
     fontSize: typography.caption,
     marginBottom: spacing.xs,
-    height: 60,
-    textAlignVertical: 'top',
+    // height: 60,
+    lineHeight: 20,
+    textAlignVertical: 'center',
   },
   charCount: {
     alignSelf: 'flex-end',

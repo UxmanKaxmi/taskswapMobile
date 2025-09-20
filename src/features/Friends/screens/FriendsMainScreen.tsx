@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { View, LayoutAnimation, Platform, UIManager } from 'react-native';
 import FriendList from '../components/FriendList';
 import TabButton from '../components/TabButton';
 import { Layout } from '@shared/components/Layout';
@@ -9,7 +9,6 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { Height } from '@shared/components/Spacing';
 import { AppStackParamList } from 'navigation/navigation';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { LayoutAnimation, Platform, UIManager } from 'react-native';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);

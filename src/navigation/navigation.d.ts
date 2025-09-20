@@ -31,7 +31,11 @@ export type AppStackParamList = {
   Home: undefined;
   FindFriendsScreen: undefined;
   AddTask: { task?: Task } | undefined;
-  TaskDetail: { task: Task };
+  TaskDetail: {
+    taskId?: string;
+    task?: Task;
+    highlightCommentId?: string;
+  };
   FindFriendsMainScreen: undefined;
   NotificationMainScreen: undefined;
   MyProfileMainScreen: undefined;

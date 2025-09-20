@@ -3,6 +3,7 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Linking } from 'react-native';
 import { AppStackParamList } from './navigation';
+import { Task } from '@features/Tasks/types/tasks';
 
 /**
  * Typed navigation hook for convenience with AppStackParamList.
@@ -70,4 +71,8 @@ export function openFriendsProfile(
   friendId: string,
 ) {
   navigation.navigate('FriendsProfileScreen', { id: friendId });
+}
+
+export function navigateToTaskDetails(navigation: NavigationProp<AppStackParamList>, task: Task) {
+  navigation.navigate('TaskDetail', { task });
 }

@@ -8,7 +8,7 @@ import Icon from '@shared/components/Icons/Icon';
 import { spacing, colors, typography } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 
-export type FriendsStatsAchievements = {
+export type FriendsStatsAchievementsType = {
   // karmaPoints: number;
   tasksDone: number;
   dayStreak: number;
@@ -29,7 +29,7 @@ export default function FriendsStatsAchievements({
   //   { icon: 'fire', label: '7 Day Streak' },
   //   { icon: 'star', label: 'Top Rated' },
   // ],
-}: FriendsStatsAchievements) {
+}: FriendsStatsAchievementsType) {
   return (
     <View style={styles.card}>
       {/* <TextElement variant="subtitle" weight="600" style={styles.header}>

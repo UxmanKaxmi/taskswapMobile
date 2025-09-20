@@ -2,31 +2,47 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Avatar from '@shared/components/Avatar/Avatar';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { spacing } from '@shared/theme';
-import { getTypeVisual } from '@shared/utils/typeVisuals';
+import { colors, spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
-import type { NotificationDTO } from '../types/notification.types';
+import { NotificationDTO } from '../types/notification.types';
+import { getTypeVisual } from '@shared/utils/typeVisuals';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/navigation';
 
-type Props = {
+interface Props {
   item: NotificationDTO;
   onPress: () => void;
-};
+}
 
-export default function FollowNotification({ item }: Props) {
-  const { emoji } = getTypeVisual(item.type);
+export default function CommentMention({ item, onPress }: Props) {
+  const { emoji, color } = getTypeVisual(item.type);
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
   const handlePress = () => {
-    navigation.navigate('FriendsProfileScreen', { id: item?.sender?.id ?? '' });
+    console.log('item', item?.metadata?.taskId);
+    navigation.navigate('TaskDetail', {
+      taskId: item?.metadata?.taskId ?? '',
+      highlightCommentId: item.metadata?.commentId, // 👈 pass the comment id
+    });
   };
   return (
-    <TouchableOpacity onPress={handlePress} style={styles.row}>
+    <TouchableOpacity
+      onPress={handlePress}
+      style={[
+        styles.row,
+        {
+          backgroundColor: item.read ? colors.background : colors.adviceBg,
+        },
+      ]}
+    >
       <Avatar uri={item.sender?.photo} fallback={item.sender?.name} />
       <View style={styles.textContainer}>
         <TextElement variant="body">
-          <TextElement weight="bold">{item.sender?.name || 'Someone'}</TextElement> followed you
+          <TextElement weight="bold">{item.sender?.name || 'Someone'}</TextElement> {item.message}
+          {'\n'}
+          <TextElement variant="body" style={styles.quotedText}>
+            “{item.metadata?.commentText}”
+          </TextElement>
         </TextElement>
         <TextElement variant="caption" color="muted">
           {timeAgo(item.createdAt)}
@@ -39,6 +55,11 @@ export default function FollowNotification({ item }: Props) {
 }
 
 const styles = StyleSheet.create({
+  quotedText: {
+    fontStyle: 'italic',
+    marginBottom: spacing.sm,
+    color: colors.primary,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
