@@ -136,7 +136,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
             screen: 'Home',
           });
         },
-        onError: () => { },
+        onError: () => {},
       });
     }
   };
@@ -148,9 +148,9 @@ export default function AddTaskScreen({ route, navigation }: Props) {
       newErrors.description = 'Description is required.';
     }
 
-    // if (['reminder', 'motivation'].includes(type) && remindAt < twoHoursLater) {
-    //   newErrors.remindAt = 'Please select a time at least 2 hours from now.';
-    // }
+    if (['reminder', 'motivation'].includes(type) && remindAt < twoHoursLater) {
+      newErrors.remindAt = 'Please select a time at least 2 hours from now.';
+    }
     if (type === 'decision') {
       const newOptionErrors = options.map(opt => (opt.trim() === '' ? 'Required' : ''));
 
@@ -188,7 +188,19 @@ export default function AddTaskScreen({ route, navigation }: Props) {
                 <TextElement color="text" weight="600" variant="title" style={styles.label}>
                   Task Type
                 </TextElement>
-                <TaskTypeSelector selected={type} onSelect={setType} />
+                <TaskTypeSelector
+                  selected={type}
+                  onSelect={nextType => {
+                    if (['motivation', 'advice'].includes(nextType)) {
+                      showToast({
+                        type: 'info',
+                        title: 'This feature is under development 🚧',
+                      });
+                      return; // 🚫 Don’t update state
+                    }
+                    setType(nextType);
+                  }}
+                />
 
                 <TaskDescriptionInput
                   error={errors.description}

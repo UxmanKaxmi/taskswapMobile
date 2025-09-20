@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   buttonsRow: {},
   editBtn: {
-    height: verticalScale(30),
+    // height: verticalScale(30),
     flex: 1,
     // marginRight: spacing.sm,
     borderRadius: spacing.sm,

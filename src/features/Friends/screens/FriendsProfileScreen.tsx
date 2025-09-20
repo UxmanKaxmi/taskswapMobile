@@ -60,7 +60,7 @@ export default function FriendsProfileScreen() {
   };
 
   return (
-    <Layout>
+    <Layout useSafeArea={isAndroid ? false : true}>
       <AppHeader />
 
       {isLoading && <AppLoader visible />}
