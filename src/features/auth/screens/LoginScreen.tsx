@@ -34,8 +34,8 @@ export default function LoginScreen() {
     }
 
     try {
-      const res = await fetch(`${LOCALHOST}/test-db`);
-      const data = await res.json();
+      const res = await api.get(`${LOCALHOST}/test-db`);
+      const data = res.data;
 
       if (data.connected) {
         console.log('✅ Mobile app connected to backend + DB', data.users);
@@ -140,7 +140,7 @@ export default function LoginScreen() {
               // setIsLoading(true);
             }
           }}
-        // icon={<Icon name="google" color={'white'} iconStyle="brand" />}
+          // icon={<Icon name="google" color={'white'} iconStyle="brand" />}
         />
       </View>
       <Height size={20} />

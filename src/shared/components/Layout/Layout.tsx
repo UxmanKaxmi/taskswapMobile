@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '@shared/theme';
-import { isAndroid } from '@shared/utils/constants';
+import { isAndroid, isIOS } from '@shared/utils/constants';
 
 type LayoutProps = {
   children?: ReactNode;
@@ -23,6 +23,7 @@ type LayoutProps = {
   allowPadding?: boolean;
   footerContent?: ReactNode;
   footerHeight?: number;
+  edgesProp?: Array<'top' | 'bottom' | 'left' | 'right'>;
 };
 
 // ✅ forwardRef so parent can call scrollToEnd
@@ -40,12 +41,19 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
       allowPadding = true,
       footerContent = null,
       footerHeight = 64,
+      edgesProp = [],
       ...otherProps
     },
     ref,
   ) => {
     const insets = useSafeAreaInsets();
     const Container = useSafeArea ? SafeAreaView : View;
+    const edges = useSafeArea
+      ? isIOS
+        ? (['top', 'left', 'right'] as const)
+        : (['left', 'right'] as const)
+      : [];
+    const finalEdges = Array.isArray(edgesProp) && edgesProp.length > 0 ? edgesProp : edges;
 
     const content = scrollable ? (
       <ScrollView
@@ -73,7 +81,7 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
       >
         <View style={[styles.outerContainer, { backgroundColor }]}>
           <Container
-            edges={['top', 'left', 'right']}
+            edges={finalEdges}
             style={[styles.container, allowPadding && styles.padded, style]}
             {...otherProps}
           >

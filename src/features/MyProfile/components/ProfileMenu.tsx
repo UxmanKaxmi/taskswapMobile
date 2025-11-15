@@ -8,12 +8,13 @@ import Row from '@shared/components/Layout/Row';
 import { spacing, colors, typography } from '@shared/theme';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppNavigationProp, MainStackParamList } from 'navigation/navigation';
+import { AppNavigationProp, MainStackParamList } from '@navigation/types/navigation';
 
 export type MenuItem = {
   label: string;
   icon: React.ComponentProps<typeof Icon>['name'];
   onPress: () => void;
+  iconSet: React.ComponentProps<typeof Icon>['set'];
 };
 
 type Props = {};
@@ -41,6 +42,7 @@ export default function ProfileMenu() {
       onPress: () => {
         navigation.navigate('FindFriendsScreen');
       },
+      iconSet: 'ion',
     },
     {
       label: 'Saved Tasks',
@@ -48,13 +50,15 @@ export default function ProfileMenu() {
       onPress: () => {
         /* go to saved */
       },
+      iconSet: 'ion',
     },
     {
-      label: 'Billing',
-      icon: 'card',
+      label: 'Invite Friends',
+      icon: 'people-group',
       onPress: () => {
-        /* go to billing*/
+        navigation.navigate('InviteFriendsScreen');
       },
+      iconSet: 'fa6',
     },
     {
       label: 'Help Center',
@@ -62,16 +66,20 @@ export default function ProfileMenu() {
       onPress: () => {
         /* go to help  */
       },
+      iconSet: 'ion',
     },
     {
       label: 'Debug Notification',
-      icon: 'debug',
+      icon: 'arrow-down-left-box-outline',
       onPress: () => navigation.navigate('MainDebugScreen'),
+      iconSet: 'ion',
     },
+
     {
       label: 'Log Out',
       icon: 'log-out',
       onPress: () => handleLogout(),
+      iconSet: 'ion',
     },
   ] as const; // ← keep the literal types
 
@@ -86,13 +94,25 @@ export default function ProfileMenu() {
         >
           <Row align="center" justify="space-between" style={styles.innerRow}>
             <Row align="center">
-              <Icon
-                set="fa6"
-                name={item.icon}
-                size={20}
-                color={colors.primary}
-                style={styles.icon}
-              />
+              {/* Render Icon only if the set is supported */}
+              {item.iconSet === 'fa6' ? (
+                <Icon
+                  set="fa6"
+                  name={item.icon}
+                  size={20}
+                  color={colors.primary}
+                  style={styles.icon}
+                  iconStyle="solid"
+                />
+              ) : item.iconSet === 'ion' ? (
+                <Icon
+                  set="ion"
+                  name={item.icon}
+                  size={20}
+                  color={colors.primary}
+                  style={styles.icon}
+                />
+              ) : null}
               <TextElement variant="body" weight="500" style={styles.label}>
                 {item.label}
               </TextElement>

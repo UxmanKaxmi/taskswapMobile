@@ -7,7 +7,7 @@ import Row from '@shared/components/Layout/Row';
 import Search from '@shared/components/Search/Search';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Height } from '@shared/components/Spacing';
-import { AppStackParamList } from 'navigation/navigation';
+import { AppStackParamList } from '@navigation/types/navigation';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {

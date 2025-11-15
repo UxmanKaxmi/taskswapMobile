@@ -10,9 +10,9 @@ import DecisionCard from '@features/Home/components/DecisionCard';
 import ReminderCard from '@features/Home/components/ReminderCard';
 import MotivationCard from '@features/Home/components/MotivationCard';
 import AdviceCard from '@features/Home/components/AdviceCard';
-import { navigateToTaskDetails, openFriendsProfile } from '@navigation/navigationUtils';
+import { navigateToTaskDetails, openFriendsProfile } from '@navigation/types/navigationUtils';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '@navigation/navigation';
+import { AppStackParamList } from '@navigation/types/navigation';
 import { Task } from '@features/Tasks/types/tasks';
 
 type Props = {

@@ -16,7 +16,7 @@ import { ms, vs } from 'react-native-size-matters';
 import FindFriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
-import { AppStackParamList } from './navigation';
+import { AppStackParamList } from './types/navigation';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { useUnreadNotificationCount } from '@features/Notification/hooks/useUnreadNotificationCount';
 

@@ -24,7 +24,7 @@ export default function AppHeader({
   return (
     <View style={styles.container}>
       {showNavigation ? (
-        <TouchableOpacity onPress={navigation.goBack}>
+        <TouchableOpacity onPress={navigation.goBack} style={styles.leftSide}>
           <Icon set="ion" name="chevron-back" size={24} color={colors.tabActive} />
         </TouchableOpacity>
       ) : (
@@ -43,8 +43,7 @@ const styles = StyleSheet.create({
     height: ms(50),
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    // paddingHorizontal: spacing.md,
+    justifyContent: 'space-around',
     // borderBottomColor: colors.border,
   },
   title: {
@@ -52,8 +51,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     flex: 1,
+    // backgroundColor: 'green',
   },
   side: {
-    width: 24,
+    // width: ms(50),
+    // backgroundColor: 'blue',
+  },
+  leftSide: {
+    // width: ms(50),
+    left: -8,
+    justifyContent: 'flex-start',
+    // backgroundColor: 'red',
   },
 });

@@ -12,6 +12,7 @@ export enum QueryKeys {
   FriendProfile = 'friend-profile',
   Votes = 'votes',
   Comments = 'comments', // ✅ NEW for comments
+  ReferralLink = 'referral-link', // ✅ NEW
 }
 
 export const buildQueryKey = {
@@ -33,4 +34,5 @@ export const buildQueryKey = {
   friendProfile: (id: string) => [QueryKeys.FriendProfile, id],
   votesForTask: (taskId: string) => [QueryKeys.Votes, taskId],
   commentsForTask: (taskId: string) => [QueryKeys.Comments, taskId],
+  referralLink: () => [QueryKeys.ReferralLink],
 };

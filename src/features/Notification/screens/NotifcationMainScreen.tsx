@@ -15,7 +15,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing, colors } from '@shared/theme';
-import { AppStackParamList } from 'navigation/navigation';
+import { AppStackParamList } from '@navigation/types/navigation';
 import { useNotifications } from '../hooks/useNotifications';
 import { useBatchMarkNotificationsAsRead } from '../hooks/useBatchMarkNotificationsAsRead';
 import { timeAgo } from '@shared/utils/helperFunctions';
@@ -134,7 +134,7 @@ export default function NotificationMainScreen() {
   }
 
   return (
-    <Layout allowPadding={false}>
+    <Layout>
       {sections.length === 0 ? (
         <Row align="center" justify="center" flex>
           <EmptyState title="No notifications" subtitle="You're all caught up!" />
@@ -173,7 +173,7 @@ export default function NotificationMainScreen() {
 const styles = StyleSheet.create({
   sectionHeaderContainer: {
     paddingVertical: vs(12),
-    paddingHorizontal: spacing.md,
+    // paddingHorizontal: spacing.md,
 
     backgroundColor: colors.background,
   },
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.md,
+    // paddingHorizontal: spacing.md,
     // paddingVertical: spacing.sm,
     // backgroundColor: '#fff',
   },

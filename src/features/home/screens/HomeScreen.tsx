@@ -13,7 +13,7 @@ import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButto
 import { Layout } from '@shared/components/Layout';
 import { Height } from '@shared/components/Spacing';
 import { spacing, typography } from '@shared/theme';
-import { AppStackParamList } from 'navigation/navigation';
+import { AppStackParamList } from '@navigation/types/navigation';
 
 import ReminderCard from '../components/ReminderCard';
 import DecisionCard from '../components/DecisionCard';
@@ -24,7 +24,7 @@ import MotivationCard from '../components/MotivationCard';
 import AdviceCard from '../components/AdviceCard';
 import NotificationTester from '@features/Debug/NotificationTester';
 import { useAuth } from '@features/Auth/AuthProvider';
-import { navigateToTaskDetails } from '@navigation/navigationUtils';
+import { navigateToTaskDetails } from '@navigation/types/navigationUtils';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
@@ -128,7 +128,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <Layout allowPadding={false}>
+    <Layout allowPadding={false} edgesProp={['top', 'left', 'right']}>
       <Height size={15} />
       <HeadingText level={1}>Your Tasks</HeadingText>
       <View style={styles.filters}>

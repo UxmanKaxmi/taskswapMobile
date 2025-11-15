@@ -3,7 +3,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RouteProp, useRoute } from '@react-navigation/native';
 
-import { AppStackParamList, MainStackParamList } from 'navigation/navigation';
+import { AppStackParamList, MainStackParamList } from '@navigation/types/navigation';
 import TaskDetailScreen from '@features/Tasks/screens/TaskDetailScreen';
 import BottomTabs from './BottomTabs';
 import { LogoutButton } from '@features/Auth/components/LogoutButton';
@@ -16,6 +16,7 @@ import MainDebugScreen from '@features/Debug/MainDebugScreen';
 import { isAndroid, isIOS } from '@shared/utils/constants';
 import FriendsProfileScreen from '@features/Friends/screens/FriendsProfileScreen';
 import AddTaskScreen from '@features/Tasks/screens/AddTaskScreen';
+import InviteFriendsScreen from '@features/Invite/screens/InviteFriendsScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -39,6 +40,15 @@ export function AppNavigator() {
         component={FindFriendsScreen}
         options={{
           title: 'Find Friends',
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="InviteFriendsScreen"
+        component={InviteFriendsScreen}
+        options={{
+          title: 'Invite Friends',
           headerShown: false,
         }}
       />

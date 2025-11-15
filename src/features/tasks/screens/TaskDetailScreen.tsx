@@ -12,7 +12,7 @@ import {
   Task,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppStackParamList } from 'navigation/navigation';
+import { AppStackParamList } from '@navigation/types/navigation';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Layout } from '@shared/components/Layout';
@@ -34,7 +34,7 @@ import { showToast } from '@shared/utils/toast';
 import { useCompleteTask } from '@features/Home/hooks/useCompleteTask';
 import { queryClient } from '@lib/react-query/client';
 import { buildQueryKey } from '@shared/constants/queryKeys';
-import { openFriendsProfile } from '@navigation/navigationUtils';
+import { openFriendsProfile } from '@navigation/types/navigationUtils';
 import { colors, spacing } from '@shared/theme';
 import StackedVoteBar from '../components/StackedVoteBar';
 import AppLoader from '@shared/components/Loader/Loader';

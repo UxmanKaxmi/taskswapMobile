@@ -9,7 +9,7 @@ import { moderateScale, ms, vs } from 'react-native-size-matters';
 import { typography } from '@shared/theme';
 import Avatar from '@shared/components/Avatar/Avatar';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from 'navigation/navigation';
+import { AppStackParamList } from '@navigation/types/navigation';
 
 type Props = {
   name: string;

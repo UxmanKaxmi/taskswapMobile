@@ -11,8 +11,8 @@ import EmptyState from '@features/Empty/EmptyState';
 import { useSearchFriends } from '../hooks/useSearchFriends';
 import { useDebounce } from 'use-debounce';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from 'navigation/navigation';
-import { openFriendsProfile } from '@navigation/navigationUtils';
+import { AppStackParamList } from '@navigation/types/navigation';
+import { openFriendsProfile } from '@navigation/types/navigationUtils';
 
 type Friend = {
   id: string;

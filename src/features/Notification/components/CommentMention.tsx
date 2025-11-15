@@ -7,7 +7,7 @@ import { timeAgo } from '@shared/utils/helperFunctions';
 import { NotificationDTO } from '../types/notification.types';
 import { getTypeVisual } from '@shared/utils/typeVisuals';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '@navigation/navigation';
+import { AppStackParamList } from '@navigation/types/navigation';
 
 interface Props {
   item: NotificationDTO;

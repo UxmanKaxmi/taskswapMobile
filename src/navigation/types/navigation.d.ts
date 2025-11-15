@@ -1,6 +1,6 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Task } from '../features/Tasks/types/tasks';
+import { Task } from '../../features/Tasks/types/tasks';
 
 declare global {
   namespace ReactNavigation {
@@ -37,6 +37,7 @@ export type AppStackParamList = {
     highlightCommentId?: string;
   };
   FindFriendsMainScreen: undefined;
+  InviteFriendsScreen: undefined;
   NotificationMainScreen: undefined;
   MyProfileMainScreen: undefined;
   MainDebugScreen: undefined;

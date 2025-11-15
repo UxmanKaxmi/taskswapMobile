@@ -19,7 +19,7 @@ import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
 import ListView from '@shared/components/ListView/ListView';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
-import { AppStackParamList } from 'navigation/navigation';
+import { AppStackParamList } from '@navigation/types/navigation';
 import { TaskType, Task } from '@features/Tasks/types/tasks';
 import { showToast } from '@shared/utils/toast';
 import Icon from '@shared/components/Icons/Icon';

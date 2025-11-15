@@ -4,9 +4,9 @@ import axios, { AxiosRequestConfig, AxiosError, InternalAxiosRequestConfig } fro
 import { getSignOut } from './authBridge';
 import { Platform } from 'react-native';
 
-const BASE_URL = 'https://taskswapbackend.onrender.com';
+// const BASE_URL = 'http://localhost:3001';
 
-// const BASE_URL = Platform.OS === 'android' ? 'http://192.168.1.15:3001' : 'http://localhost:3001';
+const BASE_URL = Platform.OS === 'android' ? 'http://10.0.3.2:3001' : 'http://localhost:3001';
 export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   skipToast?: boolean;
 }

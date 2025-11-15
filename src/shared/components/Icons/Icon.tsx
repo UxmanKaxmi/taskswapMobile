@@ -60,5 +60,5 @@ export default function Icon({
     );
   }
 
-  return <Ionicons name={name as IoniconsName} size={size} color={iconColor} style={style} />;
+  return <Ionicons name={name as IoniconsName} size={size + 2} color={iconColor} style={style} />;
 }

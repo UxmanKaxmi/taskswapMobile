@@ -5,7 +5,11 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { useMatchUsers } from '../hooks/useMatchUsers';
 import FriendFollowRow from '../components/FriendsFollowRow';
 import { useNavigation } from '@react-navigation/native';
-import { AppNavigationProp, AppStackParamList, MainNavigationProp } from 'navigation/navigation';
+import {
+  AppNavigationProp,
+  AppStackParamList,
+  MainNavigationProp,
+} from '@navigation/types/navigation';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import { useAuth } from '@features/Auth/AuthProvider';
 import ListView from '@shared/components/ListView/ListView';
@@ -16,6 +20,7 @@ import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButto
 import { useToggleFollow } from '@features/User/hooks/useToggleFollow';
 import { queryClient } from '@lib/react-query/client';
 import { buildQueryKey } from '@shared/constants/queryKeys';
+import { Height } from '@shared/components/Spacing';
 
 export default function FindFriendsScreen() {
   const navigation = useNavigation<AppStackParamList>();
@@ -95,7 +100,7 @@ export default function FindFriendsScreen() {
         )}
         renderItem={({ item }) => (
           <FriendFollowRow
-            onPressRow={() => { }}
+            onPressRow={() => {}}
             isLoading={isPending && variables === item.id}
             photo={item.photo}
             name={item.name}
@@ -149,6 +154,7 @@ export default function FindFriendsScreen() {
           style={{ paddingHorizontal: spacing.md }}
         />
       )}
+      <Height size={20} />
     </Layout>
   );
 }

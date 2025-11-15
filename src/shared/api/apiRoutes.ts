@@ -8,6 +8,7 @@ export enum ApiRoute {
   NOTIFICATION = '/notification',
   VOTE = '/vote',
   COMMENTS = '/comments',
+  REFERRALS = '/referrals',
 }
 
 // ✅ Builder functions for dynamic API routes
@@ -43,13 +44,19 @@ export const buildRoute = {
     `${ApiRoute.NOTIFICATION}/${notificationId}/read`,
   markNotificationBatch: () => `${ApiRoute.NOTIFICATION}/mark-many-read`,
 
-  // 📌 Vote Routes ✅
+  // 📌 Vote Routes
   castVote: (taskId: string) => `${ApiRoute.VOTE}/tasks/${taskId}/vote`,
   getVotes: (taskId: string) => `${ApiRoute.VOTE}/tasks/${taskId}/votes`,
 
-  // 📌 Comment Routes ✅
+  // 📌 Comment Routes
   getComments: (taskId: string) => `${ApiRoute.COMMENTS}/${taskId}`,
   addComment: () => `${ApiRoute.COMMENTS}`,
   likeComment: (commentId: string) => `${ApiRoute.COMMENTS}/${commentId}/like`,
   toggleCommentLike: () => `${ApiRoute.COMMENTS}/like`,
+
+  // 📌 Referral / Invite Routes
+  referralLink: (channel?: 'sms' | 'whatsapp' | 'email') =>
+    `${ApiRoute.REFERRALS}/link${channel ? `?channel=${channel}` : ''}`,
+  rotateReferralLink: () => `${ApiRoute.REFERRALS}/link/rotate`,
+  attributeReferral: () => `${ApiRoute.REFERRALS}/attribute`,
 };

@@ -11,11 +11,13 @@
     "start": "react-native start --reset-cache",
     "test": "jest",
     "android-release": "cd android && ./gradlew assembleRelease",
+    "create-feature": "node createFeature.js",
     "ios-release": "xcodebuild -workspace ios/taskswapMobile.xcworkspace -scheme taskswapMobile -configuration Release -sdk iphoneos -derivedDataPath ios/build && ios-deploy --bundle ios/build/Build/Products/Release-iphoneos/taskswapMobile.app"
   },
   "dependencies": {
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^2.1.2",
+    "@react-native-clipboard/clipboard": "^1.16.3",
     "@react-native-community/datetimepicker": "^8.3.0",
     "@react-native-firebase/app": "^22.2.0",
     "@react-native-firebase/messaging": "^22.2.0",
