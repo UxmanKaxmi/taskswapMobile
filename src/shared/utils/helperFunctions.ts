@@ -1,7 +1,9 @@
 // utils/humanizeDate.ts
+import { Task } from '@features/Tasks/types/tasks';
 import { hasNotificationPermission } from '../../lib/notifications/NotificationPermissionPrompt';
 import { parseISO, formatDistanceToNow, format, isBefore, isToday } from 'date-fns';
 import { Dimensions } from 'react-native';
+import { AgendaSchedule } from 'react-native-calendars';
 
 /**
  * Returns a relative string like "3 hours ago"
@@ -137,4 +139,21 @@ export function formatReminderTime(isoDate: string): string {
   }
 
   return format(date, 'MMM d, yyyy • h:mm a'); // e.g., "Jun 1, 2025 • 9:00 PM"
+}
+
+export function convertTasksToAgendaItems(tasks: Task[]): AgendaSchedule<Task> {
+  return tasks.reduce((acc, task) => {
+    const dateSource = task.remindAt ?? task.deliverAt ?? task.createdAt;
+    const key = format(new Date(dateSource), 'yyyy-MM-dd');
+
+    if (!acc[key]) acc[key] = [];
+
+    acc[key].push({
+      ...task,
+      // AgendaEntry requires height; pick something that fits your cards
+      height: 110,
+    });
+
+    return acc;
+  }, {} as AgendaSchedule<Task>);
 }

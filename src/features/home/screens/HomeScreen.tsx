@@ -1,34 +1,34 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
 import { Task, TaskType } from '@features/Tasks/types/tasks';
 
 import TextElement from '@shared/components/TextElement/TextElement';
-import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import ListView from '@shared/components/ListView/ListView';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import HeadingText from '@shared/components/HeadingText';
-import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
 import { Layout } from '@shared/components/Layout';
 import { Height } from '@shared/components/Spacing';
 import { spacing, typography } from '@shared/theme';
 import { AppStackParamList } from '@navigation/types/navigation';
-
 import ReminderCard from '../components/ReminderCard';
 import DecisionCard from '../components/DecisionCard';
-import { AdviceTask, DecisionTask, MotivationTask, ReminderTask } from '../types/home';
-import { vs } from 'react-native-size-matters';
-import { showToast } from '@shared/utils/toast';
 import MotivationCard from '../components/MotivationCard';
 import AdviceCard from '../components/AdviceCard';
-import NotificationTester from '@features/Debug/NotificationTester';
+
+import { showToast } from '@shared/utils/toast';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { navigateToTaskDetails } from '@navigation/types/navigationUtils';
+import ViewToggle, { ViewMode } from '../components/ViewToggle';
 
+import { Agenda } from 'react-native-calendars';
+import { convertTasksToAgendaItems } from '@shared/utils/helperFunctions';
+import AgendaView from '../components/AgendaView';
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const [filter, setFilter] = useState<TaskType | 'all'>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('list'); // 👈 new
   const { data: allTasks = [], isLoading, isError, error, refetch } = useTasksQuery();
   const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
@@ -52,6 +52,7 @@ export default function HomeScreen() {
       refetch();
     }, [refetch]),
   );
+
   useEffect(() => {
     if (isError) {
       showToast({
@@ -66,10 +67,7 @@ export default function HomeScreen() {
   const openFriendsProfileScreen = useCallback(
     (id: string) => {
       if (id === user?.id) {
-        // ✅ Navigate to last profile tab instead
-        navigation.navigate('Tabs', {
-          screen: 'Profile',
-        });
+        navigation.navigate('Tabs', { screen: 'Profile' });
       } else {
         navigation.navigate('FriendsProfileScreen', { id });
       }
@@ -78,8 +76,6 @@ export default function HomeScreen() {
   );
 
   const renderTaskNew = ({ item }: { item: Task }) => {
-    console.log(item, 'ttt');
-
     switch (item.type) {
       case 'decision':
         return (
@@ -130,7 +126,13 @@ export default function HomeScreen() {
   return (
     <Layout allowPadding={false} edgesProp={['top', 'left', 'right']}>
       <Height size={15} />
-      <HeadingText level={1}>Your Tasks</HeadingText>
+
+      {/* Header row: title + view toggle */}
+      <View style={styles.headerRow}>
+        <HeadingText level={1}>Your Tasks</HeadingText>
+        <ViewToggle value={viewMode} onChange={setViewMode} />
+      </View>
+
       <View style={styles.filters}>
         <ListView
           scrollViewProps={{
@@ -152,38 +154,51 @@ export default function HomeScreen() {
         </ListView>
       </View>
 
-      <ListView
-        data={tasks}
-        renderItem={renderTaskNew}
-        flatListProps={{
-          keyExtractor: item => item.id,
-          ListEmptyComponent: (
-            <View style={{ flex: 1, alignItems: 'flex-start', marginLeft: 20 }}>
-              <Height size={20} />
-              <TextElement variant="body" color="muted">
-                {isLoading ? 'Loading tasks...' : 'No tasks found.'}
-              </TextElement>
-            </View>
-          ),
-          ListFooterComponent: <View style={{ backgroundColor: 'red' }} />,
-          ItemSeparatorComponent: () => <View style={styles.borderSeparator} />,
-        }}
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
-      />
-      {/* <AnimatedBottomButton
-        title="Add Task"
-        onPress={() => signOut()}
-        // onPress={() => navigation.navigate('FindFriendsScreen')}
-        style={styles.addButton}
-        visible={true}
-      /> */}
+      {/* For now it still renders the same list – next step we'll switch on viewMode */}
+      <View style={styles.contentWrapper}>
+        {viewMode === 'list' ? (
+          <ListView
+            data={tasks}
+            renderItem={renderTaskNew}
+            flatListProps={{
+              keyExtractor: item => item.id,
+              ListEmptyComponent: (
+                <View style={{ flex: 1, alignItems: 'flex-start', marginLeft: 20 }}>
+                  <Height size={20} />
+                  <TextElement variant="body" color="muted">
+                    {isLoading ? 'Loading tasks...' : 'No tasks found.'}
+                  </TextElement>
+                </View>
+              ),
+              ListFooterComponent: <View />,
+              ItemSeparatorComponent: () => <View style={styles.borderSeparator} />,
+            }}
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+          />
+        ) : (
+          <AgendaView
+            tasks={tasks}
+            isLoading={isLoading}
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            renderItem={renderTaskNew}
+          />
+        )}
+      </View>
     </Layout>
   );
 }
 
 const styles = StyleSheet.create({
   container: {},
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingEnd: spacing.md,
+    marginBottom: spacing.md,
+  },
   filters: {
     flexDirection: 'row',
   },
@@ -207,5 +222,8 @@ const styles = StyleSheet.create({
   },
   tagsText: {
     fontSize: typography.small,
+  },
+  contentWrapper: {
+    flex: 1,
   },
 });

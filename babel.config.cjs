@@ -1,5 +1,6 @@
 module.exports = function (api) {
   api.cache(true);
+
   return {
     presets: ['@react-native/babel-preset'],
     plugins: [
@@ -17,6 +18,9 @@ module.exports = function (api) {
           extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
         },
       ],
+
+      // MUST BE LAST
+      'react-native-reanimated/plugin',
     ],
   };
 };
