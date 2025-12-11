@@ -28,6 +28,11 @@ export const colors = {
   decisionBg: '#EDE7FF',
   motivationBg: '#E3FCEF',
 
+  reminderBgHard: '#FFE08A',
+  adviceBgHard: '#B3EBF0',
+  decisionBgHard: '#C9B8FF',
+  motivationBgHard: '#B5F5D5',
+
   tabActive: '#000',
   tabInactive: '#757575',
 

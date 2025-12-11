@@ -9,6 +9,9 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { Height } from '@shared/components/Spacing';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
+import AuthIntroScreen from '@features/Auth/screens/AuthIntroScreen';
+import { useAuth } from '@features/Auth/AuthProvider';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -18,12 +21,23 @@ export default function FindFriendsMainScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const isSearching = !!searchQuery.trim();
   const previousIsSearching = useRef(isSearching);
+  const navigation = useNavigation();
+  const { user, loading } = useAuth();
+
   useEffect(() => {
     if (previousIsSearching.current !== isSearching) {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       previousIsSearching.current = isSearching;
     }
   }, [isSearching]);
+
+  if (loading) return null;
+
+  if (!user) {
+    navigation.navigate('Auth');
+    return null;
+  }
+
   return (
     <Layout>
       <Search

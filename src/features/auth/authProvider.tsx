@@ -1,12 +1,5 @@
 // src/features/auth/AuthProvider.tsx
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  ReactNode,
-  PropsWithChildren,
-} from 'react';
+import React, { createContext, useState, useEffect, useContext, PropsWithChildren } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signOutGoogle } from '@shared/utils/googleAuth';
 import { api } from '@shared/api/axios';
@@ -14,9 +7,10 @@ import { useGoogleAuth } from './api/useGoogleAuth';
 import { showToast } from '@shared/utils/toast';
 import { initializeNotifications } from '@lib/notifications/initNotifications';
 import { getMessaging } from '@react-native-firebase/messaging';
-import { isAndroid } from '@shared/utils/constants';
 import { queryClient } from '@lib/react-query/client';
 import { registerSignOut } from '@shared/api/authBridge';
+import { buildQueryKey } from '@shared/constants/queryKeys';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 
 type User = {
   id: string;
@@ -47,57 +41,50 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [loading, setLoading] = useState(true);
   const [hasSeenFindFriendsScreen, setHasSeenFindFriendsScreenState] = useState(false);
 
-  const { mutateAsync: googleAuth, isPending: authLoading, error: authError } = useGoogleAuth();
-  // const { mutate: syncFcmToken } = useSyncFcmToken();
+  const { mutateAsync: googleAuth } = useGoogleAuth();
 
   const setHasSeenFindFriendsScreen = async (seen: boolean) => {
     await AsyncStorage.setItem(STORAGE_HAS_SEEN_FIND_FRIENDS, JSON.stringify(seen));
     setHasSeenFindFriendsScreenState(seen);
   };
 
+  // Load saved session
   useEffect(() => {
     const loadSession = async () => {
       const savedUser = await AsyncStorage.getItem(STORAGE_USER);
       const savedToken = await AsyncStorage.getItem(STORAGE_TOKEN);
-
       const seenFlag = await AsyncStorage.getItem(STORAGE_HAS_SEEN_FIND_FRIENDS);
-      if (seenFlag) setHasSeenFindFriendsScreenState(JSON.parse(seenFlag));
+
+      if (seenFlag) {
+        setHasSeenFindFriendsScreenState(JSON.parse(seenFlag));
+      }
 
       if (savedUser && savedToken) {
         setUser(JSON.parse(savedUser));
         setToken(savedToken);
         api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
       }
+
       setLoading(false);
     };
+
     loadSession();
   }, []);
 
+  /* ----------------------- SIGN IN ----------------------- */
   const signIn = async () => {
     try {
       const { user, token } = await googleAuth();
+
       setUser(user);
       setToken(token);
+
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
       await AsyncStorage.setItem(STORAGE_USER, JSON.stringify(user));
       await AsyncStorage.setItem(STORAGE_TOKEN, token);
 
-      // 🔐 Attempt to setup notifications — but don't block login
-
-      initializeNotifications()
-        .then(async () => {
-          await getMessaging().registerDeviceForRemoteMessages();
-          const fcmToken = await getMessaging().getToken();
-          console.log('📲 FCM Token:', fcmToken);
-
-          // Optionally sync to backend if you have an endpoint
-          // if (user?.id && fcmToken) {
-          //   syncFcmToken({ userId: user.id, fcmToken });
-          // }
-        })
-        .catch(err => {
-          console.warn('⚠️ Failed to initialize notifications:', err.message);
-        });
+      initializeNotifications().catch(() => {});
 
       showToast({
         type: 'success',
@@ -105,7 +92,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         message: `Hello, ${user.name}`,
       });
     } catch (err: any) {
-      console.error('🔐 Sign in failed', err);
       showToast({
         type: 'error',
         title: 'Sign-in Failed',
@@ -115,14 +101,28 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+  /* ----------------------- SIGN OUT ----------------------- */
   const signOut = async () => {
     await signOutGoogle();
     await AsyncStorage.multiRemove([STORAGE_USER, STORAGE_TOKEN, STORAGE_HAS_SEEN_FIND_FRIENDS]);
+
     setUser(null);
     setToken(null);
+
+    // Clear React Query data
+    // Remove the specific user-related cache immediately
+    queryClient.removeQueries({
+      queryKey: buildQueryKey.myProfile(),
+      exact: true,
+    });
+
+    // Then clear EVERYTHING
+    queryClient.clear();
+
     delete api.defaults.headers.common['Authorization'];
+
     setHasSeenFindFriendsScreenState(false);
-    queryClient.clear(); // <-- this line is key
+
     showToast({
       type: 'info',
       title: 'Signed out',
@@ -130,6 +130,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     });
   };
 
+  // Register logout handler for external callers
   useEffect(() => {
     registerSignOut(signOut);
   }, [signOut]);
@@ -152,7 +153,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used inside AuthProvider');
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
+  return ctx;
 };

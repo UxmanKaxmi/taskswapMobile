@@ -18,25 +18,40 @@ type Props = {
 
 function getTaskPlaceholder(type: TaskType): string {
   switch (type) {
-    case 'reminder':
-      return 'What do you need to be reminded about?';
-    case 'decision':
-      return 'What decision do you need help making?';
     case 'motivation':
-      return 'What do you need motivation for?';
+      return 'Push someone up! Drop your motivation.';
+    case 'reminder':
+      return 'What do you need to remember?';
+    case 'decision':
+      return 'What are you deciding between?';
     case 'advice':
-      return 'What would you like advice on?';
+      return 'What do you want advice on?';
     default:
-      return 'What do you need help with?';
+      return 'Write your push...';
   }
 }
+
+const getTitle = (type: TaskType) => {
+  switch (type) {
+    case 'motivation':
+      return 'Your Push';
+    case 'reminder':
+      return 'Reminder Details';
+    case 'decision':
+      return 'Decision Details';
+    case 'advice':
+      return 'Advice Request';
+    default:
+      return 'Your Push';
+  }
+};
 
 export default function TaskDescriptionInput({ type, value, error, onChange }: Props) {
   return (
     <>
       <TextElement
         weight="600"
-        variant="title"
+        variant="subtitle"
         style={[
           styles.label,
           {
@@ -44,7 +59,7 @@ export default function TaskDescriptionInput({ type, value, error, onChange }: P
           },
         ]}
       >
-        Task Description
+        {getTitle(type)}
       </TextElement>
       <Row>
         <AppTextInput

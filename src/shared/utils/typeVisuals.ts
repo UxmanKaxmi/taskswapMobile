@@ -1,5 +1,8 @@
 // src/shared/utils/typeVisuals.ts
 
+import { TaskType } from '@features/Tasks/types/tasks';
+import { colors } from '@shared/theme';
+
 export type TaskCategoryType =
   | 'reminder'
   | 'decision'
@@ -10,42 +13,46 @@ export type TaskCategoryType =
   | 'comment'
   | 'task';
 
-export type VisualInfo = {
-  emoji: string;
-  color: string;
+// -------- EMOJIS ONLY (NO COLORS HERE) --------
+export const typeEmojis: Record<TaskCategoryType, string> = {
+  reminder: '🔔',
+  decision: '⚖️',
+  'decision-done': '✅',
+  motivation: '💡',
+  advice: '💬',
+  follow: '➕',
+  comment: '💬',
+  task: '📝',
 };
 
-/**
- * A mapping of task and notification types to their visual representations.
- *
- * Each type is associated with an emoji and a color to ensure consistent design
- * across task cards, type selectors, and notification UIs.
- *
- * @example
- * const visual = getTypeVisual('reminder');
- * // visual.emoji === '🕒'
- * // visual.color === '#FF9800'
- */
-export const typeVisuals: Record<TaskCategoryType, VisualInfo> = {
-  reminder: { emoji: '🕒', color: '#FF9800' },
-  decision: { emoji: '🧠', color: '#00BCD4' },
-  'decision-done': { emoji: '✅', color: '#00BCD4' },
-  motivation: { emoji: '🚀', color: '#4CAF50' },
-  advice: { emoji: '💡', color: '#FFC107' },
-  follow: { emoji: '➕', color: '#4CAF50' },
-  comment: { emoji: '💬', color: '#2196F3' },
-  task: { emoji: '📝', color: '#9C27B0' },
-};
-
-/**
- * Returns visual info (emoji + color) for a given type.
- * Falls back to a default visual if the type is not recognized.
- */
-export function getTypeVisual(type: string): VisualInfo {
-  return (
-    typeVisuals[type as TaskCategoryType] || {
-      emoji: '🔔',
-      color: '#9E9E9E',
-    }
-  );
+// Cleaner getVisual function
+export function getTypeVisual(type: string) {
+  return {
+    emoji: typeEmojis[type as TaskCategoryType] ?? '🔔',
+    color: typeBackgrounds[type as TaskType] ?? '#9E9E9E',
+  };
 }
+
+// -------- SINGLE COLOR SOURCE --------
+// All colors come from your theme system now
+export const typeBackgrounds: Record<TaskType, string> = {
+  reminder: colors.reminderBg,
+  decision: colors.decisionBg,
+  motivation: colors.motivationBg,
+  advice: colors.adviceBg,
+};
+
+export const typeBackgroundsHard: Record<TaskType, string> = {
+  reminder: colors.reminderBgHard,
+  decision: colors.decisionBgHard,
+  motivation: colors.motivationBgHard,
+  advice: colors.adviceBgHard,
+};
+
+// Icons remain unchanged
+export const typeIcons: Record<TaskType, string> = {
+  reminder: 'bell',
+  decision: 'scale-unbalanced',
+  motivation: 'lightbulb',
+  advice: 'message',
+};

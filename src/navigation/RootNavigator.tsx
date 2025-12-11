@@ -1,17 +1,46 @@
-// src/navigation/RootNavigator.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
+import AppNavigator from './AppNavigator';
 import AuthNavigator from './AuthNavigator';
-import { AppNavigator } from './AppNavigator';
-import { MainStackParamList } from '@navigation/types/navigation';
-import { useAuth } from '@features/Auth/AuthProvider';
+import IntroScreen from '@features/Intro/screens/IntroScreen';
+import AuthIntroScreen from '@features/Auth/screens/AuthIntroScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { registerPostLogoutNavigation } from '@shared/api/authBridge';
 
-const Stack = createNativeStackNavigator<MainStackParamList>();
+const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
-  const { user, loading, hasSeenFindFriendsScreen } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [firstTime, setFirstTime] = useState(false);
+
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    registerPostLogoutNavigation(() => {
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'App',
+            state: {
+              routes: [{ name: 'Tabs', state: { routes: [{ name: 'Home' }] } }],
+            },
+          },
+        ],
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    async function checkFirstLaunch() {
+      const seen = await AsyncStorage.getItem('hasSeenOnboarding');
+      setFirstTime(!seen); // true if first launch
+      setLoading(false);
+    }
+    checkFirstLaunch();
+  }, []);
 
   if (loading) {
     return (
@@ -22,18 +51,25 @@ export default function RootNavigator() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {user ? (
-          <Stack.Screen
-            name="App"
-            component={AppNavigator}
-            initialParams={{ showFindFriends: !hasSeenFindFriendsScreen }}
-          />
-        ) : (
-          <Stack.Screen name="Auth" component={AuthNavigator} />
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {/* First-time onboarding */}
+      {firstTime && <Stack.Screen name="OnboardingIntro" component={IntroScreen} />}
+
+      {/* Main App */}
+      <Stack.Screen name="App" component={AppNavigator} />
+
+      {/* Auth Prompt (login-required intro) */}
+      <Stack.Screen
+        name="AuthIntro"
+        component={AuthIntroScreen}
+        // options={{
+        //   presentation: 'formSheet',
+        //   animation: 'slide_from_bottom',
+        // }}
+      />
+
+      {/* Login Flow */}
+      <Stack.Screen name="Auth" component={AuthNavigator} />
+    </Stack.Navigator>
   );
 }

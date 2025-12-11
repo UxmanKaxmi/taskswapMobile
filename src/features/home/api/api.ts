@@ -11,9 +11,7 @@ export async function sendReminderNoteAPI(taskId: string, message: string) {
 
 export async function getRemindersByTaskAPI(taskId: string) {
   console.log('[🔄 API CALL] Fetching task by ID:', taskId); // ✅ Add this
-
   const res = await api.get<ReminderNoteDTO[]>(buildRoute.getReminders(taskId));
-
   return res.data;
 }
 

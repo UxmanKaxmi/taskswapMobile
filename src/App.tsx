@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import RootNavigator from './navigation/RootNavigator';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
@@ -7,19 +7,26 @@ import { toastConfig } from '@shared/components/Toast/toastConfig';
 import { initializeNotifications } from './lib/notifications/initNotifications';
 import NotificationPermissionPrompt from './lib/notifications/NotificationPermissionPrompt';
 import firebase from '@react-native-firebase/app';
-import { Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Platform, StatusBar, StyleSheet } from 'react-native';
 import { AnimatedBootSplash } from '@features/Splash/AnimatedBootSplash';
 import { AuthProvider } from '@features/Auth/AuthProvider';
 
 const queryClient = new QueryClient();
 
+const LightNavTheme = {
+  ...DefaultTheme,
+  dark: false,
+  colors: {
+    ...DefaultTheme.colors,
+    background: '#FFFFFF',
+  },
+};
+
 export default function App() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    // set transparent status bar
     StatusBar.setBarStyle('dark-content');
-
     if (Platform.OS === 'android') {
       StatusBar.setBackgroundColor('transparent');
       StatusBar.setTranslucent(true);
@@ -32,22 +39,21 @@ export default function App() {
   }, []);
 
   return visible ? (
-    <AnimatedBootSplash
-      onAnimationEnd={() => {
-        setVisible(false);
-      }}
-    />
+    <AnimatedBootSplash onAnimationEnd={() => setVisible(false)} />
   ) : (
     <QueryClientProvider client={queryClient}>
       <NotificationPermissionPrompt />
+
       <AuthProvider>
-        <RootNavigator />
+        <NavigationContainer theme={LightNavTheme}>
+          <RootNavigator />
+        </NavigationContainer>
       </AuthProvider>
+
       <Toast config={toastConfig} position="bottom" bottomOffset={60} />
     </QueryClientProvider>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -1,120 +1,75 @@
 // src/shared/components/MotivationCard.tsx
 
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, TouchableOpacity, Image } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
-import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import Row from '@shared/components/Layout/Row';
-import { colors, spacing, typography } from '@shared/theme';
-import { MotivationTask } from '../types/home';
-import { capitalizeFirstLetter, simpleTimeAgo, timeAgo } from '@shared/utils/helperFunctions';
 import TypeTag from '@shared/components/TypeTag/TypeTag';
+import { colors, spacing } from '@shared/theme';
+import { MotivationTask } from '../types/home';
+import { timeAgo } from '@shared/utils/helperFunctions';
+import { cardStyles } from './styles';
+import { getTypeVisual, typeBackgrounds } from '@shared/utils/typeVisuals';
+import TaskFooter from './TaskFooter';
 
 type Props = {
   task: MotivationTask;
   onPressCard: (task: MotivationTask) => void;
   onPressSuggest: (task: MotivationTask) => void;
   onPressView: (task: MotivationTask) => void;
+  onPressShare?: (task: MotivationTask) => void;
 };
 
-export default function MotivationCard({ task, onPressCard, onPressSuggest, onPressView }: Props) {
+export default function MotivationCard({ task, onPressCard, onPressShare }: Props) {
   const { avatar, name = 'John Doe', createdAt, text, type } = task;
+  const { emoji } = getTypeVisual(type);
 
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={() => onPressCard(task)}>
-      <Row justify="space-between" style={styles.cardHeader}>
+    <TouchableOpacity
+      style={[
+        cardStyles.card,
+        {
+          backgroundColor: typeBackgrounds[type],
+          borderColor: typeBackgrounds[type],
+        },
+      ]}
+      activeOpacity={0.7}
+      onPress={() => onPressCard(task)}
+    >
+      {/* Header */}
+      <Row justify="space-between" style={cardStyles.cardHeader}>
         <Row>
-          <Image source={{ uri: avatar }} style={styles.avatar} />
+          <Image source={{ uri: avatar }} style={cardStyles.avatar} />
           <View>
-            <TextElement variant="subtitle" style={styles.name}>
+            <TextElement variant="subtitle" style={cardStyles.name}>
               {name}
             </TextElement>
-            <TextElement variant="caption" style={styles.timeAgo} color="muted">
+            <TextElement variant="caption" color="muted" style={cardStyles.timeAgo}>
               {timeAgo(createdAt)}
             </TextElement>
           </View>
         </Row>
+
         <TypeTag type={type} />
       </Row>
 
-      {/* Task text + optional emoji */}
-      <View style={styles.messageRow}>
-        <TextElement variant="body">{text}</TextElement>
-        {/* {emoji && (
-              <TextElement variant="body" style={styles.emoji}>
-                {emoji}
-              </TextElement>
-            )} */}
+      {/* Motivation message row (small + emoji like ReminderCard) */}
+      <View style={cardStyles.messageRow}>
+        <TextElement variant="title" style={cardStyles.mainText}>
+          {emoji} {text}
+        </TextElement>
+      </View>
+
+      <View style={{ marginTop: spacing.md }}>
+        <TaskFooter
+          commentCount={task.commentsCount ?? 0}
+          shareHandler={() => onPressShare?.(task)}
+          viewCount={task.viewCount ?? 0}
+          // ❌ No extra icon for Advice (no votes/helpers)
+        />
       </View>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  type: {
-    fontSize: ms(12),
-    fontWeight: '500',
-    backgroundColor: colors.border,
-    paddingVertical: ms(4),
-    paddingHorizontal: ms(12),
-    borderRadius: 20,
-    color: colors.text,
-  },
-  card: {
-    backgroundColor: '#fff',
-    marginHorizontal: spacing.md,
-    marginVertical: vs(8),
-    padding: spacing.md,
-    borderRadius: spacing.sm,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-  },
-
-  cardHeader: {
-    marginBottom: vs(8),
-  },
-
-  avatar: {
-    width: ms(50),
-    height: ms(50),
-    borderRadius: ms(50) / 2,
-  },
-
-  name: {
-    marginLeft: spacing.xs,
-  },
-  timeAgo: {
-    marginLeft: spacing.xs,
-    margin: 0,
-    padding: 0,
-  },
-
-  messageRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: vs(12),
-  },
-
-  emoji: {
-    marginLeft: spacing.sm,
-  },
-
-  actions: {
-    justifyContent: 'space-between',
-  },
-
-  button: {
-    flex: 1,
-    marginRight: spacing.sm,
-    borderRadius: spacing.xs,
-    paddingVertical: spacing.sm,
-  },
-
-  buttonText: {
-    fontSize: typography.small,
-  },
-});

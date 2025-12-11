@@ -8,3 +8,6 @@ export const APP_NAME = 'TaskSwap';
 export const CONTACTS_SCOPE = 'https://www.googleapis.com/auth/contacts.readonly';
 
 export const DEFAULT_PROFILE_IMAGE_SIZE = 120;
+
+export const isDEV = __DEV__;
+export const isPROD = !__DEV__;

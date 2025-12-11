@@ -4,6 +4,11 @@ import { StyleSheet } from 'react-native';
 import { moderateScale, moderateVerticalScale, ms, vs } from 'react-native-size-matters';
 
 export const cardStyles = StyleSheet.create({
+  mainText: {
+    // marginBottom: vs(8),
+    fontSize: ms(16),
+    fontWeight: '500',
+  },
   type: {
     fontSize: ms(12),
     fontWeight: '500',
@@ -18,11 +23,7 @@ export const cardStyles = StyleSheet.create({
     marginHorizontal: spacing.md,
     marginVertical: vs(8),
     padding: spacing.md,
-    borderRadius: spacing.sm,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    borderRadius: spacing.md,
   },
 
   cardHeader: {
@@ -30,19 +31,22 @@ export const cardStyles = StyleSheet.create({
   },
 
   avatar: {
-    width: ms(50),
-    height: ms(50),
-    borderRadius: ms(50) / 2,
+    width: ms(35),
+    height: ms(35),
+    borderRadius: ms(35) / 2,
   },
 
   name: {
     marginLeft: spacing.xs,
+    fontSize: ms(14),
+    fontWeight: '500',
+    lineHeight: ms(18),
   },
   timeAgo: {
     marginLeft: spacing.xs,
     margin: 0,
     padding: 0,
-    fontSize: ms(12),
+    fontSize: ms(11),
   },
 
   messageRow: {

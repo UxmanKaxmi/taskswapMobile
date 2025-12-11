@@ -1,4 +1,5 @@
 // utils/humanizeDate.ts
+import { BottomTabParamList } from '@navigation/types/navigation';
 import { hasNotificationPermission } from '../../lib/notifications/NotificationPermissionPrompt';
 import { parseISO, formatDistanceToNow, format, isBefore, isToday } from 'date-fns';
 import { Dimensions } from 'react-native';
@@ -137,4 +138,33 @@ export function formatReminderTime(isoDate: string): string {
   }
 
   return format(date, 'MMM d, yyyy • h:mm a'); // e.g., "Jun 1, 2025 • 9:00 PM"
+}
+
+export const TAB_SCREENS: (keyof BottomTabParamList)[] = [
+  'Home',
+  'Friends',
+  'Notification',
+  'Profile',
+  'AddTaskButton',
+];
+
+export function formatViews(num: number): string {
+  if (num < 0) return '0';
+
+  if (num < 1000) {
+    return num.toString(); // 0 - 999
+  }
+
+  if (num < 1_000_000) {
+    const n = num / 1000;
+    return n < 10 ? `${n.toFixed(1)}k` : `${n.toFixed(0)}k`;
+  }
+
+  if (num < 1_000_000_000) {
+    const n = num / 1_000_000;
+    return n < 10 ? `${n.toFixed(1)}M` : `${n.toFixed(0)}M`;
+  }
+
+  const n = num / 1_000_000_000;
+  return n < 10 ? `${n.toFixed(1)}B` : `${n.toFixed(0)}B`;
 }

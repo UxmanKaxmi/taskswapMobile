@@ -38,12 +38,16 @@ export default function Ripple({
         radius,
       }}
       style={({ pressed }) => [
-        style,
         radius != null && { borderRadius: radius },
         Platform.OS === 'ios' && pressed && !disabled && styles.iosRipple,
       ]}
     >
-      <View style={radius != null ? { borderRadius: radius, overflow: 'hidden' } : undefined}>
+      <View
+        style={[
+          style, // 👈 NOW flexDirection: 'row' works!
+          radius != null && { borderRadius: radius, overflow: 'hidden' },
+        ]}
+      >
         {children}
       </View>
     </Pressable>

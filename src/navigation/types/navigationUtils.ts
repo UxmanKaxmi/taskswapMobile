@@ -1,29 +1,44 @@
 // src/lib/navigation/navigationUtils.ts
 
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { CommonActions, NavigationProp, useNavigation } from '@react-navigation/native';
 import { Linking } from 'react-native';
-import { AppStackParamList } from './navigation';
+
+import { AppStackParamList, BottomTabParamList } from './navigation';
 import { Task } from '@features/Tasks/types/tasks';
+import { useAuth } from '@features/Auth/AuthProvider';
+
+/* -------------------------------------------------------------------------- */
+/*                               Typed Hooks                                   */
+/* -------------------------------------------------------------------------- */
 
 /**
- * Typed navigation hook for convenience with AppStackParamList.
+ * Typed navigation hook for screens inside AppStack (stack screens).
  * @example
- * const navigation = useTypedNavigation();
- * navigation.navigate('Home');
+ * const navigation = useAppNavigation();
+ * navigation.navigate("TaskDetail", { task });
  */
-export const useTypedNavigation = () => {
+export const useAppNavigation = () => {
   return useNavigation<NavigationProp<AppStackParamList>>();
 };
 
 /**
- * Navigate to a specific screen with optional params.
- * Type-safe for routes with or without params.
- *
- * @example
- * navigateTo(navigation, 'Home');
- * navigateTo(navigation, 'TaskDetail', { taskId: '123' });
+ * Typed navigation hook for BottomTab screens.
  */
-export function navigateTo<T extends keyof AppStackParamList>(
+export const useTabNavigation = () => {
+  return useNavigation<NavigationProp<BottomTabParamList>>();
+};
+
+/* -------------------------------------------------------------------------- */
+/*                         Generic Type-Safe Navigate                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Navigate inside AppStack (stack screens).
+ * Supports screen params properly.
+ * @example
+ * navigateStack(nav, "TaskDetail", { taskId: "123" });
+ */
+export function navigateStack<T extends keyof AppStackParamList>(
   navigation: NavigationProp<AppStackParamList>,
   screen: T,
   ...[params]: undefined extends AppStackParamList[T]
@@ -34,11 +49,22 @@ export function navigateTo<T extends keyof AppStackParamList>(
 }
 
 /**
- * Reset navigation stack and navigate to a new screen.
+ * Navigate inside Tab screens (Home, Friends, Notification, Profile)
  * @example
- * resetNavigation(navigation, 'Login');
+ * navigateTab(nav, "Home");
  */
-export function resetNavigation<T extends keyof AppStackParamList>(
+export function navigateTab<T extends keyof BottomTabParamList>(
+  navigation: NavigationProp<BottomTabParamList>,
+  screen: T,
+) {
+  (navigation.navigate as any)(screen);
+}
+
+/* -------------------------------------------------------------------------- */
+/*                              Reset Navigation                               */
+/* -------------------------------------------------------------------------- */
+
+export function resetToStack<T extends keyof AppStackParamList>(
   navigation: NavigationProp<AppStackParamList>,
   screen: T,
   ...[params]: undefined extends AppStackParamList[T]
@@ -51,6 +77,10 @@ export function resetNavigation<T extends keyof AppStackParamList>(
   });
 }
 
+/* -------------------------------------------------------------------------- */
+/*                               Helper Shortcuts                              */
+/* -------------------------------------------------------------------------- */
+
 /**
  * Open app settings — useful for permissions screens.
  */
@@ -59,9 +89,9 @@ export const openAppSettings = () => {
 };
 
 /**
- * Shortcut to navigate to a user's FriendsProfile screen.
+ * Navigate to someone's profile (friend's profile).
  * @example
- * openFriendsProfile(navigation, 'user_abc123');
+ * openFriendsProfile(navigation, "user_123");
  */
 export function openFriendsProfile(
   navigation: NavigationProp<AppStackParamList>,
@@ -71,10 +101,70 @@ export function openFriendsProfile(
 }
 
 /**
- * Shortcut to navigate to a task detail screen.
+ * Navigate to AddTask modal.
+ * @example
+ * openAddTask(nav);
+ */
+export function openAddTask(navigation: NavigationProp<AppStackParamList>, task?: Task) {
+  navigation.navigate('AddTask', { task });
+}
+
+/**
+ * Shortcut to navigate to a Task Detail screen.
  * @example
  * navigateToTaskDetails(navigation, task);
  */
 export function navigateToTaskDetails(navigation: NavigationProp<AppStackParamList>, task: Task) {
   navigation.navigate('TaskDetail', { task });
+}
+
+export function resetToHomeRoot(navigation: any) {
+  navigation.reset({
+    index: 0,
+    routes: [
+      {
+        name: 'App',
+        state: {
+          routes: [
+            {
+              name: 'Tabs',
+              state: {
+                index: 0,
+                routes: [{ name: 'Home' }],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  });
+}
+
+/**
+ * Wrap any navigation action: if user is not logged in,
+ * redirect to login, otherwise navigate to intended screen.
+ *
+ * @example
+ * checkAuthThenNavigate(navigation, "AddTask");
+ * checkAuthThenNavigate(navigation, "TaskDetail", { task });
+ */
+
+export function useCheckAuthThenNavigate() {
+  const navigation = useAppNavigation();
+  const { user } = useAuth();
+
+  return function checkAuthThenNavigate<T extends keyof AppStackParamList>(
+    screen: T,
+    params?: AppStackParamList[T],
+  ) {
+    if (!user) {
+      navigation.navigate('AuthIntro', {
+        redirectTo: screen,
+        params,
+      });
+      return;
+    }
+
+    navigation.navigate(screen, params);
+  };
 }

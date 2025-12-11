@@ -51,6 +51,7 @@ import { parseISO, formatDistanceToNow } from 'date-fns';
 import { fetchComments } from '../api/commentApi';
 import { useVoteStats } from '@features/Home/hooks/useVoteStats';
 import { isAndroid } from '@shared/utils/constants';
+import { increaseTaskViewCount } from '../api/taskApi';
 
 export default function TaskDetailScreen({
   route,
@@ -78,6 +79,11 @@ export default function TaskDetailScreen({
     queryFn: () => fetchComments(taskId),
     enabled: !!taskId,
   });
+
+  useEffect(() => {
+    if (!taskId) return;
+    increaseTaskViewCount(taskId).catch(() => {});
+  }, [taskId]);
 
   const task = tasks?.find(t => t.id === taskId) ?? initialTask;
 

@@ -78,8 +78,6 @@ export default function HomeScreen() {
   );
 
   const renderTaskNew = ({ item }: { item: Task }) => {
-    console.log(item, 'ttt');
-
     switch (item.type) {
       case 'decision':
         return (
@@ -165,8 +163,8 @@ export default function HomeScreen() {
               </TextElement>
             </View>
           ),
-          ListFooterComponent: <View style={{ backgroundColor: 'red' }} />,
-          ItemSeparatorComponent: () => <View style={styles.borderSeparator} />,
+          ListFooterComponent: <View style={{}} />,
+          // ItemSeparatorComponent: () => <View style={styles.borderSeparator} />,
         }}
         refreshing={refreshing}
         onRefresh={handleRefresh}

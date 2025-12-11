@@ -65,3 +65,11 @@ export async function getVotesForTask(taskId: string) {
   const res = await api.get(buildRoute.getVotes(taskId));
   return res.data as Record<string, number>;
 }
+
+export function increaseTaskViewCount(taskId: string) {
+  return api.post(buildRoute.incrementTaskViews(taskId));
+}
+
+export function fetchTaskViewCount(taskId: string) {
+  return api.get(buildRoute.incrementTaskViews(taskId));
+}

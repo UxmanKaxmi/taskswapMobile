@@ -28,11 +28,14 @@ import Avatar from '@shared/components/Avatar/Avatar';
 import NotificationCard from '../components/DefaultNotification';
 import { queryClient } from '@lib/react-query/client';
 import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
+import { useAuth } from '@features/Auth/AuthProvider';
+import { useAppNavigation } from '@navigation/types/navigationUtils';
 
 export default function NotificationMainScreen() {
-  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const navigation = useNavigation();
   const { data: notifications = [], isLoading, refetch } = useNotifications();
   const { mutate: markBatch } = useBatchMarkNotificationsAsRead();
+  const { user, loading } = useAuth();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -131,6 +134,11 @@ export default function NotificationMainScreen() {
         <ActivityIndicator size="small" />
       </View>
     );
+  }
+
+  if (!user) {
+    navigation.navigate('Auth');
+    return null;
   }
 
   return (

@@ -44,6 +44,13 @@ export const mockStats = {
 export default function MyProfileMainScreen() {
   const { user } = useAuth();
   const { data: MyProfileData, isLoading, isError, error } = useMyProfileData();
+  const navigation = useNavigation();
+
+  if (!user) {
+    navigation.navigate('Auth');
+    return null;
+  }
+
   return (
     <Layout allowPadding style={{ marginTop: 0, paddingTop: 0 }}>
       <ListView
@@ -53,11 +60,11 @@ export default function MyProfileMainScreen() {
         }}
       >
         <ProfileHeader
-          avatarUri={MyProfileData?.photo}
-          name={MyProfileData?.name || 'No Name'}
-          username={MyProfileData?.name || 'no username'}
-          following={MyProfileData?.followingCount ?? 0}
-          followers={MyProfileData?.followersCount ?? 0}
+          avatarUri={user ? MyProfileData?.photo : undefined}
+          name={user ? (MyProfileData?.name ?? '') : ''}
+          username={user ? (MyProfileData?.name ?? '') : ''}
+          following={user ? (MyProfileData?.followingCount ?? 0) : 0}
+          followers={user ? (MyProfileData?.followersCount ?? 0) : 0}
           onEditProfile={() => {}}
           onShareProfile={() => {}}
         />

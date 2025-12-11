@@ -9,6 +9,7 @@ import { spacing, colors, typography } from '@shared/theme';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppNavigationProp, MainStackParamList } from '@navigation/types/navigation';
+import { triggerLogout } from '@shared/api/authBridge';
 
 export type MenuItem = {
   label: string;
@@ -23,7 +24,6 @@ type Props = {};
  * Profile menu that takes a dynamic list of items with icons and callbacks.
  */
 export default function ProfileMenu() {
-  const { signOut } = useAuth();
   const navigation = useNavigation<AppNavigationProp>();
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to log out?', [
@@ -31,7 +31,7 @@ export default function ProfileMenu() {
       {
         text: 'Logout',
         style: 'destructive',
-        onPress: async () => signOut(),
+        onPress: async () => triggerLogout(),
       },
     ]);
   };

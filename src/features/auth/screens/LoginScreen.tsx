@@ -1,201 +1,153 @@
-import React, { useEffect } from 'react';
-import { View, Text, Button, Alert, Image, StyleSheet, Dimensions, Platform } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Dimensions, Alert } from 'react-native';
 import { useAuth } from '../AuthProvider';
-import { api } from '@shared/api/axios';
 import { moderateScale } from 'react-native-size-matters';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
-import Icon from '@react-native-vector-icons/fontawesome6';
 import Column from '@shared/components/Layout/Column';
 import { Height } from '@shared/components/Spacing';
-import AnimatedTextRotatorWithTitle from '../components/AnimatedTextRotatorWithTitle';
-import AnimatedBackground from '@shared/components/Layout/AnimatedBackground';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-
-const { width, height } = Dimensions.get('window');
+import AppHeader from '@shared/components/AppHeader/AppHeader';
+import Icon from '@shared/components/Icons/Icon';
+import { colors } from '@shared/theme';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import {
+  AppStackParamList,
+  AuthStackParamList,
+  BottomTabParamList,
+} from '@navigation/types/navigation';
+import { TAB_SCREENS } from '@shared/utils/helperFunctions';
 
 export default function LoginScreen() {
-  const { user, signIn, signOut, loading } = useAuth();
-  const LOCALHOST = Platform.OS === 'android' ? 'http://10.0.2.2:3001' : 'http://localhost:3001';
+  const { signIn, loading } = useAuth();
 
-  async function pingServer() {
-    console.log('Google Signin config:', await GoogleSignin.getCurrentUser());
+  const route = useRoute<RouteProp<AuthStackParamList, 'Login'>>();
+  const navigation = useNavigation();
 
+  const redirectTo =
+    route.params?.redirectTo && typeof route.params.redirectTo === 'string'
+      ? route.params.redirectTo
+      : 'Home';
+
+  console.log('Redirect to:', redirectTo, route);
+
+  const handleLogin = async () => {
     try {
-      const res = await api.get('/health');
-      if (res.status === 200 && res.data.ok) {
-        console.log('✅ Backend is reachable!', res.data);
-      } else {
-        console.warn('⚠️ Health check returned non-OK', res);
-      }
-    } catch (err) {
-      console.error('❌ Cannot reach backend via axios baseURL:', err);
+      await signIn();
+
+      const isTab = TAB_SCREENS.includes(redirectTo as any);
+
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'App',
+            state: {
+              routes: isTab
+                ? [
+                    {
+                      name: 'Tabs',
+                      state: {
+                        index: 0,
+                        routes: [{ name: redirectTo as keyof BottomTabParamList }],
+                      },
+                    },
+                  ]
+                : [
+                    {
+                      name: 'Tabs',
+                    },
+                    {
+                      name: redirectTo as keyof AppStackParamList,
+                      params: route.params?.params,
+                    },
+                  ],
+            },
+          },
+        ],
+      });
+    } catch (e) {
+      Alert.alert('Login failed', e.message);
     }
-
-    try {
-      const res = await api.get(`${LOCALHOST}/test-db`);
-      const data = res.data;
-
-      if (data.connected) {
-        console.log('✅ Mobile app connected to backend + DB', data.users);
-      } else {
-        console.log('❌ Connection failed:', data.error);
-      }
-    } catch (err) {
-      console.error('❌ Error fetching /test-db:', err);
-    }
-  }
-  useEffect(() => {
-    pingServer();
-  }, []);
-
-  // if (user) {
-  //   return (
-  //     <View style={{ padding: 20 }}>
-  //       <Text>Welcome, {user.name}</Text>
-  //       {user.photo && (
-  //         <Image source={{ uri: user.photo }} style={{ width: 80, height: 80, borderRadius: 40 }} />
-  //       )}
-  //       <Button title="Sign Out" onPress={signOut} />
-  //     </View>
-  //   );
-  // }
+  };
 
   return (
     <Layout>
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          alignSelf: 'center',
-          marginTop: height * 0.08,
-        }}
-      >
-        <Image
-          source={require('@assets/images/logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
-
-      <Height size={50} />
+      <AppHeader showNavigation />
 
       <Column flex>
-        {/* <AnimatedTextRotatorWithTitle
-          messages={[
-            {
-              mainTitle: 'Welcome',
-              title: 'Swap small tasks. Earn big smiles.',
-              subtitle: 'Let your friends make your day easier',
-              image: require('@assets/images/loginImage1.png'),
-            },
-            {
-              mainTitle: 'Welcome to TaskSwap',
-
-              title: 'Because “Can someone remind me?” just got an app.',
-              subtitle: 'Your crew’s got your back.',
-              image: require('@assets/images/loginImage2.png'),
-            },
-            {
-              mainTitle: 'Hey there!',
-
-              title: 'Need a favor? Want to help?',
-              subtitle: 'This is where fun tasks meet friendly people.',
-              image: require('@assets/images/loginImage3.png'),
-            },
-            {
-              mainTitle: 'Welcome',
-              title: 'Tiny tasks. Real connections.',
-              subtitle: 'Ask, remind, decide — together.',
-              image: require('@assets/images/loginImage4.png'),
-            },
-          ]}
-          interval={5000}
-        /> */}
+        {/* Login Title */}
         <TextElement variant="title" style={styles.title}>
-          Welcome to TaskSwap
+          Sign In to Unlock Full Access
         </TextElement>
 
-        <TextElement variant="subtitle" style={styles.subtitle}>
-          Tiny tasks. Real connections.
-          {'\n'}
-          Ask, remind, decide — together.
+        {/* Motivational Tagline */}
+        <TextElement variant="caption" style={styles.tagline}>
+          You're almost there — let's make your progress truly yours.
         </TextElement>
+
+        <Height size={20} />
+
+        {/* Feature Highlights */}
+        <View style={styles.featuresContainer}>
+          <View style={styles.featureItem}>
+            <Icon set="ion" name="trail-sign-outline" size={16} color={colors.primary} />
+            <TextElement variant="subtitle" style={styles.featureText}>
+              Track your daily streaks
+            </TextElement>
+          </View>
+          <View style={styles.featureItem}>
+            <Icon set="fa6" name="user" size={16} color={colors.primary} />
+            <TextElement variant="subtitle" style={styles.featureText}>
+              Motivate friends & share updates
+            </TextElement>
+          </View>
+          <View style={styles.featureItem}>
+            <Icon set="fa6" name="bell" size={16} color={colors.primary} />
+            <TextElement variant="subtitle" style={styles.featureText}>
+              Get personalized reminders
+            </TextElement>
+          </View>
+        </View>
       </Column>
-      <Height size={20} />
 
-      {/* Buttons */}
+      <Height size={40} />
+
+      {/* Login Button */}
       <View style={styles.buttonContainer}>
-        <PrimaryButton
-          isLoading={loading}
-          title="Continue with Google"
-          onPress={async () => {
-            // setIsLoading(true);
-            try {
-              await signIn();
-            } catch (e: any) {
-              Alert.alert('Login failed', e.message || 'Unknown error');
-            } finally {
-              // setIsLoading(true);
-            }
-          }}
-          // icon={<Icon name="google" color={'white'} iconStyle="brand" />}
-        />
+        <PrimaryButton isLoading={loading} title="Continue with Google" onPress={handleLogin} />
       </View>
+
       <Height size={20} />
     </Layout>
   );
 }
+
 const styles = StyleSheet.create({
-  logoWrapper: {
-    alignItems: 'center',
-    // marginBottom: moderateScale(40),
-  },
-  logo: {
-    width: width * 0.4,
-    height: height * 0.1,
-    alignSelf: 'center',
-  },
-  brand: {
-    fontSize: moderateScale(20),
-    fontWeight: '600',
-    marginTop: moderateScale(8),
-    color: '#222',
+  tagline: {
+    fontSize: moderateScale(14),
+    color: '#666',
+    marginBottom: 10,
   },
   title: {
-    textAlign: 'center',
+    textAlign: 'left',
     fontWeight: '700',
-    fontSize: moderateScale(30),
+    fontSize: moderateScale(24),
+    marginBottom: moderateScale(8),
   },
-  subtitle: {
-    fontSize: moderateScale(20),
-    color: '#555',
+  featuresContainer: {
+    marginTop: 0,
+    gap: 16,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  featureText: {
+    color: colors.muted,
   },
   buttonContainer: {
     width: '100%',
-  },
-  button: {
-    height: moderateScale(48),
-    borderRadius: moderateScale(8),
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: moderateScale(16),
-  },
-  outlineButton: {
-    borderWidth: 1,
-    borderColor: '#f1c40f',
-    backgroundColor: 'transparent',
-  },
-  fillButton: {
-    backgroundColor: '#f1c40f',
-  },
-  outlineText: {
-    color: '#f1c40f',
-    fontWeight: '600',
-  },
-  fillText: {
-    color: '#fff',
-    fontWeight: '600',
   },
 });

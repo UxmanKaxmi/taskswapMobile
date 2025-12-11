@@ -11,7 +11,7 @@ import { timeAgo } from '@shared/utils/helperFunctions';
 import TypeTag from '@shared/components/TypeTag/TypeTag';
 import { cardStyles } from './styles';
 import HelperAvatarGroup from './HelperAvatarGroup';
-import { getTypeVisual } from '@shared/utils/typeVisuals';
+import { getTypeVisual, typeBackgrounds } from '@shared/utils/typeVisuals';
 import { useGetVotes } from '@features/Tasks/hooks/useGetVotes';
 import { useCastVote } from '@features/Tasks/hooks/useVote';
 import Icon from '@shared/components/Icons/Icon';
@@ -20,18 +20,26 @@ import VoteProgressBar from './VoteProgressBar';
 import StackedVoteBar from '@features/Tasks/components/StackedVoteBar';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { useVoteStats } from '../hooks/useVoteStats';
+import TaskFooter from './TaskFooter';
 
 type Props = {
   task: DecisionTask;
   onPressCard: (task: DecisionTask) => void;
   onPressSuggest: (task: DecisionTask) => void;
   onPressView: (task: DecisionTask) => void;
+  onPressShare?: (task: DecisionTask) => void;
 };
 
 const screenWidth = Dimensions.get('window').width;
 const buttonWidth = (screenWidth - spacing.md * 2 - spacing.sm) / 2;
 
-export default function DecisionCard({ task, onPressCard, onPressSuggest, onPressView }: Props) {
+export default function DecisionCard({
+  task,
+  onPressCard,
+  onPressSuggest,
+  onPressView,
+  onPressShare,
+}: Props) {
   const { avatar, name = 'John Doe', createdAt, text, options, type, helpers, id } = task;
   const { emoji } = getTypeVisual(type);
   const { mutate: castVote, isPending } = useCastVote(id);
@@ -55,7 +63,17 @@ export default function DecisionCard({ task, onPressCard, onPressSuggest, onPres
     return ms(14); // short
   };
   return (
-    <TouchableOpacity style={cardStyles.card} activeOpacity={0.7} onPress={() => onPressCard(task)}>
+    <TouchableOpacity
+      style={[
+        cardStyles.card,
+        {
+          backgroundColor: typeBackgrounds[type],
+          borderColor: typeBackgrounds[type],
+        },
+      ]}
+      activeOpacity={0.7}
+      onPress={() => onPressCard(task)}
+    >
       {/* Header with avatar and time */}
 
       <Row justify="space-between" style={cardStyles.cardHeader}>
@@ -70,12 +88,12 @@ export default function DecisionCard({ task, onPressCard, onPressSuggest, onPres
             </TextElement>
           </View>
         </Row>
-        <TypeTag type={type} />
+        <TypeTag type={type} iconStyle={type === 'decision' ? 'solid' : 'regular'} />
       </Row>
 
       {/* Question text */}
       <View style={cardStyles.messageRow}>
-        <TextElement variant="title">
+        <TextElement variant="title" style={cardStyles.mainText}>
           {emoji} {text}
         </TextElement>
       </View>
@@ -137,6 +155,14 @@ export default function DecisionCard({ task, onPressCard, onPressSuggest, onPres
           <HelperAvatarGroup helpers={helpers} />
         </View>
       )}
+      <View style={{ marginTop: spacing.md }}>
+        <TaskFooter
+          commentCount={task.commentsCount ?? 0}
+          shareHandler={() => onPressShare?.(task)}
+          extra={{ icon: 'options-outline', count: totalVotes }}
+          viewCount={task.viewCount ?? 0}
+        />
+      </View>
     </TouchableOpacity>
   );
 }

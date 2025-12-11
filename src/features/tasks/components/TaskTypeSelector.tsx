@@ -9,7 +9,7 @@ type Props = {
   onSelect: (type: TaskType) => void;
 };
 
-const taskTypes: TaskType[] = ['reminder', 'decision', 'motivation', 'advice'];
+const taskTypes: TaskType[] = ['motivation', 'decision', 'reminder', 'advice'];
 
 export default function TaskTypeSelector({ selected, onSelect }: Props) {
   const { colors } = useTheme();
@@ -24,7 +24,7 @@ export default function TaskTypeSelector({ selected, onSelect }: Props) {
   useEffect(() => {
     taskTypes.forEach(type => {
       Animated.spring(scaleAnim[type], {
-        toValue: type === selected ? 1.3 : 1,
+        toValue: type === selected ? 1.15 : 1,
         useNativeDriver: true,
         friction: 5,
       }).start();
@@ -37,14 +37,19 @@ export default function TaskTypeSelector({ selected, onSelect }: Props) {
         const { emoji } = getTypeVisual(type);
         const isSelected = selected === type;
 
+        const bgColor = getTypeVisual(type).color;
+        const borderColor = isSelected ? colors.primary : 'transparent';
+        const textColor = isSelected ? colors.primary : colors.text;
+
         return (
           <TouchableOpacity
             key={type}
+            activeOpacity={1}
             style={[
               styles.button,
               {
-                borderColor: isSelected ? colors.primary : colors.border,
-                backgroundColor: isSelected ? colors.primary : 'transparent',
+                backgroundColor: bgColor,
+                borderColor,
               },
             ]}
             onPress={() => onSelect(type)}
@@ -60,11 +65,12 @@ export default function TaskTypeSelector({ selected, onSelect }: Props) {
             >
               {emoji}
             </Animated.Text>
+
             <Animated.Text
               style={[
                 styles.label,
                 {
-                  color: isSelected ? colors.onPrimary : colors.text,
+                  color: textColor,
                 },
               ]}
             >
@@ -83,14 +89,13 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: 12,
-    marginTop: 8,
     marginBottom: 16,
   },
   button: {
     width: '48%',
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 12,
+    borderWidth: 2,
+    borderRadius: 14,
+    paddingVertical: 14,
     paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
@@ -101,7 +106,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   label: {
-    fontWeight: '500',
+    fontWeight: '600',
     fontSize: 16,
   },
 });

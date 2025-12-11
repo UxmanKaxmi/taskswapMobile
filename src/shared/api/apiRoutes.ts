@@ -26,6 +26,7 @@ export const buildRoute = {
   searchFriends: (query: string, includeFollowed: boolean = true) =>
     `${ApiRoute.USERS}/search-friends?query=${encodeURIComponent(query)}&includeFollowed=${includeFollowed}`,
   friendProfile: (id: string) => `${ApiRoute.USERS}/${id}/profile`,
+  incrementTaskViews: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/views`,
 
   // 📌 Reminder Note Routes (via Task)
   sendReminder: (taskId: string) => `${ApiRoute.REMINDER_NOTES}/${taskId}/remind`,

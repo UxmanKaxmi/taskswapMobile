@@ -21,15 +21,17 @@ import { Height, Width } from '@shared/components/Spacing';
 import ReminderMessageModal from '@shared/components/Modals/ReminderMessageModal';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { useAddReminder } from '../hooks/useAddTask';
-import { getTypeVisual } from '@shared/utils/typeVisuals';
+import { getTypeVisual, typeBackgrounds } from '@shared/utils/typeVisuals';
 import { formatDistanceToNow, isBefore, parseISO } from 'date-fns';
 import HelperAvatarGroup from './HelperAvatarGroup';
+import TaskFooter from './TaskFooter';
 type Props = {
   task: ReminderTask;
   onPressCard: (task: ReminderTask) => void;
   onPressProfile: (task: ReminderTask) => void;
   onPressView: (task: ReminderTask) => void;
   onRemind: (task: ReminderTask, msg: string) => void;
+  onPressShare?: (task: ReminderTask) => void;
 };
 
 export default function ReminderCard({
@@ -38,6 +40,7 @@ export default function ReminderCard({
   onPressProfile,
   onPressView,
   onRemind,
+  onPressShare,
 }: Props) {
   const {
     avatar,
@@ -150,8 +153,8 @@ export default function ReminderCard({
       style={[
         cardStyles.card,
         {
-          // backgroundColor: isOwner ? '#F3F4FF' : '#FFFFFF',
-          // borderColor: isOwner ? colors.primary : '#E0E0E0',
+          backgroundColor: typeBackgrounds[type],
+          borderColor: typeBackgrounds[type],
         },
       ]}
       activeOpacity={0.7}
@@ -175,7 +178,7 @@ export default function ReminderCard({
       </Row>
 
       <View style={cardStyles.messageRow}>
-        <TextElement variant="title">
+        <TextElement variant="title" style={cardStyles.mainText}>
           {emoji} {text}
         </TextElement>
       </View>
@@ -236,6 +239,14 @@ export default function ReminderCard({
         isLoading={isSendingReminder}
         taskText={task.text}
       />
+      <View style={{ marginTop: spacing.md }}>
+        <TaskFooter
+          commentCount={task.commentsCount ?? 0}
+          shareHandler={() => onPressShare?.(task)}
+          viewCount={task.viewCount ?? 0}
+          // ❌ No extra icon for Advice (no votes/helpers)
+        />
+      </View>
     </TouchableOpacity>
   );
 }
