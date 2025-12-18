@@ -25,6 +25,7 @@ import { getTypeVisual, typeBackgrounds } from '@shared/utils/typeVisuals';
 import { formatDistanceToNow, isBefore, parseISO } from 'date-fns';
 import HelperAvatarGroup from './HelperAvatarGroup';
 import TaskFooter from './TaskFooter';
+import { Shadow } from '@shared/components/Shadow';
 type Props = {
   task: ReminderTask;
   onPressCard: (task: ReminderTask) => void;
@@ -149,7 +150,9 @@ export default function ReminderCard({
   };
 
   return (
-    <TouchableOpacity
+    <Shadow
+      size="tint"
+      // color={colors.reminderBgHardest}
       style={[
         cardStyles.card,
         {
@@ -157,96 +160,96 @@ export default function ReminderCard({
           borderColor: typeBackgrounds[type],
         },
       ]}
-      activeOpacity={0.7}
-      onPress={() => onPressCard(task)}
     >
-      <Row justify="space-between" style={cardStyles.cardHeader}>
-        <Pressable onPress={() => handleProfilePress()}>
-          <Row>
-            <Image source={{ uri: avatar }} style={cardStyles.avatar} />
-            <View>
-              <TextElement variant="subtitle" style={cardStyles.name}>
-                {name}
-              </TextElement>
-              <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
-                {timeAgo(createdAt)}
-              </TextElement>
-            </View>
-          </Row>
-        </Pressable>
-        <TypeTag type={type} />
-      </Row>
+      <TouchableOpacity style={{}} activeOpacity={0.7} onPress={() => onPressCard(task)}>
+        <Row justify="space-between" style={cardStyles.cardHeader}>
+          <Pressable onPress={() => handleProfilePress()}>
+            <Row>
+              <Image source={{ uri: avatar }} style={cardStyles.avatar} />
+              <View>
+                <TextElement variant="subtitle" style={cardStyles.name}>
+                  {name}
+                </TextElement>
+                <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
+                  {timeAgo(createdAt)}
+                </TextElement>
+              </View>
+            </Row>
+          </Pressable>
+          <TypeTag type={type} />
+        </Row>
 
-      <View style={cardStyles.messageRow}>
-        <TextElement variant="title" style={cardStyles.mainText}>
-          {emoji} {text}
+        <View style={cardStyles.messageRow}>
+          <TextElement variant="title" style={cardStyles.mainText}>
+            {emoji} {text}
+          </TextElement>
+        </View>
+        <Height size={8} />
+
+        <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
+          {isBefore(new Date(task.remindAt), new Date())
+            ? '⏰ Reminder time passed'
+            : `⏳ ${formatDistanceToNow(parseISO(task.remindAt), {
+                addSuffix: true,
+              })}`}
         </TextElement>
-      </View>
-      <Height size={8} />
-
-      <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
-        {isBefore(new Date(task.remindAt), new Date())
-          ? '⏰ Reminder time passed'
-          : `⏳ ${formatDistanceToNow(parseISO(task.remindAt), {
-              addSuffix: true,
-            })}`}
-      </TextElement>
-      <View style={cardStyles.buttonRow}>
-        {isOwner ? (
-          isCompleted ? (
-            <TextElement
-              onPress={handleMarkUnDone}
-              variant="caption"
-              style={{ color: colors.success }}
-            >
-              {/* <Icon name="" size={ms(16)} color={colors.success} /> */}
-              <Width size={10} />
-              Marked Completed
-            </TextElement>
+        <View style={cardStyles.buttonRow}>
+          {isOwner ? (
+            isCompleted ? (
+              <TextElement
+                onPress={handleMarkUnDone}
+                variant="caption"
+                style={{ color: colors.success }}
+              >
+                {/* <Icon name="" size={ms(16)} color={colors.success} /> */}
+                <Width size={10} />
+                Marked Completed
+              </TextElement>
+            ) : (
+              <OutlineButton
+                title="Mark as Done"
+                style={cardStyles.buttonFull}
+                onPress={handleMarkDone}
+                isLoading={isPending}
+              />
+            )
           ) : (
             <OutlineButton
-              title="Mark as Done"
+              title="Remind Them"
+              disabled={hasReminded}
               style={cardStyles.buttonFull}
-              onPress={handleMarkDone}
-              isLoading={isPending}
+              onPress={handleRemind}
             />
-          )
-        ) : (
-          <OutlineButton
-            title="Remind Them"
-            disabled={hasReminded}
-            style={cardStyles.buttonFull}
-            onPress={handleRemind}
-          />
-        )}
-      </View>
-      {helpers && helpers.length > 0 && (
-        <View style={{ flex: 1 }}>
-          <TextElement weight="500" variant="subtitle" style={{ fontSize: ms(16) }}>
-            Helpers
-          </TextElement>
-          <HelperAvatarGroup helpers={helpers} />
+          )}
         </View>
-      )}
+        {helpers && helpers.length > 0 && (
+          <View style={{ flex: 1 }}>
+            <TextElement weight="500" variant="subtitle" style={{ fontSize: ms(16) }}>
+              Helpers
+            </TextElement>
+            <HelperAvatarGroup helpers={helpers} />
+          </View>
+        )}
 
-      <ReminderMessageModal
-        visible={showModal}
-        onClose={() => setShowModal(false)}
-        onSend={handleSendReminder}
-        message={customMessage}
-        setMessage={setCustomMessage}
-        taskName={task.name}
-        isLoading={isSendingReminder}
-        taskText={task.text}
-      />
-      <View style={{ marginTop: spacing.md }}>
-        <TaskFooter
-          commentCount={task.commentsCount ?? 0}
-          shareHandler={() => onPressShare?.(task)}
-          viewCount={task.viewCount ?? 0}
-          // ❌ No extra icon for Advice (no votes/helpers)
+        <ReminderMessageModal
+          visible={showModal}
+          onClose={() => setShowModal(false)}
+          onSend={handleSendReminder}
+          message={customMessage}
+          setMessage={setCustomMessage}
+          taskName={task.name}
+          isLoading={isSendingReminder}
+          taskText={task.text}
         />
-      </View>
-    </TouchableOpacity>
+        <View style={{ marginTop: spacing.md }}>
+          <TaskFooter
+            commentCount={task.commentsCount ?? 0}
+            shareHandler={() => onPressShare?.(task)}
+            viewCount={task.viewCount ?? 0}
+            // ❌ No extra icon for Advice (no votes/helpers)
+          />
+        </View>
+      </TouchableOpacity>
+    </Shadow>
   );
 }

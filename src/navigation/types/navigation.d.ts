@@ -1,6 +1,7 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Task } from '../../features/Tasks/types/tasks';
+import { AddTaskStackParamList } from '@features/AddTask/navigation/AddTaskNavigator';
 
 declare global {
   namespace ReactNavigation {
@@ -36,7 +37,10 @@ export type AppStackParamList = {
   Tabs: NavigatorScreenParams<BottomTabParamList>;
 
   // STACK ONLY SCREENS (open above tabs)
-  AddTask: { task?: Task } | undefined;
+  AddTask: NavigatorScreenParams<AddTaskStackParamList> & {
+    task?: Task; // optional: for "Edit Task" later
+  };
+  FilterTasksModal: undefined;
 
   TaskDetail:
     | {

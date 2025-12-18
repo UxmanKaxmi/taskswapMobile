@@ -21,6 +21,7 @@ import StackedVoteBar from '@features/Tasks/components/StackedVoteBar';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { useVoteStats } from '../hooks/useVoteStats';
 import TaskFooter from './TaskFooter';
+import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 
 type Props = {
   task: DecisionTask;
@@ -63,7 +64,8 @@ export default function DecisionCard({
     return ms(14); // short
   };
   return (
-    <TouchableOpacity
+    <Shadow
+      size="tint"
       style={[
         cardStyles.card,
         {
@@ -71,99 +73,99 @@ export default function DecisionCard({
           borderColor: typeBackgrounds[type],
         },
       ]}
-      activeOpacity={0.7}
-      onPress={() => onPressCard(task)}
     >
-      {/* Header with avatar and time */}
+      <TouchableOpacity style={{}} activeOpacity={0.7} onPress={() => onPressCard(task)}>
+        {/* Header with avatar and time */}
 
-      <Row justify="space-between" style={cardStyles.cardHeader}>
-        <Row>
-          <Image source={{ uri: avatar }} style={cardStyles.avatar} />
-          <View>
-            <TextElement variant="subtitle" style={cardStyles.name}>
-              {name}
-            </TextElement>
-            <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
-              {timeAgo(createdAt)}
-            </TextElement>
-          </View>
+        <Row justify="space-between" style={cardStyles.cardHeader}>
+          <Row>
+            <Image source={{ uri: avatar }} style={cardStyles.avatar} />
+            <View>
+              <TextElement variant="subtitle" style={cardStyles.name}>
+                {name}
+              </TextElement>
+              <TextElement variant="caption" style={cardStyles.timeAgo} color="muted">
+                {timeAgo(createdAt)}
+              </TextElement>
+            </View>
+          </Row>
+          <TypeTag type={type} iconStyle={type === 'decision' ? 'solid' : 'regular'} />
         </Row>
-        <TypeTag type={type} iconStyle={type === 'decision' ? 'solid' : 'regular'} />
-      </Row>
 
-      {/* Question text */}
-      <View style={cardStyles.messageRow}>
-        <TextElement variant="title" style={cardStyles.mainText}>
-          {emoji} {text}
-        </TextElement>
-      </View>
+        {/* Question text */}
+        <View style={cardStyles.messageRow}>
+          <TextElement variant="title" style={cardStyles.mainText}>
+            {emoji} {text}
+          </TextElement>
+        </View>
 
-      {/* Options OR Vote Results */}
-      {/* Results */}
-      {votedOption || task.completed ? (
-        <View style={{ marginTop: spacing.sm }}>
-          <VoteProgressBar
-            option1={option1}
-            option2={option2}
-            percent1={percent1}
-            percent2={percent2}
-            votedOption={votedOption ?? undefined}
+        {/* Options OR Vote Results */}
+        {/* Results */}
+        {votedOption || task.completed ? (
+          <View style={{ marginTop: spacing.sm }}>
+            <VoteProgressBar
+              option1={option1}
+              option2={option2}
+              percent1={percent1}
+              percent2={percent2}
+              votedOption={votedOption ?? undefined}
+            />
+          </View>
+        ) : (
+          // ❌ No vote yet — show buttons
+          <Row style={styles.buttonGroup}>
+            {options.map((val, index) => {
+              const voteCount = task.votes?.[val]?.count ?? 0;
+              const percent = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+
+              return (
+                <OutlineButton
+                  key={index}
+                  title={`${val} (${percent}%)`}
+                  onPress={() =>
+                    castVote({
+                      nextOption: val,
+                      prevOption: votedOption ?? undefined,
+                      me: {
+                        id: user!.id,
+                        name: user!.name,
+                        photo: user!.photo,
+                      },
+                    })
+                  }
+                  disabled={isPending}
+                  style={StyleSheet.flatten([
+                    styles.buttonHalf,
+                    { marginRight: index === 0 ? spacing.sm : 0 },
+                  ])}
+                  textStyle={{
+                    fontSize: getFontSize(`${val} (${percent}%)`),
+                  }}
+                />
+              );
+            })}
+          </Row>
+        )}
+
+        {/* Helpers section (optional) */}
+        {helpers && helpers.length > 0 && (
+          <View style={{ flex: 1, marginTop: spacing.md }}>
+            <TextElement weight="500" variant="subtitle" style={{ fontSize: ms(16) }}>
+              Helpers
+            </TextElement>
+            <HelperAvatarGroup helpers={helpers} />
+          </View>
+        )}
+        <View style={{ marginTop: spacing.md }}>
+          <TaskFooter
+            commentCount={task.commentsCount ?? 0}
+            shareHandler={() => onPressShare?.(task)}
+            extra={{ icon: 'options-outline', count: totalVotes }}
+            viewCount={task.viewCount ?? 0}
           />
         </View>
-      ) : (
-        // ❌ No vote yet — show buttons
-        <Row style={styles.buttonGroup}>
-          {options.map((val, index) => {
-            const voteCount = task.votes?.[val]?.count ?? 0;
-            const percent = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
-
-            return (
-              <OutlineButton
-                key={index}
-                title={`${val} (${percent}%)`}
-                onPress={() =>
-                  castVote({
-                    nextOption: val,
-                    prevOption: votedOption ?? undefined,
-                    me: {
-                      id: user!.id,
-                      name: user!.name,
-                      photo: user!.photo,
-                    },
-                  })
-                }
-                disabled={isPending}
-                style={StyleSheet.flatten([
-                  styles.buttonHalf,
-                  { marginRight: index === 0 ? spacing.sm : 0 },
-                ])}
-                textStyle={{
-                  fontSize: getFontSize(`${val} (${percent}%)`),
-                }}
-              />
-            );
-          })}
-        </Row>
-      )}
-
-      {/* Helpers section (optional) */}
-      {helpers && helpers.length > 0 && (
-        <View style={{ flex: 1, marginTop: spacing.md }}>
-          <TextElement weight="500" variant="subtitle" style={{ fontSize: ms(16) }}>
-            Helpers
-          </TextElement>
-          <HelperAvatarGroup helpers={helpers} />
-        </View>
-      )}
-      <View style={{ marginTop: spacing.md }}>
-        <TaskFooter
-          commentCount={task.commentsCount ?? 0}
-          shareHandler={() => onPressShare?.(task)}
-          extra={{ icon: 'options-outline', count: totalVotes }}
-          viewCount={task.viewCount ?? 0}
-        />
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </Shadow>
   );
 }
 

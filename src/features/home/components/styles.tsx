@@ -3,11 +3,13 @@ import { colors, spacing, typography } from '@shared/theme';
 import { StyleSheet } from 'react-native';
 import { moderateScale, moderateVerticalScale, ms, vs } from 'react-native-size-matters';
 
+export const quoteSize = ms(38);
 export const cardStyles = StyleSheet.create({
   mainText: {
     // marginBottom: vs(8),
-    fontSize: ms(16),
-    fontWeight: '500',
+    fontSize: ms(24),
+    lineHeight: ms(30),
+    fontWeight: '600',
   },
   type: {
     fontSize: ms(12),
@@ -20,10 +22,19 @@ export const cardStyles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#fff',
-    marginHorizontal: spacing.md,
+    // marginHorizontal: spacing.md,
     marginVertical: vs(8),
-    padding: spacing.md,
+
     borderRadius: spacing.md,
+  },
+  touchable: {
+    paddingVertical: vs(15),
+    paddingHorizontal: vs(20),
+  },
+  gradient: {
+    flex: 1, // 🔑 THIS IS CRITICAL
+    borderRadius: 16,
+    overflow: 'hidden',
   },
 
   cardHeader: {
@@ -34,12 +45,14 @@ export const cardStyles = StyleSheet.create({
     width: ms(35),
     height: ms(35),
     borderRadius: ms(35) / 2,
+    borderWidth: 2,
+    borderColor: colors.surface,
   },
 
   name: {
     marginLeft: spacing.xs,
     fontSize: ms(14),
-    fontWeight: '500',
+    fontWeight: '600',
     lineHeight: ms(18),
   },
   timeAgo: {
@@ -52,7 +65,7 @@ export const cardStyles = StyleSheet.create({
   messageRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: vs(0),
+    marginVertical: vs(6),
   },
 
   emoji: {

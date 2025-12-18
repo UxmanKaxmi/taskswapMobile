@@ -1999,6 +1999,11 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
+"@mhpdev/react-native-haptics@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@mhpdev/react-native-haptics/-/react-native-haptics-1.0.1.tgz#362a1f647d67a8d9e310adf1975a7acedf95fec5"
+  integrity sha512-QGcLS6u4JM8h1d8+9hyoEsVG09BT34IsLAz3bHQQSPLvQkGL5R0RCQ7uylFo4tkA2HE1IhRs7sOQtvkiXvSr4Q==
+
 "@napi-rs/wasm-runtime@^0.2.11":
   version "0.2.12"
   resolved "https://registry.yarnpkg.com/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz#3e78a8b96e6c33a6c517e1894efbd5385a7cb6f2"

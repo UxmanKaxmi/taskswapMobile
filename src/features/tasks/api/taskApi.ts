@@ -1,32 +1,13 @@
 import { api } from '@shared/api/axios';
 import { Task, TaskType } from '../types/tasks';
 import { ApiRoute, buildRoute } from '@shared/api/apiRoutes';
+import { CreateTaskPayload } from '@features/AddTask';
 
 /**
  * Fetch all tasks for the authenticated user.
  */
 export async function getTasks(): Promise<Task[]> {
   const response = await api.get(ApiRoute.TASKS);
-  return response.data;
-}
-
-/**
- * Payload for creating a task.
- */
-export interface CreateTaskPayload {
-  text: string;
-  type: TaskType;
-  remindAt?: string; // For reminder tasks
-  options?: string[]; // For decision tasks
-  deliverAt?: string | null; // For motivation tasks
-  helperIds?: string[]; // IDs of users to assign as helpers
-}
-
-/**
- * Create a new task of any supported type.
- */
-export async function createTask(data: CreateTaskPayload): Promise<Task> {
-  const response = await api.post(ApiRoute.TASKS, data);
   return response.data;
 }
 

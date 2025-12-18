@@ -1,6 +1,13 @@
 // ✅ Define all possible task types
 export type TaskType = 'reminder' | 'decision' | 'motivation' | 'advice';
 
+export enum TaskTypeEnum {
+  Reminder = 'reminder',
+  Decision = 'decision',
+  Advice = 'advice',
+  Motivation = 'motivation',
+}
+
 // ✅ Full Task object (received from API)
 export type Task = {
   votedOption: any;

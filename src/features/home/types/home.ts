@@ -2,6 +2,7 @@
 // ✅ Define all task types strictly
 // ---------------------------------------------
 export type TaskType = 'reminder' | 'decision' | 'motivation' | 'advice';
+export type TabKey = 'all' | 'motivation' | 'advice' | 'decision' | 'reminder';
 
 export type HelperUser = {
   id: string;
@@ -104,3 +105,10 @@ export interface ReminderNoteDTO {
   senderName: string;
   senderPhoto?: string | null;
 }
+
+export type TimeFilter = 'latest' | 'today' | 'thisWeek' | 'thisMonth' | 'allTime';
+
+export type FeedFilter = {
+  // time: TimeFilter;
+  types: TaskType[];
+};

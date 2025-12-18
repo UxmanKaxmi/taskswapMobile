@@ -26,7 +26,7 @@ import TypeTag from '@shared/components/TypeTag/TypeTag';
 import { Height } from '@shared/components/Spacing';
 import { getTypeVisual } from '@shared/utils/typeVisuals';
 import Column from '@shared/components/Layout/Column';
-import HelpersRow from '../components/HelpersRow';
+import HelpersRow from '../../AddTask/components/HelpersRow';
 import { ms } from 'react-native-size-matters';
 import CompletionStatus from '../components/CompletionStatus';
 import { useAuth } from '@features/Auth/AuthProvider';

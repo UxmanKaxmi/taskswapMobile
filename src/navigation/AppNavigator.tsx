@@ -11,9 +11,10 @@ import InviteFriendsScreen from '@features/Invite/screens/InviteFriendsScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import { AppStackParamList } from './types/navigation';
 import FriendsProfileScreen from '@features/Friends/screens/FriendsProfileScreen';
-import { isIOS } from '@shared/utils/constants';
+import { isAndroid, isIOS } from '@shared/utils/constants';
 import BottomTabsIOS from './BottomTabsIOS';
 import BottomTabsAndroid from './BottomTabsAndroid';
+import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -26,12 +27,23 @@ export default function AppNavigator() {
       {/* Add Task Modal */}
       <Stack.Screen
         name="AddTask"
-        component={AddTaskScreen}
+        component={AddTaskNavigator}
         options={{
-          presentation: 'modal',
-          animation: 'slide_from_bottom',
+          animation: !isAndroid ? 'slide_from_bottom' : 'fade_from_bottom',
+          animationDuration: 300,
         }}
       />
+
+      {/* Choose Impact screen */}
+      {/* <Stack.Screen
+        name="ChooseImpactScreen"
+        component={ChooseImpactScreen}
+        options={{
+          animation: 'slide_from_bottom',
+          animationDuration: 300,
+        }}
+      /> */}
+
       {/* Friend flows */}
       <Stack.Screen name="FindFriendsScreen" component={FindFriendsScreen} />
       <Stack.Screen name="InviteFriendsScreen" component={InviteFriendsScreen} />

@@ -139,22 +139,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center', // 👈 Add this
     justifyContent: 'center', // 👈 Ensure centered
-    paddingVertical: moderateScale(12), // 👈 Optional tweak
+    paddingVertical: moderateScale(16), // 👈 Optional tweak
     paddingHorizontal: moderateScale(24),
     borderRadius: 10,
     borderWidth: 1,
     marginVertical: vs(10),
+    marginHorizontal: moderateScale(6),
     alignSelf: 'stretch',
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center', // 👈 Crucial for vertical centering
     justifyContent: 'center',
-    width: '100%',
   },
   text: {
     fontSize: moderateScale(16), // 👈 Slightly smaller may help
-    fontWeight: '600', // 👈 Optional tweak for balance
+    fontWeight: '700', // 👈 Optional tweak for balance
   },
   iconWrapper: {
     marginRight: 8,

@@ -7,7 +7,10 @@ import { Platform } from 'react-native';
 // const BASE_URL = 'http://localhost:3001';
 
 const BASE_URL =
-  Platform.OS === 'android' ? 'http://192.168.1.13:3001' : 'http://192.168.1.13:3001';
+  Platform.OS === 'android'
+    ? 'http://192.168.1.5:3001' // Android emulator loopback
+    : 'http://localhost:3001'; //
+
 export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   skipToast?: boolean;
 }

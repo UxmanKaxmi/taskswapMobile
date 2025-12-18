@@ -45,7 +45,7 @@ export default function HeadingText({
     <TextElement
       {...rest}
       variant={variant}
-      weight="600"
+      weight="700"
       style={[{ marginVertical, marginHorizontal }, style]}
     >
       {children}

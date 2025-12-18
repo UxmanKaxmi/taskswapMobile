@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@bottom-tabs/react-navigation": "^1.1.0",
+    "@mhpdev/react-native-haptics": "^1.0.1",
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-clipboard/clipboard": "^1.16.3",

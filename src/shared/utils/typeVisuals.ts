@@ -1,6 +1,6 @@
 // src/shared/utils/typeVisuals.ts
 
-import { TaskType } from '@features/Tasks/types/tasks';
+import { TaskType, TaskTypeEnum } from '@features/Tasks/types/tasks';
 import { colors } from '@shared/theme';
 
 export type TaskCategoryType =
@@ -11,7 +11,8 @@ export type TaskCategoryType =
   | 'advice'
   | 'follow'
   | 'comment'
-  | 'task';
+  | 'task'
+  | 'push';
 
 // -------- EMOJIS ONLY (NO COLORS HERE) --------
 export const typeEmojis: Record<TaskCategoryType, string> = {
@@ -23,6 +24,7 @@ export const typeEmojis: Record<TaskCategoryType, string> = {
   follow: '➕',
   comment: '💬',
   task: '📝',
+  push: '⚡',
 };
 
 // Cleaner getVisual function
@@ -52,7 +54,49 @@ export const typeBackgroundsHard: Record<TaskType, string> = {
 // Icons remain unchanged
 export const typeIcons: Record<TaskType, string> = {
   reminder: 'bell',
-  decision: 'scale-unbalanced',
+  decision: 'circle-dot',
   motivation: 'lightbulb',
   advice: 'message',
+};
+
+// ---- IMPACT CREATION VISUALS (ChooseImpactScreen) ----
+
+export const impactTypeVisuals: Record<
+  TaskType,
+  {
+    title: string;
+    description: string;
+    icon: { set: 'fa6' | 'ion'; name: string };
+    color: string;
+    background: string;
+  }
+> = {
+  motivation: {
+    title: TaskTypeEnum.Motivation,
+    description: 'Get a boost when you’re feeling stuck or low.',
+    icon: { set: 'fa6', name: typeIcons.motivation },
+    color: colors.motivationBgHardest,
+    background: colors.motivationBg,
+  },
+  advice: {
+    title: TaskTypeEnum.Advice,
+    description: 'Get thoughts or guidance from others.',
+    icon: { set: 'fa6', name: typeIcons.advice },
+    color: colors.adviceBgHardest,
+    background: colors.adviceBg,
+  },
+  decision: {
+    title: TaskTypeEnum.Decision,
+    description: 'Let others help you choose.',
+    icon: { set: 'fa6', name: typeIcons.decision },
+    color: colors.decisionBgHardest,
+    background: colors.decisionBg,
+  },
+  reminder: {
+    title: TaskTypeEnum.Reminder,
+    description: 'A gentle nudge so you don’t forget.',
+    icon: { set: 'fa6', name: typeIcons.reminder },
+    color: colors.reminderBgHardest,
+    background: colors.reminderBg,
+  },
 };

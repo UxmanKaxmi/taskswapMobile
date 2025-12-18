@@ -24,13 +24,27 @@ export default function TypeTag({
   type,
   iconEnabled = true,
   styleOverride,
-  iconStyle = 'regular',
+  iconStyle = 'solid',
   iconSet = 'fa6',
 }: Props) {
   const backgroundColor = typeBackgroundsHard[type];
   const label = capitalizeFirstLetter(type);
   const iconName = typeIcons[type];
 
+  const getDynamicColor = (type: TaskType) => {
+    switch (type) {
+      case 'advice':
+        return colors.adviceBgHardest;
+      case 'reminder':
+        return colors.reminderBgHardest;
+      case 'motivation':
+        return colors.motivationBgHardest;
+      case 'decision':
+        return colors.decisionBgHardest;
+      default:
+        return colors.muted;
+    }
+  };
   return (
     <View style={[styles.container, { backgroundColor }, styleOverride]}>
       {iconEnabled && (
@@ -38,12 +52,20 @@ export default function TypeTag({
           set={iconSet}
           name={iconName}
           size={moderateScale(12)}
-          color={colors.muted}
+          color={getDynamicColor(type)}
           style={styles.icon}
           iconStyle={iconStyle}
         />
       )}
-      <TextElement variant="caption" color="muted" style={styles.text}>
+      <TextElement
+        variant="caption"
+        style={[
+          styles.text,
+          {
+            color: getDynamicColor(type),
+          },
+        ]}
+      >
         {label}
       </TextElement>
     </View>
@@ -65,7 +87,8 @@ const styles = StyleSheet.create({
   text: {
     fontSize: moderateScale(12),
     lineHeight: moderateScale(16),
-    includeFontPadding: false,
+    fontWeight: '500',
+    // includeFontPadding: false,
     textAlignVertical: 'center',
   },
 });

@@ -21,6 +21,7 @@ export type ListViewProps<ItemT> = {
   style?: ViewStyle;
   onRefresh?: () => void;
   refreshing?: boolean;
+  listRef?: React.Ref<FlatList<ItemT>>;
 
   /**
    * Optional component to show when the data array is empty.
@@ -43,6 +44,7 @@ export function ListView<ItemT>(props: ListViewProps<ItemT>) {
   if (data && renderItem) {
     return (
       <FlatList
+        ref={props.listRef} // ✅ correct place
         bounces={!!props.onRefresh}
         style={style}
         data={data}

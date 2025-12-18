@@ -1,4 +1,4 @@
-// src/shared/components/AnimatedBottomButton.tsx
+// src/shared/components/Buttons/AnimatedBottomButton.tsx
 import React, { useEffect, useRef } from 'react';
 import {
   Animated,
@@ -9,116 +9,137 @@ import {
   ActivityIndicator,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '../TextElement/TextElement';
+import { vs } from 'react-native-size-matters';
+import { isIOS } from '@shared/utils/constants';
 
 export interface AnimatedBottomButtonProps {
-  /** Button label */
   title: string;
-  /** Press handler */
   onPress: (e: GestureResponderEvent) => void;
-  /** Controls whether the button is visible (slides up) or hidden (slides down) */
   visible: boolean;
-  /** Whether to show a loading spinner instead of the label */
   isLoading?: boolean;
-  /** Called when the show/hide animation completes */
   onToggleComplete?: (visible: boolean) => void;
-  /** Any additional container style overrides */
+
+  /** Background color of the button */
+  buttonColor?: string;
+
+  /** Background color of the bottom sheet */
+  containerColor?: string;
+
   style?: ViewStyle;
 }
 
-/**
- * AnimatedBottomButton slides up from the bottom when `visible` is true,
- * and slides down (with fade-out) when `visible` is false.
- *
- * @example
- * <AnimatedBottomButton
- *   title="Save"
- *   visible={isDirty}
- *   isLoading={saving}
- *   onPress={handleSave}
- * />
- */
+export const BOTTOM_BUTTON_HEIGHT = vs(105);
+
 export default function AnimatedBottomButton({
   title,
   onPress,
   visible,
   isLoading = false,
   onToggleComplete,
+  buttonColor,
+  containerColor,
   style,
 }: AnimatedBottomButtonProps) {
-  const { colors, spacing, typography } = useTheme();
+  const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
 
-  // animated values
-  const translateY = useRef(new Animated.Value(visible ? 0 : 100)).current;
+  const translateY = useRef(new Animated.Value(visible ? 0 : BOTTOM_BUTTON_HEIGHT)).current;
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
 
-  // drive show/hide animations
   useEffect(() => {
     Animated.parallel([
       Animated.timing(translateY, {
-        toValue: visible ? 0 : 100,
-        duration: 300,
+        toValue: visible ? 0 : 120,
+        duration: 280,
         useNativeDriver: true,
       }),
       Animated.timing(opacity, {
         toValue: visible ? 1 : 0,
-        duration: 300,
+        duration: 220,
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      onToggleComplete?.(visible);
-    });
-  }, [visible, onToggleComplete, opacity, translateY]);
+    ]).start(() => onToggleComplete?.(visible));
+  }, [visible]);
 
   return (
     <Animated.View
       pointerEvents={visible ? 'auto' : 'none'}
       style={[
-        styles.container,
+        styles.wrapper,
         {
-          backgroundColor: colors.primary,
-          padding: spacing.md,
           transform: [{ translateY }],
           opacity,
         },
         style,
       ]}
     >
-      <TouchableOpacity
-        style={[styles.button, { width: '100%' }]}
-        onPress={onPress}
-        activeOpacity={0.8}
-        disabled={isLoading}
+      <View
+        style={[
+          styles.sheet,
+          {
+            backgroundColor: containerColor ?? colors.card,
+          },
+        ]}
       >
-        {isLoading ? (
-          <View style={{ paddingVertical: spacing.sm + 2 }}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: buttonColor ?? colors.primary }]}
+          onPress={onPress}
+          activeOpacity={0.9}
+          disabled={isLoading}
+        >
+          {isLoading ? (
             <ActivityIndicator color={colors.onPrimary} />
-          </View>
-        ) : (
-          <TextElement
-            style={{ textAlign: 'center', paddingVertical: spacing.sm }}
-            color="onPrimary"
-            variant="body"
-            weight="600"
-          >
-            {title}
-          </TextElement>
-        )}
-      </TouchableOpacity>
+          ) : (
+            <TextElement
+              color="onPrimary"
+              variant="body"
+              weight="600"
+              style={{ textAlign: 'center' }}
+            >
+              {title}
+            </TextElement>
+          )}
+        </TouchableOpacity>
+      </View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     position: 'absolute',
-    bottom: 0, // bottom of screen
     left: 0,
     right: 0,
+    bottom: -20, // ✅ ALWAYS 0
     alignItems: 'center',
   },
+  sheet: {
+    width: '105%', // ✅ FULL WIDTH
+    paddingHorizontal: 16, // inset content
+    paddingVertical: vs(20),
+    borderTopEndRadius: 28,
+    borderTopStartRadius: 28,
+
+    // iOS shadow
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: -4 },
+
+    // Android shadow
+    height: BOTTOM_BUTTON_HEIGHT,
+
+    elevation: 14,
+  },
+
   button: {
-    borderRadius: 8,
+    height: vs(45),
+    width: '100%',
+    alignSelf: 'center',
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

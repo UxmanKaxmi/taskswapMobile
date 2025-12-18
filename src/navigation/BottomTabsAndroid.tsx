@@ -43,9 +43,24 @@ export default function BottomTabsAndroid({ route }: any) {
         headerShown: false,
         tabBarStyle: [
           {
-            paddingTop: isAndroid ? vs(8) : 0,
+            paddingTop: vs(8),
             height: vs(60),
             paddingBottom: vs(6),
+            boxShadow: '0px -6px 12px rgba(0,0,0,0.08)', // ← TOP SHADOW
+
+            position: 'absolute',
+            left: 25,
+            right: 25,
+            // bottom: isAndroid ? 12 : 24,
+            // height: 70,
+            borderTopEndRadius: 30,
+            borderTopStartRadius: 30,
+
+            // backgroundColor: '#fff',
+            paddingHorizontal: 16,
+
+            // shadowRadius: 12,
+            // elevation: 12,
           },
           shouldHideTabBar ? { display: 'none' } : undefined,
         ],
@@ -53,7 +68,7 @@ export default function BottomTabsAndroid({ route }: any) {
         tabBarInactiveTintColor: colors.tabInactive,
         tabBarLabelStyle: {
           paddingTop: vs(2),
-          fontSize: ms(11),
+          fontSize: ms(10),
         },
 
         tabBarIcon: ({ color, size, focused }) => {
@@ -118,17 +133,21 @@ export default function BottomTabsAndroid({ route }: any) {
 
 const styles = StyleSheet.create({
   addButtonContainer: {
-    top: -30, // raise the button
+    top: -40, // raise the button
     justifyContent: 'center',
     alignItems: 'center',
+    // shadowColor: colors.primary,
   },
   addButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 70,
+    height: 70,
+    borderWidth: 4,
+    borderRadius: 100,
+    borderColor: colors.background,
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    boxShadow: '0px 6px 20px rgba(92, 103, 192, 0.35)',
     shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,

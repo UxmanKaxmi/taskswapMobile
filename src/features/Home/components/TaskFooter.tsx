@@ -4,7 +4,12 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import { colors } from '@shared/theme';
 import Ripple from '@shared/components/Buttons/Ripple';
-import { formatViews } from '@shared/utils/helperFunctions';
+import { formatViews, getFirstName, toShortName } from '@shared/utils/helperFunctions';
+import PushButton from '@shared/components/PushButton';
+import { TaskType } from '../types/home';
+import { TaskTypeEnum } from '@features/Tasks/types/tasks';
+import AppBorder from '@shared/components/AppBorder/AppBorder';
+import { ms, vs } from 'react-native-size-matters';
 
 interface ExtraMeta {
   icon: string;
@@ -17,6 +22,9 @@ interface Props {
   viewCount?: number;
   extra?: ExtraMeta;
   onPressComments?: () => void;
+  taskDetails?: any;
+  hasPushed: boolean;
+  pushCount: number;
 }
 
 export default function TaskFooter({
@@ -25,30 +33,62 @@ export default function TaskFooter({
   viewCount,
   extra,
   onPressComments,
+  taskDetails,
+  hasPushed = false,
+  pushCount = 21,
 }: Props) {
+  const othersCount = Math.max(pushCount - 1, 0);
+
+  const pushedText = hasPushed
+    ? othersCount > 0
+      ? `You and ${othersCount} other${othersCount === 1 ? '' : 's'} pushed this`
+      : 'You pushed this'
+    : `${pushCount} people pushed this`;
+
   return (
-    <View style={styles.footer}>
-      {/* View Count */}
-      {typeof viewCount === 'number' && (
-        <View style={[styles.action, { flex: 1 }]}>
-          <Icon name="eye-outline" size={16} color={colors.muted} set="ion" />
-          <TextElement style={styles.count}>{formatViews(viewCount)}</TextElement>
-        </View>
-      )}
+    <View>
+      <AppBorder
+        color={colors[`${TaskTypeEnum.Motivation}BgHard`]}
+        style={{ marginBottom: vs(16) }}
+      />
+      <View style={styles.footer}>
+        {taskDetails?.type === TaskTypeEnum.Motivation && (
+          <View style={{ flex: 1 }}>
+            {!hasPushed ? (
+              <PushButton
+                onPress={() => {}}
+                count={pushCount}
+                taskType={TaskTypeEnum.Motivation}
+                label={`Push ${getFirstName(taskDetails?.name)}!`}
+                size="sm"
+              />
+            ) : (
+              <TextElement style={styles.pushedText}>{pushedText}</TextElement>
+            )}
+          </View>
+        )}
 
-      {/* Comments */}
-      <Ripple style={styles.action} onPress={onPressComments}>
-        <Icon set="fa6" name="comment" size={16} color={colors.muted} />
-        <TextElement style={styles.count}>{commentCount}</TextElement>
-      </Ripple>
+        {/* View Count */}
+        {/* {typeof viewCount === 'number' && (
+          <View style={[styles.action]}>
+            <Icon name="eye-outline" size={16} color={colors.muted} set="ion" />
+            <TextElement style={styles.count}>{formatViews(viewCount)}</TextElement>
+          </View>
+        )} */}
 
-      {/* Share */}
-      <Ripple style={styles.action} onPress={shareHandler}>
-        <Icon name="share-outline" size={16} color={colors.muted} set="ion" />
-      </Ripple>
+        {/* Comments */}
+        <Ripple style={styles.action} onPress={onPressComments}>
+          <Icon set="fa6" name="comment" size={ms(14)} color={colors.muted} />
+          <TextElement style={styles.count}>{commentCount}</TextElement>
+        </Ripple>
 
-      {/* Extra (votes/helpers/etc) */}
-      {/*
+        {/* Share */}
+        {/* <Ripple style={styles.action} onPress={shareHandler}>
+          <Icon name="share-outline" size={16} color={colors.muted} set="ion" />
+        </Ripple> */}
+
+        {/* Extra (votes/helpers/etc) */}
+        {/*
 {extra?.icon && (
   <View style={styles.action}>
     <Icon name={extra.icon} size={18} variant="text" />
@@ -56,11 +96,19 @@ export default function TaskFooter({
   </View>
 )}
 */}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  pushedText: {
+    // marginTop: vs(6),
+    fontSize: ms(12),
+    color: colors.muted,
+    opacity: 0.6,
+    // backgroundColor: 'red',
+  },
   footer: {
     gap: 20,
     flexDirection: 'row',
@@ -71,10 +119,11 @@ const styles = StyleSheet.create({
   action: {
     flexDirection: 'row',
     alignItems: 'center',
+    opacity: 0.6,
   },
   count: {
-    marginLeft: 4,
+    marginLeft: 6,
     color: colors.muted,
-    fontSize: 14,
+    fontSize: ms(14),
   },
 });

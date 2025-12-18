@@ -17,23 +17,22 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 
 import TaskTypeSelector from '../components/TaskTypeSelector';
-import TaskDescriptionInput from '../components/TaskDescriptionInput';
 import ListTaskOptionSelector from '../components/ListTaskOptionSelector';
-import SelectHelpersModal from '../components/SelectHelpersModal';
+import SelectHelpersModal from '../../AddTask/components/SelectHelpersModal';
 
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 
-import { useCreateTask } from '../hooks/useCreateTask';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { TaskType, Task } from '@features/Tasks/types/tasks';
-import { CreateTaskPayload } from '../api/taskApi';
 
 import { showToast } from '@shared/utils/toast';
 import { colors, spacing } from '@shared/theme';
 import { isIOS } from '@shared/utils/constants';
 
-import VisibilitySelector from '../components/VisibilitySelector'; // NEW SMALL COMPONENT
 import { vs } from 'react-native-size-matters';
+import { useCreateTask } from '@features/AddTask/hooks/useCreateTask';
+import { CreateTaskPayload } from '@features/AddTask';
+import VisibilitySelectorWithModal from '@features/AddTask/components/VisibilitySelectorWithModal';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
 
@@ -67,10 +66,40 @@ export default function AddTaskScreen({ route, navigation }: Props) {
     navigation.setOptions({ headerShown: false });
   }, []);
 
+  function getTaskPlaceholder(type: TaskType): string {
+    switch (type) {
+      case 'motivation':
+        return 'e.g. "Motivate me to go to the gym daily."';
+      case 'reminder':
+        return 'What do you need to remember?';
+      case 'decision':
+        return 'What are you deciding between?';
+      case 'advice':
+        return 'What do you want advice on?';
+      default:
+        return 'Write your push...';
+    }
+  }
+
+  const getTitle = (type: TaskType) => {
+    switch (type) {
+      case 'motivation':
+        return 'What do you need a push for?';
+      case 'reminder':
+        return 'Reminder Details';
+      case 'decision':
+        return 'Decision Details';
+      case 'advice':
+        return 'Advice Request';
+      default:
+        return 'Your Push';
+    }
+  };
+
   const getButtonText = () => {
     switch (type) {
       case 'motivation':
-        return 'Post Motivation';
+        return 'Ask for Motivation';
       case 'reminder':
         return 'Set Reminder';
       case 'decision':
@@ -93,7 +122,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
       type,
       remindAt: type === 'reminder' ? remindAt.toISOString() : undefined,
       helpers: helperIds,
-      visibility,
+      visibility: visibility,
     };
 
     createTask(payload as CreateTaskPayload, {
@@ -105,7 +134,11 @@ export default function AddTaskScreen({ route, navigation }: Props) {
   };
 
   return (
-    <Layout>
+    <Layout
+      footerContent={
+        <PrimaryButton title={getButtonText()} isLoading={isPending} onPress={handleSubmit} />
+      }
+    >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView behavior={isIOS ? 'padding' : undefined} style={{ flex: 1 }}>
           <Animated.View style={{ flex: 1, opacity, transform: [{ scale }] }}>
@@ -119,7 +152,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
                 </TextElement>
 
                 <TextElement color="muted" style={styles.subtitle}>
-                  Share a motivation, reminder, decision, or advice with PushMeUp.
+                  Tell people what you need help with — motivation, reminders, advice, or decisions.
                 </TextElement>
 
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
@@ -129,7 +162,12 @@ export default function AddTaskScreen({ route, navigation }: Props) {
               {/* TYPE SELECTOR (REUSED) */}
               <TaskTypeSelector selected={type} onSelect={setType} />
               {/* DESCRIPTION (REUSED) */}
-              <TaskDescriptionInput value={description} onChange={setDescription} type={type} />
+              {/* <TaskDescriptionInput
+                value={description}
+                onChange={setDescription}
+                placeholder={getTaskPlaceholder(type)}
+                title={getTitle(type)}
+              /> */}
               {/* REMINDER TIME */}
               {type === 'reminder' && (
                 <ListTaskOptionSelector
@@ -151,13 +189,8 @@ export default function AddTaskScreen({ route, navigation }: Props) {
                 valueType="text"
               />
               {/* VISIBILITY */}
-              <VisibilitySelector selected={visibility} onSelect={setVisibility} />
+              <VisibilitySelectorWithModal selected={visibility} onSelect={setVisibility} />
             </ScrollView>
-
-            {/* FOOTER BUTTON */}
-            <View style={styles.footer}>
-              <PrimaryButton title={getButtonText()} isLoading={isPending} onPress={handleSubmit} />
-            </View>
 
             <SelectHelpersModal
               visible={helperModalVisible}

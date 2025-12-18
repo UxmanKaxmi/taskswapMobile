@@ -62,7 +62,7 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
           allowPadding && styles.padded,
-          { paddingBottom: footerContent ? insets.bottom : insets.bottom },
+          footerContent ? { paddingBottom: footerHeight + insets.bottom } : null,
         ]}
         showsVerticalScrollIndicator={false}
         {...scrollViewProps}
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     // paddingTop: isAndroid ? spacing.md : 0,
   },
   container: {
-    flex: 1,
+    flexGrow: 1, // ✅ instead of flex:1
   },
   padded: {
     paddingVertical: isAndroid ? spacing.md : 0,
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   footer: {
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
-    backgroundColor: colors.background,
+    backgroundColor: colors.transparent,
     paddingTop: spacing.sm,
   },
   flex: {

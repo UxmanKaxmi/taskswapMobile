@@ -3,6 +3,7 @@ import { BottomTabParamList } from '@navigation/types/navigation';
 import { hasNotificationPermission } from '../../lib/notifications/NotificationPermissionPrompt';
 import { parseISO, formatDistanceToNow, format, isBefore, isToday } from 'date-fns';
 import { Dimensions } from 'react-native';
+import { HelperUser } from '@features/Home/types/home';
 
 /**
  * Returns a relative string like "3 hours ago"
@@ -168,3 +169,170 @@ export function formatViews(num: number): string {
   const n = num / 1_000_000_000;
   return n < 10 ? `${n.toFixed(1)}B` : `${n.toFixed(0)}B`;
 }
+
+export function MakeFirstLetterUppercase(t: string) {
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+export function formatHelperNames(helpers: HelperUser[]) {
+  if (helpers.length === 0) return null;
+  if (helpers.length === 1) return helpers[0].name;
+  if (helpers.length === 2) return `${helpers[0].name} & ${helpers[1].name}`;
+  return `${helpers[0].name}, ${helpers[1].name} +${helpers.length - 2}`;
+}
+
+// toShortName('Mike Roberts');  will become      // "Mike R."
+
+export function toShortName(fullName?: string): string {
+  if (!fullName) return '';
+
+  const parts = fullName
+    .trim()
+    .split(/\s+/) // handles multiple spaces
+    .filter(Boolean);
+
+  if (parts.length === 0) return '';
+
+  const firstName = parts[0];
+
+  // Only first name
+  if (parts.length === 1) {
+    return firstName;
+  }
+
+  const lastName = parts[parts.length - 1];
+  const lastInitial = lastName.charAt(0).toUpperCase();
+
+  return `${firstName} ${lastInitial}.`;
+}
+
+export function getFirstName(fullName?: string): string {
+  if (!fullName) return '';
+
+  const parts = fullName
+    .trim()
+    .split(/\s+/) // handles multiple spaces
+    .filter(Boolean);
+
+  if (parts.length === 0) return '';
+
+  const firstName = parts[0];
+
+  // Only first name
+  if (parts.length === 1) {
+    return firstName;
+  }
+  return `${firstName}`;
+}
+
+// Removes both straight and curly quotes from start and end of the string
+export function stripOuterQuotes(text?: string): string {
+  if (!text) return '';
+
+  return text
+    .trim()
+    .replace(/^["“]+/, '') // remove opening straight or curly quotes
+    .replace(/["”]+$/, ''); // remove closing straight or curly quotes
+}
+export const MOCK_HELPERS = [
+  {
+    id: '1',
+    name: 'Ali',
+    photo: 'https://i.pravatar.cc/150?img=12',
+  },
+  {
+    id: '2',
+    name: 'Sarah',
+    photo: 'https://i.pravatar.cc/150?img=32',
+  },
+  {
+    id: '3',
+    name: 'Usman',
+    photo: 'https://i.pravatar.cc/150?img=45',
+  },
+  {
+    id: '4',
+    name: 'Ahmed',
+    photo: 'https://i.pravatar.cc/150?img=22',
+  },
+  {
+    id: '5',
+    name: 'Ali',
+    photo: 'https://i.pravatar.cc/150?img=12',
+  },
+  {
+    id: '6',
+    name: 'Sarah',
+    photo: 'https://i.pravatar.cc/150?img=32',
+  },
+  {
+    id: '7',
+    name: 'Usman',
+    photo: 'https://i.pravatar.cc/150?img=45',
+  },
+  {
+    id: '8',
+    name: 'Ahmed',
+    photo: 'https://i.pravatar.cc/150?img=22',
+  },
+  {
+    id: '9',
+    name: 'Ali',
+    photo: 'https://i.pravatar.cc/150?img=12',
+  },
+  {
+    id: '10',
+    name: 'Sarah',
+    photo: 'https://i.pravatar.cc/150?img=32',
+  },
+  {
+    id: '11',
+    name: 'Usman',
+    photo: 'https://i.pravatar.cc/150?img=45',
+  },
+  {
+    id: '12',
+    name: 'Ahmed',
+    photo: 'https://i.pravatar.cc/150?img=22',
+  },
+  {
+    id: '1',
+    name: 'Ali',
+    photo: 'https://i.pravatar.cc/150?img=12',
+  },
+  {
+    id: '2',
+    name: 'Sarah',
+    photo: 'https://i.pravatar.cc/150?img=32',
+  },
+  {
+    id: '3',
+    name: 'Usman',
+    photo: 'https://i.pravatar.cc/150?img=45',
+  },
+  {
+    id: '4',
+    name: 'Ahmed',
+    photo: 'https://i.pravatar.cc/150?img=22',
+  },
+  {
+    id: '1',
+    name: 'Ali',
+    photo: 'https://i.pravatar.cc/150?img=12',
+  },
+  {
+    id: '2',
+    name: 'Sarah',
+    photo: 'https://i.pravatar.cc/150?img=32',
+  },
+  {
+    id: '3',
+    name: 'Usman',
+    photo: 'https://i.pravatar.cc/150?img=45',
+  },
+  {
+    id: '4',
+    name: 'Ahmed',
+    photo: 'https://i.pravatar.cc/150?img=22',
+  },
+];

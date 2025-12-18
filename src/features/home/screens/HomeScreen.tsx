@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
-import { Task, TaskType } from '@features/Tasks/types/tasks';
+import { Task, TaskType, TaskTypeEnum } from '@features/Tasks/types/tasks';
 
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
@@ -17,7 +17,14 @@ import { AppStackParamList } from '@navigation/types/navigation';
 
 import ReminderCard from '../components/ReminderCard';
 import DecisionCard from '../components/DecisionCard';
-import { AdviceTask, DecisionTask, MotivationTask, ReminderTask } from '../types/home';
+import {
+  AdviceTask,
+  DecisionTask,
+  FeedFilter,
+  MotivationTask,
+  ReminderTask,
+  TabKey,
+} from '../types/home';
 import { vs } from 'react-native-size-matters';
 import { showToast } from '@shared/utils/toast';
 import MotivationCard from '../components/MotivationCard';
@@ -25,13 +32,61 @@ import AdviceCard from '../components/AdviceCard';
 import NotificationTester from '@features/Debug/NotificationTester';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { navigateToTaskDetails } from '@navigation/types/navigationUtils';
+import Row from '@shared/components/Layout/Row';
+import { Icon } from '@shared/components/Icons';
+import Ripple from '@shared/components/Buttons/Ripple';
+import FilterTasksModal from '@features/Tasks/components/FilterTasksModal';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { haptics } from '@shared/utils/haptics';
+import { Greeting } from '@shared/components/Greeting';
+import HomeHeader from '../components/HomeHeader';
+import HorizontalFilterTabs from '../components/HorizontalFilterTabs';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
-  const [filter, setFilter] = useState<TaskType | 'all'>('all');
+
   const { data: allTasks = [], isLoading, isError, error, refetch } = useTasksQuery();
+
   const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+
+  const TAB_TO_TYPES: Record<TabKey, TaskTypeEnum[]> = {
+    all: [
+      TaskTypeEnum.Motivation,
+      TaskTypeEnum.Decision,
+      TaskTypeEnum.Reminder,
+      TaskTypeEnum.Advice,
+    ],
+    motivation: [TaskTypeEnum.Motivation],
+    decision: [TaskTypeEnum.Decision],
+    reminder: [TaskTypeEnum.Reminder],
+    advice: [TaskTypeEnum.Advice],
+  };
+
+  const [activeTab, setActiveTab] = useState<TabKey>('all');
+
+  const [feedFilter, setFeedFilter] = useState<FeedFilter>({
+    time: 'latest',
+    types: [
+      TaskTypeEnum.Motivation,
+      TaskTypeEnum.Decision,
+      TaskTypeEnum.Reminder,
+      TaskTypeEnum.Advice,
+    ],
+  });
+
+  const rotation = useSharedValue(0);
+
+  useEffect(() => {
+    rotation.value = withTiming(filterModalVisible ? 180 : 0, {
+      duration: 220,
+    });
+  }, [filterModalVisible]);
+  const animatedIconStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
 
   const handleRefresh = async () => {
     try {
@@ -42,10 +97,20 @@ export default function HomeScreen() {
     }
   };
 
+  // const tasks = useMemo(() => {
+  //   if (filter === 'all') return allTasks;
+  //   return allTasks.filter(task => task.type === filter);
+  // }, [allTasks, filter]);
+
   const tasks = useMemo(() => {
-    if (filter === 'all') return allTasks;
-    return allTasks.filter(task => task.type === filter);
-  }, [allTasks, filter]);
+    let list = allTasks;
+
+    if (feedFilter.types.length) {
+      list = list.filter(task => feedFilter.types.includes(task.type));
+    }
+
+    return list;
+  }, [allTasks, feedFilter.types]);
 
   useFocusEffect(
     useCallback(() => {
@@ -126,29 +191,30 @@ export default function HomeScreen() {
   };
 
   return (
-    <Layout allowPadding={false} edgesProp={['top', 'left', 'right']}>
-      <Height size={15} />
-      <HeadingText level={1}>Your Tasks</HeadingText>
-      <View style={styles.filters}>
-        <ListView
-          scrollViewProps={{
-            horizontal: true,
-            showsHorizontalScrollIndicator: false,
-            contentContainerStyle: { marginLeft: 20 },
-          }}
-        >
-          {(['all', 'reminder', 'decision', 'motivation', 'advice'] as const).map(t => (
-            <OutlineButton
-              key={t}
-              type={filter === t ? 'alt' : 'default'}
-              style={styles.tagsButton}
-              textStyle={styles.tagsText}
-              title={t.charAt(0).toUpperCase() + t.slice(1)}
-              onPress={() => setFilter(t)}
-            />
-          ))}
-        </ListView>
-      </View>
+    <Layout>
+      <HomeHeader
+        filterOpen={filterModalVisible}
+        onPressSearch={() => {
+          setFilterModalVisible(true);
+        }}
+        onPressFilter={() => {
+          setFilterModalVisible(true);
+        }}
+      />
+
+      <Greeting name={user?.name} onPressAction={() => setFilterModalVisible(true)} />
+
+      <HorizontalFilterTabs
+        value={activeTab as any}
+        onChange={tab => {
+          haptics.selection();
+          setActiveTab(tab as TabKey);
+          setFeedFilter(prev => ({
+            ...prev,
+            types: TAB_TO_TYPES[tab as TabKey],
+          }));
+        }}
+      />
 
       <ListView
         data={tasks}
@@ -169,6 +235,7 @@ export default function HomeScreen() {
         refreshing={refreshing}
         onRefresh={handleRefresh}
       />
+
       {/* <AnimatedBottomButton
         title="Add Task"
         onPress={() => signOut()}
@@ -176,6 +243,16 @@ export default function HomeScreen() {
         style={styles.addButton}
         visible={true}
       /> */}
+
+      <FilterTasksModal
+        visible={filterModalVisible}
+        value={feedFilter}
+        onClose={() => setFilterModalVisible(false)}
+        onApply={value => {
+          setFeedFilter(value);
+          setFilterModalVisible(false);
+        }}
+      />
     </Layout>
   );
 }

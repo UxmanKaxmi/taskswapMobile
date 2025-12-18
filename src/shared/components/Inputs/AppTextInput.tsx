@@ -27,11 +27,14 @@ interface AppTextInputProps extends TextInputProps {
   autoFocus?: boolean;
   error?: boolean;
   errorText?: string;
+  wrapperStyle?: ViewStyle;
+  onCharCountChange?: (count: number, limit: number) => void;
 }
 
 export default function AppTextInput({
   label,
   containerStyle,
+  wrapperStyle,
   inputStyle,
   showCharCount = false,
   charLimit = 90,
@@ -41,6 +44,7 @@ export default function AppTextInput({
   autoFocus = false,
   error,
   errorText,
+  onCharCountChange,
   ...rest
 }: AppTextInputProps) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -107,21 +111,30 @@ export default function AppTextInput({
       <Animated.View
         style={[
           styles.wrapper,
+
           {
             transform: [{ translateX: shakeAnim }],
 
             borderColor: value.length >= charLimit || error ? colors.error : colors.border,
           },
+          wrapperStyle,
         ]}
       >
         <TextInput
           autoFocus={autoFocus}
           style={[styles.input, inputStyle]}
-          placeholderTextColor={colors.muted}
+          placeholderTextColor={colors.placeHolder}
           value={value}
           onChangeText={text => {
+            const lines = text.split('\n');
+
+            if (lines.length > 4) {
+              return; // ❌ block extra lines
+            }
+
             if (text.length <= charLimit) {
               onChangeText(text);
+              onCharCountChange?.(text.length, charLimit);
             }
           }}
           maxLength={charLimit}
