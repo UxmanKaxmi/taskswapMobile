@@ -60,4 +60,8 @@ export const buildRoute = {
     `${ApiRoute.REFERRALS}/link${channel ? `?channel=${channel}` : ''}`,
   rotateReferralLink: () => `${ApiRoute.REFERRALS}/link/rotate`,
   attributeReferral: () => `${ApiRoute.REFERRALS}/attribute`,
+
+  // ✅ Push (Encouragement)
+  toggleTaskPush: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/push`,
+  getTaskPushes: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/pushes`,
 };

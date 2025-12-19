@@ -30,7 +30,7 @@ export default function Greeting({ name, onPressAction }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    // paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     paddingTop: spacing.xs,
     paddingBottom: spacing.xs,
   },

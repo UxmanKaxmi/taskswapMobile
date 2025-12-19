@@ -18,6 +18,7 @@ import { Icon } from '@shared/components/Icons';
 import PushButton from '@shared/components/PushButton';
 import TaskMetaRow from './TaskMetaRow';
 import TaskCardGradient from './TaskCardGradient';
+import { useTaskPushes, useToggleTaskPush } from '@features/Tasks/hooks/useTaskPush';
 
 type Props = {
   task: MotivationTask;
@@ -32,6 +33,18 @@ export default function MotivationCard({ task, onPressCard, onPressShare }: Prop
   const { emoji } = getTypeVisual(type);
 
   const quoteSize = ms(100);
+  console.log('motivation', task);
+
+  const taskId = task.id;
+
+  const { data: pushData } = useTaskPushes(taskId);
+  const { mutate: togglePush, isPending } = useToggleTaskPush(taskId);
+
+  const hasPushedValue = pushData?.hasPushed || false;
+  const pushCountValue = pushData?.pushCount || 0;
+
+  console.log('pushData?.hasPushed', pushData?.hasPushed);
+  console.log('task.pushCount', task.pushCount);
 
   return (
     <Shadow
@@ -108,7 +121,11 @@ export default function MotivationCard({ task, onPressCard, onPressShare }: Prop
               shareHandler={() => onPressShare?.(task)}
               viewCount={task.viewCount ?? 0}
               taskDetails={task}
-              // ❌ No extra icon for Advice (no votes/helpers)
+              hasPushed={hasPushedValue}
+              pushCount={pushCountValue}
+              onPressPush={togglePush}
+              isPushing={isPending}
+              onPressUnpush={togglePush}
             />
           </View>
         </TouchableOpacity>

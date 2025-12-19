@@ -55,7 +55,7 @@ export const haptics = {
    */
   dragStart() {
     if (Platform.OS === 'android') {
-      Haptics.android('drag-start');
+      Haptics.androidHaptics('drag-start');
     } else {
       Haptics.impact('light');
     }
@@ -66,7 +66,7 @@ export const haptics = {
    */
   dragEnd() {
     if (Platform.OS === 'android') {
-      Haptics.android('gesture-end');
+      Haptics.androidHaptics('gesture-end');
     } else {
       Haptics.selection();
     }

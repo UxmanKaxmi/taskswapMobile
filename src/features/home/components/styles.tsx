@@ -1,7 +1,7 @@
 // src/features/tasks/components/styles.ts
 import { colors, spacing, typography } from '@shared/theme';
 import { StyleSheet } from 'react-native';
-import { moderateScale, moderateVerticalScale, ms, vs } from 'react-native-size-matters';
+import { ms, vs } from 'react-native-size-matters';
 
 export const quoteSize = ms(38);
 export const cardStyles = StyleSheet.create({
@@ -21,10 +21,9 @@ export const cardStyles = StyleSheet.create({
     color: colors.text,
   },
   card: {
-    backgroundColor: '#fff',
-    // marginHorizontal: spacing.md,
-    marginVertical: vs(8),
+    marginHorizontal: spacing.md,
 
+    marginVertical: vs(8),
     borderRadius: spacing.md,
   },
   touchable: {

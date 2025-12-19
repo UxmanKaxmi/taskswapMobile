@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: spacing.sm,
     marginHorizontal: -spacing.md, // 👈 escape parent padding
+    paddingHorizontal: spacing.md,
   },
   listContent: {
     paddingHorizontal: spacing.md,

@@ -86,3 +86,8 @@ export interface ToggleCommentLikePayload {
   commentId: string;
   like: boolean; // true = like, false = unlike
 }
+
+export type TaskPush = {
+  pushCount: number;
+  hasPushed: boolean;
+};

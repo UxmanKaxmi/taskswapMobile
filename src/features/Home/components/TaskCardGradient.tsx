@@ -16,9 +16,9 @@ const GRADIENTS: Record<TaskType, string[]> = {
     colors.motivationIconBackground, // light top glow
     colors.motivationBg, // base
   ],
-  advice: [colors.adviceIconBackground, colors.adviceBg, colors.adviceBgHard],
-  decision: [colors.decisionIconBackground, colors.decisionBg, colors.decisionBgHard],
-  reminder: [colors.reminderIconBackground, colors.reminderBg, colors.reminderBgHard],
+  advice: [colors.adviceIconBackground, colors.adviceBg],
+  decision: [colors.decisionIconBackground, colors.decisionBg],
+  reminder: [colors.reminderIconBackground, colors.reminderBg],
 };
 
 export default function TaskCardGradient({ type, children, style }: Props) {

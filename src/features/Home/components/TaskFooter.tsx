@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import { colors } from '@shared/theme';
@@ -10,6 +10,9 @@ import { TaskType } from '../types/home';
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
 import { ms, vs } from 'react-native-size-matters';
+import { isDEV } from '@shared/utils/constants';
+import { usePushInteraction } from '../hooks/usePushInteraction';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 interface ExtraMeta {
   icon: string;
@@ -25,6 +28,9 @@ interface Props {
   taskDetails?: any;
   hasPushed: boolean;
   pushCount: number;
+  onPressPush: () => void;
+  isPushing?: boolean;
+  onPressUnpush?: () => void; //TEST ONLY
 }
 
 export default function TaskFooter({
@@ -35,38 +41,90 @@ export default function TaskFooter({
   onPressComments,
   taskDetails,
   hasPushed = false,
-  pushCount = 21,
+  pushCount = 0,
+  onPressPush,
+  onPressUnpush,
+  isPushing = false,
 }: Props) {
-  const othersCount = Math.max(pushCount - 1, 0);
+  const {
+    hasPushed: pushed,
+    pushedText,
+    handlePush,
+    handleUnpush,
+  } = usePushInteraction({
+    hasPushed,
+    pushCount,
+    onPush: onPressPush,
+    onUnpush: onPressUnpush,
+    isPushing,
+  });
 
-  const pushedText = hasPushed
-    ? othersCount > 0
-      ? `You and ${othersCount} other${othersCount === 1 ? '' : 's'} pushed this`
-      : 'You pushed this'
-    : `${pushCount} people pushed this`;
+  const opacity = useSharedValue(1);
+  const translateY = useSharedValue(0);
+  const hasMounted = useRef(false);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    opacity.value = withTiming(0, { duration: 80 }, () => {
+      translateY.value = pushed ? 2 : 0;
+      opacity.value = withTiming(1, { duration: 150 });
+    });
+  }, [pushed]);
 
   return (
     <View>
       <AppBorder
-        color={colors[`${TaskTypeEnum.Motivation}BgHard`]}
+        color={colors[`${taskDetails?.type}BgHard` as keyof typeof colors]}
         style={{ marginBottom: vs(16) }}
       />
       <View style={styles.footer}>
         {taskDetails?.type === TaskTypeEnum.Motivation && (
-          <View style={{ flex: 1 }}>
-            {!hasPushed ? (
+          <Animated.View style={[animatedStyle, { flex: 1 }]}>
+            {!pushed ? (
               <PushButton
-                onPress={() => {}}
-                count={pushCount}
+                onPress={handlePush}
+                loading={isPushing}
                 taskType={TaskTypeEnum.Motivation}
                 label={`Push ${getFirstName(taskDetails?.name)}!`}
                 size="sm"
               />
             ) : (
-              <TextElement style={styles.pushedText}>{pushedText}</TextElement>
+              <>
+                <TextElement style={styles.pushedText}>{pushedText}</TextElement>
+
+                {isDEV && (
+                  <TouchableOpacity onPress={handleUnpush} style={styles.unpushButton}>
+                    <TextElement style={styles.unpushText}>Unpush (dev)</TextElement>
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
+          </Animated.View>
+        )}
+        {/* {taskDetails?.type === TaskTypeEnum.Advice && (
+          <View style={{ flex: 1 }}>
+            {!hasPushed ? (
+              <PushButton
+                onPress={() => {}}
+                taskType={TaskTypeEnum.Advice}
+                label={`Suggest advice`}
+                size="sm"
+                buttonStyle={{ paddingLeft: ms(10) }}
+              />
+            ) : (
+              <TextElement style={styles.pushedText}>{pushedTextAdvice}</TextElement>
             )}
           </View>
-        )}
+        )} */}
 
         {/* View Count */}
         {/* {typeof viewCount === 'number' && (
@@ -102,6 +160,15 @@ export default function TaskFooter({
 }
 
 const styles = StyleSheet.create({
+  unpushButton: {
+    marginTop: vs(6),
+  },
+
+  unpushText: {
+    fontSize: ms(11),
+    color: colors.error,
+    opacity: 0.6,
+  },
   pushedText: {
     // marginTop: vs(6),
     fontSize: ms(12),

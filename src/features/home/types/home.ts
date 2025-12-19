@@ -38,7 +38,8 @@ export type BaseTask = {
   voteCount: number;
   viewCount: number;
 
-  helpersCount: number;
+  pushCount: number;
+  hasPushed: boolean;
 
   // 🔥 Extra state
   hasReminded: boolean;

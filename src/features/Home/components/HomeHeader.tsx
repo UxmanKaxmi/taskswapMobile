@@ -8,7 +8,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-na
 import { haptics } from '@shared/utils/haptics';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
 import { vs } from 'react-native-size-matters';
-import { colors } from '@shared/theme';
+import { colors, spacing } from '@shared/theme';
 
 type Props = {
   onPressSearch: () => void;
@@ -64,6 +64,7 @@ export default function HomeHeader({ onPressSearch, onPressFilter, filterOpen = 
 const styles = StyleSheet.create({
   container: {
     paddingTop: 4,
+    paddingHorizontal: spacing.md,
   },
   borderWidthFull: {
     borderWidth: StyleSheet.hairlineWidth,

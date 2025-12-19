@@ -20,6 +20,7 @@ import { AppStackParamList } from './types/navigation';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { useUnreadNotificationCount } from '@features/Notification/hooks/useUnreadNotificationCount';
 import { isAndroid } from '@shared/utils/constants';
+import { useCheckAuthThenNavigate } from './types/navigationUtils';
 
 type BottomTabParamList = {
   Home: undefined;
@@ -34,6 +35,7 @@ const Tab = createBottomTabNavigator<BottomTabParamList>();
 export default function BottomTabsAndroid({ route }: any) {
   const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home';
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const checkAuthThenNavigate = useCheckAuthThenNavigate();
 
   const shouldHideTabBar = ['SomeScreenYouWantToHideOn'].includes(routeName);
 
@@ -113,7 +115,7 @@ export default function BottomTabsAndroid({ route }: any) {
 
           tabBarButton: props => (
             <TouchableOpacity
-              onPress={() => navigation.navigate('AddTask')}
+              onPress={() => checkAuthThenNavigate('AddTask')}
               style={styles.addButtonContainer}
               activeOpacity={0.9}
             >

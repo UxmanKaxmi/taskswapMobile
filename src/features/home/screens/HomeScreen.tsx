@@ -191,7 +191,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <Layout>
+    <Layout allowPaddingHorizontal={false}>
       <HomeHeader
         filterOpen={filterModalVisible}
         onPressSearch={() => {
@@ -221,6 +221,10 @@ export default function HomeScreen() {
         renderItem={renderTaskNew}
         flatListProps={{
           keyExtractor: item => item.id,
+          // contentContainerStyle: {
+          //   paddingHorizontal: spacing.md, // ✅ IMPORTANT
+          //   paddingBottom: spacing.lg,
+          // },
           ListEmptyComponent: (
             <View style={{ flex: 1, alignItems: 'flex-start', marginLeft: 20 }}>
               <Height size={20} />

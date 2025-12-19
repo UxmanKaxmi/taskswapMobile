@@ -110,18 +110,26 @@ export default function ButtonBase({
       }}
       pointerEvents={isLoading || disabled ? 'none' : 'auto'}
     >
-      {isLoading ? (
-        <Row flex>
-          <ActivityIndicator color={textColor} />
-        </Row>
-      ) : (
-        <View style={styles.content}>
-          {icon && <View style={styles.iconWrapper}>{icon}</View>}
-          <Text style={[styles.text, { color: disabled ? '#888' : textColor }, textStyle]}>
-            {title}
-          </Text>
-        </View>
-      )}
+      <View style={styles.content}>
+        {icon && <View style={[styles.iconWrapper, isLoading && styles.hiddenIcon]}>{icon}</View>}
+
+        <Text
+          style={[
+            styles.text,
+            { color: disabled ? '#888' : textColor },
+            textStyle,
+            isLoading && styles.hiddenText, // 👈 key
+          ]}
+        >
+          {title}
+        </Text>
+
+        {isLoading && (
+          <View style={styles.loaderOverlay}>
+            <ActivityIndicator size={10} color={textColor} />
+          </View>
+        )}
+      </View>
     </AnimatedTouchable>
   );
 }
@@ -135,6 +143,22 @@ function shadeColor(hex: string, percent: number) {
 }
 
 const styles = StyleSheet.create({
+  hiddenIcon: {
+    opacity: 0,
+  },
+  hiddenText: {
+    opacity: 0,
+  },
+
+  loaderOverlay: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
   button: {
     flexDirection: 'row',
     alignItems: 'center', // 👈 Add this

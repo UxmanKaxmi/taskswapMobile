@@ -20,7 +20,9 @@ type LayoutProps = {
   statusBarHidden?: boolean;
   scrollable?: boolean;
   scrollViewProps?: object;
-  allowPadding?: boolean;
+  allowPaddingVertical?: boolean;
+  allowPaddingHorizontal?: boolean;
+
   footerContent?: ReactNode;
   footerHeight?: number;
   edgesProp?: Array<'top' | 'bottom' | 'left' | 'right'>;
@@ -38,7 +40,8 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
       statusBarHidden = false,
       scrollable = false,
       scrollViewProps = {},
-      allowPadding = true,
+      allowPaddingVertical = true,
+      allowPaddingHorizontal = true,
       footerContent = null,
       footerHeight = 64,
       edgesProp = [],
@@ -70,7 +73,15 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
         {children}
       </ScrollView>
     ) : (
-      <View style={[styles.flex, allowPadding && styles.padded]}>{children}</View>
+      <View
+        style={[
+          styles.flex,
+          allowPaddingVertical && styles.paddedVertical,
+          allowPaddingHorizontal && styles.paddedHorizontal,
+        ]}
+      >
+        {children}
+      </View>
     );
 
     return (
@@ -82,7 +93,7 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
         <View style={[styles.outerContainer, { backgroundColor }]}>
           <Container
             edges={finalEdges}
-            style={[styles.container, allowPadding && styles.padded, style]}
+            style={[styles.container, allowPaddingVertical && styles.paddedVertical, style]}
             {...otherProps}
           >
             {content}
@@ -110,9 +121,8 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1, // ✅ instead of flex:1
   },
-  padded: {
+  paddedVertical: {
     paddingVertical: isAndroid ? spacing.md : 0,
-    paddingHorizontal: spacing.sm,
   },
   footer: {
     borderTopWidth: StyleSheet.hairlineWidth,
@@ -122,5 +132,8 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
+  },
+  paddedHorizontal: {
+    paddingHorizontal: spacing.md, // ✅ HERE
   },
 });

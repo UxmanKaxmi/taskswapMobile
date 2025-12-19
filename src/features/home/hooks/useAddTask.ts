@@ -5,10 +5,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { sendReminderNoteAPI } from '../api/api';
 import { showToast } from '@shared/utils/toast';
 
-interface AddReminderInput {
-  taskId: string;
-  message: string;
-}
+// interface AddReminderInput {
+//   taskId: string;
+//   message: string;
+// }
 
 export function useAddReminder(taskId: string) {
   const queryClient = useQueryClient();

@@ -6,6 +6,7 @@ import { getTypeVisual } from '@shared/utils/typeVisuals';
 import ButtonBase from '../Buttons/ButtonBase';
 import { StyleSheet } from 'react-native';
 import TextElement from '../TextElement/TextElement';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 
 export type PushButtonProps = {
   onPress: () => void;
@@ -13,6 +14,8 @@ export type PushButtonProps = {
   label?: string; // e.g. "Push Usman!"
   size?: 'sm' | 'md';
   taskType?: TaskType;
+  buttonStyle?: object;
+  loading?: boolean;
 };
 
 export default function PushButton({
@@ -20,26 +23,45 @@ export default function PushButton({
   disabled = false,
   label = 'Push',
   size = 'sm',
-  taskType = 'motivation',
+  taskType,
+  buttonStyle,
+  loading = false,
 }: PushButtonProps) {
-  const { emoji } = getTypeVisual('push');
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const { emoji } = getTypeVisual(taskType || 'reminder');
 
   function TextIcon({ emoji }: { emoji: string }) {
     return <TextElement style={{ fontSize: ms(14) }}>{emoji}</TextElement>;
   }
 
+  const handlePress = () => {
+    scale.value = withSpring(0.96, { damping: 15 }, () => {
+      scale.value = withSpring(1);
+    });
+
+    onPress?.();
+  };
+
   return (
-    <ButtonBase
-      title={label}
-      onPress={onPress}
-      disabled={disabled}
-      icon={<TextIcon emoji={emoji} />}
-      backgroundColor={colors.motivationBgHardest}
-      textColor={colors.onPrimary}
-      borderColor="transparent"
-      style={[size === 'sm' && styles.small, size === 'md' && styles.medium]}
-      textStyle={styles.text}
-    />
+    <Animated.View style={animatedStyle}>
+      <ButtonBase
+        isLoading={loading}
+        title={label}
+        onPress={handlePress}
+        disabled={disabled}
+        icon={<TextIcon emoji={emoji} />}
+        backgroundColor={colors[`${taskType || 'reminder'}BgHardest`]}
+        textColor={colors.onPrimary}
+        borderColor="transparent"
+        style={[size === 'sm' && styles.small, size === 'md' && styles.medium, buttonStyle]}
+        textStyle={styles.text}
+      />
+    </Animated.View>
   );
 }
 
@@ -48,7 +70,6 @@ const styles = StyleSheet.create({
     paddingVertical: ms(4),
     paddingHorizontal: ms(6),
     paddingRight: ms(12),
-
     borderRadius: ms(20),
     marginVertical: 0,
     marginHorizontal: 0,
