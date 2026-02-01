@@ -64,7 +64,8 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
         bounces={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
-          allowPadding && styles.padded,
+          allowPaddingVertical && styles.paddedVertical,
+          allowPaddingHorizontal && styles.paddedHorizontal,
           footerContent ? { paddingBottom: footerHeight + insets.bottom } : null,
         ]}
         showsVerticalScrollIndicator={false}

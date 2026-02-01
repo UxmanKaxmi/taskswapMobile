@@ -28,6 +28,7 @@ export default function RecentTaskCard({ task, onPress }: Props) {
 
   const renderTaskNew = ({ item }: { item: Task }) => {
     console.log(item.type, 'item.type');
+
     switch (item.type) {
       case 'decision':
         return (

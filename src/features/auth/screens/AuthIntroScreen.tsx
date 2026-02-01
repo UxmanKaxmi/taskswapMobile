@@ -8,8 +8,56 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { colors } from '@shared/theme';
 import { AuthStackParamList } from '@navigation/types/navigation';
 import { resetToHomeRoot, resetToStack } from '@navigation/types/navigationUtils';
+import { vs } from 'react-native-size-matters';
 
 const { width, height } = Dimensions.get('window');
+
+// Map of copy for different redirect screens
+const authCopyMap: Record<
+  string,
+  {
+    title: string;
+    subtitle: string;
+    cta: string;
+  }
+> = {
+  AddTask: {
+    title: 'Create Your Task',
+    subtitle: 'Log in to create tasks, involve helpers, and keep everything in one place.',
+    cta: 'Log In to Create',
+  },
+
+  Friends: {
+    title: 'Stay Connected',
+    subtitle:
+      'Log in to follow friends, send support, and stay close to the people you care about.',
+    cta: 'Log In to Connect',
+  },
+
+  FriendsProfileScreen: {
+    title: 'Make Your Support Count',
+    subtitle: 'Log in to send your support and keep the connection meaningful.',
+    cta: 'Log In to Help',
+  },
+
+  Notification: {
+    title: 'See What’s New',
+    subtitle: 'Log in to view updates, responses, and gentle nudges meant for you.',
+    cta: 'Log In to View',
+  },
+
+  Profile: {
+    title: 'Your Space, Saved',
+    subtitle: 'Log in to track progress, manage your activity, and stay connected.',
+    cta: 'Log In & Continue',
+  },
+
+  Home: {
+    title: 'Make Your Support Count',
+    subtitle: 'Log in to support others, see how it helps, and stay connected.',
+    cta: 'Log In to Support',
+  },
+};
 
 export default function AuthIntroScreen() {
   const route = useRoute<RouteProp<AuthStackParamList, 'AuthIntro'>>();
@@ -17,6 +65,13 @@ export default function AuthIntroScreen() {
   const redirectTo = route.params?.redirectTo;
   const redirectParams = route.params?.params;
   const navigation = useNavigation();
+
+  console.log('redirectTo', redirectTo);
+  const copy = (redirectTo && authCopyMap[redirectTo]) ?? {
+    title: 'Continue with Push Me Up',
+    subtitle: 'Log in to save your progress and stay connected.',
+    cta: 'Log In',
+  };
 
   const handleContinue = () => {
     navigation.navigate('Auth', {
@@ -29,12 +84,16 @@ export default function AuthIntroScreen() {
   };
 
   const handleSkip = () => {
-    resetToHomeRoot(navigation);
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      resetToHomeRoot(navigation);
+    }
   };
 
   return (
     <Animated.View style={{ flex: 1 }}>
-      <Layout>
+      <Layout backgroundColor="onAccent">
         {/* <View style={styles.logoWrapper}>
           <Image
             source={require('@assets/images/logo.png')}
@@ -51,16 +110,15 @@ export default function AuthIntroScreen() {
           />
 
           <TextElement marginVertical={18} variant="title" style={styles.title}>
-            Log in to Continue
+            {copy.title}
           </TextElement>
 
           <TextElement variant="caption" style={styles.subtitle}>
-            Unlock all features — add tasks, follow friends, track your journey, and stay motivated
-            every day.
+            {copy.subtitle}
           </TextElement>
         </View>
 
-        <PrimaryButton title="Login" onPress={handleContinue} />
+        <PrimaryButton title={copy.cta} onPress={handleContinue} />
         <Height size={10} />
 
         <TouchableOpacity onPress={handleSkip}>
@@ -91,13 +149,14 @@ const styles = StyleSheet.create({
   },
   image: {
     width: width,
-    height: height * 0.3,
-    marginBottom: 20,
+    height: height * 0.42,
+    // marginBottom: 20,
   },
   title: {
     marginBottom: 10,
     fontWeight: '700',
     textAlign: 'center',
+    marginTop: vs(-20),
   },
   subtitle: {
     color: '#707070',

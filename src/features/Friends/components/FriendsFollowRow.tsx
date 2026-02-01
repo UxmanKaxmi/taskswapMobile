@@ -57,6 +57,7 @@ export default function FriendFollowRow({
         textStyle={{
           color: isFollowing ? colors.onAccent : colors.primary,
           fontSize: moderateScale(10),
+          lineHeight: moderateScale(16),
         }}
         style={styles.button}
       />

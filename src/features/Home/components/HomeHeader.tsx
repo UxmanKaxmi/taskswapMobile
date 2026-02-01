@@ -9,6 +9,7 @@ import { haptics } from '@shared/utils/haptics';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
 import { vs } from 'react-native-size-matters';
 import { colors, spacing } from '@shared/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   onPressSearch: () => void;
@@ -19,6 +20,9 @@ type Props = {
 export default function HomeHeader({ onPressSearch, onPressFilter, filterOpen = false }: Props) {
   const rotation = useSharedValue(0);
 
+  //Safe area is needed for here for the animation.
+  const insets = useSafeAreaInsets();
+
   useEffect(() => {
     rotation.value = withTiming(filterOpen ? 180 : 0, { duration: 220 });
   }, [filterOpen]);
@@ -28,11 +32,19 @@ export default function HomeHeader({ onPressSearch, onPressFilter, filterOpen = 
   }));
 
   return (
-    <Row justify="space-between" style={styles.container}>
-      <AppBorder color={colors.border} style={styles.borderWidthFull} />
+    <Row
+      justify="space-between"
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+        },
+      ]}
+    >
+      {/* <AppBorder color={colors.border} style={styles.borderWidthFull} /> */}
       {/* App name (kept subtle) */}
       <HeadingText level={2} marginHorizontal={0}>
-        PushMeUp
+        Push Me Up
       </HeadingText>
 
       {/* Actions */}
@@ -63,7 +75,6 @@ export default function HomeHeader({ onPressSearch, onPressFilter, filterOpen = 
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 4,
     paddingHorizontal: spacing.md,
   },
   borderWidthFull: {

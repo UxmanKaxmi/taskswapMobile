@@ -87,7 +87,7 @@ export default function AddMotivationScreen({ navigation }: Props) {
       type: TaskTypeEnum.Motivation,
       text: text.trim(),
       visibility,
-      helperIds: visibility === 'private' ? [] : helperIds,
+      helpers: visibility === 'private' ? [] : helperIds,
     };
 
     createTask(payload, {

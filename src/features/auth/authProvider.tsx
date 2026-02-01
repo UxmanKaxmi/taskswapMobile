@@ -25,6 +25,8 @@ type AuthContextType = {
   signOut: () => Promise<void>;
   loading: boolean;
   token: string | null;
+  isAuthenticated: boolean; // ✅
+
   hasSeenFindFriendsScreen: boolean;
   setHasSeenFindFriendsScreen: (seen: boolean) => void;
 };
@@ -42,7 +44,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [hasSeenFindFriendsScreen, setHasSeenFindFriendsScreenState] = useState(false);
 
   const { mutateAsync: googleAuth } = useGoogleAuth();
-
+  const isAuthenticated = !!token && !loading;
   const setHasSeenFindFriendsScreen = async (seen: boolean) => {
     await AsyncStorage.setItem(STORAGE_HAS_SEEN_FIND_FRIENDS, JSON.stringify(seen));
     setHasSeenFindFriendsScreenState(seen);
@@ -143,6 +145,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         signOut,
         loading,
         token,
+        isAuthenticated, // ✅ ADD THIS
+
         hasSeenFindFriendsScreen,
         setHasSeenFindFriendsScreen,
       }}
@@ -156,4 +160,12 @@ export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
   return ctx;
+};
+
+export const useIsOwner = (ownerId?: string | null) => {
+  const { user } = useAuth();
+
+  if (!ownerId || !user?.id) return false;
+
+  return ownerId === user.id;
 };

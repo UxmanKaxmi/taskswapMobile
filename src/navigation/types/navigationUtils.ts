@@ -1,6 +1,6 @@
 // src/lib/navigation/navigationUtils.ts
 
-import { CommonActions, NavigationProp, useNavigation } from '@react-navigation/native';
+import { CommonActions, NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Linking } from 'react-native';
 
 import { AppStackParamList, BottomTabParamList } from './navigation';
@@ -141,30 +141,48 @@ export function resetToHomeRoot(navigation: any) {
 }
 
 /**
- * Wrap any navigation action: if user is not logged in,
- * redirect to login, otherwise navigate to intended screen.
+ * Guards a navigation action behind authentication.
+ *
+ * If the user is not authenticated, navigates to `AuthIntro` and stores
+ * the intended destination so the user can be redirected back after login.
+ *
+ * If the user *is* authenticated, immediately navigates to the target screen.
+ *
+ * @returns `true` if navigation proceeded, `false` if redirected to auth.
  *
  * @example
- * checkAuthThenNavigate(navigation, "AddTask");
- * checkAuthThenNavigate(navigation, "TaskDetail", { task });
+ * // Navigate only if authenticated
+ * if (!checkAuthThenNavigate('AddTask')) return;
+ *
+ * @example
+ * // Navigate with params
+ * if (!checkAuthThenNavigate('TaskDetail', { taskId })) return;
  */
 
 export function useCheckAuthThenNavigate() {
   const navigation = useAppNavigation();
+  const route = useRoute();
   const { user } = useAuth();
 
   return function checkAuthThenNavigate<T extends keyof AppStackParamList>(
-    screen: T,
+    screen?: T,
     params?: AppStackParamList[T],
-  ) {
+  ): boolean {
     if (!user) {
+      console.log('screen', screen);
+      console.log('route.name', route.name);
+
       navigation.navigate('AuthIntro', {
-        redirectTo: screen,
+        redirectTo: (screen ?? route.name) as keyof AppStackParamList,
         params,
       });
-      return;
+      return false;
     }
 
-    navigation.navigate(screen, params);
+    if (screen) {
+      navigation.navigate(screen, params);
+    }
+
+    return true;
   };
 }

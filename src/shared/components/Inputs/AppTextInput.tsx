@@ -1,6 +1,6 @@
 // src/shared/components/Inputs/AppTextInput.tsx
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, forwardRef } from 'react';
 import {
   TextInput,
   StyleSheet,
@@ -9,7 +9,6 @@ import {
   ViewStyle,
   TextStyle,
   Animated,
-  Platform,
 } from 'react-native';
 import { colors, spacing, typography } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -31,143 +30,152 @@ interface AppTextInputProps extends TextInputProps {
   onCharCountChange?: (count: number, limit: number) => void;
 }
 
-export default function AppTextInput({
-  label,
-  containerStyle,
-  wrapperStyle,
-  inputStyle,
-  showCharCount = false,
-  charLimit = 90,
-  value,
-  onChangeText,
-  onValidityChange,
-  autoFocus = false,
-  error,
-  errorText,
-  onCharCountChange,
-  ...rest
-}: AppTextInputProps) {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const shakeAnim = useRef(new Animated.Value(0)).current;
-  const labelPulse = useRef(new Animated.Value(1)).current;
-  const prevErrorRef = useRef<boolean | undefined>(false);
-  useEffect(() => {
-    const exceededLimit = value.length >= charLimit;
-    const errorBecameTrue = !prevErrorRef.current && error;
+const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
+  (
+    {
+      label,
+      containerStyle,
+      wrapperStyle,
+      inputStyle,
+      showCharCount = false,
+      charLimit = 90,
+      value,
+      onChangeText,
+      onValidityChange,
+      autoFocus = false,
+      error,
+      errorText,
+      onCharCountChange,
+      ...rest
+    },
+    ref,
+  ) => {
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+    const shakeAnim = useRef(new Animated.Value(0)).current;
+    const labelPulse = useRef(new Animated.Value(1)).current;
+    const prevErrorRef = useRef<boolean | undefined>(false);
 
-    if (onValidityChange) {
-      const isValid = !!value.trim() && value.length <= charLimit;
-      onValidityChange(isValid);
-    }
+    useEffect(() => {
+      const exceededLimit = value.length >= charLimit;
+      const errorBecameTrue = !prevErrorRef.current && error;
 
-    if (errorBecameTrue || exceededLimit) {
-      Animated.parallel([
-        Animated.sequence([
-          Animated.spring(scaleAnim, {
-            toValue: 1.15,
-            useNativeDriver: true,
-          }),
-          Animated.spring(scaleAnim, {
-            toValue: 1,
-            friction: 3,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-          Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-          Animated.timing(shakeAnim, { toValue: 6, duration: 50, useNativeDriver: true }),
-          Animated.timing(shakeAnim, { toValue: -6, duration: 50, useNativeDriver: true }),
-          Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
-        ]),
-        Animated.sequence([
-          Animated.timing(labelPulse, {
-            toValue: 1.1,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(labelPulse, {
-            toValue: 1,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]).start();
-    }
+      if (onValidityChange) {
+        const isValid = !!value.trim() && value.length <= charLimit;
+        onValidityChange(isValid);
+      }
 
-    // ✅ only update after animation check
-    prevErrorRef.current = error;
-  }, [value, charLimit, error, onValidityChange]);
+      if (errorBecameTrue || exceededLimit) {
+        Animated.parallel([
+          Animated.sequence([
+            Animated.spring(scaleAnim, {
+              toValue: 1.15,
+              useNativeDriver: true,
+            }),
+            Animated.spring(scaleAnim, {
+              toValue: 1,
+              friction: 3,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: 6, duration: 50, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: -6, duration: 50, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
+          ]),
+          Animated.sequence([
+            Animated.timing(labelPulse, {
+              toValue: 1.1,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(labelPulse, {
+              toValue: 1,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+          ]),
+        ]).start();
+      }
 
-  return (
-    <View style={containerStyle}>
-      {label && (
-        <Animated.View>
-          <TextElement variant="caption" style={styles.label}>
-            {label}
-          </TextElement>
+      prevErrorRef.current = error;
+    }, [value, charLimit, error, onValidityChange]);
+
+    return (
+      <View style={containerStyle}>
+        {label && (
+          <Animated.View>
+            <TextElement variant="caption" style={styles.label}>
+              {label}
+            </TextElement>
+          </Animated.View>
+        )}
+
+        <Animated.View
+          style={[
+            styles.wrapper,
+            {
+              transform: [{ translateX: shakeAnim }],
+              borderColor: value.length >= charLimit || error ? colors.error : colors.border,
+            },
+            wrapperStyle,
+          ]}
+        >
+          {console.log('autoFocus', autoFocus)}
+          <TextInput
+            ref={ref} // ✅ THIS IS THE KEY
+            autoFocus={autoFocus}
+            style={[styles.input, inputStyle]}
+            placeholderTextColor={colors.placeHolder}
+            value={value}
+            multiline
+            textAlignVertical="top"
+            onChangeText={text => {
+              const lines = text.split('\n');
+              if (lines.length > 4) return;
+
+              if (text.length <= charLimit) {
+                onChangeText(text);
+                onCharCountChange?.(text.length, charLimit);
+              }
+            }}
+            maxLength={charLimit}
+            {...rest}
+          />
         </Animated.View>
-      )}
-      <Animated.View
-        style={[
-          styles.wrapper,
 
-          {
-            transform: [{ translateX: shakeAnim }],
+        <Row style={{ justifyContent: errorText ? 'space-between' : 'flex-end' }}>
+          {errorText && (
+            <Animated.Text
+              style={[
+                styles.charCount,
+                error && { color: colors.error },
+                { transform: [{ scale: scaleAnim }] },
+              ]}
+            >
+              {errorText}
+            </Animated.Text>
+          )}
 
-            borderColor: value.length >= charLimit || error ? colors.error : colors.border,
-          },
-          wrapperStyle,
-        ]}
-      >
-        <TextInput
-          autoFocus={autoFocus}
-          style={[styles.input, inputStyle]}
-          placeholderTextColor={colors.placeHolder}
-          value={value}
-          onChangeText={text => {
-            const lines = text.split('\n');
+          {showCharCount && (
+            <Animated.Text
+              style={[
+                styles.charCount,
+                value.length >= charLimit && { color: colors.error },
+                { transform: [{ scale: scaleAnim }] },
+              ]}
+            >
+              {value.length}/{charLimit}
+            </Animated.Text>
+          )}
+        </Row>
+      </View>
+    );
+  },
+);
 
-            if (lines.length > 4) {
-              return; // ❌ block extra lines
-            }
-
-            if (text.length <= charLimit) {
-              onChangeText(text);
-              onCharCountChange?.(text.length, charLimit);
-            }
-          }}
-          maxLength={charLimit}
-          {...rest}
-        />
-      </Animated.View>
-      <Row style={{ justifyContent: errorText ? 'space-between' : 'flex-end' }}>
-        {errorText && (
-          <Animated.Text
-            style={[
-              styles.charCount,
-              error && { color: colors.error },
-              { transform: [{ scale: scaleAnim }] },
-            ]}
-          >
-            {errorText}
-          </Animated.Text>
-        )}
-        {showCharCount && (
-          <Animated.Text
-            style={[
-              styles.charCount,
-              value.length >= charLimit && { color: colors.error },
-              { transform: [{ scale: scaleAnim }] },
-            ]}
-          >
-            {value.length}/{charLimit}
-          </Animated.Text>
-        )}
-      </Row>
-    </View>
-  );
-}
+export default AppTextInput;
 
 const styles = StyleSheet.create({
   wrapper: {

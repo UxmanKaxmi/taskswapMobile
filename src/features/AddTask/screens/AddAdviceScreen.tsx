@@ -81,7 +81,7 @@ export default function AddAdviceScreen({ navigation }: Props) {
       type: TaskTypeEnum.Advice,
       text: text.trim(),
       visibility,
-      helperIds: visibility === 'private' ? [] : helperIds,
+      helpers: visibility === 'private' ? [] : helperIds,
     };
 
     createTask(payload, {

@@ -52,7 +52,11 @@ export default function MyProfileMainScreen() {
   }
 
   return (
-    <Layout allowPadding style={{ marginTop: 0, paddingTop: 0 }}>
+    <Layout
+      allowPaddingVertical={true}
+      allowPaddingHorizontal
+      style={{ marginTop: 0, paddingTop: 0 }}
+    >
       <ListView
         style={{}}
         scrollViewProps={{

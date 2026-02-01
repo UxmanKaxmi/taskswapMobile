@@ -48,11 +48,44 @@ export const cardStyles = StyleSheet.create({
     borderColor: colors.surface,
   },
 
+  avatarWrapper: {
+    width: ms(36),
+    height: ms(36),
+    marginRight: spacing.sm,
+    position: 'relative',
+  },
+
+  ownerAvatar: {
+    width: ms(36),
+    height: ms(36),
+    borderRadius: ms(18),
+  },
+
+  helperOverlay: {
+    position: 'absolute',
+    bottom: ms(-4),
+    right: ms(-6),
+  },
+
   name: {
-    marginLeft: spacing.xs,
-    fontSize: ms(14),
+    // marginLeft: spacing.xs,
+    fontSize: ms(16),
     fontWeight: '600',
     lineHeight: ms(18),
+  },
+
+  helperWrapper: {
+    marginEnd: ms(20), // 👈 overlap ON TOP of owner
+    marginLeft: ms(-25), // 👈 overlap ON TOP of owner
+    marginTop: ms(20),
+    zIndex: 2, // 👈 helpers above owner
+  },
+  helperText: {
+    // marginLeft: spacing.sm,
+    fontSize: ms(10),
+    // color: colors.onPrimary,
+    // opacity: 0.9,
+    // lineHeight: ms(14),
   },
   timeAgo: {
     marginLeft: spacing.xs,
@@ -64,7 +97,8 @@ export const cardStyles = StyleSheet.create({
   messageRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: vs(6),
+    marginTop: vs(8),
+    marginBottom: vs(0),
   },
 
   emoji: {

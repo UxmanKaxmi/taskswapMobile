@@ -10,6 +10,9 @@ import firebase from '@react-native-firebase/app';
 import { Platform, StatusBar, StyleSheet } from 'react-native';
 import { AnimatedBootSplash } from '@features/Splash/AnimatedBootSplash';
 import { AuthProvider } from '@features/Auth/AuthProvider';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { AppInfoBottomSheetProvider } from '@shared/components/AppInfoBottomSheet/AppInfoBottomSheetProvider';
 
 const queryClient = new QueryClient();
 
@@ -27,8 +30,9 @@ export default function App() {
 
   useEffect(() => {
     StatusBar.setBarStyle('dark-content');
+
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor('transparent');
+      StatusBar.setBackgroundColor('#FFFFFF');
       StatusBar.setTranslucent(true);
     }
   }, []);
@@ -41,17 +45,23 @@ export default function App() {
   return visible ? (
     <AnimatedBootSplash onAnimationEnd={() => setVisible(false)} />
   ) : (
-    <QueryClientProvider client={queryClient}>
-      <NotificationPermissionPrompt />
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+      <BottomSheetModalProvider>
+        <AppInfoBottomSheetProvider>
+          <QueryClientProvider client={queryClient}>
+            <NotificationPermissionPrompt />
 
-      <AuthProvider>
-        <NavigationContainer theme={LightNavTheme}>
-          <RootNavigator />
-        </NavigationContainer>
-      </AuthProvider>
+            <AuthProvider>
+              <NavigationContainer theme={LightNavTheme}>
+                <RootNavigator />
+              </NavigationContainer>
+            </AuthProvider>
 
-      <Toast config={toastConfig} position="bottom" bottomOffset={60} />
-    </QueryClientProvider>
+            <Toast config={toastConfig} position="bottom" bottomOffset={60} />
+          </QueryClientProvider>
+        </AppInfoBottomSheetProvider>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 }
 const styles = StyleSheet.create({

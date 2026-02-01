@@ -23,7 +23,9 @@ export type Task = {
   deliverAt?: string; // for motivation tasks
   avatar?: string;
   name?: string;
-
+  hasAdvised?: boolean;
+  hasVoted?: boolean;
+  voteCount?: number;
   helpers?: string[];
   votes: {
     [option: string]: {

@@ -4,75 +4,99 @@ import { TaskHelper } from '../types/home';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { ms } from 'react-native-size-matters';
 import { colors } from '@shared/theme';
+import { Shadow } from '@shared/components/Shadow';
 
 type Props = {
   helpers: TaskHelper[];
   maxVisible?: number;
+  avatarSize?: number;
+  containerStyle?: any;
 };
 
-export default function HelperAvatarGroup({ helpers, maxVisible = 4 }: Props) {
-  const visible = helpers.slice(0, maxVisible);
-  const remaining = helpers.length - maxVisible;
+export default function HelperAvatarGroup({ helpers, avatarSize = ms(38), containerStyle }: Props) {
+  if (!helpers || helpers.length === 0) {
+    return null;
+  }
 
-  return (
-    <View style={styles.container}>
-      {visible.map((helper, index) => (
+  // 🔹 Case 1: exactly ONE helper → show avatar
+  if (helpers.length === 1) {
+    const helper = helpers[0];
+
+    return (
+      <Shadow
+        size="tint"
+        style={[styles.container, containerStyle, { width: avatarSize, height: avatarSize }]}
+      >
         <Image
-          key={helper.id}
-          source={{ uri: helper.photo }}
+          source={helper.photo ? { uri: helper.photo } : require('@assets/images/emptyFriend.png')}
           style={[
             styles.avatar,
             {
-              left: index * 21,
-              zIndex: helpers.length - index,
+              width: avatarSize,
+              height: avatarSize,
+              borderRadius: avatarSize / 2,
             },
           ]}
         />
-      ))}
+      </Shadow>
+    );
+  }
 
-      {remaining > 0 && (
-        <View style={[styles.more, { left: maxVisible * 21 }]}>
-          <TextElement style={styles.moreText}>+{remaining}</TextElement>
-        </View>
-      )}
-    </View>
+  // 🔹 Case 2: MORE THAN ONE helper → show +N
+  return (
+    <Shadow
+      size="tint"
+      style={[styles.container, containerStyle, { width: avatarSize, height: avatarSize }]}
+    >
+      <View
+        style={[
+          styles.more,
+          {
+            width: avatarSize,
+            height: avatarSize,
+            borderRadius: avatarSize / 2,
+          },
+        ]}
+      >
+        <TextElement
+          style={[
+            styles.moreText,
+            {
+              lineHeight: avatarSize - ms(4), // 👈 key fix
+              textAlign: 'center',
+            },
+          ]}
+        >
+          +{helpers.length}
+        </TextElement>
+      </View>
+    </Shadow>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    // backgroundColor: 'red',
+    position: 'relative',
+  },
 
-    height: ms(38),
-    flexDirection: 'row',
-    // position: 'relative',
-    // alignItems: 'flex-end',
-    // justifyContent: 'flex-end',
-    // alignContent: 'flex-end',
-    // // alignSelf: 'flex-end',
-  },
   avatar: {
-    width: ms(38),
-    height: ms(38),
-    borderRadius: ms(38),
-    position: 'absolute',
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: '#ccc',
+    borderWidth: 0.4,
+    borderColor: colors.card,
+    backgroundColor: colors.muted,
+    opacity: 0.9,
   },
+
   more: {
-    width: ms(40),
-    height: ms(40),
-    borderRadius: ms(22),
-    backgroundColor: '#3498db',
+    backgroundColor: colors.onAccent,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'absolute',
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: colors.card,
   },
+
   moreText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: colors.muted,
+    fontSize: ms(10),
+    fontWeight: '500',
   },
 });

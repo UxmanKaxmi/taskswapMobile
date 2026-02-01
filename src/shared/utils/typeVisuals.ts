@@ -50,6 +50,12 @@ export const typeBackgroundsHard: Record<TaskType, string> = {
   motivation: colors.motivationBgHard,
   advice: colors.adviceBgHard,
 };
+export const typeBackgroundsHardest: Record<TaskType, string> = {
+  reminder: colors.reminderBgHardest,
+  decision: colors.decisionBgHardest,
+  motivation: colors.motivationBgHardest,
+  advice: colors.adviceBgHardest,
+};
 
 // Icons remain unchanged
 export const typeIcons: Record<TaskType, string> = {
@@ -58,6 +64,13 @@ export const typeIcons: Record<TaskType, string> = {
   motivation: 'lightbulb',
   advice: 'message',
 };
+
+export function getTaskBackgroundVisual(type: TaskType) {
+  return {
+    icon: typeIcons[type],
+    color: typeBackgroundsHard[type],
+  };
+}
 
 // ---- IMPACT CREATION VISUALS (ChooseImpactScreen) ----
 

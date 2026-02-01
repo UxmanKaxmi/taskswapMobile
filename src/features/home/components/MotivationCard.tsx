@@ -19,6 +19,9 @@ import PushButton from '@shared/components/PushButton';
 import TaskMetaRow from './TaskMetaRow';
 import TaskCardGradient from './TaskCardGradient';
 import { useTaskPushes, useToggleTaskPush } from '@features/Tasks/hooks/useTaskPush';
+import HelperAvatarGroup from './HelperAvatarGroup';
+import TaskHeader from './TaskHeader';
+import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 
 type Props = {
   task: MotivationTask;
@@ -28,8 +31,8 @@ type Props = {
   onPressShare?: (task: MotivationTask) => void;
 };
 
-export default function MotivationCard({ task, onPressCard, onPressShare }: Props) {
-  const { avatar, name = 'John Doe', createdAt, text, type } = task;
+export default function MotivationCard({ task, onPressCard, onPressShare, onPressSuggest }: Props) {
+  const { avatar, name = 'John Doe', createdAt, text, type, helpers } = task;
   const { emoji } = getTypeVisual(type);
 
   const quoteSize = ms(100);
@@ -42,9 +45,6 @@ export default function MotivationCard({ task, onPressCard, onPressShare }: Prop
 
   const hasPushedValue = pushData?.hasPushed || false;
   const pushCountValue = pushData?.pushCount || 0;
-
-  console.log('pushData?.hasPushed', pushData?.hasPushed);
-  console.log('task.pushCount', task.pushCount);
 
   return (
     <Shadow
@@ -74,19 +74,13 @@ export default function MotivationCard({ task, onPressCard, onPressShare }: Prop
           onPress={() => onPressCard(task)}
         >
           {/* Header */}
-          <Row justify="space-between" style={cardStyles.cardHeader}>
-            <Row>
-              <Image source={{ uri: avatar }} style={cardStyles.avatar} />
-              <View>
-                <TextElement variant="subtitle" style={cardStyles.name}>
-                  {toShortName(name)}
-                </TextElement>
-                <TaskMetaRow type={'motivation'} timeAgo={timeAgo(createdAt)} />
-              </View>
-            </Row>
-
-            {/* <TypeTag type={type} /> */}
-          </Row>
+          <TaskHeader
+            avatar={avatar || ''}
+            name={name}
+            createdAt={createdAt}
+            type={TaskTypeEnum.Motivation}
+            helpers={helpers}
+          />
 
           {/* Motivation message row (small + emoji like ReminderCard) */}
           {/* Motivation block */}
@@ -126,6 +120,7 @@ export default function MotivationCard({ task, onPressCard, onPressShare }: Prop
               onPressPush={togglePush}
               isPushing={isPending}
               onPressUnpush={togglePush}
+              // onPressComments={onPressSuggest(task)}
             />
           </View>
         </TouchableOpacity>

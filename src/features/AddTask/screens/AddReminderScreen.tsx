@@ -98,7 +98,7 @@ export default function AddReminderScreen({ navigation }: Props) {
       type: TaskTypeEnum.Reminder,
       text: text.trim(),
       visibility,
-      helperIds,
+      helpers: visibility === 'private' ? [] : helperIds,
       remindAt: remindAt.toISOString(),
     };
 

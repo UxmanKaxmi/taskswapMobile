@@ -234,6 +234,21 @@ export function stripOuterQuotes(text?: string): string {
     .replace(/^["“]+/, '') // remove opening straight or curly quotes
     .replace(/["”]+$/, ''); // remove closing straight or curly quotes
 }
+
+export function formatViewCount(count: number): string {
+  if (count < 1000) return `${count}`;
+
+  if (count < 10_000) {
+    return `${(count / 1000).toFixed(1).replace('.0', '')}k`;
+  }
+
+  if (count < 1_000_000) {
+    return `${Math.floor(count / 1000)}k`;
+  }
+
+  return `${(count / 1_000_000).toFixed(1).replace('.0', '')}M`;
+}
+
 export const MOCK_HELPERS = [
   {
     id: '1',

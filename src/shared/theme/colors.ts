@@ -1,6 +1,6 @@
 export const colors = {
   // Brand
-  primary: '#5C6BC0', // Indigo – buttons, highlights
+  primary: '#7B6CF6', // Indigo – buttons, highlights
   onPrimary: '#FFFFFF', // Text/iconography on primary backgrounds
 
   accent: '#FF7043', // Deep orange – motivation actions
@@ -39,6 +39,8 @@ export const colors = {
   reminderBgHardest: '#F59E0B',
   adviceBgHardest: '#3B82F6',
   decisionBgHardest: '#9f67feff',
+  decisionBgSoft: '#9e67fe55',
+
   motivationBgHardest: '#10B981',
 
   adviceIconBackground: '#EAF0FF',
@@ -49,10 +51,12 @@ export const colors = {
   // Tabs
   tabActive: '#000',
   tabInactive: '#757575',
-
   inputBackground: '#F2F2F2',
-
   secondary: '#F59E0B', // amber-500
-
   transparent: 'transparent',
+
+  calmBlue: '#3F5EF3',
+  motivationPurple: '#7B6CF6',
+  lavendarPink: '#D8B4F8',
+  gradientDarkPurple: '#E9D9FF',
 };

@@ -120,8 +120,8 @@ const styles = StyleSheet.create({
     width: '105%', // ✅ FULL WIDTH
     paddingHorizontal: 16, // inset content
     paddingVertical: vs(20),
-    borderTopEndRadius: 28,
-    borderTopStartRadius: 28,
+    borderTopEndRadius: 40,
+    borderTopStartRadius: 40,
 
     // iOS shadow
     shadowOpacity: 0.15,

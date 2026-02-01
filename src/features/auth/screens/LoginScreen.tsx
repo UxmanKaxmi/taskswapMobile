@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Dimensions, Alert } from 'react-native';
 import { useAuth } from '../AuthProvider';
-import { moderateScale } from 'react-native-size-matters';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
@@ -17,19 +17,43 @@ import {
   BottomTabParamList,
 } from '@navigation/types/navigation';
 import { TAB_SCREENS } from '@shared/utils/helperFunctions';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 export default function LoginScreen() {
   const { signIn, loading } = useAuth();
 
   const route = useRoute<RouteProp<AuthStackParamList, 'Login'>>();
   const navigation = useNavigation();
-
+  const hasAnimated = React.useRef(false);
   const redirectTo =
     route.params?.redirectTo && typeof route.params.redirectTo === 'string'
       ? route.params.redirectTo
       : 'Home';
 
   console.log('Redirect to:', redirectTo, route);
+
+  const AnimatedFeatureRow = ({
+    children,
+    delay = 0,
+  }: {
+    children: React.ReactNode;
+    delay?: number;
+  }) => {
+    return (
+      <Animated.View
+        entering={
+          hasAnimated.current
+            ? undefined
+            : FadeInDown.duration(240).delay(delay).springify().damping(18)
+        }
+        onLayout={() => {
+          hasAnimated.current = true;
+        }}
+      >
+        {children}
+      </Animated.View>
+    );
+  };
 
   const handleLogin = async () => {
     try {
@@ -72,42 +96,59 @@ export default function LoginScreen() {
   };
 
   return (
-    <Layout>
+    <Layout backgroundColor="onAccent">
       <AppHeader showNavigation />
 
       <Column flex>
         {/* Login Title */}
-        <TextElement variant="title" style={styles.title}>
-          Sign In to Unlock Full Access
-        </TextElement>
+        <Animated.View entering={FadeIn.duration(220)}>
+          <TextElement variant="title" style={styles.title}>
+            Unlock Your Full Experience
+          </TextElement>
+        </Animated.View>
 
         {/* Motivational Tagline */}
         <TextElement variant="caption" style={styles.tagline}>
-          You're almost there — let's make your progress truly yours.
+          Create an account to save your progress, support others, and that helps you stay
+          consistent.
         </TextElement>
 
         <Height size={20} />
 
         {/* Feature Highlights */}
         <View style={styles.featuresContainer}>
-          <View style={styles.featureItem}>
-            <Icon set="ion" name="trail-sign-outline" size={16} color={colors.primary} />
-            <TextElement variant="subtitle" style={styles.featureText}>
-              Track your daily streaks
-            </TextElement>
-          </View>
-          <View style={styles.featureItem}>
-            <Icon set="fa6" name="user" size={16} color={colors.primary} />
-            <TextElement variant="subtitle" style={styles.featureText}>
-              Motivate friends & share updates
-            </TextElement>
-          </View>
-          <View style={styles.featureItem}>
-            <Icon set="fa6" name="bell" size={16} color={colors.primary} />
-            <TextElement variant="subtitle" style={styles.featureText}>
-              Get personalized reminders
-            </TextElement>
-          </View>
+          <AnimatedFeatureRow delay={0}>
+            <View style={styles.featureItem}>
+              <Icon
+                set="fa6"
+                name="chart-line"
+                iconStyle="solid"
+                size={20}
+                color={colors.primary}
+              />
+              <TextElement variant="subtitle" style={styles.featureText}>
+                Track your progress and daily streaks
+              </TextElement>
+            </View>
+          </AnimatedFeatureRow>
+
+          <AnimatedFeatureRow delay={90}>
+            <View style={styles.featureItem}>
+              <Icon set="fa6" name="user" size={20} color={colors.primary} />
+              <TextElement variant="subtitle" style={styles.featureText}>
+                Support friends and share updates
+              </TextElement>
+            </View>
+          </AnimatedFeatureRow>
+
+          <AnimatedFeatureRow delay={180}>
+            <View style={styles.featureItem}>
+              <Icon set="fa6" name="bell" size={20} color={colors.primary} />
+              <TextElement variant="subtitle" style={styles.featureText}>
+                Get gentle, personalized reminders
+              </TextElement>
+            </View>
+          </AnimatedFeatureRow>
         </View>
       </Column>
 
@@ -116,6 +157,13 @@ export default function LoginScreen() {
       {/* Login Button */}
       <View style={styles.buttonContainer}>
         <PrimaryButton isLoading={loading} title="Continue with Google" onPress={handleLogin} />
+        <TextElement
+          variant="caption"
+          color="muted"
+          style={{ textAlign: 'center', fontSize: moderateScale(12) }}
+        >
+          We&apos;ll never post without your permission.
+        </TextElement>
       </View>
 
       <Height size={20} />
@@ -125,15 +173,16 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   tagline: {
-    fontSize: moderateScale(14),
-    color: '#666',
+    fontSize: moderateScale(16),
+    color: colors.muted,
     marginBottom: 10,
   },
   title: {
     textAlign: 'left',
     fontWeight: '700',
-    fontSize: moderateScale(24),
+    fontSize: moderateScale(28),
     marginBottom: moderateScale(8),
+    marginTop: verticalScale(28),
   },
   featuresContainer: {
     marginTop: 0,
@@ -146,6 +195,8 @@ const styles = StyleSheet.create({
   },
   featureText: {
     color: colors.muted,
+    fontSize: moderateScale(18),
+    marginLeft: moderateScale(5),
   },
   buttonContainer: {
     width: '100%',

@@ -49,15 +49,13 @@ export default function DecisionChoicesInput({ choices, onChange }: Props) {
             <AppTextInput
               value={text}
               onChangeText={t => updateChoice(index, t)}
-              placeholder={
-                letter === 'A' ? `Pros: better pay ${letter}` : `Cons: longer commute ${letter}`
-              }
+              placeholder={letter === 'A' ? `Pros: better pay.` : `Cons: longer commute `}
               containerStyle={{ flex: 1 }}
               wrapperStyle={styles.inputWrapper}
               inputStyle={styles.optionInput}
               multiline={false}
               numberOfLines={1}
-              maxLength={30}
+              maxLength={20}
             />
 
             <View style={styles.badge}>

@@ -13,6 +13,12 @@ import { ms, vs } from 'react-native-size-matters';
 import { isDEV } from '@shared/utils/constants';
 import { usePushInteraction } from '../hooks/usePushInteraction';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { getTypeVisual } from '@shared/utils/typeVisuals';
+import { useIsOwner } from '@features/Auth/AuthProvider';
+import Row from '@shared/components/Layout/Row';
+import { navigateToTaskDetails } from '@navigation/types/navigationUtils';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { AppStackParamList } from '@navigation/types/navigation';
 
 interface ExtraMeta {
   icon: string;
@@ -31,6 +37,13 @@ interface Props {
   onPressPush: () => void;
   isPushing?: boolean;
   onPressUnpush?: () => void; //TEST ONLY
+
+  //Reminder
+  onSendReminder?: () => void;
+  reminderText?: string;
+  hasReminded?: boolean;
+  reminderNoteCount?: number;
+  reminderExpired?: boolean;
 }
 
 export default function TaskFooter({
@@ -45,6 +58,13 @@ export default function TaskFooter({
   onPressPush,
   onPressUnpush,
   isPushing = false,
+
+  //reminder
+  onSendReminder,
+  hasReminded,
+  reminderNoteCount = 0,
+  reminderText,
+  reminderExpired,
 }: Props) {
   const {
     hasPushed: pushed,
@@ -59,9 +79,12 @@ export default function TaskFooter({
     isPushing,
   });
 
+  const isOwner = useIsOwner(taskDetails?.userId);
+
   const opacity = useSharedValue(1);
   const translateY = useSharedValue(0);
   const hasMounted = useRef(false);
+  const { emoji } = getTypeVisual(taskDetails?.type);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -80,11 +103,13 @@ export default function TaskFooter({
     });
   }, [pushed]);
 
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+
   return (
     <View>
       <AppBorder
         color={colors[`${taskDetails?.type}BgHard` as keyof typeof colors]}
-        style={{ marginBottom: vs(16) }}
+        style={{ marginBottom: vs(14) }}
       />
       <View style={styles.footer}>
         {taskDetails?.type === TaskTypeEnum.Motivation && (
@@ -94,8 +119,12 @@ export default function TaskFooter({
                 onPress={handlePush}
                 loading={isPushing}
                 taskType={TaskTypeEnum.Motivation}
-                label={`Push ${getFirstName(taskDetails?.name)}!`}
+                label={
+                  (isOwner ? ' 💪 ' : emoji) +
+                  `Push ${isOwner ? 'myself' : getFirstName(taskDetails?.name)}!`
+                }
                 size="sm"
+                isOwner={isOwner}
               />
             ) : (
               <>
@@ -110,21 +139,168 @@ export default function TaskFooter({
             )}
           </Animated.View>
         )}
-        {/* {taskDetails?.type === TaskTypeEnum.Advice && (
-          <View style={{ flex: 1 }}>
-            {!hasPushed ? (
-              <PushButton
-                onPress={() => {}}
-                taskType={TaskTypeEnum.Advice}
-                label={`Suggest advice`}
-                size="sm"
-                buttonStyle={{ paddingLeft: ms(10) }}
-              />
+
+        {taskDetails?.type === TaskTypeEnum.Advice && (
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            {/* OWNER */}
+            {isOwner ? (
+              commentCount > 0 ? (
+                <TextElement style={styles.pushedText}>
+                  {commentCount === 1
+                    ? '1 person shared advice'
+                    : `${commentCount} people shared advice`}
+                </TextElement>
+              ) : (
+                <TextElement style={styles.pushedText}>Waiting for advice</TextElement>
+              )
+            ) : /* NON-OWNER */ taskDetails.hasAdvised ? (
+              <TextElement style={styles.pushedText}>
+                {commentCount > 1
+                  ? `You and ${commentCount - 1} others shared advice`
+                  : 'You shared advice'}
+              </TextElement>
             ) : (
-              <TextElement style={styles.pushedText}>{pushedTextAdvice}</TextElement>
+              <View
+                style={{
+                  width: '100%',
+                  flex: 1,
+                }}
+              >
+                <PushButton
+                  onPress={() =>
+                    navigateToTaskDetails(navigation, {
+                      ...taskDetails,
+                      openAdviceComposer: true,
+                    })
+                  }
+                  taskType={TaskTypeEnum.Advice}
+                  label={`${emoji} Suggest advice`}
+                  size="sm"
+                  buttonStyle={{ paddingLeft: ms(8) }}
+                />
+              </View>
             )}
           </View>
-        )} */}
+        )}
+
+        {taskDetails?.type === TaskTypeEnum.Reminder && (
+          <View style={{ flex: 1 }}>
+            {/* OWNER */}
+            {isOwner ? (
+              <Row justify="space-between" align="center" style={{ width: '100%' }}>
+                <TextElement style={styles.pushedText}>
+                  {taskDetails.hasReminded
+                    ? 'Reminder sent'
+                    : reminderNoteCount === 0
+                      ? 'No nudges yet'
+                      : reminderNoteCount === 1
+                        ? '1 person nudged you'
+                        : `${reminderNoteCount} people nudged you`}
+                </TextElement>
+
+                {reminderText &&
+                  (() => {
+                    const [timeEmoji, ...timeText] = reminderText.split(' ');
+
+                    return (
+                      <Row align="center">
+                        <TextElement style={styles.reminderEmoji}>{timeEmoji}</TextElement>
+
+                        <TextElement style={styles.reminderSubText}>
+                          {timeText.join(' ')}
+                        </TextElement>
+                      </Row>
+                    );
+                  })()}
+              </Row>
+            ) : taskDetails.hasReminded ? (
+              /* NON-OWNER — already nudged */
+              <Row justify="space-between" align="center" style={{ width: '100%' }}>
+                <TextElement style={styles.pushedText}>
+                  You nudged {getFirstName(taskDetails?.name)}
+                </TextElement>
+
+                {reminderText &&
+                  (() => {
+                    const [timeEmoji, ...timeText] = reminderText.split(' ');
+
+                    return (
+                      <Row align="center">
+                        <TextElement style={styles.reminderEmoji}>{timeEmoji}</TextElement>
+
+                        <TextElement style={styles.reminderSubText}>
+                          {timeText.join(' ')}
+                        </TextElement>
+                      </Row>
+                    );
+                  })()}
+              </Row>
+            ) : (
+              /* NON-OWNER — can nudge */
+              <Row justify="space-between" align="center" style={{ width: '100%' }}>
+                <PushButton
+                  onPress={() => onSendReminder?.()}
+                  taskType={TaskTypeEnum.Reminder}
+                  label={emoji + ' Send reminder'}
+                  size="sm"
+                />
+
+                {reminderText &&
+                  (() => {
+                    const [timeEmoji, ...timeText] = reminderText.split(' ');
+
+                    return (
+                      <Row align="center">
+                        <TextElement style={styles.reminderEmoji}>{timeEmoji}</TextElement>
+
+                        <TextElement style={styles.reminderSubText}>
+                          {timeText.join(' ')}
+                        </TextElement>
+                      </Row>
+                    );
+                  })()}
+              </Row>
+            )}
+          </View>
+        )}
+        {taskDetails?.type === TaskTypeEnum.Decision && (
+          <View style={{ flex: 1, alignItems: 'flex-start' }}>
+            {(() => {
+              const voteCount = taskDetails.voteCount ?? 0;
+              const hasVoted = taskDetails.hasVoted;
+              const ownerName = getFirstName(taskDetails?.name);
+
+              // 🟣 CASE 1: No votes yet
+              if (voteCount === 0) {
+                return (
+                  <TextElement style={styles.pushedText}>
+                    {isOwner ? 'Be the first to vote' : `Your opinion can help ${ownerName} decide`}
+                  </TextElement>
+                );
+              }
+
+              // 🟣 CASE 2: User HAS voted
+              if (hasVoted) {
+                return (
+                  <TextElement style={styles.pushedText}>
+                    {voteCount === 1
+                      ? 'Your vote is in'
+                      : `You and ${voteCount - 1} other${
+                          voteCount - 1 === 1 ? '' : 's'
+                        } voted their picks`}
+                  </TextElement>
+                );
+              }
+
+              // 🟣 CASE 3: User has NOT voted, others have
+              return (
+                <TextElement style={styles.pushedText}>
+                  {isOwner ? 'Be the first to vote' : `Your opinion can help ${ownerName} decide`}
+                </TextElement>
+              );
+            })()}
+          </View>
+        )}
 
         {/* View Count */}
         {/* {typeof viewCount === 'number' && (
@@ -135,10 +311,12 @@ export default function TaskFooter({
         )} */}
 
         {/* Comments */}
-        <Ripple style={styles.action} onPress={onPressComments}>
-          <Icon set="fa6" name="comment" size={ms(14)} color={colors.muted} />
-          <TextElement style={styles.count}>{commentCount}</TextElement>
-        </Ripple>
+        {/* {
+          <Ripple style={styles.action} onPress={onPressComments}>
+            <Icon set="fa6" name="comment" size={ms(14)} color={colors.muted} />
+            <TextElement style={styles.count}>{commentCount}</TextElement>
+          </Ripple>
+        } */}
 
         {/* Share */}
         {/* <Ripple style={styles.action} onPress={shareHandler}>
@@ -160,6 +338,12 @@ export default function TaskFooter({
 }
 
 const styles = StyleSheet.create({
+  reminderSubText: {
+    fontSize: ms(12),
+    color: colors.muted,
+    opacity: 0.6,
+    textAlign: 'center',
+  },
   unpushButton: {
     marginTop: vs(6),
   },
@@ -192,5 +376,20 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     color: colors.muted,
     fontSize: ms(14),
+  },
+  adviceCount: {
+    color: colors.adviceBgHardest,
+    fontSize: ms(12),
+    fontWeight: '600',
+  },
+  adviceCountText: {
+    // marginLeft: 6,
+    color: colors.adviceBgHardest,
+    fontSize: ms(12),
+    fontWeight: '500',
+  },
+  reminderEmoji: {
+    fontSize: ms(10),
+    opacity: 0.7,
   },
 });

@@ -33,10 +33,10 @@ export default function FindFriendsMainScreen() {
 
   if (loading) return null;
 
-  if (!user) {
-    navigation.navigate('Auth');
-    return null;
-  }
+  // if (!user) {
+  //   navigation.navigate('Auth');
+  //   return null;
+  // }
 
   return (
     <Layout>

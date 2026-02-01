@@ -1,5 +1,6 @@
 export enum QueryKeys {
   Tasks = 'tasks',
+  Task = 'task',
   ReminderNotes = 'reminders',
   User = 'user',
   Auth = 'auth',
@@ -17,8 +18,8 @@ export enum QueryKeys {
 }
 
 export const buildQueryKey = {
-  tasks: () => [QueryKeys.Tasks],
-  taskById: (taskId: string) => [QueryKeys.Tasks, taskId],
+  tasks: (userId?: string) => [QueryKeys.Tasks, userId],
+  taskById: (taskId: string) => [QueryKeys.Task, taskId],
   remindersForTask: (taskId: string) => [QueryKeys.ReminderNotes, taskId],
   user: () => [QueryKeys.User],
   auth: () => [QueryKeys.Auth],

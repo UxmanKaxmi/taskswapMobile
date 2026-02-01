@@ -1,87 +1,99 @@
 import React from 'react';
-import { ms } from 'react-native-size-matters';
+import { StyleSheet, TextStyle } from 'react-native';
+import { ms, vs } from 'react-native-size-matters';
 import { colors } from '@shared/theme';
 import { TaskType } from '@features/Tasks/types/tasks';
-import { getTypeVisual } from '@shared/utils/typeVisuals';
 import ButtonBase from '../Buttons/ButtonBase';
-import { StyleSheet } from 'react-native';
-import TextElement from '../TextElement/TextElement';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 
-export type PushButtonProps = {
+interface PushButtonProps {
   onPress: () => void;
-  disabled?: boolean;
-  label?: string; // e.g. "Push Usman!"
-  size?: 'sm' | 'md';
+  label?: string;
+  size?: 'sm' | 'md' | 'lg';
   taskType?: TaskType;
-  buttonStyle?: object;
+  disabled?: boolean;
   loading?: boolean;
-};
+  icon?: React.ReactNode;
+  style?: any;
+  textStyle?: TextStyle;
+  backgroundColor?: string;
+  textColor?: string;
+  borderColor?: string;
+}
 
 export default function PushButton({
   onPress,
-  disabled = false,
   label = 'Push',
   size = 'sm',
   taskType,
-  buttonStyle,
+  disabled = false,
   loading = false,
+  icon,
+  style,
+  textStyle,
+  backgroundColor,
+  textColor = colors.onPrimary,
+  borderColor = 'transparent',
 }: PushButtonProps) {
-  const scale = useSharedValue(1);
+  const resolvedBg = backgroundColor ?? colors[`${taskType || 'reminder'}BgHardest`];
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const { emoji } = getTypeVisual(taskType || 'reminder');
-
-  function TextIcon({ emoji }: { emoji: string }) {
-    return <TextElement style={{ fontSize: ms(14) }}>{emoji}</TextElement>;
-  }
-
-  const handlePress = () => {
-    scale.value = withSpring(0.96, { damping: 15 }, () => {
-      scale.value = withSpring(1);
-    });
-
-    onPress?.();
+  const sizeStyles = {
+    sm: styles.small,
+    md: styles.medium,
+    lg: styles.large,
   };
 
+  const textSizeStyles = {
+    sm: styles.textSm,
+    md: styles.textMd,
+    lg: styles.textLg,
+  };
   return (
-    <Animated.View style={animatedStyle}>
-      <ButtonBase
-        isLoading={loading}
-        title={label}
-        onPress={handlePress}
-        disabled={disabled}
-        icon={<TextIcon emoji={emoji} />}
-        backgroundColor={colors[`${taskType || 'reminder'}BgHardest`]}
-        textColor={colors.onPrimary}
-        borderColor="transparent"
-        style={[size === 'sm' && styles.small, size === 'md' && styles.medium, buttonStyle]}
-        textStyle={styles.text}
-      />
-    </Animated.View>
+    <ButtonBase
+      title={label}
+      onPress={onPress}
+      isLoading={loading}
+      disabled={disabled}
+      icon={icon}
+      backgroundColor={resolvedBg}
+      textColor={textColor}
+      borderColor={borderColor}
+      style={StyleSheet.flatten([sizeStyles[size], style])}
+      textStyle={StyleSheet.flatten([textSizeStyles[size], textStyle])}
+    />
   );
 }
-
 const styles = StyleSheet.create({
+  /* Button sizes */
   small: {
-    paddingVertical: ms(4),
-    paddingHorizontal: ms(6),
-    paddingRight: ms(12),
+    paddingVertical: vs(6),
+    paddingHorizontal: ms(12),
     borderRadius: ms(20),
+    alignSelf: 'flex-start',
     marginVertical: 0,
     marginHorizontal: 0,
-    alignSelf: 'flex-start',
   },
   medium: {
-    paddingVertical: ms(10),
+    paddingVertical: vs(10),
     paddingHorizontal: ms(18),
     borderRadius: ms(22),
   },
-  text: {
+  large: {
+    paddingVertical: vs(14),
+    paddingHorizontal: ms(24),
+    borderRadius: ms(26),
+  },
+
+  /* Text sizes */
+  textSm: {
     fontSize: ms(12),
     fontWeight: '600',
+  },
+  textMd: {
+    fontSize: ms(14),
+    fontWeight: '700',
+  },
+  textLg: {
+    fontSize: ms(16),
+    fontWeight: '700',
   },
 });

@@ -2,13 +2,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TaskPush } from '../types/tasks';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import { getTaskPushes, toggleTaskPush } from '../api/taskPush.api';
+import { useAuth } from '@features/Auth/AuthProvider';
 
 // ✅ Fetch pushes for a task
 export function useTaskPushes(taskId: string) {
+  const { isAuthenticated } = useAuth(); // or token !== null
   return useQuery<TaskPush>({
     queryKey: buildQueryKey.pushesForTask(taskId ?? ''),
     queryFn: () => getTaskPushes(taskId!),
-    enabled: !!taskId,
+    enabled: !!taskId && isAuthenticated,
   });
 }
 

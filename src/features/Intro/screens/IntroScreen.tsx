@@ -17,27 +17,27 @@ import { Height } from '@shared/components/Spacing';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { isDEV, isPROD } from '@shared/utils/constants';
+import { colors } from '@shared/theme';
+import AppLogo from '@shared/components/AppLogo/AppLogo';
+import { ms, vs } from 'react-native-size-matters';
 
 const { width, height } = Dimensions.get('window');
 
 const slides = [
   {
     image: require('@assets/images/slider1.png'),
-    title: 'Your Daily Boost of Motivation',
-    subtitle:
-      'Discover inspiring actions, progress updates, and uplifting posts from people just like you.',
+    title: 'You Don’t Have to Push Yourself Alone',
+    subtitle: 'Share your goals with people you trust and get a gentle nudge when it gets hard.',
   },
   {
     image: require('@assets/images/slider2.png'),
-    title: 'Motivate Each Other, Every Day',
-    subtitle:
-      'Add friends, share your goals, and give each other gentle pushes when someone needs it.',
+    title: 'Friends Help You Show Up',
+    subtitle: 'Invite friends, support each other, and give small, thoughtful pushes…',
   },
   {
     image: require('@assets/images/slider3.png'),
-    title: 'Small Steps. Big Change.',
-    subtitle:
-      'Post quick updates, track streaks, and celebrate progress — one tiny push at a time.',
+    title: 'Progress, One Day at a Time',
+    subtitle: 'Track small wins, stay accountable, and keep going. No pressure, just progress.',
   },
 ];
 
@@ -62,7 +62,11 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
     });
   };
   return (
-    <Layout>
+    <Layout
+      style={{
+        backgroundColor: colors.onAccent,
+      }}
+    >
       <View
         style={{
           justifyContent: 'center',
@@ -72,16 +76,20 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
         }}
       >
         <View style={styles.logoWrapper}>
-          <Image
+          {/* <TextElement variant="subtitle" marginVertical={5}>
+            Welcome to
+          </TextElement>{' '}
+          <AppLogo size="lg" /> */}
+          {/* <Image
             source={require('@assets/images/logo.png')}
             style={styles.logo}
             resizeMode="contain"
-          />
+          /> */}
         </View>
       </View>
 
       <Swiper
-        autoplay
+        // autoplay
         loop={true}
         dotStyle={styles.dot}
         activeDotStyle={styles.activeDot}
@@ -89,8 +97,12 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
       >
         {slides.map((slide, index) => (
           <View key={index} style={styles.container}>
-            <Image source={slide.image} style={styles.image} resizeMode="contain" />
-            <TextElement variant="title" style={styles.title}>
+            <Image
+              source={slide.image}
+              style={index == 2 ? styles.image3 : styles.image}
+              resizeMode="contain"
+            />
+            <TextElement variant="title" style={index == 2 ? styles.title3 : styles.title}>
               {slide.title}
             </TextElement>
             <TextElement variant="caption" style={styles.subtitle}>
@@ -100,7 +112,7 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
         ))}
       </Swiper>
 
-      <PrimaryButton onPress={handleStart} title="Let’s Start ➜" />
+      <PrimaryButton onPress={handleStart} style={styles.button} title="Let’s Start ➜" />
       <Height size={20} />
     </Layout>
   );
@@ -112,6 +124,7 @@ const styles = StyleSheet.create({
   logoWrapper: {
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: height * 0.02,
   },
 
   logo: {
@@ -125,31 +138,47 @@ const styles = StyleSheet.create({
     // paddingHorizontal: 24,
   },
   image: {
-    height: height * 0.35,
-    width: width * 0.85,
-    marginBottom: 30,
+    height: height * 0.32,
+    width: width * 2,
+  },
+  image3: {
+    height: height * 0.45,
+    width: width * 2,
+    marginTop: vs(-50),
   },
   title: {
     fontWeight: '700',
     textAlign: 'center',
     marginBottom: 10,
+    lineHeight: 32,
+    fontSize: ms(24),
+  },
+  title3: {
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 10,
+    lineHeight: 32,
+    fontSize: ms(24),
+    marginTop: vs(-40),
   },
   subtitle: {
-    color: '#707070',
+    color: colors.muted,
     textAlign: 'center',
     lineHeight: 22,
     paddingHorizontal: 10,
     marginBottom: 40,
+    fontSize: ms(15),
   },
   button: {
-    flexDirection: 'row',
-    backgroundColor: '#6D5DFB',
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: 240,
+    // flexDirection: 'row',
+    backgroundColor: colors.motivationPurple,
+    // paddingVertical: 14,
+    // paddingHorizontal: 40,
+    // borderRadius: 16,
+    // alignItems: 'center',
+    // justifyContent: 'space-between',
+    // width: 240,
+    marginBottom: vs(22),
   },
   buttonText: {
     color: 'white',
@@ -169,7 +198,7 @@ const styles = StyleSheet.create({
     margin: 4,
   },
   activeDot: {
-    backgroundColor: '#6D5DFB',
+    backgroundColor: colors.motivationPurple,
     width: 10,
     height: 10,
     borderRadius: 5,

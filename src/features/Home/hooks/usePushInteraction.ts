@@ -17,6 +17,8 @@ export function usePushInteraction({
   onUnpush,
   isPushing = false,
 }: UsePushInteractionParams) {
+  const checkAuthThenNavigate = useCheckAuthThenNavigate();
+
   const othersCount = Math.max(pushCount - 1, 0);
 
   const pushedText = useMemo(() => {
@@ -34,10 +36,12 @@ export function usePushInteraction({
   const handlePush = useCallback(() => {
     if (isPushing || hasPushed) return;
 
-    useCheckAuthThenNavigate();
-    haptics.success(); // 👈 micro feedback
+    // 🔐 Auth check only
+    if (!checkAuthThenNavigate()) return;
+
+    haptics.success();
     onPush();
-  }, [isPushing, hasPushed, onPush]);
+  }, [isPushing, hasPushed, onPush, checkAuthThenNavigate]);
 
   const handleUnpush = useCallback(() => {
     if (!onUnpush) return;

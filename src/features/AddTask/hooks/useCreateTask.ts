@@ -16,12 +16,18 @@ export function useCreateTask() {
       queryClient.invalidateQueries({ queryKey: buildQueryKey.tasks() });
     },
     onError: error => {
-      const message = (error.response?.data as { error?: string })?.error || 'Something went wrong';
+      const data = error.response?.data as
+        | {
+            error?: string;
+            issues?: { message: string; path?: string[] }[];
+          }
+        | undefined;
+
+      const message = data?.issues?.[0]?.message || data?.error || 'Something went wrong';
 
       showToast({
         type: 'error',
-        title: 'Error',
-        message: message,
+        title: message,
       });
 
       console.error('❌ Axios Error:', error);

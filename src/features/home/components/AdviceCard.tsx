@@ -16,6 +16,9 @@ import { Icon } from '@shared/components/Icons';
 import TaskMetaRow from './TaskMetaRow';
 import TaskCardGradient from './TaskCardGradient';
 import { colors, spacing } from '@shared/theme';
+import HelperAvatarGroup from './HelperAvatarGroup';
+import { TaskTypeEnum } from '@features/Tasks/types/tasks';
+import TaskHeader from './TaskHeader';
 
 type Props = {
   task: AdviceTask;
@@ -26,11 +29,12 @@ type Props = {
 };
 
 export default function AdviceCard({ task, onPressCard, onPressShare }: Props) {
-  const { avatar, name = 'John Doe', createdAt, text, type } = task;
+  const { avatar, name = 'John Doe', createdAt, text, type, helpers } = task;
   const { emoji } = getTypeVisual(type);
 
   const quoteSize = ms(120);
 
+  const helpersNew = helpers.concat(helpers);
   return (
     <Shadow size="tint" style={cardStyles.card}>
       <TaskCardGradient style={cardStyles.gradient} type={type}>
@@ -51,19 +55,13 @@ export default function AdviceCard({ task, onPressCard, onPressShare }: Props) {
           onPress={() => onPressCard(task)}
         >
           {/* Header */}
-          <Row justify="space-between" style={cardStyles.cardHeader}>
-            <Row>
-              <Image source={{ uri: avatar }} style={cardStyles.avatar} />
-
-              <View>
-                <TextElement variant="subtitle" style={cardStyles.name}>
-                  {toShortName(name)}
-                </TextElement>
-
-                <TaskMetaRow type="advice" timeAgo={timeAgo(createdAt)} />
-              </View>
-            </Row>
-          </Row>
+          <TaskHeader
+            avatar={avatar || ''}
+            name={name}
+            createdAt={createdAt}
+            type={TaskTypeEnum.Advice}
+            helpers={helpers}
+          />
 
           {/* Message */}
           <View style={cardStyles.messageRow}>

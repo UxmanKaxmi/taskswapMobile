@@ -58,7 +58,7 @@ export default function TaskMetaRow({ type, timeAgo }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    marginLeft: spacing.xs,
+    marginLeft: ms(1),
   },
 
   icon: {

@@ -62,10 +62,11 @@ export default function RootNavigator() {
       <Stack.Screen
         name="AuthIntro"
         component={AuthIntroScreen}
-        // options={{
-        //   presentation: 'formSheet',
-        //   animation: 'slide_from_bottom',
-        // }}
+        options={{
+          animation: 'slide_from_bottom',
+          animationDuration: 300,
+          animationTypeForReplace: 'push',
+        }}
       />
 
       {/* Login Flow */}

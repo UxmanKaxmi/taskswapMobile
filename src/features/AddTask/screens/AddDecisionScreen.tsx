@@ -27,7 +27,6 @@ import { resetToHomeRoot } from '@navigation/types/navigationUtils';
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 import { useFollowers } from '@features/User/hooks/useFollowers';
 import { getButtonText, getTaskPlaceholder, getTitle } from '../utils/constants';
-import DecisionOptions from '../components/DecisionChoicesInput.tsx';
 import DecisionChoicesInput from '../components/DecisionChoicesInput.tsx';
 import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton.tsx';
 import { isAndroid } from '@shared/utils/constants.ts';
@@ -86,7 +85,8 @@ export default function AddDecisionScreen({ navigation }: Props) {
       type: TaskTypeEnum.Decision,
       text: text.trim(),
       visibility,
-      helperIds: visibility === 'private' ? [] : helperIds,
+      helpers: visibility === 'private' ? [] : helperIds,
+      options: options.map(o => o.trim()),
     };
 
     createTask(payload, {

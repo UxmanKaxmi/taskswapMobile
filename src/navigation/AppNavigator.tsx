@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Screens that open ABOVE the tabs
 import MainDebugScreen from '@features/Debug/MainDebugScreen';
-import TaskDetailScreen from '@features/Tasks/screens/TaskDetailScreen';
 import AddTaskScreen from '@features/Tasks/screens/AddTaskScreen';
 import FindFriendsScreen from '@features/Friends/screens/FindFriendsScreen';
 import InviteFriendsScreen from '@features/Invite/screens/InviteFriendsScreen';
@@ -15,6 +14,8 @@ import { isAndroid, isIOS } from '@shared/utils/constants';
 import BottomTabsIOS from './BottomTabsIOS';
 import BottomTabsAndroid from './BottomTabsAndroid';
 import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
+import TaskDetailScreenOld from '@features/TaskDetail/screens/TaskDetailScreenOld';
+import TaskDetailScreen from '@features/TaskDetail/screens/TaskDetailScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 

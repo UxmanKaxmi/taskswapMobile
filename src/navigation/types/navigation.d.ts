@@ -47,6 +47,7 @@ export type AppStackParamList = {
         task?: Task;
         taskId?: string;
         highlightCommentId?: string;
+        openAdviceComposer?: boolean;
       }
     | undefined;
 

@@ -136,10 +136,10 @@ export default function NotificationMainScreen() {
     );
   }
 
-  if (!user) {
-    navigation.navigate('Auth');
-    return null;
-  }
+  // if (!user) {
+  //   navigation.navigate('Auth');
+  //   return null;
+  // }
 
   return (
     <Layout>

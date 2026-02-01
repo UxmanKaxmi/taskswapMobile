@@ -4,6 +4,7 @@ import {
   getFocusedRouteNameFromRoute,
   NavigationProp,
   useNavigation,
+  useRoute,
 } from '@react-navigation/native';
 import Icon from '@shared/components/Icons/Icon'; // ✅ your custom Icon component
 import HomeScreen from '@features/Home/screens/HomeScreen';
@@ -20,7 +21,8 @@ import { AppStackParamList } from './types/navigation';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { useUnreadNotificationCount } from '@features/Notification/hooks/useUnreadNotificationCount';
 import { isAndroid } from '@shared/utils/constants';
-import { useCheckAuthThenNavigate } from './types/navigationUtils';
+import { useAppNavigation, useCheckAuthThenNavigate } from './types/navigationUtils';
+import { useAuth } from '@features/Auth/AuthProvider';
 
 type BottomTabParamList = {
   Home: undefined;
@@ -32,12 +34,32 @@ type BottomTabParamList = {
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
+export function useCheckAuthForTab() {
+  const { user } = useAuth();
+  const navigation = useAppNavigation();
+  const route = useRoute();
+
+  return function checkAuthForTab(
+    e: { preventDefault: () => void },
+    tabName: keyof AppStackParamList,
+  ) {
+    if (!user) {
+      e.preventDefault();
+      navigation.navigate('AuthIntro', {
+        redirectTo: tabName,
+      });
+    }
+  };
+}
+
 export default function BottomTabsAndroid({ route }: any) {
   const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home';
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
+  const checkAuthForTab = useCheckAuthForTab();
 
   const shouldHideTabBar = ['SomeScreenYouWantToHideOn'].includes(routeName);
+  const { user } = useAuth();
 
   return (
     <Tab.Navigator
@@ -107,7 +129,15 @@ export default function BottomTabsAndroid({ route }: any) {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Friends" component={FindFriendsMainScreen} />
+      <Tab.Screen
+        name="Friends"
+        component={FindFriendsMainScreen}
+        listeners={{
+          tabPress: e => {
+            checkAuthForTab(e, 'Friends');
+          },
+        }}
+      />
       <Tab.Screen
         name="AddTask"
         options={{
@@ -127,8 +157,24 @@ export default function BottomTabsAndroid({ route }: any) {
         }}
         component={AddTaskScreen}
       />
-      <Tab.Screen name="Notification" component={NotificationMainScreen} />
-      <Tab.Screen name="Profile" component={MyProfileMainScreen} />
+      <Tab.Screen
+        name="Notification"
+        component={NotificationMainScreen}
+        listeners={{
+          tabPress: e => {
+            checkAuthForTab(e, 'Notification');
+          },
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={MyProfileMainScreen}
+        listeners={{
+          tabPress: e => {
+            checkAuthForTab(e, 'Profile');
+          },
+        }}
+      />
     </Tab.Navigator>
   );
 }

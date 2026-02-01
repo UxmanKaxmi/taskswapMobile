@@ -7,7 +7,7 @@ import { ms, vs } from 'react-native-size-matters';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import FilterPill from './FilterPill';
 
-type FilterKey = 'all' | 'motivation' | 'advice' | 'decision';
+type FilterKey = 'all' | 'motivation' | 'advice' | 'decision' | 'reminder';
 
 type Filter = {
   key: FilterKey;
@@ -19,6 +19,7 @@ const FILTERS: Filter[] = [
   { key: 'motivation', label: 'Motivation' },
   { key: 'advice', label: 'Advice' },
   { key: 'decision', label: 'Decision' },
+  { key: 'reminder', label: 'Reminder' },
 ];
 
 type Props = {
