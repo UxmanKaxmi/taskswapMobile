@@ -4853,6 +4853,7 @@ __metadata:
     react-native-animatable: ^1.4.0
     react-native-bootsplash: ^6.3.8
     react-native-bottom-tabs: ^1.1.0
+    react-native-config: ^1.5.1
     react-native-contacts: ^8.0.5
     react-native-date-picker: 5.0.12
     react-native-gesture-handler: ^2.25.0
@@ -10984,6 +10985,20 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: e0747ba422588034bae51121373e27d8785a3b1b9da849c91b73103e90bdfb676ef264c6ba087c710d167a88a67ed3a5992c293058279a442e235c43c68ce718
+  languageName: node
+  linkType: hard
+
+"react-native-config@npm:^1.5.1":
+  version: 1.6.1
+  resolution: "react-native-config@npm:1.6.1"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-windows: ">=0.61"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 356419af35bdc5eed6328c0ada41b49efd5e280d1843ecfb14a37cc37b23c5c28ced038a2ae5ccc9e1d9af324202393f83ad0e1fae4bf0d4ba5798f3c895b8f9
   languageName: node
   linkType: hard
 

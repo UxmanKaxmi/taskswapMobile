@@ -3,17 +3,18 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
+    "android": "ENVFILE=.env.dev react-native run-android",
     "format": "prettier --write .",
-    "ios": "react-native run-ios",
+    "ios": "ENVFILE=.env.dev react-native run-ios",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "start": "react-native start --reset-cache",
+    "start": "ENVFILE=.env.dev react-native start --reset-cache",
     "test": "jest",
-    "android-release": "cd android && ./gradlew assembleRelease",
+    "android-release": "ENVFILE=.env.prod sh -c 'cd android && ./gradlew assembleRelease'",
     "create-feature": "node scripts/createFeature.js",
     "create-sharedComponent": "node scripts/createSharedComponent.js",
-    "ios-release": "xcodebuild -workspace ios/taskswapMobile.xcworkspace -scheme taskswapMobile -configuration Release -sdk iphoneos -derivedDataPath ios/build && ios-deploy --bundle ios/build/Build/Products/Release-iphoneos/taskswapMobile.app"
+    "ios-release": "ENVFILE=.env.prod xcodebuild -workspace ios/taskswapMobile.xcworkspace -scheme taskswapMobile -configuration Release -sdk iphoneos -derivedDataPath ios/build && ios-deploy --bundle ios/build/Build/Products/Release-iphoneos/taskswapMobile.app",
+    "ios-multi": "bash scripts/ios-multi-sim.sh"
   },
   "dependencies": {
     "@bottom-tabs/react-navigation": "^1.1.0",
@@ -42,6 +43,7 @@
     "react-native-animatable": "^1.4.0",
     "react-native-bootsplash": "^6.3.8",
     "react-native-bottom-tabs": "^1.1.0",
+    "react-native-config": "^1.5.1",
     "react-native-contacts": "^8.0.5",
     "react-native-date-picker": "5.0.12",
     "react-native-gesture-handler": "^2.25.0",

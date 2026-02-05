@@ -1547,6 +1547,32 @@ PODS:
     - ReactCommon/turbomodule/core
     - SwiftUIIntrospect (~> 1.0)
     - Yoga
+  - react-native-config (1.6.1):
+    - react-native-config/App (= 1.6.1)
+  - react-native-config/App (1.6.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-contacts (0.1.1):
     - DoubleConversion
     - glog
@@ -1571,7 +1597,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-date-picker (5.0.13):
+  - react-native-date-picker (5.0.12):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2475,6 +2501,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-bottom-tabs (from `../node_modules/react-native-bottom-tabs`)
+  - react-native-config (from `../node_modules/react-native-config`)
   - "react-native-contacts (from `../node_modules/@s77rt/react-native-contacts`)"
   - react-native-date-picker (from `../node_modules/react-native-date-picker`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -2636,6 +2663,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-bottom-tabs:
     :path: "../node_modules/react-native-bottom-tabs"
+  react-native-config:
+    :path: "../node_modules/react-native-config"
   react-native-contacts:
     :path: "../node_modules/@s77rt/react-native-contacts"
   react-native-date-picker:
@@ -2799,8 +2828,9 @@ SPEC CHECKSUMS:
   React-Mapbuffer: da73f30b000114058d6bc41490dcce204a8ede32
   React-microtasksnativemodule: 444c5701aece79629bb73bd9e7ad8937ae65238c
   react-native-bottom-tabs: 33ebd0e1518501a03b2c80872005a42e47f21ed3
+  react-native-config: bea8fa61aefa7c96753467a403616ecf63f75456
   react-native-contacts: 543bfe869b230fa51f7a378f311c03f80ae3f6aa
-  react-native-date-picker: f32731b68a859d91282cdf77f4c74f4d0105730d
+  react-native-date-picker: c568e29cbe8203fbc94651929dac06b8d54a7aa6
   react-native-safe-area-context: 5e61d0541825a113f60c01e061974355fec8d7c1
   react-native-vector-icons: 63db8f7cb1945c084add36ff7874c32fa9c7f83f
   react-native-vector-icons-ionicons: 3a23bfb6ac5e5c44d822f37107afa50718f3cf31

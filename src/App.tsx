@@ -7,7 +7,8 @@ import { toastConfig } from '@shared/components/Toast/toastConfig';
 import { initializeNotifications } from './lib/notifications/initNotifications';
 import NotificationPermissionPrompt from './lib/notifications/NotificationPermissionPrompt';
 import firebase from '@react-native-firebase/app';
-import { Platform, StatusBar, StyleSheet } from 'react-native';
+import { Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
+import Config from 'react-native-config';
 import { AnimatedBootSplash } from '@features/Splash/AnimatedBootSplash';
 import { AuthProvider } from '@features/Auth/AuthProvider';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -27,6 +28,8 @@ const LightNavTheme = {
 
 export default function App() {
   const [visible, setVisible] = useState(true);
+  const appEnv = Config.APP_ENV || (__DEV__ ? 'development' : 'production');
+  const showDevBadge = appEnv !== 'production';
 
   useEffect(() => {
     StatusBar.setBarStyle('dark-content');
@@ -61,6 +64,14 @@ export default function App() {
           </QueryClientProvider>
         </AppInfoBottomSheetProvider>
       </BottomSheetModalProvider>
+      {showDevBadge && (
+        <View pointerEvents="none" style={styles.devBadgeContainer}>
+          <View style={styles.devBadge}>
+            <View style={styles.devBadgeDot} />
+            <Text style={styles.devBadgeText}>DEV</Text>
+          </View>
+        </View>
+      )}
     </GestureHandlerRootView>
   );
 }
@@ -77,6 +88,34 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     color: '#333',
     textAlign: 'center',
+  },
+  devBadgeContainer: {
+    position: 'absolute',
+    top: '7%',
+    right: '43%',
+    zIndex: 9999,
+  },
+  devBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#111827',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    opacity: 0.9,
+  },
+  devBadgeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#F59E0B',
+    marginRight: 6,
+  },
+  devBadgeText: {
+    color: '#F9FAFB',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.6,
   },
 });
 //     <QueryClientProvider client={queryClient}>

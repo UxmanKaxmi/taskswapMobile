@@ -3,13 +3,15 @@ import { showToast } from '@shared/utils/toast';
 import axios, { AxiosRequestConfig, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { getSignOut } from './authBridge';
 import { Platform } from 'react-native';
+import Config from 'react-native-config';
 
-// const BASE_URL = 'http://localhost:3001';
+const FALLBACK_BASE_URL_IOS = 'http://localhost:3001';
+const FALLBACK_BASE_URL_ANDROID = 'http://192.168.1.5:3001';
 
 const BASE_URL =
   Platform.OS === 'android'
-    ? 'http://192.168.1.5:3001' // Android emulator loopback
-    : 'http://localhost:3001'; //
+    ? Config.BASE_URL_ANDROID || Config.BASE_URL || FALLBACK_BASE_URL_ANDROID
+    : Config.BASE_URL_IOS || Config.BASE_URL || FALLBACK_BASE_URL_IOS;
 
 export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   skipToast?: boolean;

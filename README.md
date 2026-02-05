@@ -48,6 +48,21 @@ yarn start
 npx react-native run-ios
 ```
 
+## Environment
+
+The app uses `react-native-config` and loads env files per build type:
+
+- `.env.dev` for debug/dev runs
+- `.env.prod` for release builds
+
+Common variables:
+
+- `BASE_URL`: default API base URL
+- `BASE_URL_IOS`: iOS override
+- `BASE_URL_ANDROID`: Android override
+- `GOOGLE_SENDER_ID`: FCM sender ID
+- `APP_ENV`: `development` or `production` (drives dev badge + display name)
+
 ## Scripts
 
 From `package.json`:
@@ -61,5 +76,18 @@ From `package.json`:
 - `format`: run Prettier
 - `android-release`: build Android release APK
 - `ios-release`: build and deploy iOS release via Xcode build + `ios-deploy`
+- `ios-multi`: build once and launch on all booted iOS simulators
 - `create-feature`: generate a feature scaffold (`scripts/createFeature.js`)
 - `create-sharedComponent`: generate a shared component (`scripts/createSharedComponent.js`)
+
+Examples:
+
+```bash
+yarn ios
+yarn android
+yarn lint
+yarn format
+yarn create-feature
+yarn create-sharedComponent
+yarn ios-multi
+```

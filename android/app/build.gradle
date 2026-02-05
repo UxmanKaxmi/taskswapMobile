@@ -7,6 +7,13 @@ project.ext.react = [
     nodeExecutableAndArgs: ["/Users/usman.kazmi/.nvm/versions/node/v20.19.6/bin/node"]
 ]
 
+project.ext.envConfigFiles = [
+    debug: ".env.dev",
+    release: ".env.prod",
+]
+
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
