@@ -1,74 +1,45 @@
-# TaskSwap Mobile
+# Push Me Up (Mobile)
 
-A modern, scalable React Native app built with custom theming, TypeScript, and reusable architecture inspired by Bulletproof React.
+Push Me Up is a social accountability app. People create tasks to be pushed, nudged, or supported by friends — not to track productivity. The focus is emotional support, gentle pressure, and visible social interaction.
 
----
+## Product Intent
 
-## 🧩 Major Packages Used
+This is not a to‑do list or productivity tracker. It is about people helping people move.
 
-### 🛠 Core Stack
+### Task Intent Types
 
-| Package        | Purpose                        |
-| -------------- | ------------------------------ |
-| `react-native` | Core mobile framework          |
-| `react`        | UI library                     |
-| `typescript`   | Type safety across the project |
+1. Motivation: “I want encouragement”
+2. Advice: “I want opinions or suggestions”
+3. Decision: “Help me decide between options”
+4. Reminder: “Help me not forget”
 
----
+Each intent type has its own UI and behavior.
 
-### 📦 Dev & Tooling
+## Principles
 
-| Package                        | Purpose                                                  |
-| ------------------------------ | -------------------------------------------------------- |
-| `eslint` / `prettier`          | Code linting and formatting                              |
-| `metro-config`                 | Custom Metro bundler config for aliasing and SVG support |
-| `babel-plugin-module-resolver` | Alias support for `@app`, `@features`, etc.              |
-| `@react-native/metro-config`   | Extended config for Metro bundler                        |
-| `react-native-svg-transformer` | Enables importing `.svg` files as React components       |
+- Emotional > functional
+- Social pressure (positive) > private tracking
+- Simple > clever
+- MVP first, polish later
 
----
+## Tech Stack
 
-### 🎨 UI & Theming
+- Frontend: React Native + TypeScript
+- Backend: Node.js + Express
+- Database: PostgreSQL (Prisma)
 
-| Package                     | Purpose                                                      |
-| --------------------------- | ------------------------------------------------------------ |
-| `react-native-size-matters` | Responsive scaling for padding, font sizes, etc.             |
-| `@shared/theme`             | Custom theme system with spacing, colors, typography         |
-| `@shared/components`        | Reusable UI components like `Button`, `Icon`, `Layout`, etc. |
+## Project Structure
 
----
+`src/`
 
-### 🌈 Icons
+- `App.tsx`: app entry and provider wiring
+- `features/`: modular, domain-driven features (screens, hooks, APIs, types)
+- `navigation/`: navigators and route types
+- `shared/`: reusable components, theme, utils, API helpers
+- `lib/`: cross-cutting libs (React Query, notifications)
+- `assets/`: images and SVGs
 
-| Package                     | Purpose                                                     |
-| --------------------------- | ----------------------------------------------------------- |
-| `react-native-vector-icons` | FontAwesome6 icons and other sets                           |
-| `FontAwesome6`              | Used with custom wrapper for themed icons with autocomplete |
-
----
-
-### 🔐 Auth & APIs
-
-| Package    | Purpose                                                          |
-| ---------- | ---------------------------------------------------------------- |
-| `axios`    | For networking/API requests                                      |
-| `firebase` | (planned or used) for social authentication (e.g., Google login) |
-
----
-
-### ⚙️ Project Structure
-
-src/
-├── app/ # Entry-level navigation & screens
-├── features/ # Modular domain features (e.g., tasks)
-├── shared/
-│ ├── components/ # Reusable UI components
-│ ├── theme/ # Theme system (colors, spacing, typography)
-│ └── icons/ # Centralized icon config/types
-
----
-
-## 🚀 Development Setup
+## Development Setup
 
 ```bash
 yarn install
@@ -77,26 +48,18 @@ yarn start
 npx react-native run-ios
 ```
 
-<!-- IMPORTANT -->
-<!-- export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH" source /Users/usmankazmi/.zshrc -->
-<!-- open -a "Android Studio.app";    -->
-<!-- https://github.com/morenoh149/react-native-contacts/issues/785 -->
+## Scripts
 
-<!-- Building on Ilya Saunkin's answer, here's a command that should output your IP address formatted as a hyperlink - just substitute 3000 for whatever your port number is:
+From `package.json`:
 
-ifconfig | grep "inet " | grep -v 127.0.0.1 | sed 's/netmask.*//g' | sed 's/inet//g' | awk '{print "http://"$1":3000/"}'
-Depending on where you're running the command, you should be able to (on a Mac) hold the command key and click/double-click to open the links. -->
-
-<!-- yarn react-native-bootsplash generate icon.png \
- --platforms=android \
- --background=5C6BC0 \
- --logo-width=200 \
- --assets-output=assets/bootsplash \
- --flavor=main \
- --html=public/index.html -->
-
-<!-- FOR THIS ERROR in ANDROID STUDIO
-public class ContactsManager extends NativeContactsSpec implements ActivityEventListener
-
-Go to react native contacts/src/NativeContacts
-and comment the line from 25 to 38 -->
+- `android`: run Android app
+- `ios`: run iOS app
+- `start`: start Metro with cache reset
+- `test`: run Jest
+- `lint`: run ESLint
+- `lint:fix`: run ESLint with autofix
+- `format`: run Prettier
+- `android-release`: build Android release APK
+- `ios-release`: build and deploy iOS release via Xcode build + `ios-deploy`
+- `create-feature`: generate a feature scaffold (`scripts/createFeature.js`)
+- `create-sharedComponent`: generate a shared component (`scripts/createSharedComponent.js`)

@@ -1,7 +1,9 @@
 // src/features/friends/components/TabButton.tsx
 import TextElement from '@shared/components/TextElement/TextElement';
+import { colors } from '@shared/theme';
 import React from 'react';
 import { Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { ms, vs } from 'react-native-size-matters';
 
 type Props = {
   title: string;
@@ -19,14 +21,16 @@ export default function TabButton({ title, isActive, onPress }: Props) {
 
 const styles = StyleSheet.create({
   text: {
-    paddingBottom: 6,
+    paddingBottom: vs(6),
     fontWeight: '400',
-    fontSize: 20,
-    paddingHorizontal: 10,
+    fontSize: ms(18),
+    paddingHorizontal: ms(5),
+    color: colors.muted,
   },
   active: {
     fontWeight: '700',
     borderBottomWidth: 2,
-    borderColor: '#000',
+    borderColor: colors.text,
+    color: colors.text,
   },
 });

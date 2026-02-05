@@ -13,6 +13,8 @@ import { useDebounce } from 'use-debounce';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { openFriendsProfile } from '@navigation/types/navigationUtils';
+import Column from '@shared/components/Layout/Column';
+import { haptics } from '@shared/utils/haptics';
 
 type Friend = {
   id: string;
@@ -82,12 +84,19 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
       }}
       emptyComponent={
         searchQuery.trim() ? (
-          <EmptyState
-            title="No matches found"
-            subtitle="Try a different name or check your spelling."
-          />
+          <View style={{ flex: 1, justifyContent: 'center', paddingBottom: vs(50) }}>
+            <EmptyState
+              title="No matches found"
+              subtitle="Try a different name or check your spelling."
+            />
+          </View>
         ) : (
-          <EmptyState title="No Friends Yet" subtitle="Invite or follow others to see them here." />
+          <View style={{ flex: 1, justifyContent: 'center', paddingBottom: vs(50) }}>
+            <EmptyState
+              title="No Friends Yet"
+              subtitle="Invite or follow others to see them here."
+            />
+          </View>
         )
       }
       renderItem={({ item }: { item: Friend }) => (
@@ -98,7 +107,10 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
           name={item.name}
           email={item.email}
           isFollowing={item.isFollowing}
-          onToggleFollow={() => toggleFollow(item.id)}
+          onToggleFollow={() => {
+            haptics.success();
+            return toggleFollow(item.id);
+          }}
         />
       )}
     />

@@ -24,11 +24,11 @@ export default function EmptyState({ title, subtitle, icon }: Props) {
       useNativeDriver
       style={styles.container}
     >
-      <Image
+      {/* <Image
         source={icon || require('@assets/images/emptyFriend.png')}
         style={styles.image}
         resizeMode="contain"
-      />
+      /> */}
       <TextElement variant="title" style={styles.title}>
         {fallbackTitle}
       </TextElement>

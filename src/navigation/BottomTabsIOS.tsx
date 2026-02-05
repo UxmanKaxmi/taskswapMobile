@@ -1,59 +1,124 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useSelector } from 'react-redux';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 
-// ---- Screens / Stacks you already have ----
-import TodayScreen from '@screens/Dashboard/today/screens/TodayScreen';
-import AccountV4 from '@screens/Dashboard/account_v4';
-import MarketScreen from '@screens/Dashboard/market_v4';
-import Rewards from '@screens/Dashboard/rewards';
-import PayRouteResolver from '@screens/Dashboard/FassetPay/screens/PayRouteResolver';
+import HomeScreen from '@features/Home/screens/HomeScreen';
+import FriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
+import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
+import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
 
-// ------------------------------------------
+import { useUnreadNotificationCount } from '@features/Notification/hooks/useUnreadNotificationCount';
+import { useAuth } from '@features/Auth/AuthProvider';
+import { useCheckAuthThenNavigate } from './types/navigationUtils';
+import TextElement from '@shared/components/TextElement/TextElement';
+import { colors } from '@shared/theme';
+import { AppStackParamList } from './types/navigation';
 
 const Tab = createNativeBottomTabNavigator();
-const Stack = createNativeStackNavigator();
 
-/**
- * Pay stack (native-safe)
- */
-function PayStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="PayResolver" component={PayRouteResolver} />
-    </Stack.Navigator>
-  );
-}
+export default function BottomTabsIOS() {
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const { user } = useAuth();
+  const { count: unreadCount } = useUnreadNotificationCount();
+  const checkAuthThenNavigate = useCheckAuthThenNavigate();
 
-/**
- * ✅ ONE and ONLY native bottom tab navigator
- */
-function MainTabs() {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="Home" component={TodayScreen} />
-      <Tab.Screen name="Account" component={AccountV4} />
-      <Tab.Screen name="Pay" component={PayStack} />
-      <Tab.Screen name="Markets" component={MarketScreen} />
-      <Tab.Screen name="Rewards" component={Rewards} />
+    <Tab.Navigator
+      tabBarInactiveTintColor={colors.tabInactive}
+      tabBarActiveTintColor={colors.primary}
+      hapticFeedbackEnabled
+      minimizeBehavior="automatic"
+      sidebarAdaptable={false}
+      screenOptions={
+        {
+          // tabBarInactiveTintColor: colors.tabInactive,
+          // tabBarInactiveTintColor: '#12334', // 👈 unfocused icon color
+        }
+      }
+    >
+      {/* HOME */}
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarIcon: ({ focused }) => ({
+            sfSymbol: focused ? 'house.fill' : 'house',
+            iconSize: 2, // 👈 SMALL ICON
+          }),
+        }}
+      />
+
+      {/* FRIENDS */}
+      <Tab.Screen
+        name="Friends"
+        component={FriendsMainScreen}
+        options={{
+          tabBarIcon: ({ focused }) => ({
+            sfSymbol: focused ? 'person.2.fill' : 'person.2',
+            iconSize: 16, // 👈 SMALL ICON
+          }),
+        }}
+      />
+
+      {/* ADD TASK → FAB BUTTON */}
+      {/* <Tab.Screen
+        name="AddTaskButton"
+        component={HomeScreen}
+        options={{
+          tabBarButton: () => (
+            <TouchableOpacity
+              onPress={() => checkAuthThenNavigate('AddTask')}
+              style={styles.addButtonContainer}
+            >
+              <View style={styles.addButton}>
+                <TextElement style={{ color: '#FFF', fontSize: 26 }}>+</TextElement>
+              </View>
+            </TouchableOpacity>
+          ),
+          tabBarIcon: () => null,
+        }}
+      /> */}
+
+      {/* NOTIFICATION */}
+      <Tab.Screen
+        name="Notification"
+        component={NotificationMainScreen}
+        options={{
+          tabBarIcon: ({ focused }) => ({
+            sfSymbol: focused ? 'bell.fill' : 'bell',
+            iconSize: 16, // 👈 SMALL ICON
+          }),
+        }}
+      />
+
+      {/* PROFILE */}
+      <Tab.Screen
+        name="Profile"
+        component={MyProfileMainScreen}
+        options={{
+          tabBarIcon: ({ focused }) => ({
+            sfSymbol: focused ? 'person.crop.circle.fill' : 'person.crop.circle',
+            iconSize: 16, // 👈 SMALL ICON
+          }),
+        }}
+      />
     </Tab.Navigator>
   );
 }
 
-/**
- * Root navigation
- * ❗ No nested tabs
- * ❗ No dynamic tab creation
- */
-export default function Route() {
-  const { isLogin } = useSelector(state => state.auth);
-
-  return (
-    <NavigationContainer>
-      {isLogin ? <MainTabs /> : null /* plug AuthNavigator here if needed */}
-    </NavigationContainer>
-  );
-}
-
+const styles = StyleSheet.create({
+  addButtonContainer: {
+    top: -30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

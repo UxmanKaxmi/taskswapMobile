@@ -21,7 +21,7 @@ export const typeEmojis: Record<TaskCategoryType, string> = {
   'decision-done': '✅',
   motivation: '💡',
   advice: '💬',
-  follow: '➕',
+  follow: '👤',
   comment: '💬',
   task: '📝',
   push: '⚡',
@@ -63,6 +63,21 @@ export const typeIcons: Record<TaskType, string> = {
   decision: 'circle-dot',
   motivation: 'lightbulb',
   advice: 'message',
+};
+
+export const getTypeColor = (type: TaskType) => {
+  switch (type) {
+    case 'advice':
+      return colors.adviceBgHardest;
+    case 'reminder':
+      return colors.reminderBgHardest;
+    case 'motivation':
+      return colors.motivationBgHardest;
+    case 'decision':
+      return colors.decisionBgHardest;
+    default:
+      return colors.muted;
+  }
 };
 
 export function getTaskBackgroundVisual(type: TaskType) {

@@ -30,6 +30,8 @@ import { queryClient } from '@lib/react-query/client';
 import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { useAppNavigation } from '@navigation/types/navigationUtils';
+import { Height } from '@shared/components/Spacing';
+import { Shadow } from '@shared/components/Shadow';
 
 export default function NotificationMainScreen() {
   const navigation = useNavigation();
@@ -142,13 +144,14 @@ export default function NotificationMainScreen() {
   // }
 
   return (
-    <Layout>
+    <Layout allowPaddingHorizontal={false}>
       {sections.length === 0 ? (
         <Row align="center" justify="center" flex>
           <EmptyState title="No notifications" subtitle="You're all caught up!" />
         </Row>
       ) : (
         <SectionList
+          showsVerticalScrollIndicator={false}
           sections={sections}
           keyExtractor={item => item.id}
           contentContainerStyle={{ paddingBottom: spacing.xl }}
@@ -160,11 +163,21 @@ export default function NotificationMainScreen() {
               </TextElement>
             </View>
           )}
-          ItemSeparatorComponent={() => <AppBorder />}
-          renderItem={({ item }) => {
-            const bgColor = item.read ? colors.background : colors.adviceBg;
+          ListFooterComponent={<Height size={vs(60)} />}
+          ListFooterComponentStyle={{}}
+          ItemSeparatorComponent={() => <AppBorder style={{ marginHorizontal: spacing.md }} />}
+          renderItem={({ item, index, section }) => {
+            const isFirst = index === 0;
+            const isLast = index === section.data.length - 1;
+
             return (
-              <View style={[styles.rowContainer, { backgroundColor: bgColor }]}>
+              <View
+                style={[
+                  styles.rowContainer,
+                  isFirst && styles.firstItem,
+                  isLast && styles.lastItem,
+                ]}
+              >
                 <NotificationCard item={item} onPress={() => {}} />
               </View>
             );
@@ -180,21 +193,39 @@ export default function NotificationMainScreen() {
 
 const styles = StyleSheet.create({
   sectionHeaderContainer: {
-    paddingVertical: vs(12),
+    // paddingVertical: vs(12),
+    paddingVertical: spacing.md,
+    // marginTop: spacing.lg,
     // paddingHorizontal: spacing.md,
-
     backgroundColor: colors.background,
+  },
+  firstItem: {
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    // marginTop: spacing.md,
+  },
+
+  lastItem: {
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    // marginBottom: spacing.md,
   },
   sectionHeader: {
     fontSize: ms(20),
     color: colors.text,
+    marginLeft: spacing.md,
   },
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     // paddingHorizontal: spacing.md,
-    // paddingVertical: spacing.sm,
+    // paddingVertical: spacing.md,
+    marginHorizontal: spacing.md,
+    // marginTop: spacing.md,
     // backgroundColor: '#fff',
+
+    backgroundColor: colors.onAccent,
+    // borderRadius: 10,
   },
 
   textContainer: {

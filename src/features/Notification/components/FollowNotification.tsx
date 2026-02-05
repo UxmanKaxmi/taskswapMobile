@@ -8,6 +8,7 @@ import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
+import { notificationStyles } from '../styles/notification.styles';
 
 type Props = {
   item: NotificationDTO;
@@ -22,28 +23,27 @@ export default function FollowNotification({ item }: Props) {
     navigation.navigate('FriendsProfileScreen', { id: item?.sender?.id ?? '' });
   };
   return (
-    <TouchableOpacity onPress={handlePress} style={styles.row}>
+    <TouchableOpacity onPress={handlePress} style={notificationStyles.cardStyles}>
       <Avatar uri={item.sender?.photo} fallback={item.sender?.name} />
       <View style={styles.textContainer}>
-        <TextElement variant="body">
-          <TextElement weight="bold">{item.sender?.name || 'Someone'}</TextElement> followed you
+        <TextElement variant="caption" style={notificationStyles.notifyText}>
+          <TextElement variant="caption" weight="bold" style={notificationStyles.nameText}>
+            {item.sender?.name || 'Someone'}
+          </TextElement>{' '}
+          followed you
         </TextElement>
-        <TextElement variant="caption" color="muted">
+        <TextElement variant="caption" style={notificationStyles.timeAgoText} color="muted">
           {timeAgo(item.createdAt)}
         </TextElement>
       </View>
 
-      <TextElement variant="title">{emoji}</TextElement>
+      <TextElement variant="caption">{emoji}</TextElement>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-  },
+  row: {},
   textContainer: {
     flex: 1,
     marginLeft: spacing.md,

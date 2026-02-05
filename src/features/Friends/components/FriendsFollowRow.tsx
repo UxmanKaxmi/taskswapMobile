@@ -56,7 +56,7 @@ export default function FriendFollowRow({
         type={isFollowing ? 'alt' : 'default'}
         textStyle={{
           color: isFollowing ? colors.onAccent : colors.primary,
-          fontSize: moderateScale(10),
+          fontSize: moderateScale(9),
           lineHeight: moderateScale(16),
         }}
         style={styles.button}
@@ -93,6 +93,5 @@ const styles = StyleSheet.create({
   },
   button: {
     width: ms(90),
-    height: ms(40),
   },
 });

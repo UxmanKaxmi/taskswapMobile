@@ -22,7 +22,7 @@ export default function Search({
 }: SearchProps) {
   return (
     <View style={styles.container}>
-      <Icon set="ion" name={'search'} color={colors.muted} size={25} />
+      <Icon set="ion" name={'search'} color={colors.muted} size={ms(15)} />
       <TextInput
         style={styles.input}
         placeholder={placeholder}
@@ -44,11 +44,12 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.inputBackground || '#F2F2F2',
+    backgroundColor: colors.inputBackground,
     borderRadius: 12,
     paddingHorizontal: spacing.md,
-    paddingVertical: ms(6),
-    marginBottom: spacing.md,
+    paddingVertical: ms(15),
+    marginTop: spacing.md,
+    marginBottom: spacing.lg,
   },
   icon: {
     marginRight: spacing.xs,

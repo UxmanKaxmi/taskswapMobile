@@ -9,7 +9,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import { spacing, colors } from '@shared/theme';
 import { TaskType } from '@features/Tasks/types/tasks';
-import { typeIcons } from '@shared/utils/typeVisuals';
+import { getTypeColor, typeIcons } from '@shared/utils/typeVisuals';
 import MotivationOpeningQuote from './MotivationOpeningQuote';
 
 type Props = {
@@ -19,22 +19,6 @@ type Props = {
 
 export default function TaskMetaRow({ type, timeAgo }: Props) {
   const iconName = typeIcons[type];
-
-  const getTypeColor = (type: TaskType) => {
-    switch (type) {
-      case 'advice':
-        return colors.adviceBgHardest;
-      case 'reminder':
-        return colors.reminderBgHardest;
-      case 'motivation':
-        return colors.motivationBgHardest;
-      case 'decision':
-        return colors.decisionBgHardest;
-      default:
-        return colors.muted;
-    }
-  };
-
   const typeColor = getTypeColor(type);
 
   return (
@@ -49,7 +33,6 @@ export default function TaskMetaRow({ type, timeAgo }: Props) {
       />
 
       <TextElement style={[styles.text, { color: typeColor }]}>{type}</TextElement>
-
       <TextElement style={styles.dot}>•</TextElement>
       <TextElement style={styles.timeText}>{timeAgo}</TextElement>
     </Row>

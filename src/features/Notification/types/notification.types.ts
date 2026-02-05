@@ -22,4 +22,5 @@ export interface NotificationDTO {
     name: string;
     photo?: string;
   };
+  taskType?: 'reminder' | 'decision' | 'motivation' | 'advice';
 }
