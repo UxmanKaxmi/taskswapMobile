@@ -18,6 +18,7 @@ export default function AnimatedAdviceMorph({
   onSubmit,
   autoFocus,
   onOpenComposer,
+  isComposerOpen,
 }) {
   const containerStyle = useAnimatedStyle(() => {
     return {
@@ -53,6 +54,7 @@ export default function AnimatedAdviceMorph({
 
   return (
     <Animated.View
+      pointerEvents="box-none"
       style={[
         styles.container,
         containerStyle,
@@ -62,7 +64,10 @@ export default function AnimatedAdviceMorph({
       ]}
     >
       {/* BUTTON */}
-      <Animated.View style={[StyleSheet.absoluteFill, buttonStyle]}>
+      <Animated.View
+        pointerEvents={isComposerOpen ? 'none' : 'auto'}
+        style={[StyleSheet.absoluteFill, buttonStyle]}
+      >
         <AnimatedBottomButtonWithHeader
           embedded
           visible
@@ -75,7 +80,10 @@ export default function AnimatedAdviceMorph({
       </Animated.View>
 
       {/* COMPOSER */}
-      <Animated.View style={[StyleSheet.absoluteFill, composerStyle]}>
+      <Animated.View
+        pointerEvents={isComposerOpen ? 'auto' : 'none'}
+        style={[StyleSheet.absoluteFill, composerStyle]}
+      >
         <AnimatedBottomComposer
           visible
           autoFocus={autoFocus}

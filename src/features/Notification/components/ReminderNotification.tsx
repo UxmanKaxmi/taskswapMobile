@@ -2,67 +2,109 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Avatar from '@shared/components/Avatar/Avatar';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
-import { NotificationDTO } from '../types/notification.types';
-import { getTypeVisual } from '@shared/utils/typeVisuals';
+import type { NotificationDTO } from '../types/notification.types';
+import { getTypeColor, getTypeVisual, typeIcons } from '@shared/utils/typeVisuals';
+import { notificationStyles } from '../styles/notification.styles';
+import { ms } from 'react-native-size-matters';
+import { Icon } from '@shared/components/Icons';
 
-interface Props {
+type Props = {
   item: NotificationDTO;
   onPress: () => void;
-}
+};
 
-export default function ReminderNotification({ item, onPress }: Props) {
-  const { emoji, color } = getTypeVisual(item.type);
+const taskTypeCopy: Record<
+  string,
+  {
+    verb: string;
+    preposition?: string;
+    suffix?: string;
+  }
+> = {
+  decision: {
+    verb: 'needs your help',
+    preposition: 'on a',
+  },
+  advice: {
+    verb: 'asked for',
+    preposition: 'an ',
+  },
+  motivation: {
+    verb: 'wants some',
+    preposition: '',
+    suffix: 'from you',
+  },
+  reminder: {
+    verb: 'needs help with a reminder',
+  },
+};
+
+export default function TaskTypeNotification({ item, onPress }: Props) {
+  const taskType = item.taskType || 'advice';
+
+  const iconName = typeIcons[taskType];
+  const typeColor = getTypeColor(taskType);
+
+  const copy = taskTypeCopy[taskType] ?? {
+    verb: 'needs your help',
+    preposition: 'with',
+  };
 
   return (
     <TouchableOpacity
       onPress={onPress}
       style={[
-        styles.row,
-        {
-          backgroundColor: item.read ? colors.background : colors.adviceBg,
-        },
+        notificationStyles.cardStyles,
+        item.read ? notificationStyles.readCard : notificationStyles.unreadCard,
       ]}
     >
-      <Avatar uri={item.metadata?.senderPhoto} fallback={item.metadata?.senderName?.[0]} />
+      <Avatar uri={item.sender?.photo} fallback={item.sender?.name} />
+
       <View style={styles.textContainer}>
-        <TextElement variant="body">
-          <TextElement weight="bold">{item.metadata?.senderName || 'Someone'}</TextElement> reminded
-          you about your task{'\n'}
-          <TextElement variant="body" style={styles.quotedText}>
-            “{item.metadata?.taskText}”
-          </TextElement>
+        <TextElement variant="caption" style={notificationStyles.notifyText}>
+          <TextElement variant="caption" weight="bold" style={notificationStyles.nameText}>
+            {item.sender?.name || 'Someone'}
+          </TextElement>{' '}
+          {copy.verb}{' '}
+          {copy.preposition !== undefined && (
+            <>
+              {copy.preposition && `${copy.preposition} `}
+              <TextElement
+                variant="caption"
+                weight="600"
+                style={{ textTransform: 'capitalize', color: typeColor }}
+              >
+                {taskType}
+              </TextElement>
+            </>
+          )}
+          {copy.suffix ? ` ${copy.suffix}` : null}
         </TextElement>
-        <TextElement variant="caption" color="muted">
+
+        <TextElement variant="caption" style={notificationStyles.timeAgoText} color="muted">
           {timeAgo(item.createdAt)}
         </TextElement>
       </View>
 
-      <TextElement variant="title">{emoji}</TextElement>
+      <Icon
+        set="fa6"
+        name={iconName}
+        size={ms(20)}
+        color={typeColor}
+        iconStyle="solid"
+        style={styles.icon}
+      />
     </TouchableOpacity>
   );
 }
-
 const styles = StyleSheet.create({
-  quotedText: {
-    fontStyle: 'italic',
-    marginBottom: spacing.sm,
-    color: colors.primary,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-  },
   textContainer: {
     flex: 1,
     marginLeft: spacing.md,
   },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginLeft: spacing.sm,
+  icon: {
+    marginRight: ms(5),
   },
 });

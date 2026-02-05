@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { View, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, RefreshControl, StatusBar } from 'react-native';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
 import { Task, TaskType, TaskTypeEnum } from '@features/Tasks/types/tasks';
@@ -210,9 +210,16 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      StatusBar.setBackgroundColor(colors.surface);
+
       refetch();
+
+      return () => {
+        StatusBar.setBackgroundColor(colors.background);
+      };
     }, [refetch]),
   );
+
   useEffect(() => {
     if (isError) {
       showToast({

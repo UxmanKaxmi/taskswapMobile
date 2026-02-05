@@ -125,8 +125,9 @@ export default function AdviceDetail({ task }: Props) {
 const styles = StyleSheet.create({
   emptyAdviceCard: {
     backgroundColor: colors.surface,
-    borderRadius: 28,
-    padding: spacing.lg,
+    borderRadius: 20,
+    paddingHorizontal: spacing.md,
+    paddingVertical: vs(17),
     marginHorizontal: spacing.md,
   },
 
@@ -147,9 +148,10 @@ const styles = StyleSheet.create({
   },
 
   emptyTitle: {
-    fontSize: 16,
+    fontSize: ms(14),
     fontWeight: '500',
     color: colors.muted,
+    marginLeft: ms(15),
   },
 
   emptyDescription: {

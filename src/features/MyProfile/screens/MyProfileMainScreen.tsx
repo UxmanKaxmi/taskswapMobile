@@ -14,33 +14,6 @@ import StatsAchievements from '../components/StatsAchievements';
 import ProfileMenu from '../components/ProfileMenu';
 import { useMyProfileData } from '../hooks/useMyProfileData';
 
-export const mockProfile = {
-  avatarUri: 'https://i.pravatar.cc/150?img=47',
-  name: 'Jane Doe',
-  username: 'janedoe',
-  following: 128,
-  followers: 1345, // will render as “1.3k”
-  onEditProfile: () => {
-    console.log('Edit Profile clicked');
-  },
-  onShareProfile: () => {
-    console.log('Share Profile clicked');
-  },
-};
-
-export const mockStats = {
-  karmaPoints: 156,
-  tasksDone: 42,
-  dayStreak: 7,
-  achievements: [
-    { icon: 'trophy', label: 'Super Helper' },
-    { icon: 'fire', label: '7 Day Streak' },
-    { icon: 'star', label: 'Top Rated' },
-    // —you can add more if you like—
-    // { icon: 'thumbs-up', label: 'Community Favorite' },
-  ],
-};
-
 export default function MyProfileMainScreen() {
   const { user } = useAuth();
   const { data: MyProfileData, isLoading, isError, error } = useMyProfileData();

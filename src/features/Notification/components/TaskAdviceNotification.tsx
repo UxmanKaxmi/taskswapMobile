@@ -5,18 +5,21 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
-import { getTypeColor } from '@shared/utils/typeVisuals';
-import { Icon } from '@shared/components/Icons';
-import { ms } from 'react-native-size-matters';
+import { getTypeColor, getTypeVisual, typeIcons } from '@shared/utils/typeVisuals';
 import { notificationStyles } from '../styles/notification.styles';
+import { ms } from 'react-native-size-matters';
+import { Icon } from '@shared/components/Icons';
 
-interface Props {
+type Props = {
   item: NotificationDTO;
   onPress: () => void;
-}
+};
 
-export default function DecisionDone({ item, onPress }: Props) {
-  const typeColor = getTypeColor(item.taskType || 'decision');
+export default function TaskAdviceNotification({ item, onPress }: Props) {
+  const taskType = item.taskType || 'advice';
+
+  const iconName = typeIcons[taskType];
+  const typeColor = getTypeColor(taskType);
 
   return (
     <TouchableOpacity
@@ -26,21 +29,23 @@ export default function DecisionDone({ item, onPress }: Props) {
         item.read ? notificationStyles.readCard : notificationStyles.unreadCard,
       ]}
     >
-      <Avatar
-        uri={item.metadata?.senderPhoto || item?.sender?.photo}
-        fallback={item.sender?.name}
-      />
+      <Avatar uri={item.sender?.photo} fallback={item.sender?.name} />
+
       <View style={styles.textContainer}>
         <TextElement variant="caption" style={notificationStyles.notifyText}>
           <TextElement variant="caption" weight="bold" style={notificationStyles.nameText}>
-            {item.metadata?.senderName || item?.sender?.name || 'Someone'}
+            {item.sender?.name || 'Someone'}
           </TextElement>{' '}
-          marked a{' '}
-          <TextElement variant="caption" weight="600" style={{ color: typeColor }}>
-            Decision
-          </TextElement>{' '}
-          as complete.
+          {`replied to your `}
+          <TextElement
+            variant="caption"
+            weight="600"
+            style={{ color: typeColor, textTransform: 'capitalize' }}
+          >
+            {taskType}
+          </TextElement>
         </TextElement>
+
         <TextElement variant="caption" style={notificationStyles.timeAgoText} color="muted">
           {timeAgo(item.createdAt)}
         </TextElement>
@@ -48,7 +53,7 @@ export default function DecisionDone({ item, onPress }: Props) {
 
       <Icon
         set="fa6"
-        name="circle-check"
+        name={iconName}
         size={ms(20)}
         color={typeColor}
         iconStyle="solid"
@@ -57,7 +62,6 @@ export default function DecisionDone({ item, onPress }: Props) {
     </TouchableOpacity>
   );
 }
-
 const styles = StyleSheet.create({
   textContainer: {
     flex: 1,

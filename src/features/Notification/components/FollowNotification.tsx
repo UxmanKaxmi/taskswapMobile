@@ -6,8 +6,6 @@ import { spacing } from '@shared/theme';
 import { getTypeVisual } from '@shared/utils/typeVisuals';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '@navigation/types/navigation';
 import { notificationStyles } from '../styles/notification.styles';
 
 type Props = {
@@ -15,15 +13,16 @@ type Props = {
   onPress: () => void;
 };
 
-export default function FollowNotification({ item }: Props) {
+export default function FollowNotification({ item, onPress }: Props) {
   const { emoji } = getTypeVisual(item.type);
-  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
-
-  const handlePress = () => {
-    navigation.navigate('FriendsProfileScreen', { id: item?.sender?.id ?? '' });
-  };
   return (
-    <TouchableOpacity onPress={handlePress} style={notificationStyles.cardStyles}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        notificationStyles.cardStyles,
+        item.read ? notificationStyles.readCard : notificationStyles.unreadCard,
+      ]}
+    >
       <Avatar uri={item.sender?.photo} fallback={item.sender?.name} />
       <View style={styles.textContainer}>
         <TextElement variant="caption" style={notificationStyles.notifyText}>

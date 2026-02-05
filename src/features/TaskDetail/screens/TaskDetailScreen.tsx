@@ -67,13 +67,13 @@ export default function TaskDetailScreen({
   const { data: friends = [] } = useFollowers();
 
   const [showCTA, setShowCTA] = React.useState(false);
-  const { data: pushData } = useTaskPushes(initialTask?.id!);
-  const addComment = useAddComment(resolvedTaskId!);
-  const { mutate: togglePush, isPending } = useToggleTaskPush(initialTask?.id!);
+  const { data: pushData } = useTaskPushes(resolvedTaskId ?? '');
+  const addComment = useAddComment(resolvedTaskId ?? '');
+  const { mutate: togglePush, isPending } = useToggleTaskPush(resolvedTaskId ?? '');
 
   const adviceMorph = useSharedValue(0); // 0 = button, 1 = composer
 
-  const { data: task, isLoading } = useQuery({
+  const { data: taskData, isLoading } = useQuery({
     queryKey: buildQueryKey.taskById(resolvedTaskId!),
     queryFn: () => getTaskByIdAPI(resolvedTaskId!),
     enabled: !!resolvedTaskId, // ✅ IMPORTANT
@@ -82,23 +82,16 @@ export default function TaskDetailScreen({
 
   console.log('initialData', initialTask, openAdviceComposer);
 
-  if (isLoading) {
-    return <AppLoader visible />;
-  }
-
-  if (!task) return null;
-
-  const bg = getTaskBackgroundVisual(task.type);
+  const task = taskData ?? initialTask;
   const isOwner = useIsOwner(task?.userId);
-  const hasHelpers = task.helpers?.length > 0;
+  const hasHelpers = !!task?.helpers?.length;
 
   const hasPushed = pushData?.hasPushed || false;
   const pushCount = pushData?.pushCount || 0;
   const hasVoted = task?.hasVoted;
-  const { emoji } = getTypeVisual(task.type);
+  const { emoji } = getTypeVisual(task?.type ?? TaskTypeEnum.Advice);
 
   const { mutate: completeTask, isPending: isMarkingPending } = useCompleteTask();
-
   const { mutate: incompleteTask, isPending: isUnMarkingPending } = useInCompleteTask();
 
   useEffect(() => {
@@ -108,14 +101,20 @@ export default function TaskDetailScreen({
   const push = usePushInteraction({
     hasPushed,
     pushCount,
-    onPush: togglePush,
-    onUnpush: togglePush,
+    onPush: () => {
+      if (!resolvedTaskId) return;
+      togglePush();
+    },
+    onUnpush: () => {
+      if (!resolvedTaskId) return;
+      togglePush();
+    },
     isPushing: isPending,
   });
 
   //ADVICE
-  const isAdviceTask = task.type === TaskTypeEnum.Advice || task.type === TaskTypeEnum.Motivation;
-  const hasAdvised = Boolean(task.hasAdvised);
+  const isAdviceTask = task?.type === TaskTypeEnum.Advice || task?.type === TaskTypeEnum.Motivation;
+  const hasAdvised = Boolean(task?.hasAdvised);
   const canGiveAdvice = isAdviceTask && !isOwner && !hasAdvised;
   const shouldOpenComposerDirectly = openAdviceComposer && canGiveAdvice && !consumedAutoOpen;
 
@@ -174,6 +173,7 @@ export default function TaskDetailScreen({
   };
 
   const footerContent = React.useMemo(() => {
+    if (!task) return null;
     if (task.type === TaskTypeEnum.Reminder && !hasPushed) {
       return (
         <AnimatedBottomButtonWithHeader
@@ -242,13 +242,14 @@ export default function TaskDetailScreen({
           autoFocus={shouldOpenComposerDirectly}
           onSubmit={handleSubmitAdvice}
           onOpenComposer={() => setShowCTA(true)}
+          isComposerOpen={showCTA}
         />
       );
     }
 
     return null;
   }, [
-    task.type,
+    task?.type,
     canGiveAdvice,
     showCTA,
     adviceText,
@@ -412,7 +413,7 @@ export default function TaskDetailScreen({
   }, [task, isOwner]);
 
   const renderContent = React.useMemo(() => {
-    switch (task.type) {
+    switch (task?.type) {
       case TaskTypeEnum.Advice:
         return renderAdvice();
 
@@ -428,7 +429,15 @@ export default function TaskDetailScreen({
       default:
         return null;
     }
-  }, [task.type, renderAdvice, renderMotivation, renderDecision]);
+  }, [task?.type, renderAdvice, renderMotivation, renderDecision]);
+
+  if (isLoading) {
+    return <AppLoader visible />;
+  }
+
+  if (!task) return null;
+
+  const bg = getTaskBackgroundVisual(task.type);
 
   return (
     <View style={{ flex: 1 }}>

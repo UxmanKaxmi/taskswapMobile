@@ -1,7 +1,7 @@
 // src/shared/components/Advice/AnimatedBottomComposer.tsx
 
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View, TextInput, TouchableOpacity } from 'react-native';
+import { Animated, Keyboard, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -41,6 +41,8 @@ export default function AnimatedBottomComposer({
   const translateY = useRef(new Animated.Value(visible ? 0 : COMPOSER_HEIGHT)).current;
 
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
+  const keyboardOffset = useRef(new Animated.Value(0)).current;
+  const keyboardOpenHeight = isAndroid ? vs(90) : vs(160);
 
   const [inputHeight, setInputHeight] = React.useState(MIN_HEIGHT);
 
@@ -88,13 +90,43 @@ export default function AnimatedBottomComposer({
     ]).start();
   }, [visible]);
 
+  useEffect(() => {
+    const showEvent = isAndroid ? 'keyboardDidShow' : 'keyboardWillShow';
+    const hideEvent = isAndroid ? 'keyboardDidHide' : 'keyboardWillHide';
+
+    const onShow = (e: any) => {
+      const height = e?.endCoordinates?.height - keyboardOpenHeight ?? 0;
+      Animated.timing(keyboardOffset, {
+        toValue: -Math.max(0, height),
+        duration: isAndroid ? 120 : 200,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const onHide = () => {
+      Animated.timing(keyboardOffset, {
+        toValue: 0,
+        duration: isAndroid ? 120 : 200,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const showSub = Keyboard.addListener(showEvent, onShow);
+    const hideSub = Keyboard.addListener(hideEvent, onHide);
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [keyboardOffset, insets.bottom]);
+
   return (
     <Animated.View
       pointerEvents={visible ? 'auto' : 'none'}
       style={[
         styles.wrapper,
         {
-          transform: [{ translateY }],
+          transform: [{ translateY: Animated.add(translateY, keyboardOffset) }],
           opacity,
         },
       ]}
@@ -178,7 +210,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: -20, // same trick ✅
+    bottom: isAndroid ? -15 : -30, // same trick ✅
     alignItems: 'center',
   },
 

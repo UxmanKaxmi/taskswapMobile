@@ -2,12 +2,11 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Avatar from '@shared/components/Avatar/Avatar';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import { NotificationDTO } from '../types/notification.types';
 import { getTypeVisual } from '@shared/utils/typeVisuals';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '@navigation/types/navigation';
+import { notificationStyles } from '../styles/notification.styles';
 
 interface Props {
   item: NotificationDTO;
@@ -15,24 +14,13 @@ interface Props {
 }
 
 export default function CommentMention({ item, onPress }: Props) {
-  const { emoji, color } = getTypeVisual(item.type);
-  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
-
-  const handlePress = () => {
-    console.log('item', item?.metadata?.taskId);
-    navigation.navigate('TaskDetail', {
-      taskId: item?.metadata?.taskId ?? '',
-      highlightCommentId: item.metadata?.commentId, // 👈 pass the comment id
-    });
-  };
+  const { emoji } = getTypeVisual(item.type);
   return (
     <TouchableOpacity
-      onPress={handlePress}
+      onPress={onPress}
       style={[
-        styles.row,
-        {
-          backgroundColor: item.read ? colors.background : colors.adviceBg,
-        },
+        notificationStyles.cardStyles,
+        item.read ? notificationStyles.readCard : notificationStyles.unreadCard,
       ]}
     >
       <Avatar uri={item.sender?.photo} fallback={item.sender?.name} />
@@ -58,12 +46,6 @@ const styles = StyleSheet.create({
   quotedText: {
     fontStyle: 'italic',
     marginBottom: spacing.sm,
-    color: colors.primary,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
   },
   textContainer: {
     flex: 1,

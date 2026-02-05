@@ -63,6 +63,21 @@ Common variables:
 - `GOOGLE_SENDER_ID`: FCM sender ID
 - `APP_ENV`: `development` or `production` (drives dev badge + display name)
 
+## Notifications
+
+Supported notification types (from `NotificationDTO.type`):
+
+- `follow`
+- `comment`
+- `task`
+- `task-helper`
+- `reminder`
+- `decision-done`
+- `advice`
+- `motivation`
+- `decision`
+- `remainder` (legacy/typo)
+
 ## Scripts
 
 From `package.json`:

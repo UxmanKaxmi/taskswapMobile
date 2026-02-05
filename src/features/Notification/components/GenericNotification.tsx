@@ -2,10 +2,11 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Avatar from '@shared/components/Avatar/Avatar';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
 import { getTypeVisual } from '@shared/utils/typeVisuals';
+import { notificationStyles } from '../styles/notification.styles';
 
 interface Props {
   item: NotificationDTO;
@@ -19,10 +20,8 @@ export default function GenericNotification({ item, onPress }: Props) {
     <TouchableOpacity
       onPress={onPress}
       style={[
-        styles.row,
-        {
-          backgroundColor: item.read ? colors.background : colors.adviceBg,
-        },
+        notificationStyles.cardStyles,
+        item.read ? notificationStyles.readCard : notificationStyles.unreadCard,
       ]}
     >
       <Avatar uri={item.sender?.photo} fallback={item.metadata?.senderName?.[0] || '?'} />
@@ -48,12 +47,6 @@ const styles = StyleSheet.create({
   quotedText: {
     fontStyle: 'italic',
     marginBottom: spacing.sm,
-    color: colors.primary,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
   },
   textContainer: {
     flex: 1,

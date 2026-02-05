@@ -7,13 +7,12 @@ import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
 import { getTypeColor, getTypeVisual, typeIcons } from '@shared/utils/typeVisuals';
 import { notificationStyles } from '../styles/notification.styles';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '@navigation/types/navigation';
 import { ms } from 'react-native-size-matters';
 import { Icon } from '@shared/components/Icons';
 
 type Props = {
   item: NotificationDTO;
+  onPress: () => void;
 };
 
 const taskTypeCopy: Record<
@@ -21,6 +20,7 @@ const taskTypeCopy: Record<
   {
     verb: string;
     preposition?: string;
+    suffix?: string;
   }
 > = {
   decision: {
@@ -33,16 +33,16 @@ const taskTypeCopy: Record<
   },
   motivation: {
     verb: 'wants some',
-    preposition: ' ',
+    preposition: '',
+    suffix: 'from you',
   },
   reminder: {
     verb: 'needs help with a reminder',
   },
 };
 
-export default function TaskTypeNotification({ item }: Props) {
+export default function TaskTypeNotification({ item, onPress }: Props) {
   const taskType = item.taskType || 'advice';
-  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
   const iconName = typeIcons[taskType];
   const typeColor = getTypeColor(taskType);
@@ -52,16 +52,14 @@ export default function TaskTypeNotification({ item }: Props) {
     preposition: 'with',
   };
 
-  const handlePress = () => {
-    if (!item.metadata?.taskId) return;
-
-    navigation.navigate('TaskDetail', {
-      id: item.metadata.taskId,
-    });
-  };
-
   return (
-    <TouchableOpacity onPress={handlePress} style={notificationStyles.cardStyles}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        notificationStyles.cardStyles,
+        item.read ? notificationStyles.readCard : notificationStyles.unreadCard,
+      ]}
+    >
       <Avatar uri={item.sender?.photo} fallback={item.sender?.name} />
 
       <View style={styles.textContainer}>
@@ -70,9 +68,9 @@ export default function TaskTypeNotification({ item }: Props) {
             {item.sender?.name || 'Someone'}
           </TextElement>{' '}
           {copy.verb}{' '}
-          {copy.preposition && (
+          {copy.preposition !== undefined && (
             <>
-              {copy.preposition}{' '}
+              {copy.preposition && `${copy.preposition} `}
               <TextElement
                 variant="caption"
                 weight="600"
@@ -82,6 +80,7 @@ export default function TaskTypeNotification({ item }: Props) {
               </TextElement>
             </>
           )}
+          {copy.suffix ? ` ${copy.suffix}` : null}
         </TextElement>
 
         <TextElement variant="caption" style={notificationStyles.timeAgoText} color="muted">

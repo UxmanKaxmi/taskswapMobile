@@ -14,6 +14,7 @@ import { AuthProvider } from '@features/Auth/AuthProvider';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { AppInfoBottomSheetProvider } from '@shared/components/AppInfoBottomSheet/AppInfoBottomSheetProvider';
+import { colors } from '@shared/theme/colors';
 
 const queryClient = new QueryClient();
 
@@ -22,7 +23,7 @@ const LightNavTheme = {
   dark: false,
   colors: {
     ...DefaultTheme.colors,
-    background: '#FFFFFF',
+    // background: '#FFFFFF',
   },
 };
 
@@ -35,7 +36,7 @@ export default function App() {
     StatusBar.setBarStyle('dark-content');
 
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor('#FFFFFF');
+      StatusBar.setBackgroundColor(colors.background);
       StatusBar.setTranslucent(true);
     }
   }, []);
@@ -64,14 +65,14 @@ export default function App() {
           </QueryClientProvider>
         </AppInfoBottomSheetProvider>
       </BottomSheetModalProvider>
-      {showDevBadge && (
+      {/* {showDevBadge && (
         <View pointerEvents="none" style={styles.devBadgeContainer}>
           <View style={styles.devBadge}>
             <View style={styles.devBadgeDot} />
             <Text style={styles.devBadgeText}>DEV</Text>
           </View>
         </View>
-      )}
+      )} */}
     </GestureHandlerRootView>
   );
 }

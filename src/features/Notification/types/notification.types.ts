@@ -11,7 +11,9 @@ export interface NotificationDTO {
     | 'task'
     | 'task-helper'
     | 'reminder'
-    | 'decision-done';
+    | 'decision-done'
+    | 'task-advice'
+    | 'task-motivation-push';
 
   message: string;
   read: boolean;

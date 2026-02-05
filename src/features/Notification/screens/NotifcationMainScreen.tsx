@@ -1,45 +1,44 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
   SectionList,
-  Image,
-  TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
   ViewToken,
 } from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { format, isToday, isYesterday, isThisWeek, isThisYear } from 'date-fns';
+import { useNavigation } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
+import type { AppStackParamList } from '@navigation/types/navigation';
 import { useDebouncedCallback } from 'use-debounce';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing, colors } from '@shared/theme';
-import { AppStackParamList } from '@navigation/types/navigation';
 import { useNotifications } from '../hooks/useNotifications';
 import { useBatchMarkNotificationsAsRead } from '../hooks/useBatchMarkNotificationsAsRead';
-import { timeAgo } from '@shared/utils/helperFunctions';
 import EmptyState from '@features/Empty/EmptyState';
 import { NotificationDTO } from '../types/notification.types';
 import Row from '@shared/components/Layout/Row';
 import { ms, vs } from 'react-native-size-matters';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
-import Avatar from '@shared/components/Avatar/Avatar';
 import NotificationCard from '../components/DefaultNotification';
 import { queryClient } from '@lib/react-query/client';
 import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
 import { useAuth } from '@features/Auth/AuthProvider';
-import { useAppNavigation } from '@navigation/types/navigationUtils';
 import { Height } from '@shared/components/Spacing';
-import { Shadow } from '@shared/components/Shadow';
 
 export default function NotificationMainScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const { data: notifications = [], isLoading, refetch } = useNotifications();
   const { mutate: markBatch } = useBatchMarkNotificationsAsRead();
   const { user, loading } = useAuth();
 
   const [refreshing, setRefreshing] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(30);
+
+  const PAGE_SIZE = 30;
+  const LOAD_MORE = 20;
 
   const handleRefresh = async () => {
     try {
@@ -75,19 +74,27 @@ export default function NotificationMainScreen() {
   // ✅ useDebouncedCallback from use-debounce
   const debouncedFlush = useDebouncedCallback(flushSeenIds, 1500);
 
-  const handleViewableItemsChanged = ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+  const handleViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     viewableItems.forEach(viewable => {
       const item = viewable.item as NotificationDTO;
+      const batchIds = Array.isArray(item?.metadata?.ids) ? item.metadata.ids : null;
+      if (batchIds && batchIds.length) {
+        batchIds.forEach((id: string) => {
+          if (!seenIdsRef.current.has(id)) seenIdsRef.current.add(id);
+        });
+        return;
+      }
       if (!item.read && !seenIdsRef.current.has(item.id)) {
         seenIdsRef.current.add(item.id);
       }
     });
     debouncedFlush();
-  };
+  }).current;
 
-  const viewabilityConfig = {
-    itemVisiblePercentThreshold: 60,
-  };
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 30,
+    minimumViewTime: 300,
+  }).current;
 
   useEffect(() => {
     return () => {
@@ -124,11 +131,106 @@ export default function NotificationMainScreen() {
       .map(([title, data]) => ({ title, data }));
   }
 
-  const sections = useMemo(() => groupNotifications(notifications), [notifications]);
+  const visibleNotifications = useMemo(() => {
+    const filtered = notifications.filter(n => {
+      const needsTaskType = [
+        'task-helper',
+        'taskHelper',
+        'task',
+        'reminder',
+        'decision',
+        'decision-done',
+        'decisionDone',
+        'advice',
+        'motivation',
+      ].includes(n.type);
 
-  const handlePress = (id: string) => {
-    // markAsRead(id);
-  };
+      return needsTaskType ? !!n.taskType : true;
+    });
+
+    return filtered.slice(0, visibleCount);
+  }, [notifications, visibleCount]);
+  const sections = useMemo(() => groupNotifications(visibleNotifications), [visibleNotifications]);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [notifications.length]);
+
+  const handleLoadMore = useCallback(() => {
+    if (visibleCount >= notifications.length) return;
+    setVisibleCount(prev => Math.min(prev + LOAD_MORE, notifications.length));
+  }, [visibleCount, notifications.length]);
+
+  const handleNotificationPress = useCallback(
+    (item: NotificationDTO) => {
+      console.log('[NotificationPress]', item);
+      console.log('[NotificationPress] item.type', item.type);
+
+      switch (item.type) {
+        case 'follow':
+          if (item.sender?.id) {
+            navigation.navigate('FriendsProfileScreen', { id: item.sender.id });
+          }
+          return;
+
+        case 'task-helper':
+          if (item.id) {
+            navigation.navigate('TaskDetail', { taskId: item.metadata?.taskId });
+          }
+          return;
+
+        case 'task-advice':
+          if (item.id) {
+            navigation.navigate('TaskDetail', { taskId: item.metadata?.taskId });
+          }
+          return;
+
+        case 'commentMention':
+          if (item.metadata?.taskId) {
+            navigation.navigate('TaskDetail', {
+              taskId: item.metadata.taskId,
+              highlightCommentId: item.metadata?.commentId,
+            });
+          }
+          return;
+
+        case 'task-motivation-push':
+          if (item.metadata?.taskId) {
+            navigation.navigate('TaskDetail', {
+              taskId: item.metadata.taskId,
+              highlightCommentId: item.metadata?.commentId,
+            });
+          }
+          return;
+
+        // case 'task-helper':
+        // case 'taskHelper':
+        // case 'task':
+        // case 'reminder':
+        // case 'decision-done':
+        // case 'decisionDone':
+        // case 'decision':
+        // case 'advice':
+        // case 'motivation':
+        //   if (item.metadata?.taskId) {
+        //     navigation.navigate('TaskDetail', { taskId: item.metadata.taskId });
+        //   }
+        //   return;
+        // case 'comment':
+        // case 'commentMention':
+        //   if (item.metadata?.taskId) {
+        //     navigation.navigate('TaskDetail', {
+        //       taskId: item.metadata.taskId,
+        //       highlightCommentId: item.metadata?.commentId,
+        //     });
+        //   }
+        //   return;
+        default:
+          return;
+      }
+    },
+    [navigation],
+  );
 
   if (isLoading) {
     return (
@@ -156,6 +258,10 @@ export default function NotificationMainScreen() {
           keyExtractor={item => item.id}
           contentContainerStyle={{ paddingBottom: spacing.xl }}
           stickySectionHeadersEnabled
+          initialNumToRender={12}
+          maxToRenderPerBatch={12}
+          windowSize={7}
+          removeClippedSubviews
           renderSectionHeader={({ section: { title } }) => (
             <View style={styles.sectionHeaderContainer}>
               <TextElement variant="subtitle" weight="600" style={styles.sectionHeader}>
@@ -163,8 +269,6 @@ export default function NotificationMainScreen() {
               </TextElement>
             </View>
           )}
-          ListFooterComponent={<Height size={vs(60)} />}
-          ListFooterComponentStyle={{}}
           ItemSeparatorComponent={() => <AppBorder style={{ marginHorizontal: spacing.md }} />}
           renderItem={({ item, index, section }) => {
             const isFirst = index === 0;
@@ -178,10 +282,21 @@ export default function NotificationMainScreen() {
                   isLast && styles.lastItem,
                 ]}
               >
-                <NotificationCard item={item} onPress={() => {}} />
+                <NotificationCard item={item} onPress={() => handleNotificationPress(item)} />
               </View>
             );
           }}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.6}
+          ListFooterComponent={
+            visibleCount < notifications.length ? (
+              <View style={styles.listFooter}>
+                <ActivityIndicator size="small" />
+              </View>
+            ) : (
+              <Height size={vs(60)} />
+            )
+          }
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
           onViewableItemsChanged={handleViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
@@ -223,9 +338,9 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.md,
     // marginTop: spacing.md,
     // backgroundColor: '#fff',
-
-    backgroundColor: colors.onAccent,
-    // borderRadius: 10,
+    backgroundColor: 'transparent',
+    borderRadius: 10,
+    overflow: 'hidden',
   },
 
   textContainer: {
@@ -241,5 +356,9 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: ms(12),
+  },
+  listFooter: {
+    paddingVertical: spacing.md,
+    alignItems: 'center',
   },
 });

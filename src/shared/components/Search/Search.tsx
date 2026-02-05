@@ -44,10 +44,11 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.inputBackground,
+    backgroundColor: colors.adviceBg,
     borderRadius: 12,
     paddingHorizontal: spacing.md,
-    paddingVertical: ms(15),
+    minHeight: vs(40),
+    // paddingVertical: vs(10),
     marginTop: spacing.md,
     marginBottom: spacing.lg,
   },

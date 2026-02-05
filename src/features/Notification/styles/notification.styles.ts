@@ -15,6 +15,12 @@ export const notificationStyles = StyleSheet.create({
     fontSize: ms(15),
     paddingEnd: ms(7),
   },
+  unreadCard: {
+    backgroundColor: colors.adviceBg,
+  },
+  readCard: {
+    backgroundColor: colors.onAccent,
+  },
   cardStyles: {
     flexDirection: 'row',
     alignItems: 'center',
