@@ -159,6 +159,15 @@ export function resetToHomeRoot(navigation: any) {
  * if (!checkAuthThenNavigate('TaskDetail', { taskId })) return;
  */
 
+type AuthIntroOptions = {
+  authContext?: string;
+  authCopy?: {
+    title: string;
+    subtitle: string;
+    cta: string;
+  };
+};
+
 export function useCheckAuthThenNavigate() {
   const navigation = useAppNavigation();
   const route = useRoute();
@@ -167,6 +176,7 @@ export function useCheckAuthThenNavigate() {
   return function checkAuthThenNavigate<T extends keyof AppStackParamList>(
     screen?: T,
     params?: AppStackParamList[T],
+    options?: AuthIntroOptions,
   ): boolean {
     if (!user) {
       console.log('screen', screen);
@@ -175,6 +185,8 @@ export function useCheckAuthThenNavigate() {
       navigation.navigate('AuthIntro', {
         redirectTo: (screen ?? route.name) as keyof AppStackParamList,
         params,
+        authContext: options?.authContext,
+        authCopy: options?.authCopy,
       });
       return false;
     }

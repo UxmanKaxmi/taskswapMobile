@@ -1,20 +1,34 @@
 // src/shared/api/axios.ts
 import { showToast } from '@shared/utils/toast';
 import axios, { AxiosRequestConfig, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { getSignOut } from './authBridge';
-import { Platform } from 'react-native';
+import { triggerLogout } from './authBridge';
+import { Platform, NativeModules } from 'react-native';
 import Config from 'react-native-config';
 
 const FALLBACK_BASE_URL_IOS = 'http://localhost:3001';
 const FALLBACK_BASE_URL_ANDROID = 'http://192.168.1.5:3001';
 
+const getPackagerHost = () => {
+  if (!__DEV__) return null;
+  const scriptURL = NativeModules?.SourceCode?.scriptURL || '';
+  const match = scriptURL.match(/https?:\/\/([^/:]+)(:\d+)?\//);
+  return '192.168.1.13';
+};
+
+const DEV_BASE_URL = (() => {
+  const host = getPackagerHost();
+  return host ? `http://${host}:3001` : null;
+})();
+
 const BASE_URL =
-  Platform.OS === 'android'
+  (__DEV__ && DEV_BASE_URL) ||
+  (Platform.OS === 'android'
     ? Config.BASE_URL_ANDROID || Config.BASE_URL || FALLBACK_BASE_URL_ANDROID
-    : Config.BASE_URL_IOS || Config.BASE_URL || FALLBACK_BASE_URL_IOS;
+    : Config.BASE_URL_IOS || Config.BASE_URL || FALLBACK_BASE_URL_IOS);
 
 export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   skipToast?: boolean;
+  skipAuthLogout?: boolean;
 }
 interface CustomAxiosError extends Omit<AxiosError, 'config'> {
   config: CustomAxiosRequestConfig & { headers?: Record<string, string> };
@@ -55,8 +69,10 @@ api.interceptors.response.use(
     const errStr = (data?.error || data?.message || '').toString().toLowerCase();
 
     const shouldLogout =
-      status === 401 &&
-      (code === 'AUTH_INVALID_TOKEN' ||
+      !error.config?.skipAuthLogout &&
+      (status === 401 ||
+        status === 403 ||
+        code === 'AUTH_INVALID_TOKEN' ||
         code === 'AUTH_TOKEN_EXPIRED' ||
         errStr.includes('invalid token') ||
         errStr.includes('token expired'));
@@ -73,13 +89,10 @@ api.interceptors.response.use(
       });
 
       // trigger app-level sign out via the bridge
-      const signOut = getSignOut?.();
-      if (signOut) {
-        try {
-          await signOut();
-        } catch (e) {
-          // no-op; still reject the original error
-        }
+      try {
+        await triggerLogout();
+      } catch (e) {
+        // no-op; still reject the original error
       }
       return Promise.reject(error);
     }

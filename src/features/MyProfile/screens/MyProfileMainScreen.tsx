@@ -39,7 +39,7 @@ export default function MyProfileMainScreen() {
         <ProfileHeader
           avatarUri={user ? MyProfileData?.photo : undefined}
           name={user ? (MyProfileData?.name ?? '') : ''}
-          username={user ? (MyProfileData?.name ?? '') : ''}
+          username={user ? (MyProfileData?.email ?? '') : ''}
           following={user ? (MyProfileData?.followingCount ?? 0) : 0}
           followers={user ? (MyProfileData?.followersCount ?? 0) : 0}
           onEditProfile={() => {}}

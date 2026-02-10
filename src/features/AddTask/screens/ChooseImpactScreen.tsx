@@ -55,7 +55,7 @@ export default function ChooseImpactScreen() {
 
   return (
     <Layout>
-      <AppHeader title="New Push" showCross />
+      <AppHeader title="" showCross />
       {/* Header */}
       {/* <Row justify="space-between" align="center" style={styles.header}>
         <Ripple onPress={() => navigation.goBack()}>

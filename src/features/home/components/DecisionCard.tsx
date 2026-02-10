@@ -27,6 +27,7 @@ import { cardStyles } from './styles';
 import DecisionChoiceBar from '@features/AddTask/components/DecisionChoiceBar';
 import { Height } from '@shared/components/Spacing';
 import { showConfirmAlert } from '@shared/utils/confirmAlert';
+import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 
 type Props = {
   task: DecisionTask;
@@ -46,7 +47,11 @@ export default function DecisionCard({ task, onPressCard, onPressShare }: Props)
 
   const { option1, option2, percent1, percent2, totalVotes } = useVoteStats(task);
 
+  const checkAuthThenNavigate = useCheckAuthThenNavigate();
+
   const handleVote = (val: string) => {
+    if (!checkAuthThenNavigate(undefined, undefined, { authContext: 'Decision' })) return;
+
     if (!user) return;
 
     showConfirmAlert({

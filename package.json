@@ -14,7 +14,8 @@
     "create-feature": "node scripts/createFeature.js",
     "create-sharedComponent": "node scripts/createSharedComponent.js",
     "ios-release": "ENVFILE=.env.prod xcodebuild -workspace ios/taskswapMobile.xcworkspace -scheme taskswapMobile -configuration Release -sdk iphoneos -derivedDataPath ios/build && ios-deploy --bundle ios/build/Build/Products/Release-iphoneos/taskswapMobile.app",
-    "ios-multi": "bash scripts/ios-multi-sim.sh"
+    "ios-multi": "bash scripts/ios-multi-sim.sh",
+    "ios-device": "bash scripts/run-ios-device.sh"
   },
   "dependencies": {
     "@bottom-tabs/react-navigation": "^1.1.0",

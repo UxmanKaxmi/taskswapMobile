@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { View, FlatList, Pressable, StyleSheet, ListRenderItem } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors, spacing } from '@shared/theme';
@@ -29,9 +29,15 @@ type Props = {
 
 export default function HorizontalFilterTabs({ value, onChange }: Props) {
   const listRef = useRef<FlatList<Filter>>(null);
+  const [activeKey, setActiveKey] = useState<FilterKey>(value);
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
-    const index = FILTERS.findIndex(f => f.key === value);
+    setActiveKey(value);
+  }, [value]);
+
+  useEffect(() => {
+    const index = FILTERS.findIndex(f => f.key === activeKey);
     if (index === -1) return;
 
     const isFirst = index === 0;
@@ -42,9 +48,23 @@ export default function HorizontalFilterTabs({ value, onChange }: Props) {
       animated: true,
       viewPosition: isFirst ? 0 : isLast ? 1 : 0.5,
     });
-  }, [value]);
+  }, [activeKey]);
+
+  const handlePress = useCallback(
+    (key: FilterKey) => {
+      if (key === activeKey) return;
+      setActiveKey(key);
+      startTransition(() => onChange(key));
+    },
+    [activeKey, onChange, startTransition],
+  );
+
   const renderItem: ListRenderItem<Filter> = ({ item }) => (
-    <FilterPill label={item.label} active={item.key === value} onPress={() => onChange(item.key)} />
+    <FilterPill
+      label={item.label}
+      active={item.key === activeKey}
+      onPress={() => handlePress(item.key)}
+    />
   );
 
   return (

@@ -24,9 +24,6 @@ export default function RootNavigator() {
         routes: [
           {
             name: 'App',
-            state: {
-              routes: [{ name: 'Tabs', state: { routes: [{ name: 'Home' }] } }],
-            },
           },
         ],
       });

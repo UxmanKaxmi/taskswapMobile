@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { View, TouchableOpacity, StyleSheet, RefreshControl, StatusBar } from 'react-native';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
@@ -31,7 +31,7 @@ import MotivationCard from '../components/MotivationCard';
 import AdviceCard from '../components/AdviceCard';
 import NotificationTester from '@features/Debug/NotificationTester';
 import { useAuth } from '@features/Auth/AuthProvider';
-import { navigateToTaskDetails } from '@navigation/types/navigationUtils';
+import { navigateToTaskDetails, useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 import Row from '@shared/components/Layout/Row';
 import { Icon } from '@shared/components/Icons';
 import Ripple from '@shared/components/Buttons/Ripple';
@@ -50,14 +50,16 @@ import HomeHeader from '../components/HomeHeader';
 import HorizontalFilterTabs from '../components/HorizontalFilterTabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isAndroid, isIOS } from '@shared/utils/constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
   const { data: allTasks = [], isLoading, isError, error, refetch } = useTasksQuery();
 
-  const { user } = useAuth();
+  const { user, hasSeenFindFriendsScreen, justLoggedIn, consumeJustLoggedIn } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const hasTriggeredFindFriendsRef = useRef(false);
 
   const [filterModalVisible, setFilterModalVisible] = useState(false);
 
@@ -68,6 +70,27 @@ export default function HomeScreen() {
   const HEADER_COLLAPSED = isAndroid ? vs(50) : vs(30) + TOP_INSET;
   const SCROLL_DISTANCE = HEADER_EXPANDED - HEADER_COLLAPSED;
   const scrollY = useSharedValue(0);
+  const checkAuthThenNavigate = useCheckAuthThenNavigate();
+
+  useEffect(() => {
+    hasTriggeredFindFriendsRef.current = false;
+  }, [user?.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!user || hasSeenFindFriendsScreen || !justLoggedIn) return;
+      if (hasTriggeredFindFriendsRef.current) return;
+
+      const timeoutId = setTimeout(() => {
+        if (hasTriggeredFindFriendsRef.current) return;
+        hasTriggeredFindFriendsRef.current = true;
+        navigation.navigate('FindFriendsScreen', { openedFromHome: true });
+        consumeJustLoggedIn();
+      }, 2000);
+
+      return () => clearTimeout(timeoutId);
+    }, [user, hasSeenFindFriendsScreen, justLoggedIn, navigation, consumeJustLoggedIn]),
+  );
 
   const headerStyle = useAnimatedStyle(() => {
     const height = interpolate(
@@ -287,7 +310,22 @@ export default function HomeScreen() {
             key={item.id}
             task={item as any}
             onPressCard={() => navigateToTaskDetails(navigation, item)}
-            onPressSuggest={t => console.log('Suggest for', t.id)}
+            onPressSuggest={t => {
+              if (
+                checkAuthThenNavigate(
+                  'TaskDetail',
+                  {
+                    taskId: t.id,
+                    openAdviceComposer: true,
+                  },
+                  {
+                    authContext: 'Advice',
+                  },
+                )
+              ) {
+                return;
+              }
+            }}
             onPressView={t => console.log('View for', t.id)}
           />
         );

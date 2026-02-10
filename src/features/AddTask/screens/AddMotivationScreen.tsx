@@ -162,7 +162,7 @@ export default function AddMotivationScreen({ navigation }: Props) {
       >
         <TaskBackground icon={typeIcons.motivation} color={typeBackgroundsHard.motivation} />
 
-        <AppHeader title={'Ask for Motivation'} />
+        <AppHeader title={''} />
 
         <TextElement variant="title" style={styles.subtitle}>
           {getTitle(TaskTypeEnum.Motivation)}

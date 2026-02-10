@@ -76,7 +76,7 @@ export default function ProfileHeader({
           </Column>
         </Row>
 
-        <Row justify="flex-start" style={styles.buttonsRow}>
+        {/* <Row justify="flex-start" style={styles.buttonsRow}>
           <OutlineButton
             textStyle={styles.buttonText}
             title="Edit Profile"
@@ -89,7 +89,7 @@ export default function ProfileHeader({
             onPress={onShareProfile}
             style={styles.shareBtn}
           />
-        </Row>
+        </Row> */}
       </View>
     </Row>
   );
@@ -100,7 +100,8 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(12),
   },
   followingValue: {
-    fontSize: moderateScale(14),
+    textTransform: 'uppercase',
+    fontSize: moderateScale(11),
   },
   followingHeading: {
     fontSize: moderateScale(16),
@@ -126,7 +127,8 @@ const styles = StyleSheet.create({
   },
   name: {},
   username: {
-    fontSize: ms(14),
+    lineHeight: ms(14),
+    fontSize: ms(11),
   },
   statsRow: {
     // alignSelf: 'flex-start',

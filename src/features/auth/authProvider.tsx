@@ -29,6 +29,8 @@ type AuthContextType = {
 
   hasSeenFindFriendsScreen: boolean;
   setHasSeenFindFriendsScreen: (seen: boolean) => void;
+  justLoggedIn: boolean;
+  consumeJustLoggedIn: () => void;
 };
 
 const STORAGE_USER = 'auth:user';
@@ -42,6 +44,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasSeenFindFriendsScreen, setHasSeenFindFriendsScreenState] = useState(false);
+  const [justLoggedIn, setJustLoggedIn] = useState(false);
 
   const { mutateAsync: googleAuth } = useGoogleAuth();
   const isAuthenticated = !!token && !loading;
@@ -49,6 +52,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     await AsyncStorage.setItem(STORAGE_HAS_SEEN_FIND_FRIENDS, JSON.stringify(seen));
     setHasSeenFindFriendsScreenState(seen);
   };
+  const consumeJustLoggedIn = () => setJustLoggedIn(false);
 
   // Load saved session
   useEffect(() => {
@@ -86,6 +90,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       await AsyncStorage.setItem(STORAGE_USER, JSON.stringify(user));
       await AsyncStorage.setItem(STORAGE_TOKEN, token);
 
+      setJustLoggedIn(true);
       initializeNotifications().catch(() => {});
 
       showToast({
@@ -110,6 +115,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     setUser(null);
     setToken(null);
+    setJustLoggedIn(false);
 
     // Clear React Query data
     // Remove the specific user-related cache immediately
@@ -149,6 +155,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
         hasSeenFindFriendsScreen,
         setHasSeenFindFriendsScreen,
+        justLoggedIn,
+        consumeJustLoggedIn,
       }}
     >
       {children}

@@ -34,7 +34,9 @@ export default function ReminderWhenPicker({
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate();
 
-  const minTime = isSameDay(date, minDate) ? minDate : new Date(date.setHours(0, 0, 0, 0));
+  const minTime = isSameDay(date, minDate)
+    ? minDate
+    : new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
   const dateLabel = isToday(date)
     ? 'Today'
     : isTomorrow(date)

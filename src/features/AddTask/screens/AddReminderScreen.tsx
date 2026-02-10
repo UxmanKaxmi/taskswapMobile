@@ -41,7 +41,18 @@ type Props = NativeStackScreenProps<AddTaskStackParamList, 'AddReminder'>;
 
 export default function AddReminderScreen({ navigation }: Props) {
   const MIN_REMINDER_OFFSET_MS = 2 * 60 * 60 * 1000; // 2 hours
-  const getMinReminderDate = () => new Date(Date.now() + MIN_REMINDER_OFFSET_MS);
+  const normalizeToMinute = (date: Date) =>
+    new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      0,
+      0,
+    );
+  const getMinReminderDate = () =>
+    normalizeToMinute(new Date(Date.now() + MIN_REMINDER_OFFSET_MS));
 
   const [text, setText] = useState('');
   const [remindAt, setRemindAt] = useState<Date | null>(null);
@@ -50,14 +61,17 @@ export default function AddReminderScreen({ navigation }: Props) {
   const [showHelperModal, setShowHelperModal] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const minReminderDate = getMinReminderDate();
+  const minReminderDateRef = React.useRef<Date>(getMinReminderDate());
+  const minReminderDate = minReminderDateRef.current;
 
   const [selectedDate, setSelectedDate] = useState(minReminderDate);
   const [selectedTime, setSelectedTime] = useState(minReminderDate);
 
   const helperIds = helpers.map(h => h.id);
 
-  const isReminderTimeValid = !!remindAt && remindAt.getTime() >= Date.now() + 2 * 60 * 60 * 1000;
+  const isReminderTimeValid =
+    !!remindAt &&
+    normalizeToMinute(remindAt).getTime() >= minReminderDate.getTime();
 
   const canSubmit = text.trim().length > 0 && isReminderTimeValid && !success;
 
@@ -138,7 +152,7 @@ export default function AddReminderScreen({ navigation }: Props) {
       >
         <TaskBackground icon={typeIcons.reminder} color={typeBackgroundsHard.reminder} />
 
-        <AppHeader title="Create Reminder" />
+        <AppHeader title="" />
 
         <TextElement variant="title" style={styles.subtitle}>
           {getTitle(TaskTypeEnum.Reminder)}

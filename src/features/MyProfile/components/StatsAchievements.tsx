@@ -4,7 +4,6 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Row from '@shared/components/Layout/Row';
-import Icon from '@shared/components/Icons/Icon';
 import { spacing, colors, typography } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 
@@ -37,28 +36,30 @@ export default function StatsAchievements({
       </TextElement> */}
 
       {/* Stats Row */}
-      <Row justify="space-around" style={styles.statsRow}>
-        <View style={styles.statItem}>
+      <Row style={styles.statsRow}>
+        <View style={[styles.statItem, { flex: 1.2 }]}>
           <TextElement variant="title" weight="700" style={styles.statNumber}>
             {taskSuccessRate}%
           </TextElement>
-          <TextElement variant="caption" color="muted">
+          <TextElement variant="caption" style={styles.statLabel}>
             Task Success
           </TextElement>
         </View>
+        <View style={styles.divider} />
         <View style={styles.statItem}>
           <TextElement variant="title" weight="700" style={styles.statNumber}>
             {tasksDone}
           </TextElement>
-          <TextElement variant="caption" color="muted">
+          <TextElement variant="caption" style={styles.statLabel}>
             Tasks Done
           </TextElement>
         </View>
+        <View style={styles.divider} />
         <View style={styles.statItem}>
           <TextElement variant="title" weight="700" style={styles.statNumber}>
             {dayStreak}
           </TextElement>
-          <TextElement variant="caption" color="muted">
+          <TextElement variant="caption" style={styles.statLabel}>
             Day Streak
           </TextElement>
         </View>
@@ -83,18 +84,23 @@ export default function StatsAchievements({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: spacing.sm,
-    paddingBottom: 0,
-    paddingTop: 10,
+    backgroundColor: colors.card,
+    borderRadius: ms(22),
+    paddingVertical: vs(12),
+    paddingHorizontal: spacing.md,
+    // marginHorizontal: spacing.md,
+    marginVertical: vs(10),
     // shadow
   },
   header: {
     marginHorizontal: spacing.md,
     marginBottom: spacing.md,
-    fontSize: ms(20),
+    fontSize: ms(18),
     color: colors.text,
   },
-  statsRow: {},
+  statsRow: {
+    alignItems: 'center',
+  },
   statItem: {
     alignItems: 'center',
     // backgroundColor: 'red',
@@ -102,7 +108,20 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     color: colors.primary,
-    marginBottom: vs(5),
+    marginBottom: vs(6),
+    fontSize: ms(22),
+  },
+  statLabel: {
+    color: colors.muted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    fontSize: ms(10),
+  },
+  divider: {
+    width: 1,
+    height: vs(34),
+    backgroundColor: colors.border,
+    opacity: 0.6,
   },
   achievementsRow: {},
   achievementBox: {

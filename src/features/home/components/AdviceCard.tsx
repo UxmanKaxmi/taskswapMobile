@@ -79,6 +79,7 @@ export default function AdviceCard({ task, onPressCard, onPressShare }: Props) {
               taskDetails={task}
               hasPushed={task.hasPushed}
               pushCount={task.pushCount ?? 0}
+              onPressPush={() => {}}
             />
           </View>
         </TouchableOpacity>

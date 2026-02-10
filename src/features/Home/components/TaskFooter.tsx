@@ -16,9 +16,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { getTypeVisual } from '@shared/utils/typeVisuals';
 import { useIsOwner } from '@features/Auth/AuthProvider';
 import Row from '@shared/components/Layout/Row';
-import { navigateToTaskDetails } from '@navigation/types/navigationUtils';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '@navigation/types/navigation';
+import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 
 interface ExtraMeta {
   icon: string;
@@ -85,6 +83,7 @@ export default function TaskFooter({
   const translateY = useSharedValue(0);
   const hasMounted = useRef(false);
   const { emoji } = getTypeVisual(taskDetails?.type);
+  const checkAuthThenNavigate = useCheckAuthThenNavigate();
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -102,8 +101,6 @@ export default function TaskFooter({
       opacity.value = withTiming(1, { duration: 150 });
     });
   }, [pushed]);
-
-  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
   return (
     <View>
@@ -167,12 +164,21 @@ export default function TaskFooter({
                 }}
               >
                 <PushButton
-                  onPress={() =>
-                    navigateToTaskDetails(navigation, {
-                      ...taskDetails,
-                      openAdviceComposer: true,
-                    })
-                  }
+                  onPress={() => {
+                    if (!taskDetails) return;
+                    checkAuthThenNavigate(
+                      'TaskDetail',
+                      {
+                        task: {
+                          ...taskDetails,
+                          openAdviceComposer: true,
+                        },
+                      },
+                      {
+                        authContext: 'Advice',
+                      },
+                    );
+                  }}
                   taskType={TaskTypeEnum.Advice}
                   label={`${emoji} Suggest advice`}
                   size="sm"
@@ -239,7 +245,12 @@ export default function TaskFooter({
               /* NON-OWNER — can nudge */
               <Row justify="space-between" align="center" style={{ width: '100%' }}>
                 <PushButton
-                  onPress={() => onSendReminder?.()}
+                  onPress={() => {
+                    if (!checkAuthThenNavigate(undefined, undefined, { authContext: 'Reminder' }))
+                      return;
+
+                    onSendReminder?.();
+                  }}
                   taskType={TaskTypeEnum.Reminder}
                   label={emoji + ' Send reminder'}
                   size="sm"

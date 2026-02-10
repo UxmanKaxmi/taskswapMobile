@@ -42,34 +42,39 @@ export async function signOutGoogle() {
  * and return a de-duplicated, lowercase list of email addresses.
  */
 export async function fetchGoogleContacts(): Promise<ContactEmail[]> {
-  const { accessToken } = await GoogleSignin.getTokens();
+  try {
+    const { accessToken } = await GoogleSignin.getTokens();
 
-  const resp = await axios.get('https://people.googleapis.com/v1/people/me/connections', {
-    params: {
-      personFields: 'emailAddresses',
-      pageSize: 2000,
-    },
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+    const resp = await axios.get('https://people.googleapis.com/v1/people/me/connections', {
+      params: {
+        personFields: 'emailAddresses',
+        pageSize: 2000,
+      },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
-  const connections = resp.data.connections || [];
-  const result: ContactEmail[] = [];
+    const connections = resp.data.connections || [];
+    const result: ContactEmail[] = [];
 
-  for (const person of connections) {
-    const addrs = person.emailAddresses as Array<{ value: string }>;
-    if (addrs) {
-      for (const { value } of addrs) {
-        if (value) {
-          result.push({ email: value.toLowerCase(), source: 'google' });
+    for (const person of connections) {
+      const addrs = person.emailAddresses as Array<{ value: string }>;
+      if (addrs) {
+        for (const { value } of addrs) {
+          if (value) {
+            result.push({ email: value.toLowerCase(), source: 'google' });
+          }
         }
       }
     }
-  }
 
-  console.log(`📨 Fetched ${result.length} emails from Google Contacts`);
-  return result;
+    console.log(`📨 Fetched ${result.length} emails from Google Contacts`);
+    return result;
+  } catch (err) {
+    console.warn('⚠️ Failed to fetch Google contacts:', err);
+    return [];
+  }
 }
 
 /**

@@ -29,7 +29,7 @@ import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButto
 import { colors } from '@shared/theme';
 import { isAndroid } from '@shared/utils/constants';
 import TaskDetailHelpers from '../components/TaskDetailHelpers';
-import { useIsOwner } from '@features/Auth/AuthProvider';
+import { useAuth, useIsOwner } from '@features/Auth/AuthProvider';
 import { useFollowers } from '@features/User/hooks/useFollowers';
 import { HelperUser } from '@features/Home/types/home';
 import ViewHelpersModal from '../components/ViewHelpersModal';
@@ -54,6 +54,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import AnimatedAdviceMorph from '../components/AnimatedAdviceMorph';
 import { queryClient } from '@lib/react-query/client';
+import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 export default function TaskDetailScreen({
   route,
 }: NativeStackScreenProps<AppStackParamList, 'TaskDetail'>) {
@@ -63,6 +64,8 @@ export default function TaskDetailScreen({
   const [showHelperModal, setShowHelperModal] = React.useState(false);
   const [adviceText, setAdviceText] = React.useState('');
   const [consumedAutoOpen, setConsumedAutoOpen] = React.useState(false);
+  const { user } = useAuth();
+  const checkAuthThenNavigate = useCheckAuthThenNavigate();
 
   const { data: friends = [] } = useFollowers();
 
@@ -241,7 +244,24 @@ export default function TaskDetailScreen({
           onChangeText={setAdviceText}
           autoFocus={shouldOpenComposerDirectly}
           onSubmit={handleSubmitAdvice}
-          onOpenComposer={() => setShowCTA(true)}
+          onOpenComposer={() => {
+            if (!user) {
+              checkAuthThenNavigate(
+                'TaskDetail',
+                {
+                  taskId: resolvedTaskId,
+                  task: task ? { ...task, openAdviceComposer: true } : undefined,
+                  openAdviceComposer: true,
+                  highlightCommentId: route.params?.highlightCommentId,
+                },
+                {
+                  authContext: 'Advice',
+                },
+              );
+              return;
+            }
+            setShowCTA(true);
+          }}
           isComposerOpen={showCTA}
         />
       );

@@ -28,6 +28,18 @@ export type MainStackParamList = {
     showFindFriends?: boolean;
   };
   Auth: NavigatorScreenParams<AuthStackParamList>;
+  AuthIntro?:
+    | {
+        redirectTo?: keyof AppStackParamList;
+        params?: AppStackParamList[keyof AppStackParamList];
+        authContext?: 'Friends' | string;
+        authCopy?: {
+          title: string;
+          subtitle: string;
+          cta: string;
+        };
+      }
+    | undefined;
 };
 
 /* ------------------------------ APP NAVIGATOR ------------------------------ */
@@ -52,7 +64,11 @@ export type AppStackParamList = {
     | undefined;
 
   // friend flows (opened from Friends tab)
-  FindFriendsScreen: undefined;
+  FindFriendsScreen:
+    | {
+        openedFromHome?: boolean;
+      }
+    | undefined;
   InviteFriendsScreen: undefined;
 
   // notifications

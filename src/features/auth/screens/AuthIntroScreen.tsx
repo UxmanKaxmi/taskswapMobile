@@ -6,11 +6,12 @@ import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import { Height } from '@shared/components/Spacing';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { colors } from '@shared/theme';
-import { AuthStackParamList } from '@navigation/types/navigation';
+import { MainStackParamList } from '@navigation/types/navigation';
 import { resetToHomeRoot, resetToStack } from '@navigation/types/navigationUtils';
 import { vs } from 'react-native-size-matters';
 
 const { width, height } = Dimensions.get('window');
+const loginImage = require('@assets/images/loginImage5.png');
 
 // Map of copy for different redirect screens
 const authCopyMap: Record<
@@ -36,7 +37,7 @@ const authCopyMap: Record<
 
   FriendsProfileScreen: {
     title: 'Make Your Support Count',
-    subtitle: 'Log in to send your support and keep the connection meaningful.',
+    subtitle: 'Log in to send support and keep the connection meaningful.',
     cta: 'Log In to Help',
   },
 
@@ -54,24 +55,52 @@ const authCopyMap: Record<
 
   Home: {
     title: 'Make Your Support Count',
-    subtitle: 'Log in to support others, see how it helps, and stay connected.',
+    subtitle: 'Log in to support others, see your impact, and stay connected.',
     cta: 'Log In to Support',
+  },
+
+  Advice: {
+    title: 'Log In to Suggest Advice',
+    subtitle: 'Log in to share your advice and return right where you left off.',
+    cta: 'Log In to Send',
+  },
+
+  Reminder: {
+    title: 'Log In to Send a Reminder',
+    subtitle: 'Log in to set a reminder and get updates when it’s done.',
+    cta: 'Log In to Remind',
+  },
+
+  Push: {
+    title: 'Log In to Send a Push',
+    subtitle: 'Log in to send a quick push of motivation. It only takes a second.',
+    cta: 'Log In to Push',
+  },
+
+  Decision: {
+    title: 'Log In to Help Them Decide',
+    subtitle: 'Log in to vote or share input and help them move forward.',
+    cta: 'Log In to Respond',
   },
 };
 
 export default function AuthIntroScreen() {
-  const route = useRoute<RouteProp<AuthStackParamList, 'AuthIntro'>>();
+  const route = useRoute<RouteProp<MainStackParamList, 'AuthIntro'>>();
 
   const redirectTo = route.params?.redirectTo;
   const redirectParams = route.params?.params;
+  const authContext = route.params?.authContext;
+  const authCopy = route.params?.authCopy;
   const navigation = useNavigation();
 
   console.log('redirectTo', redirectTo);
-  const copy = (redirectTo && authCopyMap[redirectTo]) ?? {
-    title: 'Continue with Push Me Up',
-    subtitle: 'Log in to save your progress and stay connected.',
-    cta: 'Log In',
-  };
+  const copy = authCopy ||
+    (authContext && authCopyMap[authContext]) ||
+    (redirectTo && authCopyMap[redirectTo]) || {
+      title: 'Continue with Push Me Up',
+      subtitle: 'Log in to save your progress and stay connected.',
+      cta: 'Log In',
+    };
 
   const handleContinue = () => {
     navigation.navigate('Auth', {
@@ -104,9 +133,11 @@ export default function AuthIntroScreen() {
 
         <View style={styles.container}>
           <Image
-            source={require('@assets/images/loginImage5.png')}
+            source={loginImage}
             style={styles.image}
             resizeMode="contain"
+            fadeDuration={0}
+            defaultSource={loginImage}
           />
 
           <TextElement marginVertical={18} variant="title" style={styles.title}>

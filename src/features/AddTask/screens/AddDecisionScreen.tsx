@@ -161,7 +161,7 @@ export default function AddDecisionScreen({ navigation }: Props) {
       >
         <TaskBackground icon={typeIcons.decision} color={typeBackgroundsHard.decision} />
 
-        <AppHeader title="Ask for a Decision" />
+        <AppHeader title="" />
 
         <TextElement variant="title" style={styles.subtitle}>
           {getTitle(TaskTypeEnum.Decision)}

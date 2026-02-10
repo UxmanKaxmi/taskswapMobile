@@ -6,6 +6,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import Row from '@shared/components/Layout/Row';
 import { showToast } from '@shared/utils/toast';
 import { showConfirmAlert } from '@shared/utils/confirmAlert';
+import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 
 type Props = {
   option1: string;
@@ -60,7 +61,11 @@ export default function StackedVoteBar({
     }).start();
   }, [percent1, percent2, measured]);
 
+  const checkAuthThenNavigate = useCheckAuthThenNavigate();
+
   const handlePress = (label: string) => {
+    if (!checkAuthThenNavigate(undefined, undefined, { authContext: 'Decision' })) return;
+
     if (!canChange) {
       showToast({
         type: 'info',

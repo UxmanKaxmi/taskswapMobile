@@ -1,7 +1,7 @@
 // src/shared/components/Advice/AnimatedBottomComposer.tsx
 
 import React, { useEffect, useRef } from 'react';
-import { Animated, Keyboard, StyleSheet, TextInput, View } from 'react-native';
+import { Animated, KeyboardAvoidingView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -12,10 +12,9 @@ import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import AppTextInput from '@shared/components/Inputs/AppTextInput';
 
 const INPUT_HEIGHT = vs(48);
-const FOOTER_HEIGHT = vs(80);
-export const COMPOSER_HEIGHT = isAndroid ? vs(120) : vs(FOOTER_HEIGHT);
+export const COMPOSER_HEIGHT = isAndroid ? vs(120) : vs(0);
 const MIN_HEIGHT = vs(30);
-const MAX_HEIGHT = vs(110);
+const MAX_HEIGHT = vs(120);
 
 const MIN_CHARS = 20;
 const MAX_CHARS = 140;
@@ -41,8 +40,6 @@ export default function AnimatedBottomComposer({
   const translateY = useRef(new Animated.Value(visible ? 0 : COMPOSER_HEIGHT)).current;
 
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
-  const keyboardOffset = useRef(new Animated.Value(0)).current;
-  const keyboardOpenHeight = isAndroid ? vs(90) : vs(160);
 
   const [inputHeight, setInputHeight] = React.useState(MIN_HEIGHT);
 
@@ -90,102 +87,77 @@ export default function AnimatedBottomComposer({
     ]).start();
   }, [visible]);
 
-  useEffect(() => {
-    const showEvent = isAndroid ? 'keyboardDidShow' : 'keyboardWillShow';
-    const hideEvent = isAndroid ? 'keyboardDidHide' : 'keyboardWillHide';
-
-    const onShow = (e: any) => {
-      const height = e?.endCoordinates?.height - keyboardOpenHeight ?? 0;
-      Animated.timing(keyboardOffset, {
-        toValue: -Math.max(0, height),
-        duration: isAndroid ? 120 : 200,
-        useNativeDriver: true,
-      }).start();
-    };
-
-    const onHide = () => {
-      Animated.timing(keyboardOffset, {
-        toValue: 0,
-        duration: isAndroid ? 120 : 200,
-        useNativeDriver: true,
-      }).start();
-    };
-
-    const showSub = Keyboard.addListener(showEvent, onShow);
-    const hideSub = Keyboard.addListener(hideEvent, onHide);
-
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, [keyboardOffset, insets.bottom]);
-
   return (
     <Animated.View
       pointerEvents={visible ? 'auto' : 'none'}
       style={[
         styles.wrapper,
         {
-          transform: [{ translateY: Animated.add(translateY, keyboardOffset) }],
+          transform: [{ translateY }],
           opacity,
         },
       ]}
     >
-      <View
-        style={[
-          styles.sheet,
-          {
-            backgroundColor: colors.card,
-            paddingBottom: insets.bottom + vs(10),
-          },
-        ]}
+      <KeyboardAvoidingView
+        behavior={isAndroid ? 'height' : 'padding'}
+        style={styles.keyboardAvoiding}
       >
-        {/* ✅ REAL INPUT */}
-        <AppTextInput
-          ref={inputRef}
-          value={value}
-          onChangeText={text => {
-            onChangeText(text);
-            if (showError) setShowError(false); // clear error once user edits
-          }}
-          placeholder="What helped you in a similar situation?"
-          charLimit={MAX_CHARS}
-          showCharCount={false}
-          multiline
-          wrapperStyle={[styles.inputWrapper, { backgroundColor: colors.inputBackground }]}
-          inputStyle={[styles.inputText, { height: inputHeight }]}
-          error={showError && (isTooShort || isTooLong)}
-          errorText={
-            showError && isTooShort
-              ? `Write at least ${MIN_CHARS} characters`
-              : showError && isTooLong
-                ? `Keep it under ${MAX_CHARS} characters`
-                : undefined
-          }
-          onContentSizeChange={e => {
-            const nextHeight = Math.min(
-              MAX_HEIGHT,
-              Math.max(MIN_HEIGHT, e.nativeEvent.contentSize.height),
-            );
-            setInputHeight(nextHeight);
-          }}
-          showCharCount={value.length > 0} // 👈 key line
-        />
-        {/* Footer */}
-        <View style={styles.footerRow}>
-          <TextElement style={styles.helperText} color="muted">
-            Be kind & helpful
-          </TextElement>
-
-          <PrimaryButton
-            title="Share advice →"
-            onPress={handleSubmit}
-            disabled={!value.trim()}
-            style={[styles.cta, value.trim() && styles.backgroundDisabled]}
-            textStyle={styles.ctaText}
+        <View
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: colors.card,
+              paddingBottom: insets.bottom,
+            },
+          ]}
+        >
+          {/* ✅ REAL INPUT */}
+          <AppTextInput
+            ref={inputRef}
+            value={value}
+            onChangeText={text => {
+              onChangeText(text);
+              if (showError) setShowError(false); // clear error once user edits
+            }}
+            placeholder="What helped you in a similar situation?"
+            charLimit={MAX_CHARS}
+            showCharCount={false}
+            multiline
+            wrapperStyle={[styles.inputWrapper, { backgroundColor: colors.inputBackground }]}
+            inputStyle={[styles.inputText, { height: inputHeight }]}
+            error={showError && (isTooShort || isTooLong)}
+            errorText={
+              showError && isTooShort
+                ? `Write at least ${MIN_CHARS} characters`
+                : showError && isTooLong
+                  ? `Keep it under ${MAX_CHARS} characters`
+                  : undefined
+            }
+            onContentSizeChange={e => {
+              const nextHeight = Math.min(
+                MAX_HEIGHT,
+                Math.max(MIN_HEIGHT, e.nativeEvent.contentSize.height),
+              );
+              setInputHeight(nextHeight);
+            }}
+            showCharCount={value.length > 0} // 👈 key line
           />
+          {/* Footer */}
+          <View style={styles.footerRow}>
+            <TextElement style={styles.helperText} color="muted">
+              Be kind & helpful
+            </TextElement>
+
+            <PrimaryButton
+              title="Share advice →"
+              onPress={handleSubmit}
+              disabled={!value.trim()}
+              style={[styles.cta, value.trim() && styles.backgroundDisabled]}
+              textStyle={styles.ctaText}
+            />
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Animated.View>
   );
 }
@@ -198,7 +170,6 @@ const styles = StyleSheet.create({
 
   inputText: {
     fontSize: ms(12),
-    // paddingVertical: vs(15),
     marginTop: vs(8),
     paddingHorizontal: ms(12),
   },
@@ -210,12 +181,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: isAndroid ? -15 : -30, // same trick ✅
-    alignItems: 'center',
+    bottom: -10, // start hidden below screen
+    alignItems: 'stretch',
+  },
+  keyboardAvoiding: {
+    width: '100%',
   },
 
   sheet: {
-    width: '100%',
+    // width: '100%',
     paddingHorizontal: spacing.md,
     paddingTop: vs(20),
     borderTopLeftRadius: 40,
@@ -238,7 +212,7 @@ const styles = StyleSheet.create({
   },
 
   footerRow: {
-    marginTop: vs(12),
+    marginTop: vs(0),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

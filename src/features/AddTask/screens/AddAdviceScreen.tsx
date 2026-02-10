@@ -183,7 +183,7 @@ export default function AddAdviceScreen({ navigation }: Props) {
         <TaskBackground icon={typeIcons.advice} color={typeBackgroundsHard.advice} />
 
         {/* <StepIndicator step={2} total={2} /> */}
-        <AppHeader title={'Ask for Advice'} />
+        <AppHeader title={''} />
         {/* Title */}
 
         <TextElement variant="title" style={styles.subtitle}>

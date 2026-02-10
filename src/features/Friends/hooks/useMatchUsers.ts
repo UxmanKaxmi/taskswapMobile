@@ -24,6 +24,10 @@ async function fetchMatchedUsers(currentUserEmail: string): Promise<MatchedUser[
     c => c.email.toLowerCase() !== currentUserEmail.toLowerCase(),
   );
 
+  if (filteredContacts.length === 0) {
+    return [];
+  }
+
   filteredContacts.forEach(c => {
     if (!emailToSourceMap.has(c.email)) {
       emailToSourceMap.set(c.email, c.source);
@@ -31,12 +35,16 @@ async function fetchMatchedUsers(currentUserEmail: string): Promise<MatchedUser[
   });
 
   const emails = filteredContacts.map(c => c.email);
-  const resp = await api.post(buildRoute.matchUsers(), { emails });
-
-  return resp.data.map((user: any) => ({
-    ...user,
-    source: emailToSourceMap.get(user.email) || 'phone',
-  }));
+  try {
+    const resp = await api.post(buildRoute.matchUsers(), { emails });
+    return resp.data.map((user: any) => ({
+      ...user,
+      source: emailToSourceMap.get(user.email) || 'phone',
+    }));
+  } catch (err) {
+    console.error('❌ Failed to match users:', err);
+    return [];
+  }
 }
 
 export function useMatchUsers() {

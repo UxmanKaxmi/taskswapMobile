@@ -37,7 +37,7 @@ export function usePushInteraction({
     if (isPushing || hasPushed) return;
 
     // 🔐 Auth check only
-    if (!checkAuthThenNavigate()) return;
+    if (!checkAuthThenNavigate(undefined, undefined, { authContext: 'Push' })) return;
 
     haptics.success();
     onPush();

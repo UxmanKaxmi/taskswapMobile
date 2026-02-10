@@ -15,12 +15,13 @@ import { showToast } from '@shared/utils/toast';
 // ⬇️ your hook from earlier (channel-aware cache)
 import { useReferralLink } from '../hooks/useReferralLink';
 import { vs } from 'react-native-size-matters';
+import Ripple from '@shared/components/Buttons/Ripple';
+import { APP_NAME } from '@shared/utils/constants';
 
 export default function InviteFriendsScreen() {
   // Pick a default channel for analytics attribution; change as needed.
   const { data, isLoading, refetch, sharePayload, rotateLink, rotating } = useReferralLink();
 
-  console.log('data', data);
   const referralLink = data?.link ?? '';
 
   const handleShare = async () => {
@@ -73,7 +74,7 @@ export default function InviteFriendsScreen() {
         />
       }
     >
-      <AppHeader title="" />
+      <AppHeader title="" inDevelopment />
 
       <View style={styles.content}>
         <View style={{ marginVertical: spacing.sm }}>
@@ -85,7 +86,7 @@ export default function InviteFriendsScreen() {
             color="muted"
             style={{ textAlign: 'left', marginTop: spacing.xs }}
           >
-            Share the app with your friends and earn rewards when they join TaskSwap.
+            Share the app with your friends and earn rewards when they join {APP_NAME}.
           </TextElement>
         </View>
         {isLoading ? (
@@ -93,9 +94,9 @@ export default function InviteFriendsScreen() {
         ) : (
           <>
             {/* Link display + tap-to-copy */}
-            <TouchableOpacity activeOpacity={0.8} onPress={handleCopy}>
+            <Ripple onPress={handleCopy}>
               <ReferralLinkCard link={referralLink} />
-            </TouchableOpacity>
+            </Ripple>
 
             <TextElement variant="caption" color="muted" style={styles.helperText}>
               Tap the link to copy. This is a smart link that opens TaskSwap (or the store) and

@@ -6,10 +6,16 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import Row from '@shared/components/Layout/Row';
 import { spacing, colors, typography } from '@shared/theme';
+import { ms, vs } from 'react-native-size-matters';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppNavigationProp, MainStackParamList } from '@navigation/types/navigation';
 import { triggerLogout } from '@shared/api/authBridge';
+import { api } from '@shared/api/axios';
+import { buildRoute } from '@shared/api/apiRoutes';
+import { APP_ENV } from '@shared/utils/constants';
+import Ripple from '@shared/components/Buttons/Ripple';
+import { isDEV } from '@shared/utils/constants';
 
 export type MenuItem = {
   label: string;
@@ -35,118 +41,172 @@ export default function ProfileMenu() {
       },
     ]);
   };
-  const menuItems = [
+  const handleForceTokenExpire = async () => {
+    try {
+      await api.get(buildRoute.me(), {
+        headers: { Authorization: 'Bearer invalid' },
+      });
+    } catch {
+      // interceptor handles logout + toast
+    }
+  };
+  const primaryItems = [
     {
-      label: 'Find your friends..',
-      icon: 'people-circle',
+      label: 'Find Friends',
+      icon: 'people-sharp',
       onPress: () => {
         navigation.navigate('FindFriendsScreen');
       },
       iconSet: 'ion',
     },
     {
-      label: 'Saved Tasks',
-      icon: 'bookmark',
+      label: 'Invite Friends',
+      icon: 'person-add-sharp',
       onPress: () => {
-        /* go to saved */
+        navigation.navigate('InviteFriendsScreen');
       },
       iconSet: 'ion',
     },
     {
-      label: 'Invite Friends',
-      icon: 'people-group',
-      onPress: () => {
-        navigation.navigate('InviteFriendsScreen');
-      },
-      iconSet: 'fa6',
-    },
-    {
       label: 'Help Center',
-      icon: 'help-circle',
+      icon: 'information-circle-sharp',
       onPress: () => {
         /* go to help  */
       },
       iconSet: 'ion',
     },
+  ] as const; // ← keep the literal types
+
+  const secondaryItems = [
     {
       label: 'Debug Notification',
-      icon: 'arrow-down-left-box-outline',
+      icon: 'terminal',
       onPress: () => navigation.navigate('MainDebugScreen'),
       iconSet: 'ion',
     },
+    ...(APP_ENV !== 'production'
+      ? [
+          {
+            label: 'Force Token Expire',
+            icon: 'alert-circle',
+            onPress: () => handleForceTokenExpire(),
+            iconSet: 'ion',
+          },
+        ]
+      : []),
+  ] as const;
 
+  const dangerItems = [
     {
       label: 'Log Out',
       icon: 'log-out',
       onPress: () => handleLogout(),
       iconSet: 'ion',
     },
-  ] as const; // ← keep the literal types
+  ] as const;
 
   return (
     <View style={styles.container}>
-      {menuItems.map((item, idx) => (
-        <TouchableOpacity
-          key={idx}
-          style={[styles.row, idx === menuItems.length - 1 && styles.lastRow]}
-          activeOpacity={0.7}
-          onPress={item.onPress}
-        >
-          <Row align="center" justify="space-between" style={styles.innerRow}>
-            <Row align="center">
-              {/* Render Icon only if the set is supported */}
-              {item.iconSet === 'fa6' ? (
-                <Icon
-                  set="fa6"
-                  name={item.icon}
-                  size={20}
-                  color={colors.primary}
-                  style={styles.icon}
-                  iconStyle="solid"
-                />
-              ) : item.iconSet === 'ion' ? (
-                <Icon
-                  set="ion"
-                  name={item.icon}
-                  size={20}
-                  color={colors.primary}
-                  style={styles.icon}
-                />
-              ) : null}
-              <TextElement variant="body" weight="500" style={styles.label}>
-                {item.label}
-              </TextElement>
+      <View style={styles.card}>
+        {primaryItems.map((item, idx) => (
+          <Ripple
+            key={item.label}
+            style={[styles.row, idx === primaryItems.length - 1 && styles.lastRow]}
+            onPress={item.onPress}
+          >
+            <Row align="center" justify="space-between" style={styles.innerRow}>
+              <Row align="center">
+                <View style={styles.iconCircle}>
+                  <Icon set={item.iconSet} name={item.icon} size={20} color={colors.primary} />
+                </View>
+                <TextElement variant="body" weight="600" style={styles.label}>
+                  {item.label}
+                </TextElement>
+              </Row>
+              <Icon set="ion" name="chevron-forward" size={20} color={colors.muted} />
             </Row>
-            <Icon set="ion" name="chevron-forward" size={20} color={colors.primary} />
-          </Row>
-        </TouchableOpacity>
-      ))}
+          </Ripple>
+        ))}
+      </View>
+
+      {isDEV && (
+        <View style={[styles.card, styles.cardSpacer]}>
+          {secondaryItems.map(item => (
+            <Ripple key={item.label} style={[styles.row, styles.singleRow]} onPress={item.onPress}>
+              <Row align="center" justify="space-between" style={styles.innerRow}>
+                <Row align="center">
+                  <View style={[styles.iconCircle, styles.iconCircleMuted]}>
+                    <Icon set={item.iconSet} name={item.icon} size={20} color={colors.muted} />
+                  </View>
+                  <TextElement
+                    variant="body"
+                    weight="600"
+                    style={[styles.label, styles.labelMuted]}
+                  >
+                    {item.label}
+                  </TextElement>
+                </Row>
+                <Icon set="ion" name="chevron-forward" size={20} color={colors.border} />
+              </Row>
+            </Ripple>
+          ))}
+        </View>
+      )}
+
+      <View style={[styles.card, styles.cardSpacer, styles.dangerCard]}>
+        {dangerItems.map(item => (
+          <Ripple
+            key={item.label}
+            style={[styles.row, styles.singleRow, styles.dangerRow]}
+            onPress={item.onPress}
+          >
+            <Row align="center" justify="space-between" style={styles.innerRow}>
+              <Row align="center">
+                <View style={[styles.iconCircle, styles.iconCircleDanger]}>
+                  <Icon set="ion" name={item.icon} size={20} color={colors.error} />
+                </View>
+                <TextElement variant="body" weight="700" style={[styles.label, styles.labelDanger]}>
+                  {item.label}
+                </TextElement>
+              </Row>
+              <Icon set="ion" name="chevron-forward" size={20} color={colors.error} />
+            </Row>
+          </Ripple>
+        ))}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 10,
-    // marginVertical: spacing.md,
-    // marginHorizontal: spacing.md,
+    // marginTop: 10,
+    // paddingHorizontal: spacing.md,
+  },
+  card: {
     backgroundColor: colors.surface,
-    borderRadius: spacing.sm,
+    borderRadius: ms(20),
     overflow: 'hidden',
-    paddingHorizontal: 0,
-    // subtle shadow
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
+  cardSpacer: {
+    marginTop: spacing.md,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.sm,
+    paddingVertical: vs(10),
+    paddingHorizontal: spacing.md,
     backgroundColor: colors.surface,
-    borderBottomWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
   },
   lastRow: {
+    borderBottomWidth: 0,
+  },
+  singleRow: {
     borderBottomWidth: 0,
   },
   innerRow: {
@@ -154,11 +214,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  icon: {
+  iconCircle: {
+    width: ms(44),
+    height: ms(44),
+    borderRadius: ms(22),
+    backgroundColor: colors.adviceBg,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: spacing.md,
   },
+  iconCircleMuted: {
+    backgroundColor: colors.background,
+  },
+  iconCircleDanger: {
+    backgroundColor: '#FEECEC',
+  },
   label: {
-    fontSize: typography.subtitle,
+    fontSize: ms(15),
     color: colors.text,
+    marginLeft: -spacing.sm,
+  },
+  labelMuted: {
+    color: colors.muted,
+  },
+  dangerCard: {
+    backgroundColor: '#FFF3F3',
+    borderColor: '#F5D6D6',
+  },
+  dangerRow: {
+    backgroundColor: 'transparent',
+    borderBottomWidth: 0,
+  },
+  labelDanger: {
+    color: colors.error,
   },
 });

@@ -8,7 +8,6 @@ import {
 } from '@react-navigation/native';
 import Icon from '@shared/components/Icons/Icon'; // ✅ your custom Icon component
 import HomeScreen from '@features/Home/screens/HomeScreen';
-import FindFriendsScreen from '@features/Friends/screens/FindFriendsScreen';
 import AddTaskScreen from '@features/Tasks/screens/AddTaskScreen';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { colors } from '@shared/theme';
@@ -23,6 +22,7 @@ import { useUnreadNotificationCount } from '@features/Notification/hooks/useUnre
 import { isAndroid } from '@shared/utils/constants';
 import { useAppNavigation, useCheckAuthThenNavigate } from './types/navigationUtils';
 import { useAuth } from '@features/Auth/AuthProvider';
+import { haptics } from '@shared/utils/haptics';
 
 type BottomTabParamList = {
   Home: undefined;
@@ -128,13 +128,22 @@ export default function BottomTabsAndroid({ route }: any) {
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        listeners={{
+          tabPress: () => {
+            haptics.selection();
+          },
+        }}
+      />
       <Tab.Screen
         name="Friends"
         component={FindFriendsMainScreen}
         listeners={{
           tabPress: e => {
             checkAuthForTab(e, 'Friends');
+            if (!e.defaultPrevented) haptics.selection();
           },
         }}
       />
@@ -145,7 +154,10 @@ export default function BottomTabsAndroid({ route }: any) {
 
           tabBarButton: props => (
             <TouchableOpacity
-              onPress={() => checkAuthThenNavigate('AddTask')}
+              onPress={() => {
+                if (!checkAuthThenNavigate('AddTask')) return;
+                haptics.selection();
+              }}
               style={styles.addButtonContainer}
               activeOpacity={0.9}
             >
@@ -163,6 +175,7 @@ export default function BottomTabsAndroid({ route }: any) {
         listeners={{
           tabPress: e => {
             checkAuthForTab(e, 'Notification');
+            if (!e.defaultPrevented) haptics.selection();
           },
         }}
       />
@@ -172,6 +185,7 @@ export default function BottomTabsAndroid({ route }: any) {
         listeners={{
           tabPress: e => {
             checkAuthForTab(e, 'Profile');
+            if (!e.defaultPrevented) haptics.selection();
           },
         }}
       />

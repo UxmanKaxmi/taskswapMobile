@@ -1,69 +1,102 @@
-import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, Image, SectionList } from 'react-native';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
+import { View, ActivityIndicator, SectionList } from 'react-native';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { useMatchUsers } from '../hooks/useMatchUsers';
 import FriendFollowRow from '../components/FriendsFollowRow';
-import { useNavigation } from '@react-navigation/native';
 import {
-  AppNavigationProp,
-  AppStackParamList,
-  MainNavigationProp,
-} from '@navigation/types/navigation';
+  useNavigation,
+  useFocusEffect,
+  NavigationProp,
+  useRoute,
+  RouteProp,
+} from '@react-navigation/native';
+import { AppStackParamList } from '@navigation/types/navigation';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import { useAuth } from '@features/Auth/AuthProvider';
-import ListView from '@shared/components/ListView/ListView';
 import { Layout } from '@shared/components/Layout';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
 import { vs } from 'react-native-size-matters';
-import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
 import { useToggleFollow } from '@features/User/hooks/useToggleFollow';
 import { queryClient } from '@lib/react-query/client';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import { Height } from '@shared/components/Spacing';
+import AppHeader from '@shared/components/AppHeader/AppHeader';
+import { APP_NAME, isIOS } from '@shared/utils/constants';
+import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
 
 export default function FindFriendsScreen() {
-  const navigation = useNavigation<AppStackParamList>();
-  const { colors, spacing } = useTheme();
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const route = useRoute<RouteProp<AppStackParamList, 'FindFriendsScreen'>>();
+  const openedFromHome = route.params?.openedFromHome;
+  const { spacing } = useTheme();
   const { data: matches = [], isLoading, isError, refetch } = useMatchUsers();
   const { setHasSeenFindFriendsScreen, user } = useAuth();
-  const [isVisible, setIsVisible] = useState(false);
   const { mutate: toggleFollow, isPending, variables, error } = useToggleFollow();
 
-  console.log(matches, 'matches');
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 1000);
+  const [showCta, setShowCta] = useState(false);
 
-    return () => clearTimeout(timer);
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      // start hidden, then animate in
+      setShowCta(false);
 
-  useEffect(() => {
-    if (error) {
-      console.error('Error toggling follow:', error);
-    }
-  }, [error]);
+      // next frame => visible (so Animated values go from hidden -> shown)
+      const id = setTimeout(() => setShowCta(true), 0);
+
+      return () => {
+        clearTimeout(id);
+        setShowCta(false); // optional: animate out on leaving
+      };
+    }, []),
+  );
 
   useEffect(() => {
     setHasSeenFindFriendsScreen(true);
-  }, []);
+  }, [setHasSeenFindFriendsScreen]);
 
-  const handleToggleFollow = (userId: string) => {
-    toggleFollow(userId);
-  };
+  useEffect(() => {
+    if (error) console.error('Error toggling follow:', error);
+  }, [error]);
 
-  //remove own self
-  const filteredMatches = matches.filter(match => match.id !== user?.id);
+  const goHome = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
 
-  const googleMatches = filteredMatches.filter(match => match.source === 'google');
-  const phoneMatches = filteredMatches.filter(match => match.source === 'phone');
+  const handleToggleFollow = useCallback((userId: string) => toggleFollow(userId), [toggleFollow]);
+
+  const filteredMatches = useMemo(
+    () => matches.filter(m => m.id !== user?.id),
+    [matches, user?.id],
+  );
+
+  const ctaTitle = filteredMatches.length > 0 ? 'Continue' : 'Skip for now';
+
+  const googleMatches = useMemo(
+    () => filteredMatches.filter(m => m.source === 'google'),
+    [filteredMatches],
+  );
+
+  const phoneMatches = useMemo(
+    () => filteredMatches.filter(m => m.source === 'phone'),
+    [filteredMatches],
+  );
+
+  const sections = useMemo(
+    () =>
+      [
+        { title: 'From Google Contacts', data: googleMatches },
+        { title: 'From Phone Contacts', data: phoneMatches },
+      ].filter(s => s.data.length > 0),
+    [googleMatches, phoneMatches],
+  );
 
   if (isLoading) return <ActivityIndicator style={{ flex: 1 }} />;
 
   if (isError) {
     return (
       <Layout>
+        <AppHeader title="" />
         <View
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.md }}
         >
@@ -86,75 +119,74 @@ export default function FindFriendsScreen() {
   }
 
   return (
-    <Layout>
+    <Layout
+      footerContent={
+        <AnimatedBottomButton
+          style={{
+            marginBottom: isIOS ? vs(12) : vs(-12),
+          }}
+          visible={showCta}
+          title={ctaTitle}
+          onPress={goHome}
+        />
+      }
+    >
+      <AppHeader title="" showNavigation={!openedFromHome} />
+      <Height size={spacing.md} />
+
       <SectionList
-        sections={[
-          { title: 'From Google Contacts', data: googleMatches },
-          { title: 'From Phone Contacts', data: phoneMatches },
-        ].filter(section => section.data.length > 0)}
+        sections={sections}
         keyExtractor={item => item.id}
         renderSectionHeader={({ section }) => (
-          <TextElement variant="subtitle" style={{ marginTop: spacing.sm, fontWeight: '600' }}>
+          <TextElement variant="subtitle" style={{ marginTop: spacing.md, fontWeight: '600' }}>
             {section.title}
           </TextElement>
         )}
         renderItem={({ item }) => (
-          <FriendFollowRow
-            onPressRow={() => {}}
-            isLoading={isPending && variables === item.id}
-            photo={item.photo}
-            name={item.name}
-            email={item.email}
-            isFollowing={item.isFollowing}
-            onToggleFollow={() => handleToggleFollow(item.id)}
-          />
+          <>
+            <FriendFollowRow
+              onPressRow={() => {}}
+              isLoading={isPending && variables === item.id}
+              photo={item.photo}
+              name={item.name}
+              email={item.email}
+              isFollowing={item.isFollowing}
+              onToggleFollow={() => handleToggleFollow(item.id)}
+            />
+            <TextElement
+              variant="caption"
+              color="placeHolder"
+              style={{ marginTop: spacing.xs, fontStyle: 'italic' }}
+            >
+              We only use your contacts to find friends. We never message anyone without your
+              permission.
+            </TextElement>
+          </>
         )}
         ItemSeparatorComponent={AppBorder}
         ListHeaderComponent={() => (
           <View style={{ marginVertical: spacing.sm }}>
             <TextElement variant="title" style={{ fontWeight: '700' }}>
-              Find your people <TextElement style={{ fontSize: 20 }}>👋</TextElement>
+              {openedFromHome ? 'Follow a few friends to get started' : 'Find your people'}{' '}
+              <TextElement style={{ fontSize: 20 }}>👋</TextElement>
             </TextElement>
-            <TextElement
-              variant="body"
-              color="muted"
-              style={{ textAlign: 'left', marginTop: spacing.xs }}
-            >
-              Add friends so TaskSwap feels a little more familiar.
+
+            <TextElement variant="body" color="muted" style={{ marginTop: spacing.xs }}>
+              {openedFromHome
+                ? `it makes ${APP_NAME} way more fun.`
+                : `Add friends so ${APP_NAME} feels a little more familiar.`}
             </TextElement>
           </View>
         )}
         ListEmptyComponent={() => (
-          <View style={{ alignItems: 'center', marginTop: spacing.lg }}>
-            <TextElement variant="body" color="muted" style={{ marginBottom: spacing.sm }}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <TextElement variant="body" color="muted">
               No friends found on this device.
             </TextElement>
-            <PrimaryButton
-              title="Let's continue"
-              onPress={() =>
-                navigation?.replace('Tabs', {
-                  screen: 'Home',
-                })
-              }
-              style={{ paddingHorizontal: spacing.md }}
-            />
           </View>
         )}
-        contentContainerStyle={{ paddingBottom: vs(40) }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: vs(40) }}
       />
-
-      {matches.length > 0 && (
-        <PrimaryButton
-          title="Go to Home"
-          onPress={() =>
-            navigation?.replace('Tabs', {
-              screen: 'Home',
-            })
-          }
-          style={{ paddingHorizontal: spacing.md }}
-        />
-      )}
-      <Height size={20} />
     </Layout>
   );
 }

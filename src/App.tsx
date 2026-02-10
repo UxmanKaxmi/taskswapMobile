@@ -7,8 +7,9 @@ import { toastConfig } from '@shared/components/Toast/toastConfig';
 import { initializeNotifications } from './lib/notifications/initNotifications';
 import NotificationPermissionPrompt from './lib/notifications/NotificationPermissionPrompt';
 import firebase from '@react-native-firebase/app';
-import { Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
 import Config from 'react-native-config';
+import { APP_ENV } from '@shared/utils/constants';
 import { AnimatedBootSplash } from '@features/Splash/AnimatedBootSplash';
 import { AuthProvider } from '@features/Auth/AuthProvider';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -17,6 +18,7 @@ import { AppInfoBottomSheetProvider } from '@shared/components/AppInfoBottomShee
 import { colors } from '@shared/theme/colors';
 
 const queryClient = new QueryClient();
+const loginImage = require('@assets/images/loginImage5.png');
 
 const LightNavTheme = {
   ...DefaultTheme,
@@ -29,8 +31,7 @@ const LightNavTheme = {
 
 export default function App() {
   const [visible, setVisible] = useState(true);
-  const appEnv = Config.APP_ENV || (__DEV__ ? 'development' : 'production');
-  const showDevBadge = appEnv !== 'production';
+  const showDevBadge = APP_ENV !== 'production';
 
   useEffect(() => {
     StatusBar.setBarStyle('dark-content');
@@ -44,6 +45,13 @@ export default function App() {
   useEffect(() => {
     console.log('✅ Firebase apps:', firebase.apps);
     initializeNotifications();
+  }, []);
+
+  useEffect(() => {
+    const asset = Image.resolveAssetSource(loginImage);
+    if (asset?.uri) {
+      Image.prefetch(asset.uri);
+    }
   }, []);
 
   return visible ? (
