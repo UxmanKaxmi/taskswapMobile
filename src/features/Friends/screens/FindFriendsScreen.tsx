@@ -131,7 +131,7 @@ export default function FindFriendsScreen() {
         />
       }
     >
-      <AppHeader title="" showNavigation={!openedFromHome} />
+      <AppHeader title="" showNavigation={true} />
       <Height size={spacing.md} />
 
       <SectionList
@@ -167,13 +167,13 @@ export default function FindFriendsScreen() {
         ListHeaderComponent={() => (
           <View style={{ marginVertical: spacing.sm }}>
             <TextElement variant="title" style={{ fontWeight: '700' }}>
-              {openedFromHome ? 'Follow a few friends to get started' : 'Find your people'}{' '}
+              {openedFromHome ? 'Find your people ' : 'Find your people'}{' '}
               <TextElement style={{ fontSize: 20 }}>👋</TextElement>
             </TextElement>
 
             <TextElement variant="body" color="muted" style={{ marginTop: spacing.xs }}>
               {openedFromHome
-                ? `it makes ${APP_NAME} way more fun.`
+                ? `Follow a few friends to make accountability feel lighter`
                 : `Add friends so ${APP_NAME} feels a little more familiar.`}
             </TextElement>
           </View>
@@ -181,7 +181,7 @@ export default function FindFriendsScreen() {
         ListEmptyComponent={() => (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <TextElement variant="body" color="muted">
-              No friends found on this device.
+              No friends here yet.
             </TextElement>
           </View>
         )}

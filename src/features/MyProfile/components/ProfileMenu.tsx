@@ -13,9 +13,10 @@ import { AppNavigationProp, MainStackParamList } from '@navigation/types/navigat
 import { triggerLogout } from '@shared/api/authBridge';
 import { api } from '@shared/api/axios';
 import { buildRoute } from '@shared/api/apiRoutes';
-import { APP_ENV } from '@shared/utils/constants';
+import { APP_ENV, isDEV } from '@shared/utils/constants';
 import Ripple from '@shared/components/Buttons/Ripple';
-import { isDEV } from '@shared/utils/constants';
+import { resetAllLaunchModalsSeen } from '@features/launchModals/launchModals.storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type MenuItem = {
   label: string;
@@ -41,14 +42,18 @@ export default function ProfileMenu() {
       },
     ]);
   };
-  const handleForceTokenExpire = async () => {
-    try {
-      await api.get(buildRoute.me(), {
-        headers: { Authorization: 'Bearer invalid' },
-      });
-    } catch {
-      // interceptor handles logout + toast
-    }
+  const handleResetAppData = async () => {
+    Alert.alert('Reset App', 'This will clear all data and sign you out. Continue?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset',
+        style: 'destructive',
+        onPress: async () => {
+          await triggerLogout();
+          await AsyncStorage.clear();
+        },
+      },
+    ]);
   };
   const primaryItems = [
     {
@@ -79,6 +84,12 @@ export default function ProfileMenu() {
 
   const secondaryItems = [
     {
+      label: 'Reset Launch Modals',
+      icon: 'refresh',
+      onPress: async () => await resetAllLaunchModalsSeen(),
+      iconSet: 'ion',
+    },
+    {
       label: 'Debug Notification',
       icon: 'terminal',
       onPress: () => navigation.navigate('MainDebugScreen'),
@@ -87,9 +98,9 @@ export default function ProfileMenu() {
     ...(APP_ENV !== 'production'
       ? [
           {
-            label: 'Force Token Expire',
-            icon: 'alert-circle',
-            onPress: () => handleForceTokenExpire(),
+            label: 'Reset App Data',
+            icon: 'trash',
+            onPress: () => handleResetAppData(),
             iconSet: 'ion',
           },
         ]

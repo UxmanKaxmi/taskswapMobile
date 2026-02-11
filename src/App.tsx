@@ -16,6 +16,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { AppInfoBottomSheetProvider } from '@shared/components/AppInfoBottomSheet/AppInfoBottomSheetProvider';
 import { colors } from '@shared/theme/colors';
+import { incrementAppLaunchCount } from '@features/launchModals';
 
 const queryClient = new QueryClient();
 const loginImage = require('@assets/images/loginImage5.png');
@@ -52,6 +53,10 @@ export default function App() {
     if (asset?.uri) {
       Image.prefetch(asset.uri);
     }
+  }, []);
+
+  useEffect(() => {
+    incrementAppLaunchCount().catch(() => {});
   }, []);
 
   return visible ? (

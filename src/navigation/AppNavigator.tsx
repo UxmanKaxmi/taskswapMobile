@@ -50,9 +50,9 @@ export default function AppNavigator() {
         name="FindFriendsScreen"
         component={FindFriendsScreen}
         options={({ route }) => ({
-          presentation: route.params?.openedFromHome ? 'modal' : 'card',
-          animation: route.params?.openedFromHome ? 'slide_from_bottom' : 'default',
-          animationDuration: route.params?.openedFromHome ? 300 : undefined,
+          // // presentation: route.params?.openedFromHome ? 'modal' : 'card',
+          // animation: route.params?.openedFromHome ? 'slide_from_bottom' : 'default',
+          // animationDuration: route.params?.openedFromHome ? 300 : undefined,
         })}
       />
       <Stack.Screen name="InviteFriendsScreen" component={InviteFriendsScreen} />

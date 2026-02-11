@@ -4,6 +4,7 @@ const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
 const tseslint = require('@typescript-eslint/eslint-plugin');
 const tsParser = require('@typescript-eslint/parser');
+const reactNativePlugin = require('eslint-plugin-react-native');
 
 module.exports = [
   js.configs.recommended,
@@ -33,12 +34,14 @@ module.exports = [
       import: importPlugin,
       prettier: prettierPlugin,
       '@typescript-eslint': tseslint,
+      'react-native': reactNativePlugin,
     },
     rules: {
       'prettier/prettier': 'error',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       'react/react-in-jsx-scope': 'off',
+
       'import/no-unresolved': 'error',
       'import/no-named-as-default': 'warn',
       'import/no-extraneous-dependencies': 'warn',
@@ -46,6 +49,11 @@ module.exports = [
       'import/no-mutable-exports': 'warn',
       'import/no-cycle': 'warn',
       'case-sensitive-paths': 'off',
+
+      // ✅ React Native: warn on unused styles in StyleSheet.create()
+      'react-native/no-unused-styles': 'warn',
+      // (optional) also catches inline style object duplicates
+      // 'react-native/no-inline-styles': 'warn',
     },
     settings: {
       'import/resolver': {

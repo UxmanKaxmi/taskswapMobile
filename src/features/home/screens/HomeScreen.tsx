@@ -36,6 +36,7 @@ import Row from '@shared/components/Layout/Row';
 import { Icon } from '@shared/components/Icons';
 import Ripple from '@shared/components/Buttons/Ripple';
 import FilterTasksModal from '@features/Tasks/components/FilterTasksModal';
+import { LaunchModalHost } from '@features/launchModals';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -57,9 +58,8 @@ export default function HomeScreen() {
 
   const { data: allTasks = [], isLoading, isError, error, refetch } = useTasksQuery();
 
-  const { user, hasSeenFindFriendsScreen, justLoggedIn, consumeJustLoggedIn } = useAuth();
+  const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
-  const hasTriggeredFindFriendsRef = useRef(false);
 
   const [filterModalVisible, setFilterModalVisible] = useState(false);
 
@@ -72,25 +72,6 @@ export default function HomeScreen() {
   const scrollY = useSharedValue(0);
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
 
-  useEffect(() => {
-    hasTriggeredFindFriendsRef.current = false;
-  }, [user?.id]);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!user || hasSeenFindFriendsScreen || !justLoggedIn) return;
-      if (hasTriggeredFindFriendsRef.current) return;
-
-      const timeoutId = setTimeout(() => {
-        if (hasTriggeredFindFriendsRef.current) return;
-        hasTriggeredFindFriendsRef.current = true;
-        navigation.navigate('FindFriendsScreen', { openedFromHome: true });
-        consumeJustLoggedIn();
-      }, 2000);
-
-      return () => clearTimeout(timeoutId);
-    }, [user, hasSeenFindFriendsScreen, justLoggedIn, navigation, consumeJustLoggedIn]),
-  );
 
   const headerStyle = useAnimatedStyle(() => {
     const height = interpolate(
@@ -408,6 +389,14 @@ export default function HomeScreen() {
         onApply={value => {
           setFeedFilter(value);
           setFilterModalVisible(false);
+        }}
+      />
+
+      <LaunchModalHost
+        ctx={{
+          screen: 'HOME',
+          isLoggedIn: !!user,
+          userId: user?.id ?? null,
         }}
       />
     </Layout>

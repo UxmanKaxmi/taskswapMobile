@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Layout } from '@shared/components/Layout';
 import { spacing, colors } from '@shared/theme';
@@ -18,6 +19,7 @@ export default function MyProfileMainScreen() {
   const { user } = useAuth();
   const { data: MyProfileData, isLoading, isError, error } = useMyProfileData();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   if (!user) {
     navigation.navigate('Auth');
@@ -31,9 +33,12 @@ export default function MyProfileMainScreen() {
       style={{ marginTop: 0, paddingTop: 0 }}
     >
       <ListView
-        style={{}}
+        style={{ flex: 1 }}
         scrollViewProps={{
-          contentContainerStyle: { width: '100%' },
+          contentContainerStyle: {
+            width: '100%',
+            paddingBottom: insets.bottom + vs(50),
+          },
         }}
       >
         <ProfileHeader
