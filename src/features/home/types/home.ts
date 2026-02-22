@@ -101,6 +101,7 @@ export interface ReminderNoteDTO {
   id: string;
   taskId: string;
   senderId: string;
+  isSenderCurrentUser?: boolean;
   message: string;
   createdAt: string;
   senderName: string;

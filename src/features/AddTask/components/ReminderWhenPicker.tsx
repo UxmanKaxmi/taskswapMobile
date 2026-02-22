@@ -7,16 +7,20 @@ import { ms, vs } from 'react-native-size-matters';
 import Icon from '@shared/components/Icons/Icon';
 import DatePicker from 'react-native-date-picker';
 import { format, isToday, isTomorrow } from 'date-fns';
-import { typeIcons } from '@shared/utils/typeVisuals';
 import { Shadow } from '@shared/components/Shadow';
 
 type Props = {
   date: Date;
   time: Date;
-  minDate: Date; // 👈 ADD THIS
+  minDate?: Date;
 
-  onDateChange: (date: Date) => void;
-  onTimeChange: (time: Date) => void;
+  onDateChange?: (date: Date) => void;
+  onTimeChange?: (time: Date) => void;
+
+  /** If true, UI is shown but cannot be interacted with */
+  readOnly?: boolean;
+  removeHeading?: boolean;
+  removeBottomDescription?: boolean;
 };
 
 export default function ReminderWhenPicker({
@@ -25,6 +29,9 @@ export default function ReminderWhenPicker({
   minDate,
   onDateChange,
   onTimeChange,
+  readOnly = false,
+  removeHeading = false,
+  removeBottomDescription = false,
 }: Props) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -34,9 +41,6 @@ export default function ReminderWhenPicker({
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate();
 
-  const minTime = isSameDay(date, minDate)
-    ? minDate
-    : new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
   const dateLabel = isToday(date)
     ? 'Today'
     : isTomorrow(date)
@@ -45,64 +49,93 @@ export default function ReminderWhenPicker({
 
   const timeLabel = format(time, 'p');
 
+  // Only relevant when pickers are enabled
+  const safeMinDate = minDate ?? new Date();
+  const minTime = isSameDay(date, safeMinDate)
+    ? safeMinDate
+    : new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+
+  const DateCard = (
+    <View>
+      <TextElement style={styles.label}>Date</TextElement>
+      <TextElement style={styles.value}>{dateLabel}</TextElement>
+    </View>
+  );
+
+  const TimeCard = (
+    <View>
+      <TextElement style={styles.label}>Time</TextElement>
+      <TextElement style={styles.value}>{timeLabel}</TextElement>
+    </View>
+  );
+
   return (
     <View style={styles.wrapper}>
-      <View style={styles.header}>
-        <Icon set="ion" name={'time'} size={ms(16)} color={colors.reminderBgHardest} />
-        <TextElement color={'reminderBgHardest'} style={styles.headerText} weight="600">
-          When?
-        </TextElement>
-      </View>
+      {!removeHeading && (
+        <View style={styles.header}>
+          <Icon set="ion" name={'time'} size={ms(16)} color={colors.reminderBgHardest} />
+          <TextElement color={'reminderBgHardest'} style={styles.headerText} weight="600">
+            When?
+          </TextElement>
+        </View>
+      )}
 
       <Row gap={spacing.sm}>
         {/* DATE */}
         <Shadow size="tint" style={styles.card}>
-          <Pressable onPress={() => setShowDatePicker(true)}>
-            <TextElement style={styles.label}>Date</TextElement>
-            <TextElement style={styles.value}>{dateLabel}</TextElement>
-          </Pressable>
+          {readOnly ? (
+            DateCard
+          ) : (
+            <Pressable onPress={() => setShowDatePicker(true)}>{DateCard}</Pressable>
+          )}
         </Shadow>
 
         {/* TIME */}
         <Shadow size="tint" style={styles.card}>
-          <Pressable onPress={() => setShowTimePicker(true)}>
-            <TextElement style={styles.label}>Time</TextElement>
-            <TextElement style={styles.value}>{timeLabel}</TextElement>
-          </Pressable>
+          {readOnly ? (
+            TimeCard
+          ) : (
+            <Pressable onPress={() => setShowTimePicker(true)}>{TimeCard}</Pressable>
+          )}
         </Shadow>
       </Row>
 
-      {/* DATE PICKER */}
-      <DatePicker
-        modal
-        open={showDatePicker}
-        date={date}
-        mode="date"
-        minimumDate={minDate}
-        onConfirm={selected => {
-          setShowDatePicker(false);
-          onDateChange(selected);
-        }}
-        onCancel={() => setShowDatePicker(false)}
-      />
+      {/* Only render pickers when not read-only */}
+      {!readOnly && (
+        <>
+          <DatePicker
+            modal
+            open={showDatePicker}
+            date={date}
+            mode="date"
+            minimumDate={safeMinDate}
+            onConfirm={selected => {
+              setShowDatePicker(false);
+              onDateChange?.(selected);
+            }}
+            onCancel={() => setShowDatePicker(false)}
+          />
 
-      {/* TIME PICKER */}
-      <DatePicker
-        modal
-        open={showTimePicker}
-        date={time}
-        minimumDate={minTime} // 👈 THIS IS THE IMPORTANT PART
-        mode="time"
-        onConfirm={selected => {
-          setShowTimePicker(false);
-          onTimeChange(selected);
-        }}
-        onCancel={() => setShowTimePicker(false)}
-      />
+          <DatePicker
+            modal
+            open={showTimePicker}
+            date={time}
+            minimumDate={minTime}
+            mode="time"
+            onConfirm={selected => {
+              setShowTimePicker(false);
+              onTimeChange?.(selected);
+            }}
+            onCancel={() => setShowTimePicker(false)}
+          />
+        </>
+      )}
 
-      <TextElement color={'reminderBgHardest'} style={styles.noteText}>
-        Just a heads-up — reminders need to be at least 2 hours from now
-      </TextElement>
+      {!removeBottomDescription && (
+        <TextElement color={'reminderBgHardest'} style={styles.noteText}>
+          Just a heads-up — reminders need to be at least 2 hours from now
+        </TextElement>
+      )}
     </View>
   );
 }
@@ -125,16 +158,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     lineHeight: ms(16),
   },
-  wrapper: {
-    // marginTop: spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: vs(12),
-    fontWeight: '700',
-    letterSpacing: 1,
-    color: colors.muted,
-    marginBottom: spacing.sm,
-  },
+  wrapper: {},
   card: {
     flex: 1,
     backgroundColor: colors.card,
@@ -148,7 +172,6 @@ const styles = StyleSheet.create({
     fontSize: vs(10),
     fontWeight: '600',
     color: colors.muted,
-    // marginBottom: spacing.sm,
   },
   value: {
     fontSize: vs(16),

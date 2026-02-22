@@ -10,6 +10,7 @@ import {
   TextStyle,
   Animated,
 } from 'react-native';
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { colors, spacing, typography } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Row from '../Layout/Row';
@@ -28,6 +29,7 @@ interface AppTextInputProps extends TextInputProps {
   errorText?: string;
   wrapperStyle?: ViewStyle;
   onCharCountChange?: (count: number, limit: number) => void;
+  useBottomSheetTextInput?: boolean;
 }
 
 const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
@@ -46,6 +48,7 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
       error,
       errorText,
       onCharCountChange,
+      useBottomSheetTextInput = false,
       ...rest
     },
     ref,
@@ -102,6 +105,8 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
       prevErrorRef.current = error;
     }, [value, charLimit, error, onValidityChange]);
 
+    const InputComponent: any = useBottomSheetTextInput ? BottomSheetTextInput : TextInput;
+
     return (
       <View style={containerStyle}>
         {label && (
@@ -122,8 +127,7 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
             wrapperStyle,
           ]}
         >
-          {console.log('autoFocus', autoFocus)}
-          <TextInput
+          <InputComponent
             ref={ref} // ✅ THIS IS THE KEY
             autoFocus={autoFocus}
             style={[styles.input, inputStyle]}

@@ -1,27 +1,23 @@
 // src/shared/components/ReminderCard.tsx
 
-import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
-import { format, formatDistanceToNow, isBefore, parseISO } from 'date-fns';
+import { format, isBefore } from 'date-fns';
 
 import TextElement from '@shared/components/TextElement/TextElement';
-import Row from '@shared/components/Layout/Row';
 import { colors, spacing } from '@shared/theme';
 import { ReminderTask } from '../types/home';
-import { timeAgo, stripOuterQuotes, toShortName } from '@shared/utils/helperFunctions';
+import { stripOuterQuotes } from '@shared/utils/helperFunctions';
 import { cardStyles } from './styles';
-import { getTypeVisual } from '@shared/utils/typeVisuals';
 import TaskFooter from './TaskFooter';
 import { Shadow } from '@shared/components/Shadow';
 import { Icon } from '@shared/components/Icons';
-import TaskMetaRow from './TaskMetaRow';
 import TaskCardGradient from './TaskCardGradient';
-import ReminderMessageModal from '@shared/components/Modals/ReminderMessageModal';
+import { useModal } from '@shared/components/ModalProvider';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { useAddReminder } from '../hooks/useAddTask';
 import { showToast } from '@shared/utils/toast';
-import HelperAvatarGroup from './HelperAvatarGroup';
 import TaskHeader from './TaskHeader';
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 
@@ -46,41 +42,36 @@ export default function ReminderCard({ task, onPressCard, onPressShare }: Props)
 
   const { user } = useAuth();
   const isOwner = userId === user?.id;
-  const { emoji } = getTypeVisual(type);
+  const { openReminderMessageSheet } = useModal();
 
-  const [showModal, setShowModal] = useState(false);
-  const [customMessage, setCustomMessage] = useState('');
-
-  const { mutate: addReminder, isPending } = useAddReminder(task.id);
+  const { mutate: addReminder } = useAddReminder(task.id);
   const reminderExpired = isBefore(new Date(remindAt), new Date());
 
-  const handleSendReminder = (msg: string) => {
-    if (!msg.trim()) {
-      showToast({
-        type: 'error',
-        title: 'Oops!',
-        message: 'Reminder message cannot be empty.',
-      });
-      return;
-    }
-
-    addReminder(msg, {
-      onSuccess: () => {
-        setShowModal(false);
-        setCustomMessage('');
-        showToast({
-          type: 'success',
-          title: 'Sent 🎉',
-          message: 'Your reminder has been sent!',
-        });
-      },
-      onError: (err: any) => {
-        showToast({
-          type: 'error',
-          title: 'Error',
-          message: err?.response?.data?.error || 'Failed to send reminder.',
-        });
-      },
+  const openReminderComposer = () => {
+    openReminderMessageSheet({
+      taskName: task.name || 'Someone',
+      taskText: task.text,
+      onSend: msg =>
+        new Promise<void>((resolve, reject) => {
+          addReminder(msg, {
+            onSuccess: () => {
+              showToast({
+                type: 'success',
+                title: 'Sent 🎉',
+                message: 'Your reminder has been sent!',
+              });
+              resolve();
+            },
+            onError: (err: any) => {
+              showToast({
+                type: 'error',
+                title: 'Error',
+                message: err?.response?.data?.error || 'Failed to send reminder.',
+              });
+              reject(err);
+            },
+          });
+        }),
     });
   };
 
@@ -98,7 +89,7 @@ export default function ReminderCard({ task, onPressCard, onPressShare }: Props)
 
     // ⏳ After reminder time, still active
     if (!expiresAt || expiresAt > now) {
-      return `⏳ Expired ${formatDistanceToNow(remindAt)} ago`;
+      return `⏳ Expired`;
     }
 
     // ❌ Fully expired
@@ -157,29 +148,17 @@ export default function ReminderCard({ task, onPressCard, onPressShare }: Props)
               shareHandler={() => onPressShare?.(task)}
               taskDetails={task}
               hasPushed={false}
-              onPressPush={() => !isOwner && setShowModal(true)}
+              onPressPush={() => !isOwner && openReminderComposer()}
               pushCount={task.reminderNoteCount ?? 0}
               hasReminded={hasReminded}
               reminderNoteCount={task.reminderNoteCount ?? 0}
-              onSendReminder={() => setShowModal(true)}
+              onSendReminder={openReminderComposer}
               reminderText={reminderText}
               reminderExpired={reminderExpired}
             />
           </View>
         </TouchableOpacity>
       </TaskCardGradient>
-
-      {/* Reminder modal */}
-      <ReminderMessageModal
-        visible={showModal}
-        onClose={() => setShowModal(false)}
-        onSend={handleSendReminder}
-        message={customMessage}
-        setMessage={setCustomMessage}
-        taskName={task.name}
-        taskText={task.text}
-        isLoading={isPending}
-      />
     </Shadow>
   );
 }

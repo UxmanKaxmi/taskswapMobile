@@ -96,8 +96,13 @@ export const openAppSettings = () => {
 export function openFriendsProfile(
   navigation: NavigationProp<AppStackParamList>,
   friendId: string,
+  currentUserId?: string,
 ) {
-  navigation.navigate('FriendsProfileScreen', { id: friendId });
+  if (friendId === currentUserId) {
+    navigation.navigate('Tabs', { screen: 'Profile' });
+  } else {
+    navigation.navigate('FriendsProfileScreen', { id: friendId });
+  }
 }
 
 /**

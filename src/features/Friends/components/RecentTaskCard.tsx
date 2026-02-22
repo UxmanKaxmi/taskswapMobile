@@ -14,6 +14,7 @@ import { navigateToTaskDetails, openFriendsProfile } from '@navigation/types/nav
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { Task } from '@features/Tasks/types/tasks';
+import { useAuth } from '@features/Auth/AuthProvider';
 
 type Props = {
   task: FriendTask;
@@ -22,6 +23,7 @@ type Props = {
 
 export default function RecentTaskCard({ task, onPress }: Props) {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const { user } = useAuth();
 
   const { emoji } = getTypeVisual(task.type);
   console.log(task, 'ttt');
@@ -47,7 +49,7 @@ export default function RecentTaskCard({ task, onPress }: Props) {
             key={item.id}
             task={item as any}
             onPressCard={() => navigateToTaskDetails(navigation, item)}
-            onPressProfile={t => openFriendsProfile(navigation, t.userId)}
+            onPressProfile={t => openFriendsProfile(navigation, t.userId, user?.id)}
             onPressView={t => console.log('View for', t.id)}
           />
         );

@@ -3,7 +3,6 @@ import React from 'react';
 import FollowNotification from './FollowNotification';
 import ReminderNotification from './ReminderNotification';
 import TaskNotification from './TaskNotification';
-import DefaultNotification from './DefaultNotification';
 
 import type { NotificationDTO } from '../types/notification.types';
 import GenericNotification from './GenericNotification';
@@ -19,7 +18,6 @@ type Props = {
 };
 
 export default function NotificationCard({ item, onPress }: Props) {
-  console.log('item.type', item.type);
   switch (item.type) {
     case 'follow':
       return <FollowNotification item={item} onPress={onPress} />;

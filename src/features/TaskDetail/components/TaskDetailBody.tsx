@@ -43,17 +43,4 @@ export default function TaskDetailBody({ task }: Props) {
   }
 }
 
-const styles = StyleSheet.create({
-  //   container: {
-  //     // backgroundColor: colors.surface ?? '#fff',
-  //     // borderRadius: 16,
-  //     // padding: spacing.md,
-  //     paddingVertical: spacing.md,
-  //   },
-  //   mainText: {
-  //     // marginBottom: vs(8),
-  //     fontSize: ms(26),
-  //     lineHeight: ms(32),
-  //     fontWeight: '600',
-  //   },
-});
+const styles = StyleSheet.create({});

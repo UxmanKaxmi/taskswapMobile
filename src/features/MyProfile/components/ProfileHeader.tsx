@@ -49,7 +49,7 @@ export default function ProfileHeader({
                   {name}
                 </TextElement>
                 <TextElement variant="subtitle" color="muted" style={styles.username}>
-                  @{username}
+                  {username}
                 </TextElement>
               </View>
             </Row>

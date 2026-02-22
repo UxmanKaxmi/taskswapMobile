@@ -83,48 +83,66 @@ export default function FriendsStatsAchievements({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: spacing.sm,
-    paddingBottom: 0,
-    paddingTop: 10,
-
+    backgroundColor: colors.card,
+    borderRadius: ms(22),
+    paddingVertical: vs(12),
+    paddingHorizontal: spacing.md,
+    // marginHorizontal: spacing.md,
+    marginVertical: vs(5),
     // shadow
   },
-  header: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    fontSize: ms(20),
-    color: colors.text,
+  // header: {
+  //   marginHorizontal: spacing.md,
+  //   marginBottom: spacing.md,
+  //   fontSize: ms(18),
+  //   color: colors.text,
+  // },
+  statsRow: {
+    alignItems: 'center',
   },
-  statsRow: {},
   statItem: {
     alignItems: 'center',
+    // backgroundColor: 'red',
     flex: 1,
   },
   statNumber: {
     color: colors.primary,
-    marginBottom: vs(5),
+    marginBottom: vs(6),
+    fontSize: ms(22),
   },
-  achievementsRow: {},
-  achievementBox: {
-    alignItems: 'center',
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: spacing.sm,
-    paddingVertical: spacing.sm,
-    marginHorizontal: spacing.xs,
-  },
-  iconWrapper: {
-    width: spacing.md * 4,
-    height: spacing.md * 4,
-    borderRadius: (spacing.md * 4) / 2,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-  achLabel: {
-    textAlign: 'center',
-    fontSize: typography.small,
-    color: colors.text,
-  },
+  // statLabel: {
+  //   color: colors.muted,
+  //   textTransform: 'uppercase',
+  //   letterSpacing: 1,
+  //   fontSize: ms(10),
+  // },
+  // divider: {
+  //   width: 1,
+  //   height: vs(34),
+  //   backgroundColor: colors.border,
+  //   opacity: 0.6,
+  // },
+  // achievementsRow: {},
+  // achievementBox: {
+  //   alignItems: 'center',
+  //   flex: 1,
+  //   backgroundColor: colors.surface,
+  //   borderRadius: spacing.sm,
+  //   paddingVertical: spacing.sm,
+  //   marginHorizontal: spacing.xs,
+  // },
+  // iconWrapper: {
+  //   width: spacing.md * 4,
+  //   height: spacing.md * 4,
+  //   borderRadius: (spacing.md * 4) / 2,
+  //   backgroundColor: colors.background,
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   marginBottom: spacing.xs,
+  // },
+  // achLabel: {
+  //   textAlign: 'center',
+  //   fontSize: typography.small,
+  //   color: colors.text,
+  // },
 });

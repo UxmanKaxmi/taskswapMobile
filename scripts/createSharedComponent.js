@@ -9,7 +9,7 @@ const componentName = process.argv[2];
 
 if (!componentName) {
   console.error('❌ Please provide a component name');
-  console.log('👉 Usage: yarn create-sharedComponent Button');
+  console.log('👉 Usage: bun run create-sharedComponent Button');
   process.exit(1);
 }
 

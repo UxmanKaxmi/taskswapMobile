@@ -1,14 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { spacing, colors } from '@shared/theme';
+import { colors } from '@shared/theme';
 import Icon from '@shared/components/Icons/Icon'; // assumes you have an icon component
 import { ms, vs } from 'react-native-size-matters';
 import { isAndroid } from '@shared/utils/constants';
-import Row from '../Layout/Row';
 import { Width } from '../Spacing';
 import Ripple from '../Buttons/Ripple';
 import TextElement from '../TextElement/TextElement';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   title?: string;
@@ -28,10 +28,12 @@ export default function AppHeader({
   inDevelopment = false,
 }: Props) {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const androidTopOffset = isAndroid ? insets.top : 0;
 
   return (
     <>
-      <View style={styles.container}>
+      <View style={[styles.container, { marginTop: androidTopOffset }]}>
         <View style={styles.leftSide}>
           {showCross ? (
             <Ripple onPress={navigation.goBack}>
@@ -68,7 +70,6 @@ export default function AppHeader({
 
 const styles = StyleSheet.create({
   container: {
-    height: ms(20),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',

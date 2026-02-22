@@ -12,7 +12,7 @@ import { spacing } from '@shared/theme';
 import BottomSheet from '@gorhom/bottom-sheet';
 import AppInfoBottomSheet from '@shared/components/AppInfoBottomSheet/AppInfoBottomSheet';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { useAppInfo } from '@shared/components/AppInfoBottomSheet/AppInfoBottomSheetProvider';
+import { useModal } from '@shared/components/ModalProvider';
 
 type Props = {
   task: {
@@ -29,7 +29,7 @@ export default function DecisionDetail({ task }: Props) {
   const voteMutation = useCastVote(task.id);
 
   const { option1, option2, percent1, percent2, vote1, vote2 } = useVoteStats(task);
-  const { openInfo } = useAppInfo();
+  const { openInfo } = useModal();
 
   const totalVotes = vote1 + vote2;
 
@@ -82,15 +82,6 @@ export default function DecisionDetail({ task }: Props) {
           }
         />
       )}
-
-      {/* STRONG (≥ 66%)
-      <DecisionSignalCard winningOption="Better Pay" winningVotes={4} totalVotes={6} />
-
-      MODERATE (55–65%)
-      <DecisionSignalCard winningOption="Remote Work" winningVotes={6} totalVotes={11} />
-
-      WEAK (< 55%)
-      <DecisionSignalCard winningOption="Short Commute" winningVotes={5} totalVotes={9} /> */}
     </View>
   );
 }

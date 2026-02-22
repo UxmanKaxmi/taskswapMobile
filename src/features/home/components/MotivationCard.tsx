@@ -36,7 +36,6 @@ export default function MotivationCard({ task, onPressCard, onPressShare, onPres
   const { emoji } = getTypeVisual(type);
 
   const quoteSize = ms(100);
-  console.log('motivation', task);
 
   const taskId = task.id;
 

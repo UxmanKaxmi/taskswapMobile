@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     flex: 1,
     // marginRight: spacing.sm,
     borderRadius: spacing.sm,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
   },
   shareBtn: {
     height: verticalScale(30),

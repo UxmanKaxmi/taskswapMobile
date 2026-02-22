@@ -79,9 +79,8 @@ export default function DecisionChoicesInput({ choices, onChange }: Props) {
 }
 const styles = StyleSheet.create({
   optionInput: {
-    height: vs(40), // ✅ fixed height
-    lineHeight: 20, // must be < height
-    paddingVertical: 0, // ❌ remove default padding
+    // height: vs(40), // ✅ fixed height
+    paddingVertical: vs(10), // ❌ remove default padding
     textAlignVertical: 'center',
   },
 

@@ -37,9 +37,8 @@ export interface AnimatedBottomButtonWithHeaderProps {
   showButton?: boolean; // default true
 }
 
-const HEADER_HEIGHT = vs(60);
 const TEXT_ONLY_HEIGHT = vs(65);
-const BUTTON_HEIGHT = vs(120);
+const BUTTON_HEIGHT = vs(60);
 
 export const BOTTOM_BUTTON_HEIGHT = isAndroid ? vs(90) : vs(120); // base (no header)
 
@@ -57,6 +56,12 @@ export default function AnimatedBottomButtonWithHeader({
   showButton = true,
 }: AnimatedBottomButtonWithHeaderProps) {
   const { colors } = useTheme();
+  const hasButton = showButton !== false && !!title && !!onPress;
+  const sheetMinHeight = hasButton
+    ? buttonHeader
+      ? BUTTON_HEIGHT
+      : BOTTOM_BUTTON_HEIGHT
+    : TEXT_ONLY_HEIGHT;
 
   const translateY = useRef(new Animated.Value(embedded ? 0 : 120)).current;
   const opacity = useRef(new Animated.Value(embedded ? 1 : 0)).current;
@@ -87,6 +92,7 @@ export default function AnimatedBottomButtonWithHeader({
         {
           transform: [{ translateY: embedded ? 0 : translateY }],
           opacity,
+          bottom: embedded ? 0 : hasButton ? vs(-25) : vs(-30),
         },
         style,
       ]}
@@ -96,16 +102,20 @@ export default function AnimatedBottomButtonWithHeader({
           styles.sheet,
           {
             backgroundColor: containerColor ?? colors.card,
+            minHeight: sheetMinHeight,
           },
         ]}
       >
         {buttonHeader && (
-          <TextElement style={styles.buttonHeader} color="muted">
+          <TextElement
+            style={[styles.buttonHeader, !hasButton && styles.buttonHeaderOnly]}
+            color="muted"
+          >
             {buttonHeader}
           </TextElement>
         )}
 
-        {showButton !== false && title && onPress && (
+        {hasButton && (
           <TouchableOpacity
             style={[styles.button, { backgroundColor: buttonColor ?? colors.primary }]}
             onPress={onPress}
@@ -131,7 +141,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: vs(-25),
     alignItems: 'center',
   },
 
@@ -159,6 +169,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: vs(12),
     opacity: 0.85,
+  },
+  buttonHeaderOnly: {
+    marginBottom: 0,
   },
 
   button: {

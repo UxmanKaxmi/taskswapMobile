@@ -7,6 +7,7 @@ import {
   Dimensions,
   TouchableOpacity,
   Animated,
+  TextStyle,
 } from 'react-native';
 import Swiper from 'react-native-swiper';
 import LinearGradient from 'react-native-linear-gradient';
@@ -17,13 +18,20 @@ import { Height } from '@shared/components/Spacing';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { isDEV, isPROD } from '@shared/utils/constants';
-import { colors } from '@shared/theme';
+import { colors, spacing } from '@shared/theme';
 import AppLogo from '@shared/components/AppLogo/AppLogo';
 import { ms, vs } from 'react-native-size-matters';
 
 const { width, height } = Dimensions.get('window');
+const subtitleBoldStyle: TextStyle = { fontWeight: '700' };
 
-const slides = [
+type IntroSlide = {
+  image: any;
+  title: string;
+  subtitle: React.ReactNode;
+};
+
+const slides: IntroSlide[] = [
   {
     image: require('@assets/images/slider1.png'),
     title: 'You Don’t Have to Push Yourself Alone',
@@ -31,8 +39,16 @@ const slides = [
   },
   {
     image: require('@assets/images/slider2.png'),
-    title: 'Friends Help You Show Up',
-    subtitle: 'Invite friends, support each other, and give small, thoughtful pushes…',
+    title: 'Choose The Kind Of Help You Need',
+    subtitle: (
+      <>
+        Need a push, an opinion, or a nudge later? Choose{' '}
+        <Text style={subtitleBoldStyle}>Motivation</Text>,{' '}
+        <Text style={subtitleBoldStyle}>Advice</Text>,{' '}
+        <Text style={subtitleBoldStyle}>Decision</Text>, or{' '}
+        <Text style={subtitleBoldStyle}>Reminder</Text>.
+      </>
+    ),
   },
   {
     image: require('@assets/images/slider3.png'),
@@ -43,6 +59,8 @@ const slides = [
 
 const IntroScreen = ({ navigation }: { navigation: any }) => {
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const swiperRef = useRef<Swiper>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   const handleStart = async () => {
     if (isDEV) {
@@ -61,18 +79,29 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
       navigation.replace('App');
     });
   };
+
+  const handleButtonPress = () => {
+    if (activeSlide < slides.length - 1) {
+      swiperRef.current?.scrollBy(1);
+      return;
+    }
+
+    void handleStart();
+  };
   return (
     <Layout
+      allowPaddingHorizontal={false}
       style={{
         backgroundColor: colors.onAccent,
       }}
     >
-      <View
+      <Animated.View
         style={{
           justifyContent: 'center',
           alignItems: 'center',
           alignSelf: 'center',
           top: height * 0.02,
+          opacity: fadeAnim,
         }}
       >
         <View style={styles.logoWrapper}>
@@ -86,14 +115,17 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
             resizeMode="contain"
           /> */}
         </View>
-      </View>
+      </Animated.View>
 
       <Swiper
+        ref={swiperRef}
+        width={width}
         // autoplay
-        loop={true}
+        loop={false}
         dotStyle={styles.dot}
         activeDotStyle={styles.activeDot}
         showsPagination
+        onIndexChanged={setActiveSlide}
       >
         {slides.map((slide, index) => (
           <View key={index} style={styles.container}>
@@ -112,7 +144,11 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
         ))}
       </Swiper>
 
-      <PrimaryButton onPress={handleStart} style={styles.button} title="Let’s Start ➜" />
+      <PrimaryButton
+        onPress={handleButtonPress}
+        style={styles.button}
+        title={activeSlide < slides.length - 1 ? 'Next' : 'Get Started'}
+      />
       <Height size={20} />
     </Layout>
   );
@@ -133,9 +169,10 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width,
     justifyContent: 'center',
     alignItems: 'center',
-    // paddingHorizontal: 24,
+    paddingHorizontal: spacing.md,
   },
   image: {
     height: height * 0.32,
@@ -152,6 +189,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     lineHeight: 32,
     fontSize: ms(24),
+    paddingHorizontal: ms(20),
   },
   title3: {
     fontWeight: '700',
@@ -160,12 +198,13 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     fontSize: ms(24),
     marginTop: vs(-40),
+    paddingHorizontal: ms(20),
   },
   subtitle: {
     color: colors.muted,
     textAlign: 'center',
     lineHeight: 22,
-    paddingHorizontal: 10,
+    // paddingHorizontal: 10,
     marginBottom: 40,
     fontSize: ms(15),
   },
@@ -173,7 +212,7 @@ const styles = StyleSheet.create({
     // flexDirection: 'row',
     backgroundColor: colors.motivationPurple,
     // paddingVertical: 14,
-    // paddingHorizontal: 40,
+    marginHorizontal: spacing.md,
     // borderRadius: 16,
     // alignItems: 'center',
     // justifyContent: 'space-between',

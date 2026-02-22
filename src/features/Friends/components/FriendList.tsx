@@ -15,6 +15,7 @@ import { AppStackParamList } from '@navigation/types/navigation';
 import { openFriendsProfile } from '@navigation/types/navigationUtils';
 import Column from '@shared/components/Layout/Column';
 import { haptics } from '@shared/utils/haptics';
+import { useAuth } from '@features/Auth/AuthProvider';
 
 type Friend = {
   id: string;
@@ -33,6 +34,7 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
   const [debouncedQuery] = useDebounce(searchQuery.trim(), 300);
   const usingSearch = !!debouncedQuery;
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const { user } = useAuth();
 
   const {
     data: searchData = [],
@@ -101,7 +103,7 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
       }
       renderItem={({ item }: { item: Friend }) => (
         <FriendFollowRow
-          onPressRow={() => openFriendsProfile(navigation, item.id)}
+          onPressRow={() => openFriendsProfile(navigation, item.id, user?.id)}
           isLoading={isPending && variables === item.id}
           photo={item.photo}
           name={item.name}

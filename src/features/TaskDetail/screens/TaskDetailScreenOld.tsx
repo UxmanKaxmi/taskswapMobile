@@ -44,6 +44,7 @@ import { useFollowers } from '@features/User/hooks/useFollowers';
 import { useFollowing } from '@features/User/hooks/useFollowing';
 import { parseISO, formatDistanceToNow } from 'date-fns';
 import { useVoteStats } from '@features/Home/hooks/useVoteStats';
+import { useRemindersForTask } from '@features/Home/hooks/useRemindersForTask';
 import { isAndroid } from '@shared/utils/constants';
 import ReminderNoteList from '@features/Tasks/components/ReminderNoteList';
 import CompletionStatus from '@features/Tasks/components/CompletionStatus';
@@ -79,6 +80,11 @@ export default function TaskDetailScreenOld({
     queryFn: () => fetchComments(taskId),
     enabled: !!taskId,
   });
+  const {
+    data: reminders,
+    isLoading: remindersLoading,
+    isError: remindersError,
+  } = useRemindersForTask(taskId);
 
   useEffect(() => {
     if (!taskId) return;
@@ -307,7 +313,7 @@ export default function TaskDetailScreenOld({
                 <HelpersRow
                   maxVisible={3}
                   helpers={task.helpers as any}
-                  onPressAvatar={helper => openFriendsProfile(navigation, helper.id)}
+                  onPressAvatar={helper => openFriendsProfile(navigation, helper.id, user?.id)}
                 />
               </View>
             )}
@@ -342,8 +348,12 @@ export default function TaskDetailScreenOld({
                   Friendly Reminders
                 </TextElement>
                 <ReminderNoteList
-                  onPressFriendProfile={friendId => openFriendsProfile(navigation, friendId)}
-                  taskId={task.id}
+                  onPressFriendProfile={friendId =>
+                    openFriendsProfile(navigation, friendId, user?.id)
+                  }
+                  reminders={reminders}
+                  isLoading={remindersLoading}
+                  isError={remindersError}
                 />
               </>
             )}
@@ -351,8 +361,10 @@ export default function TaskDetailScreenOld({
             <CommentsSection
               comments={comments ?? []} // 👈 ensures always array
               friends={friendsList}
-              onPressCommentUser={comment => openFriendsProfile(navigation, comment.user.id)}
-              onPressMentionUser={friend => openFriendsProfile(navigation, friend.id)}
+              onPressCommentUser={comment =>
+                openFriendsProfile(navigation, comment.user.id, user?.id)
+              }
+              onPressMentionUser={friend => openFriendsProfile(navigation, friend.id, user?.id)}
               highlightId={highlightCommentId}
               scrollRef={scrollRef} // 👈 pass down
               onToggleLike={(commentId, nextLike) => {

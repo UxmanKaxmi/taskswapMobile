@@ -29,7 +29,7 @@ const taskTypeCopy: Record<
   },
   advice: {
     verb: 'asked for',
-    preposition: 'an ',
+    preposition: 'an',
   },
   motivation: {
     verb: 'wants some',

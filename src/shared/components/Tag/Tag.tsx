@@ -5,7 +5,6 @@ import { colors, spacing } from '@shared/theme';
 import Ripple from '../Buttons/Ripple';
 import Icon from '@shared/components/Icons/Icon';
 import { ms } from 'react-native-size-matters';
-import { typeIcons } from '@shared/utils/typeVisuals';
 
 type Props = {
   label: string;
@@ -13,35 +12,53 @@ type Props = {
   onPress?: () => void;
   onRemove?: () => void;
   iconName?: string; // leading icon
+  selectOnly?: boolean; // simple selectable pill (no icon)
   style?: ViewStyle;
+  fillColor?: string; // override default fill color
+  borderColor?: string; // override default border color
+  labelColor?: keyof typeof colors; // override default label color
 };
 
 export default function Tag({
   label,
   selected = false,
   onPress,
-  onRemove,
+  onRemove: _onRemove,
   iconName = 'pricetag', // sensible default
+  selectOnly = false,
   style,
+  fillColor,
+  borderColor,
+  labelColor,
 }: Props) {
   return (
-    <Ripple onPress={onPress} style={[styles.container, selected && styles.selected, style]}>
-      <View style={styles.content}>
-        {/* Leading icon */}
-        <Icon
-          set="fa6"
-          name={iconName}
-          size={ms(12)}
-          color={selected ? colors.background : colors.primary}
-          iconStyle={selected ? 'solid' : 'regular'}
-        />
+    <Ripple
+      onPress={onPress}
+      style={[
+        styles.container,
+        selected && styles.selected,
+        style,
+        fillColor && { backgroundColor: fillColor, borderColor: fillColor },
+        { borderColor: borderColor || (selected ? colors.primary : colors.background) },
+      ]}
+    >
+      <View style={[styles.content, selectOnly && styles.selectOnlyContent]}>
+        {!selectOnly && (
+          <Icon
+            set="fa6"
+            name={iconName}
+            size={ms(12)}
+            color={labelColor ? colors[labelColor] : selected ? colors.background : colors.primary}
+            iconStyle={selected ? 'solid' : 'regular'}
+          />
+        )}
 
         {/* Label */}
         <TextElement
           variant="body"
           weight="500"
-          color={selected ? 'background' : 'primary'}
-          style={styles.label}
+          color={labelColor ? colors[labelColor] : selected ? colors.background : colors.primary}
+          style={[styles.label, selectOnly && styles.selectOnlyLabel]}
         >
           {label}
         </TextElement>
@@ -60,7 +77,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 999,
     backgroundColor: colors.background,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.primary,
   },
   selected: {
@@ -77,9 +94,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
     fontSize: ms(12),
   },
-  close: {
-    marginLeft: spacing.xs,
-    padding: 2, // easier tap target
-    borderRadius: 999,
+  selectOnlyContent: {
+    justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
+  },
+  selectOnlyLabel: {
+    marginHorizontal: 0,
   },
 });

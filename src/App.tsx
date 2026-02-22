@@ -7,14 +7,12 @@ import { toastConfig } from '@shared/components/Toast/toastConfig';
 import { initializeNotifications } from './lib/notifications/initNotifications';
 import NotificationPermissionPrompt from './lib/notifications/NotificationPermissionPrompt';
 import firebase from '@react-native-firebase/app';
-import { Image, Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
-import Config from 'react-native-config';
-import { APP_ENV } from '@shared/utils/constants';
+import { Image, Platform, StatusBar } from 'react-native';
 import { AnimatedBootSplash } from '@features/Splash/AnimatedBootSplash';
 import { AuthProvider } from '@features/Auth/AuthProvider';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { AppInfoBottomSheetProvider } from '@shared/components/AppInfoBottomSheet/AppInfoBottomSheetProvider';
+import { ModalProvider } from '@shared/components/ModalProvider';
 import { colors } from '@shared/theme/colors';
 import { incrementAppLaunchCount } from '@features/launchModals';
 
@@ -32,14 +30,13 @@ const LightNavTheme = {
 
 export default function App() {
   const [visible, setVisible] = useState(true);
-  const showDevBadge = APP_ENV !== 'production';
 
   useEffect(() => {
     StatusBar.setBarStyle('dark-content');
 
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor(colors.background);
-      StatusBar.setTranslucent(true);
+      StatusBar.setBackgroundColor(colors.surface);
+      StatusBar.setTranslucent(false);
     }
   }, []);
 
@@ -64,7 +61,7 @@ export default function App() {
   ) : (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
       <BottomSheetModalProvider>
-        <AppInfoBottomSheetProvider>
+        <ModalProvider>
           <QueryClientProvider client={queryClient}>
             <NotificationPermissionPrompt />
 
@@ -76,62 +73,22 @@ export default function App() {
 
             <Toast config={toastConfig} position="bottom" bottomOffset={60} />
           </QueryClientProvider>
-        </AppInfoBottomSheetProvider>
+        </ModalProvider>
       </BottomSheetModalProvider>
       {/* {showDevBadge && (
         <View pointerEvents="none" style={styles.devBadgeContainer}>
           <View style={styles.devBadge}>
             <View style={styles.devBadgeDot} />
-            <Text style={styles.devBadgeText}>DEV</Text>
+            <View style={styles.devBadgeTextWrap}>
+              <Text style={styles.devBadgeText}>DEV</Text>
+              <Text style={styles.devBadgeSubText}>API: {backendUrl}</Text>
+            </View>
           </View>
         </View>
       )} */}
     </GestureHandlerRootView>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: '700',
-    margin: 20,
-    lineHeight: 30,
-    color: '#333',
-    textAlign: 'center',
-  },
-  devBadgeContainer: {
-    position: 'absolute',
-    top: '7%',
-    right: '43%',
-    zIndex: 9999,
-  },
-  devBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#111827',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    opacity: 0.9,
-  },
-  devBadgeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#F59E0B',
-    marginRight: 6,
-  },
-  devBadgeText: {
-    color: '#F9FAFB',
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-  },
-});
 //     <QueryClientProvider client={queryClient}>
 //       <NotificationPermissionPrompt />
 //       <AuthProvider>

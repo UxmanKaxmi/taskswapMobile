@@ -14,10 +14,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 type Props = {
   onPressSearch: () => void;
   onPressFilter: () => void;
+  onPressMore?: () => void;
   filterOpen?: boolean;
 };
 
-export default function HomeHeader({ onPressSearch, onPressFilter, filterOpen = false }: Props) {
+export default function HomeHeader({
+  onPressSearch,
+  onPressFilter,
+  onPressMore,
+  filterOpen = false,
+}: Props) {
   const rotation = useSharedValue(0);
 
   //Safe area is needed for here for the animation.
@@ -58,6 +64,16 @@ export default function HomeHeader({ onPressSearch, onPressFilter, filterOpen = 
           <Icon set="ion" name="search" size={vs(15)} />
         </Ripple>
 
+        {onPressMore && (
+          <Ripple
+            onPress={() => {
+              haptics.open();
+              onPressMore();
+            }}
+          >
+            <Icon set="ion" name="ellipsis-vertical" size={vs(12)} />
+          </Ripple>
+        )}
         {/* <Ripple
           onPress={() => {
             haptics.open();

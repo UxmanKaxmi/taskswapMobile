@@ -24,15 +24,14 @@ import { ms, vs } from 'react-native-size-matters';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
 import NotificationCard from '../components/DefaultNotification';
 import { queryClient } from '@lib/react-query/client';
-import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
-import { useAuth } from '@features/Auth/AuthProvider';
+import { buildQueryKey } from '@shared/constants/queryKeys';
 import { Height } from '@shared/components/Spacing';
+import { getTaskByIdAPI } from '@features/Home/api/api';
 
 export default function NotificationMainScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const { data: notifications = [], isLoading, refetch } = useNotifications();
   const { mutate: markBatch } = useBatchMarkNotificationsAsRead();
-  const { user, loading } = useAuth();
 
   const [refreshing, setRefreshing] = useState(false);
   const [visibleCount, setVisibleCount] = useState(30);
@@ -161,11 +160,29 @@ export default function NotificationMainScreen() {
     setVisibleCount(prev => Math.min(prev + LOAD_MORE, notifications.length));
   }, [visibleCount, notifications.length]);
 
+  const prefetchTaskDetail = useCallback((taskId?: string) => {
+    if (!taskId) return;
+    void queryClient.prefetchQuery({
+      queryKey: buildQueryKey.taskById(taskId),
+      queryFn: () => getTaskByIdAPI(taskId),
+      staleTime: 30_000,
+    });
+  }, []);
+
+  const openTaskDetail = useCallback(
+    (taskId?: string, highlightCommentId?: string) => {
+      if (!taskId) return;
+      prefetchTaskDetail(taskId);
+      navigation.navigate('TaskDetail', {
+        taskId,
+        ...(highlightCommentId ? { highlightCommentId } : {}),
+      });
+    },
+    [navigation, prefetchTaskDetail],
+  );
+
   const handleNotificationPress = useCallback(
     (item: NotificationDTO) => {
-      console.log('[NotificationPress]', item);
-      console.log('[NotificationPress] item.type', item.type);
-
       switch (item.type) {
         case 'follow':
           if (item.sender?.id) {
@@ -174,33 +191,29 @@ export default function NotificationMainScreen() {
           return;
 
         case 'task-helper':
-          if (item.id) {
-            navigation.navigate('TaskDetail', { taskId: item.metadata?.taskId });
+          if (item.metadata?.taskId) {
+            openTaskDetail(item.metadata.taskId);
           }
           return;
 
         case 'task-advice':
-          if (item.id) {
-            navigation.navigate('TaskDetail', { taskId: item.metadata?.taskId });
+          if (item.metadata?.taskId) {
+            openTaskDetail(item.metadata.taskId);
           }
           return;
 
         case 'commentMention':
-          if (item.metadata?.taskId) {
-            navigation.navigate('TaskDetail', {
-              taskId: item.metadata.taskId,
-              highlightCommentId: item.metadata?.commentId,
-            });
-          }
+          openTaskDetail(item.metadata?.taskId, item.metadata?.commentId);
           return;
 
         case 'task-motivation-push':
-          if (item.metadata?.taskId) {
-            navigation.navigate('TaskDetail', {
-              taskId: item.metadata.taskId,
-              highlightCommentId: item.metadata?.commentId,
-            });
-          }
+          openTaskDetail(item.metadata?.taskId, item.metadata?.commentId);
+          return;
+        case 'decision-done':
+          openTaskDetail(item.metadata?.taskId);
+          return;
+        case 'reminder':
+          openTaskDetail(item.metadata?.taskId);
           return;
 
         // case 'task-helper':
@@ -229,7 +242,7 @@ export default function NotificationMainScreen() {
           return;
       }
     },
-    [navigation],
+    [navigation, openTaskDetail],
   );
 
   if (isLoading) {

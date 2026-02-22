@@ -94,6 +94,7 @@ export default function SelectHelpersModal({
               onConfirm(localSelection);
               onClose();
             }}
+            style={{ backgroundColor: colors.primary }}
           />
           <TouchableOpacity onPress={onClose} style={styles.cancel}>
             <Text style={{ color: colors.error }}>Cancel</Text>

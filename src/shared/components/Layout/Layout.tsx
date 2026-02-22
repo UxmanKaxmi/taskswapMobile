@@ -10,6 +10,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '@shared/theme';
 import { isAndroid, isIOS } from '@shared/utils/constants';
+import { vs } from 'react-native-size-matters';
 
 type LayoutProps = {
   children?: ReactNode;
@@ -57,19 +58,30 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
         : (['left', 'right'] as const)
       : [];
     const finalEdges = Array.isArray(edgesProp) && edgesProp.length > 0 ? edgesProp : edges;
+    const hasBottomSafeEdge = finalEdges.includes('bottom');
+    const footerBottomInset = hasBottomSafeEdge ? 0 : insets.bottom || spacing.sm;
+    const {
+      contentContainerStyle: scrollContentContainerStyle,
+      style: scrollStyle,
+      ...restScrollViewProps
+    } = (scrollViewProps as any) ?? {};
 
     const content = scrollable ? (
       <ScrollView
         ref={ref} // 👈 expose ref here
+        style={[styles.flex, scrollStyle]}
         bounces={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
           allowPaddingVertical && styles.paddedVertical,
           allowPaddingHorizontal && styles.paddedHorizontal,
-          footerContent ? { paddingBottom: footerHeight + insets.bottom } : null,
+          footerContent
+            ? { paddingBottom: footerHeight + (hasBottomSafeEdge ? 0 : insets.bottom) }
+            : null,
+          scrollContentContainerStyle,
         ]}
         showsVerticalScrollIndicator={false}
-        {...scrollViewProps}
+        {...restScrollViewProps}
       >
         {children}
       </ScrollView>
@@ -100,7 +112,7 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
             {content}
 
             {footerContent && (
-              <View style={[styles.footer, { paddingBottom: insets.bottom || spacing.sm }]}>
+              <View style={[styles.footer, { paddingBottom: footerBottomInset }]}>
                 {footerContent}
               </View>
             )}
@@ -123,7 +135,7 @@ const styles = StyleSheet.create({
     flexGrow: 1, // ✅ instead of flex:1
   },
   paddedVertical: {
-    paddingVertical: isAndroid ? spacing.md : 0,
+    paddingVertical: isAndroid ? vs(5) : 0,
   },
   footer: {
     borderTopWidth: StyleSheet.hairlineWidth,

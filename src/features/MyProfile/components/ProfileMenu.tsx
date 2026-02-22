@@ -1,22 +1,16 @@
 // src/features/MyProfile/components/ProfileMenu.tsx
 
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import Row from '@shared/components/Layout/Row';
-import { spacing, colors, typography } from '@shared/theme';
+import { spacing, colors } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
-import { useAuth } from '@features/Auth/AuthProvider';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppNavigationProp, MainStackParamList } from '@navigation/types/navigation';
+import { useNavigation } from '@react-navigation/native';
+import { AppNavigationProp } from '@navigation/types/navigation';
 import { triggerLogout } from '@shared/api/authBridge';
-import { api } from '@shared/api/axios';
-import { buildRoute } from '@shared/api/apiRoutes';
-import { APP_ENV, isDEV } from '@shared/utils/constants';
 import Ripple from '@shared/components/Buttons/Ripple';
-import { resetAllLaunchModalsSeen } from '@features/launchModals/launchModals.storage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type MenuItem = {
   label: string;
@@ -24,8 +18,6 @@ export type MenuItem = {
   onPress: () => void;
   iconSet: React.ComponentProps<typeof Icon>['set'];
 };
-
-type Props = {};
 
 /**
  * Profile menu that takes a dynamic list of items with icons and callbacks.
@@ -39,19 +31,6 @@ export default function ProfileMenu() {
         text: 'Logout',
         style: 'destructive',
         onPress: async () => triggerLogout(),
-      },
-    ]);
-  };
-  const handleResetAppData = async () => {
-    Alert.alert('Reset App', 'This will clear all data and sign you out. Continue?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Reset',
-        style: 'destructive',
-        onPress: async () => {
-          await triggerLogout();
-          await AsyncStorage.clear();
-        },
       },
     ]);
   };
@@ -81,31 +60,6 @@ export default function ProfileMenu() {
       iconSet: 'ion',
     },
   ] as const; // ← keep the literal types
-
-  const secondaryItems = [
-    {
-      label: 'Reset Launch Modals',
-      icon: 'refresh',
-      onPress: async () => await resetAllLaunchModalsSeen(),
-      iconSet: 'ion',
-    },
-    {
-      label: 'Debug Notification',
-      icon: 'terminal',
-      onPress: () => navigation.navigate('MainDebugScreen'),
-      iconSet: 'ion',
-    },
-    ...(APP_ENV !== 'production'
-      ? [
-          {
-            label: 'Reset App Data',
-            icon: 'trash',
-            onPress: () => handleResetAppData(),
-            iconSet: 'ion',
-          },
-        ]
-      : []),
-  ] as const;
 
   const dangerItems = [
     {
@@ -139,30 +93,6 @@ export default function ProfileMenu() {
           </Ripple>
         ))}
       </View>
-
-      {isDEV && (
-        <View style={[styles.card, styles.cardSpacer]}>
-          {secondaryItems.map(item => (
-            <Ripple key={item.label} style={[styles.row, styles.singleRow]} onPress={item.onPress}>
-              <Row align="center" justify="space-between" style={styles.innerRow}>
-                <Row align="center">
-                  <View style={[styles.iconCircle, styles.iconCircleMuted]}>
-                    <Icon set={item.iconSet} name={item.icon} size={20} color={colors.muted} />
-                  </View>
-                  <TextElement
-                    variant="body"
-                    weight="600"
-                    style={[styles.label, styles.labelMuted]}
-                  >
-                    {item.label}
-                  </TextElement>
-                </Row>
-                <Icon set="ion" name="chevron-forward" size={20} color={colors.border} />
-              </Row>
-            </Ripple>
-          ))}
-        </View>
-      )}
 
       <View style={[styles.card, styles.cardSpacer, styles.dangerCard]}>
         {dangerItems.map(item => (
@@ -234,9 +164,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: spacing.md,
   },
-  iconCircleMuted: {
-    backgroundColor: colors.background,
-  },
   iconCircleDanger: {
     backgroundColor: '#FEECEC',
   },
@@ -244,9 +171,6 @@ const styles = StyleSheet.create({
     fontSize: ms(15),
     color: colors.text,
     marginLeft: -spacing.sm,
-  },
-  labelMuted: {
-    color: colors.muted,
   },
   dangerCard: {
     backgroundColor: '#FFF3F3',

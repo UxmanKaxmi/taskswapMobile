@@ -51,8 +51,7 @@ export default function AddReminderScreen({ navigation }: Props) {
       0,
       0,
     );
-  const getMinReminderDate = () =>
-    normalizeToMinute(new Date(Date.now() + MIN_REMINDER_OFFSET_MS));
+  const getMinReminderDate = () => normalizeToMinute(new Date(Date.now() + MIN_REMINDER_OFFSET_MS));
 
   const [text, setText] = useState('');
   const [remindAt, setRemindAt] = useState<Date | null>(null);
@@ -70,8 +69,7 @@ export default function AddReminderScreen({ navigation }: Props) {
   const helperIds = helpers.map(h => h.id);
 
   const isReminderTimeValid =
-    !!remindAt &&
-    normalizeToMinute(remindAt).getTime() >= minReminderDate.getTime();
+    !!remindAt && normalizeToMinute(remindAt).getTime() >= minReminderDate.getTime();
 
   const canSubmit = text.trim().length > 0 && isReminderTimeValid && !success;
 
@@ -139,7 +137,7 @@ export default function AddReminderScreen({ navigation }: Props) {
           isLoading={isPending}
           onPress={onSubmit}
           buttonColor={colors.reminderBgHardest}
-          style={{ bottom: isAndroid ? vs(-20) : vs(20) }}
+          // style={{ bottom: isAndroid ? vs(-20) : vs(20) }}
         />
       }
       style={styles.container}

@@ -2,11 +2,12 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Avatar from '@shared/components/Avatar/Avatar';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { spacing } from '@shared/theme';
-import { getTypeVisual } from '@shared/utils/typeVisuals';
+import { colors, spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
 import { notificationStyles } from '../styles/notification.styles';
+import { Icon } from '@shared/components/Icons';
+import { ms } from 'react-native-size-matters';
 
 type Props = {
   item: NotificationDTO;
@@ -14,7 +15,6 @@ type Props = {
 };
 
 export default function FollowNotification({ item, onPress }: Props) {
-  const { emoji } = getTypeVisual(item.type);
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -36,7 +36,14 @@ export default function FollowNotification({ item, onPress }: Props) {
         </TextElement>
       </View>
 
-      <TextElement variant="caption">{emoji}</TextElement>
+      <Icon
+        style={styles.icon}
+        set="fa6"
+        name="user"
+        size={ms(20)}
+        color={colors.muted}
+        iconStyle="solid"
+      />
     </TouchableOpacity>
   );
 }
@@ -52,5 +59,8 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     marginLeft: spacing.sm,
+  },
+  icon: {
+    marginRight: ms(5),
   },
 });

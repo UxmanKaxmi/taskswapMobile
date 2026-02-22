@@ -16,6 +16,11 @@ import { TaskType } from '@features/Tasks/types/tasks';
 import { HelperUser } from '@features/Home/types/home';
 import { Icon } from '@shared/components/Icons';
 import { Shadow } from '@shared/components/Shadow';
+import Ripple from '@shared/components/Buttons/Ripple';
+import { openFriendsProfile } from '@navigation/types/navigationUtils';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { AppStackParamList } from '@navigation/types/navigation';
+import { useAuth } from '@features/Auth/AuthProvider';
 
 type Props = {
   task: {
@@ -34,6 +39,8 @@ export function TaskDetailHeader({ task }: Props) {
   const avatarSize = ms(45);
 
   const iconName = typeIcons[task.type];
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const { user } = useAuth();
 
   const getTypeColor = (type: TaskType) => {
     switch (type) {
@@ -53,33 +60,38 @@ export function TaskDetailHeader({ task }: Props) {
   return (
     <Row align="center" justify="flex-start">
       {/* Avatar + helpers */}
+      {console.log('task 222', task)}
       <View style={[styles.avatarWrapper, { width: avatarSize, height: avatarSize }]}>
-        <Image
-          source={{ uri: task.avatar }}
-          style={[
-            styles.avatar,
-            {
-              width: avatarSize,
-              height: avatarSize,
-              borderRadius: avatarSize / 2,
-            },
-          ]}
-        />
-
-        {!!task.helpers?.length && (
-          <HelperAvatarGroup
-            helpers={task.helpers}
-            avatarSize={ms(18)}
-            containerStyle={styles.helperOverlay}
+        <Ripple onPress={() => openFriendsProfile(navigation, task?.userId || '', user?.id)}>
+          <Image
+            source={{ uri: task.avatar }}
+            style={[
+              styles.avatar,
+              {
+                width: avatarSize,
+                height: avatarSize,
+                borderRadius: avatarSize / 2,
+              },
+            ]}
           />
-        )}
+
+          {!!task.helpers?.length && (
+            <HelperAvatarGroup
+              helpers={task.helpers}
+              avatarSize={ms(18)}
+              containerStyle={styles.helperOverlay}
+            />
+          )}
+        </Ripple>
       </View>
 
       {/* Name + meta */}
       <View style={{ flex: 1 }}>
-        <TextElement variant="subtitle" style={styles.name}>
-          {toShortName(task.name)}
-        </TextElement>
+        <Ripple onPress={() => openFriendsProfile(navigation, task?.userId || '', user?.id)}>
+          <TextElement variant="subtitle" style={styles.name}>
+            {toShortName(task.name)}
+          </TextElement>
+        </Ripple>
 
         {/* 🔥 Meta row (inline) */}
         <Row gap={2} justify="flex-start" align="center" style={styles.metaRow}>

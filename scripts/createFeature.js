@@ -1,13 +1,13 @@
 /* eslint-disable no-undef */
 // createFeature.js
-// Usage: npm run create-feature Feed
+// Usage: bun run create-feature Feed
 
 const fs = require("fs");
 const path = require("path");
 
 const featureName = process.argv[2];
 if (!featureName) {
-    console.error("❌ Please provide a feature name. Example: npm run create-feature Feed");
+    console.error("❌ Please provide a feature name. Example: bun run create-feature Feed");
     process.exit(1);
 }
 

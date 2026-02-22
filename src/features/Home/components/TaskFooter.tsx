@@ -198,10 +198,10 @@ export default function TaskFooter({
                   {taskDetails.hasReminded
                     ? 'Reminder sent'
                     : reminderNoteCount === 0
-                      ? 'No nudges yet'
+                      ? 'No reminders yet'
                       : reminderNoteCount === 1
-                        ? '1 person nudged you'
-                        : `${reminderNoteCount} people nudged you`}
+                        ? '1 person reminded you'
+                        : `${reminderNoteCount} people reminded you`}
                 </TextElement>
 
                 {reminderText &&
@@ -223,7 +223,7 @@ export default function TaskFooter({
               /* NON-OWNER — already nudged */
               <Row justify="space-between" align="center" style={{ width: '100%' }}>
                 <TextElement style={styles.pushedText}>
-                  You nudged {getFirstName(taskDetails?.name)}
+                  You reminded {getFirstName(taskDetails?.name)}
                 </TextElement>
 
                 {reminderText &&

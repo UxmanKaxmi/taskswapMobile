@@ -50,12 +50,7 @@ export default function FilterTasksModal({ visible, value, onApply, onClose }: P
   }, [visible]);
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      presentationStyle="pageSheet" // 👈 THIS
-    >
+    <Modal visible={visible} transparent animationType="none">
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay} />
       </TouchableWithoutFeedback>

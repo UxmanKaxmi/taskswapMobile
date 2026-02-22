@@ -146,7 +146,6 @@ export default function AddDecisionScreen({ navigation }: Props) {
           isLoading={isPending}
           onPress={onSubmit}
           buttonColor={colors.decisionBgHardest}
-          style={{ bottom: isAndroid ? vs(-20) : vs(20) }}
         />
       }
       footerHeight={showSubmit ? (isAndroid ? vs(90) : vs(80)) : vs(5)}

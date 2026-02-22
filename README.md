@@ -39,12 +39,59 @@ Each intent type has its own UI and behavior.
 - `lib/`: cross-cutting libs (React Query, notifications)
 - `assets/`: images and SVGs
 
+## App Info Modal Usage
+
+`ModalProvider` exposes modal controls through `useModal()`:
+
+- `openInfo({ title, description? })`
+- `openReminderMessageSheet({ taskName, taskText, onSend, initialMessage? })`
+
+### 1. Provider wiring (already in app root)
+
+`ModalProvider` is already wrapped in `src/App.tsx` under `BottomSheetModalProvider`, so any screen/component in the app tree can use it.
+
+### 2. Use it in a component
+
+```tsx
+import { useModal } from '@shared/components/ModalProvider';
+
+function ExampleCard() {
+  const { openInfo } = useModal();
+
+  return (
+    <Button
+      title="How this works"
+      onPress={() =>
+        openInfo({
+          title: 'How decision insights work',
+          description:
+            'This shows which option your helpers are leaning toward. A strong signal appears when one option clearly stands out.',
+        })
+      }
+    />
+  );
+}
+```
+
+### 3. Behavior
+
+- The sheet opens at `45%` height.
+- Users can close by swiping down or tapping the backdrop.
+- `title` is required.
+- `description` is optional.
+
+### 4. Common error
+
+If you see `useModal must be used inside ModalProvider`, the component using modal hooks is rendered outside the provider tree.
+
 ## Development Setup
 
+This repository is Bun-only for package installs.
+
 ```bash
-yarn install
+bun install
 cd ios && pod install && cd ..
-yarn start
+bun run start
 npx react-native run-ios
 ```
 
@@ -98,11 +145,11 @@ From `package.json`:
 Examples:
 
 ```bash
-yarn ios
-yarn android
-yarn lint
-yarn format
-yarn create-feature
-yarn create-sharedComponent
-yarn ios-multi
+bun run ios
+bun run android
+bun run lint
+bun run format
+bun run create-feature
+bun run create-sharedComponent
+bun run ios-multi
 ```

@@ -139,7 +139,7 @@ PODS:
     - AppAuth/Core (~> 1.7)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher/Core (3.5.0)
-  - Haptics (1.0.1):
+  - Haptics (1.1.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1621,7 +1621,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context (5.5.2):
+  - react-native-safe-area-context (5.6.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1636,8 +1636,8 @@ PODS:
     - React-hermes
     - React-ImageManager
     - React-jsi
-    - react-native-safe-area-context/common (= 5.5.2)
-    - react-native-safe-area-context/fabric (= 5.5.2)
+    - react-native-safe-area-context/common (= 5.6.2)
+    - react-native-safe-area-context/fabric (= 5.6.2)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -1647,7 +1647,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/common (5.5.2):
+  - react-native-safe-area-context/common (5.6.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1671,7 +1671,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/fabric (5.5.2):
+  - react-native-safe-area-context/fabric (5.6.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1720,7 +1720,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-vector-icons-ionicons (12.2.0)
+  - react-native-vector-icons-ionicons (12.3.0)
   - React-NativeModulesApple (0.79.2):
     - glog
     - hermes-engine
@@ -2044,7 +2044,7 @@ PODS:
     - React-perflogger (= 0.79.2)
     - React-utils (= 0.79.2)
   - RecaptchaInterop (101.0.0)
-  - RNBootSplash (6.3.10):
+  - RNBootSplash (6.3.12):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2116,7 +2116,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNCPicker (2.11.1):
+  - RNCPicker (2.11.4):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2140,7 +2140,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNDateTimePicker (8.4.3):
+  - RNDateTimePicker (8.6.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2351,7 +2351,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (4.13.1):
+  - RNScreens (4.10.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2375,9 +2375,9 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNScreens/common (= 4.13.1)
+    - RNScreens/common (= 4.10.0)
     - Yoga
-  - RNScreens/common (4.13.1):
+  - RNScreens/common (4.10.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2402,7 +2402,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNSVG (15.12.1):
+  - RNSVG (15.15.3):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2425,9 +2425,9 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNSVG/common (= 15.12.1)
+    - RNSVG/common (= 15.15.3)
     - Yoga
-  - RNSVG/common (15.12.1):
+  - RNSVG/common (15.15.3):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2792,7 +2792,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
-  Haptics: abd6d7fdca6718b6945282e651a6234aecde72f0
+  Haptics: c827875d6d38225b3d7d50f101568ecc3a5b01c3
   hermes-engine: 314be5250afa5692b57b4dd1705959e1973a8ebe
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
@@ -2831,9 +2831,9 @@ SPEC CHECKSUMS:
   react-native-config: bea8fa61aefa7c96753467a403616ecf63f75456
   react-native-contacts: 543bfe869b230fa51f7a378f311c03f80ae3f6aa
   react-native-date-picker: c568e29cbe8203fbc94651929dac06b8d54a7aa6
-  react-native-safe-area-context: 5e61d0541825a113f60c01e061974355fec8d7c1
+  react-native-safe-area-context: 599ee84bd389d2a4230ab7b832fb1354f8eedaec
   react-native-vector-icons: 63db8f7cb1945c084add36ff7874c32fa9c7f83f
-  react-native-vector-icons-ionicons: 3a23bfb6ac5e5c44d822f37107afa50718f3cf31
+  react-native-vector-icons-ionicons: ad07e944a092a5cf71b8b569d8f5ce2bf674c415
   React-NativeModulesApple: df8e5bc59e78ca3040ffbf41336889f3bd0fad68
   React-oscompat: ef5df1c734f19b8003e149317d041b8ce1f7d29c
   React-perflogger: 9a151e0b4c933c9205fd648c246506a83f31395d
@@ -2866,19 +2866,19 @@ SPEC CHECKSUMS:
   ReactCodegen: 041559ba76d00f6680dfa0916b3c791f4babe5ea
   ReactCommon: 1511ef100f1afa4c199fe52fe7a8d2529a41429a
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
-  RNBootSplash: 8bfa06c20407e008aa0861498805405c3673b476
+  RNBootSplash: 51fd7f59f62df31d597b1094a8886641bf5f58c3
   RNCAsyncStorage: c1dca434eda758348a549efb46822b4091d76804
   RNCClipboard: 45b13251c8938aabfc25b9ecc35b5d42ab4eb0b0
-  RNCPicker: c424533f7747c9463b35d294328e7b2b4d2baf31
-  RNDateTimePicker: f1134a2264ebba74b4db79ea2d40ca652e1502c0
+  RNCPicker: d957426e631657b70d391c4193db87c91c8406b3
+  RNDateTimePicker: fe93a0dd58fc778fa8c5ce98fbcaf48acbc4cb04
   RNFBApp: 90cf0209fb8f0460ab069a7de857d7ec851c8476
   RNFBMessaging: 37dd861b8600ec2ae9a06ba42ae4285cb707a731
   RNGestureHandler: 715fa8a84165228bbf11e5140015a13c56dc6ee4
   RNGoogleSignin: 34668f9c7a67213c8949b356404bcc7facb1b946
   RNNotifee: 5e3b271e8ea7456a36eec994085543c9adca9168
   RNReanimated: 16182f425a23ad01c522e322b9c62ca46e3e37d5
-  RNScreens: b13e4c45f0406f33986a39c0d8da0324bff94435
-  RNSVG: 680e961f640e381aab730a04b2371969686ed9f7
+  RNScreens: a25b818417609cbd805474dffd2d28b229704cfc
+  RNSVG: 61ed48ec5db36e7cf2551dbcb7ccbce6f8b5d6d9
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   SwiftUIIntrospect: fee9aa07293ee280373a591e1824e8ddc869ba5d
   Yoga: 50518ade05048235d91a78b803336dbb5b159d5d

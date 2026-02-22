@@ -14,6 +14,7 @@ import ListView from '@shared/components/ListView/ListView';
 import StatsAchievements from '../components/StatsAchievements';
 import ProfileMenu from '../components/ProfileMenu';
 import { useMyProfileData } from '../hooks/useMyProfileData';
+import { isAndroid } from '@shared/utils/constants';
 
 export default function MyProfileMainScreen() {
   const { user } = useAuth();
@@ -28,9 +29,11 @@ export default function MyProfileMainScreen() {
 
   return (
     <Layout
-      allowPaddingVertical={true}
+      allowPaddingVertical
       allowPaddingHorizontal
-      style={{ marginTop: 0, paddingTop: 0 }}
+      style={{
+        marginTop: isAndroid ? insets.top : 0, // ✅ negative margin to offset SafeAreaView padding
+      }}
     >
       <ListView
         style={{ flex: 1 }}

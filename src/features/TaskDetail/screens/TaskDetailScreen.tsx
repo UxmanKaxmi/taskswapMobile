@@ -43,7 +43,6 @@ import AnimatedBottomButtonWithHeader, {
 import TaskStatusRow from '../components/TaskStatusRow';
 import { useCompleteTask } from '@features/Home/hooks/useCompleteTask';
 import { useInCompleteTask } from '@features/Home/hooks/useInCompleteTask';
-import AnimatedBottomComposer, { COMPOSER_HEIGHT } from '../components/AnimatedBottomComposer';
 import { showToast } from '@shared/utils/toast';
 import { useAddComment } from '@features/Tasks/hooks/useComment';
 import Animated, {
@@ -55,6 +54,9 @@ import Animated, {
 import AnimatedAdviceMorph from '../components/AnimatedAdviceMorph';
 import { queryClient } from '@lib/react-query/client';
 import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
+import ReminderWhenPicker from '@features/AddTask/components/ReminderWhenPicker';
+import { useAddReminder } from '@features/Home/hooks/useAddTask';
+import { useModal } from '@shared/components/ModalProvider';
 export default function TaskDetailScreen({
   route,
 }: NativeStackScreenProps<AppStackParamList, 'TaskDetail'>) {
@@ -66,6 +68,7 @@ export default function TaskDetailScreen({
   const [consumedAutoOpen, setConsumedAutoOpen] = React.useState(false);
   const { user } = useAuth();
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
+  const { openReminderMessageSheet } = useModal();
 
   const { data: friends = [] } = useFollowers();
 
@@ -83,8 +86,6 @@ export default function TaskDetailScreen({
     initialData: initialTask, // ✅ IMPORTANT
   });
 
-  console.log('initialData', initialTask, openAdviceComposer);
-
   const task = taskData ?? initialTask;
   const isOwner = useIsOwner(task?.userId);
   const hasHelpers = !!task?.helpers?.length;
@@ -92,14 +93,44 @@ export default function TaskDetailScreen({
   const hasPushed = pushData?.hasPushed || false;
   const pushCount = pushData?.pushCount || 0;
   const hasVoted = task?.hasVoted;
+  const hasReminded = task?.hasReminded;
+
   const { emoji } = getTypeVisual(task?.type ?? TaskTypeEnum.Advice);
+
+  const { mutate: addReminder } = useAddReminder(task?.id ?? '');
 
   const { mutate: completeTask, isPending: isMarkingPending } = useCompleteTask();
   const { mutate: incompleteTask, isPending: isUnMarkingPending } = useInCompleteTask();
 
-  useEffect(() => {
-    console.log('🟢 hasVoted changed:', task?.hasVoted);
-  }, [task?.hasVoted]);
+  const openReminderComposer = React.useCallback(() => {
+    if (!task) return;
+
+    openReminderMessageSheet({
+      taskName: task.name || 'Someone',
+      taskText: task.text,
+      onSend: msg =>
+        new Promise<void>((resolve, reject) => {
+          addReminder(msg, {
+            onSuccess: () => {
+              showToast({
+                type: 'success',
+                title: 'Sent 🎉',
+                message: 'Your reminder has been sent!',
+              });
+              resolve();
+            },
+            onError: (err: any) => {
+              showToast({
+                type: 'error',
+                title: 'Error',
+                message: err?.response?.data?.error || 'Failed to send reminder.',
+              });
+              reject(err);
+            },
+          });
+        }),
+    });
+  }, [task, addReminder, openReminderMessageSheet]);
 
   const push = usePushInteraction({
     hasPushed,
@@ -177,16 +208,73 @@ export default function TaskDetailScreen({
 
   const footerContent = React.useMemo(() => {
     if (!task) return null;
-    if (task.type === TaskTypeEnum.Reminder && !hasPushed) {
+    if (task.type === TaskTypeEnum.Reminder) {
+      // OWNER
+      if (isOwner) {
+        // If owner already reminded (or you can decide based on reminderNoteCount)
+        if (task.hasReminded) {
+          return (
+            <AnimatedBottomButtonWithHeader
+              visible
+              title="✅ Reminder sent"
+              onPress={() => {}}
+              isLoading={false}
+              buttonColor={colors.border}
+              containerColor={colors.onPrimary}
+              buttonHeader="You've already sent a reminder."
+              // If your component supports it:
+              // disabled
+            />
+          );
+        }
+
+        // Owner can send reminder to self (if that's your intended behavior)
+        return (
+          <AnimatedBottomButtonWithHeader
+            visible={false}
+            title={`✅ You nudged ${getFirstName(task.name)}`}
+            onPress={() => {}}
+            isLoading={false}
+            buttonColor={colors.border}
+            containerColor={colors.onPrimary}
+            buttonHeader="You’ve already sent a reminder."
+            showButton={false}
+            // disabled
+          />
+        );
+      }
+
+      // NON-OWNER
+      if (task.hasReminded) {
+        return (
+          <AnimatedBottomButtonWithHeader
+            visible
+            title={`✅ You nudged ${getFirstName(task.name)}`}
+            onPress={() => {}}
+            isLoading={false}
+            buttonColor={colors.border}
+            containerColor={colors.onPrimary}
+            buttonHeader="You’ve already sent a reminder."
+            showButton={false}
+
+            // disabled
+          />
+        );
+      }
+
+      // NON-OWNER — can nudge (same as your PushButton logic)
       return (
         <AnimatedBottomButtonWithHeader
           visible
-          title={(isOwner ? '💪 ' : emoji) + `Push ${isOwner ? 'myself' : getFirstName(task.name)}`}
-          onPress={push.handlePush}
+          title={`${emoji} Send reminder`}
+          onPress={() => {
+            if (!checkAuthThenNavigate(undefined, undefined, { authContext: 'Reminder' })) return;
+            openReminderComposer();
+          }}
           isLoading={isPending}
           buttonColor={colors.reminderBgHardest}
           containerColor={colors.onPrimary}
-          buttonHeader="A small push can make a big difference."
+          buttonHeader="A small nudge can make a big difference."
         />
       );
     }
@@ -279,6 +367,8 @@ export default function TaskDetailScreen({
     emoji,
     isPending,
     hasVoted,
+    hasReminded,
+    openReminderComposer,
   ]);
 
   const renderAdvice = React.useCallback(() => {
@@ -396,6 +486,7 @@ export default function TaskDetailScreen({
   }, [task, isOwner]);
 
   const renderReminder = React.useCallback(() => {
+    const remindAtDateAndTime = new Date(task?.remindAt);
     return (
       <>
         <TaskDetailHeader task={task} />
@@ -405,7 +496,7 @@ export default function TaskDetailScreen({
         {/* <Height size={vs(14)} /> */}
 
         <TaskStatusRow
-          // containerStyle={{ paddingBottom: vs() }}
+          // containerStyle={{ paddingBottom: vs(0) }}
           completed={task.completed}
           viewsCount={task.viewCount || 0}
           isOwner={isOwner}
@@ -413,6 +504,15 @@ export default function TaskDetailScreen({
             task.completed ? incompleteTask(task.id) : completeTask(task.id);
           }}
           taskType={task.type}
+        />
+        <Height size={vs(2)} />
+
+        <ReminderWhenPicker
+          date={remindAtDateAndTime}
+          time={remindAtDateAndTime}
+          readOnly
+          removeHeading
+          removeBottomDescription
         />
 
         {(isOwner || hasHelpers) && (
@@ -425,7 +525,7 @@ export default function TaskDetailScreen({
             />
           </>
         )}
-        <Height size={vs(14)} />
+        <Height size={vs(18)} />
 
         <TaskDetailBody task={task} />
       </>
@@ -458,7 +558,7 @@ export default function TaskDetailScreen({
   if (!task) return null;
 
   const bg = getTaskBackgroundVisual(task.type);
-
+  const edges = isAndroid ? ['left', 'right', 'bottom'] : ['top', 'left', 'right', 'bottom'];
   return (
     <View style={{ flex: 1 }}>
       {/* 🔥 Full-screen gradient */}
@@ -472,6 +572,8 @@ export default function TaskDetailScreen({
         // scrollable={task.type !== TaskTypeEnum.Advice}
         scrollable
         footerContent={footerContent}
+        footerHeight={BOTTOM_BUTTON_HEIGHT}
+        edgesProp={edges}
         allowPaddingVertical
         allowPaddingHorizontal
         backgroundColor="transparent"

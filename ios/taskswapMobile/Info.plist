@@ -42,6 +42,8 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Allow local network access to connect to your local server.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>To find friends from you contacts</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

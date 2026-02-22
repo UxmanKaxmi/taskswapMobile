@@ -42,7 +42,7 @@ const taskTypeCopy: Record<
 };
 
 export default function TaskTypeNotification({ item, onPress }: Props) {
-  const taskType = item.taskType || 'advice';
+  const taskType = item.taskType || 'reminder';
 
   const iconName = typeIcons[taskType];
   const typeColor = getTypeColor(taskType);
@@ -51,6 +51,12 @@ export default function TaskTypeNotification({ item, onPress }: Props) {
     verb: 'needs your help',
     preposition: 'with',
   };
+  const senderName = item.sender?.name || item.metadata?.senderName || 'Someone';
+  const rawMessage = item.message?.trim();
+  const messageRemainder =
+    rawMessage && rawMessage.startsWith(senderName)
+      ? rawMessage.slice(senderName.length).trimStart()
+      : undefined;
 
   return (
     <TouchableOpacity
@@ -64,23 +70,49 @@ export default function TaskTypeNotification({ item, onPress }: Props) {
 
       <View style={styles.textContainer}>
         <TextElement variant="caption" style={notificationStyles.notifyText}>
-          <TextElement variant="caption" weight="bold" style={notificationStyles.nameText}>
-            {item.sender?.name || 'Someone'}
-          </TextElement>{' '}
-          {copy.verb}{' '}
-          {copy.preposition !== undefined && (
+          {item.type === 'reminder' ? (
             <>
-              {copy.preposition && `${copy.preposition} `}
-              <TextElement
-                variant="caption"
-                weight="600"
-                style={{ textTransform: 'capitalize', color: typeColor }}
-              >
-                {taskType}
-              </TextElement>
+              <TextElement variant="caption" weight="bold" style={notificationStyles.nameText}>
+                {senderName}
+              </TextElement>{' '}
+              left you a{' '}
+              <TextElement variant="caption" weight="600" style={{ color: typeColor }}>
+                Reminder
+              </TextElement>{' '}
+              note
+            </>
+          ) : rawMessage ? (
+            messageRemainder ? (
+              <>
+                <TextElement variant="caption" weight="bold" style={notificationStyles.nameText}>
+                  {senderName}
+                </TextElement>{' '}
+                {messageRemainder}
+              </>
+            ) : (
+              rawMessage
+            )
+          ) : (
+            <>
+              <TextElement variant="caption" weight="bold" style={notificationStyles.nameText}>
+                {senderName}
+              </TextElement>{' '}
+              {copy.verb}{' '}
+              {copy.preposition !== undefined && (
+                <>
+                  {copy.preposition && `${copy.preposition} `}
+                  <TextElement
+                    variant="caption"
+                    weight="600"
+                    style={{ textTransform: 'capitalize', color: typeColor }}
+                  >
+                    {taskType}
+                  </TextElement>
+                </>
+              )}
+              {copy.suffix ? ` ${copy.suffix}` : null}
             </>
           )}
-          {copy.suffix ? ` ${copy.suffix}` : null}
         </TextElement>
 
         <TextElement variant="caption" style={notificationStyles.timeAgoText} color="muted">

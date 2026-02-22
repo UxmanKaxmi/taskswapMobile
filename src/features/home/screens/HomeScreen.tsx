@@ -1,48 +1,32 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { View, TouchableOpacity, StyleSheet, RefreshControl, StatusBar } from 'react-native';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { View, StyleSheet, RefreshControl, ListRenderItem, Alert } from 'react-native';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
-import { Task, TaskType, TaskTypeEnum } from '@features/Tasks/types/tasks';
+import { Task, TaskTypeEnum } from '@features/Tasks/types/tasks';
 
 import TextElement from '@shared/components/TextElement/TextElement';
-import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
-import ListView from '@shared/components/ListView/ListView';
-import OutlineButton from '@shared/components/Buttons/OutlineButton';
-import HeadingText from '@shared/components/HeadingText';
-import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
 import { Layout } from '@shared/components/Layout';
 import { Height } from '@shared/components/Spacing';
-import { colors, spacing, typography } from '@shared/theme';
+import { colors, spacing } from '@shared/theme';
 import { AppStackParamList } from '@navigation/types/navigation';
 
 import ReminderCard from '../components/ReminderCard';
 import DecisionCard from '../components/DecisionCard';
-import {
-  AdviceTask,
-  DecisionTask,
-  FeedFilter,
-  MotivationTask,
-  ReminderTask,
-  TabKey,
-} from '../types/home';
+import { FeedFilter, TabKey } from '../types/home';
 import { vs } from 'react-native-size-matters';
 import { showToast } from '@shared/utils/toast';
 import MotivationCard from '../components/MotivationCard';
 import AdviceCard from '../components/AdviceCard';
-import NotificationTester from '@features/Debug/NotificationTester';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { navigateToTaskDetails, useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
-import Row from '@shared/components/Layout/Row';
-import { Icon } from '@shared/components/Icons';
-import Ripple from '@shared/components/Buttons/Ripple';
 import FilterTasksModal from '@features/Tasks/components/FilterTasksModal';
 import { LaunchModalHost } from '@features/launchModals';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
   useAnimatedScrollHandler,
   interpolate,
+  interpolateColor,
   Extrapolation,
 } from 'react-native-reanimated';
 import { haptics } from '@shared/utils/haptics';
@@ -50,8 +34,24 @@ import { Greeting } from '@shared/components/Greeting';
 import HomeHeader from '../components/HomeHeader';
 import HorizontalFilterTabs from '../components/HorizontalFilterTabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { isAndroid, isIOS } from '@shared/utils/constants';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isAndroid } from '@shared/utils/constants';
+import { useSecondaryProfileMenuItems } from '@features/MyProfile/hooks/useSecondaryProfileMenuItems';
+
+const ALL_TASK_TYPES: TaskTypeEnum[] = [
+  TaskTypeEnum.Motivation,
+  TaskTypeEnum.Decision,
+  TaskTypeEnum.Reminder,
+  TaskTypeEnum.Advice,
+];
+const MIN_REFRESH_LOADER_MS = 450;
+
+const TAB_TO_TYPES: Record<TabKey, TaskTypeEnum[]> = {
+  all: ALL_TASK_TYPES,
+  motivation: [TaskTypeEnum.Motivation],
+  decision: [TaskTypeEnum.Decision],
+  reminder: [TaskTypeEnum.Reminder],
+  advice: [TaskTypeEnum.Advice],
+};
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
@@ -63,15 +63,36 @@ export default function HomeScreen() {
 
   const [filterModalVisible, setFilterModalVisible] = useState(false);
 
-  //Animation
+  // Animation
   const insets = useSafeAreaInsets();
-  const TOP_INSET = isIOS ? insets.top : 0;
-  const HEADER_EXPANDED = isAndroid ? vs(160) : vs(130) + TOP_INSET;
-  const HEADER_COLLAPSED = isAndroid ? vs(50) : vs(30) + TOP_INSET;
+  const TOP_INSET = insets.top;
+  const HEADER_EXPANDED = (isAndroid ? 170 : vs(130)) + TOP_INSET;
+  const HEADER_COLLAPSED = (isAndroid ? vs(40) : vs(30)) + TOP_INSET;
   const SCROLL_DISTANCE = HEADER_EXPANDED - HEADER_COLLAPSED;
   const scrollY = useSharedValue(0);
+  const refreshProgressOffset = HEADER_EXPANDED + spacing.xs;
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
+  const secondaryItems = useSecondaryProfileMenuItems();
 
+  const openDevMenu = useCallback(() => {
+    if (!secondaryItems.length) return;
+
+    Alert.alert(
+      'Developer Tools',
+      undefined,
+      [
+        ...secondaryItems.map(item => ({
+          text: item.label,
+          style: item.destructive ? ('destructive' as const) : ('default' as const),
+          onPress: () => {
+            item.onPress();
+          },
+        })),
+        { text: 'Cancel', style: 'cancel' as const },
+      ],
+      { cancelable: true },
+    );
+  }, [secondaryItems]);
 
   const headerStyle = useAnimatedStyle(() => {
     const height = interpolate(
@@ -84,30 +105,10 @@ export default function HomeScreen() {
     return { height };
   });
 
-  const greetingStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      scrollY.value,
-      [0, SCROLL_DISTANCE * 0.6],
-      [1, 0],
-      Extrapolation.CLAMP,
-    );
-
-    const translateY = interpolate(
-      scrollY.value,
-      [0, SCROLL_DISTANCE],
-      [0, -12],
-      Extrapolation.CLAMP,
-    );
-
-    return {
-      opacity,
-      transform: [{ translateY }],
-    };
-  });
-
   const onScroll = useAnimatedScrollHandler({
     onScroll: event => {
-      scrollY.value = event.contentOffset.y;
+      // Ignore negative pull-to-refresh overscroll to avoid header jitter at top.
+      scrollY.value = Math.max(0, event.contentOffset.y);
     },
   });
 
@@ -115,13 +116,16 @@ export default function HomeScreen() {
     const progress = interpolate(scrollY.value, [0, SCROLL_DISTANCE], [0, 1], Extrapolation.CLAMP);
 
     if (isAndroid) {
-      // ✅ ANDROID: elevation ONLY
       return {
-        elevation: progress * 4,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: interpolateColor(
+          progress,
+          [0, 1],
+          ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.12)'],
+        ),
       };
     }
 
-    // ✅ iOS ONLY shadow props
     return {
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
@@ -130,51 +134,27 @@ export default function HomeScreen() {
     };
   });
 
-  const TAB_TO_TYPES: Record<TabKey, TaskTypeEnum[]> = {
-    all: [
-      TaskTypeEnum.Motivation,
-      TaskTypeEnum.Decision,
-      TaskTypeEnum.Reminder,
-      TaskTypeEnum.Advice,
-    ],
-    motivation: [TaskTypeEnum.Motivation],
-    decision: [TaskTypeEnum.Decision],
-    reminder: [TaskTypeEnum.Reminder],
-    advice: [TaskTypeEnum.Advice],
-  };
-
   const [activeTab, setActiveTab] = useState<TabKey>('all');
 
   const [feedFilter, setFeedFilter] = useState<FeedFilter>({
     time: 'latest',
-    types: [
-      TaskTypeEnum.Motivation,
-      TaskTypeEnum.Decision,
-      TaskTypeEnum.Reminder,
-      TaskTypeEnum.Advice,
-    ],
+    types: [...ALL_TASK_TYPES],
   });
 
-  const rotation = useSharedValue(0);
-
-  useEffect(() => {
-    rotation.value = withTiming(filterModalVisible ? 180 : 0, {
-      duration: 220,
-    });
-  }, [filterModalVisible]);
-  const animatedIconStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
-
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
+    const startedAt = Date.now();
     try {
       haptics.selection();
       setRefreshing(true);
       await refetch();
     } finally {
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < MIN_REFRESH_LOADER_MS) {
+        await new Promise(resolve => setTimeout(resolve, MIN_REFRESH_LOADER_MS - elapsed));
+      }
       setRefreshing(false);
     }
-  };
+  }, [refetch]);
 
   const collapsibleContentStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
@@ -197,11 +177,6 @@ export default function HomeScreen() {
     };
   });
 
-  // const tasks = useMemo(() => {
-  //   if (filter === 'all') return allTasks;
-  //   return allTasks.filter(task => task.type === filter);
-  // }, [allTasks, filter]);
-
   const tasks = useMemo(() => {
     let list = allTasks;
 
@@ -214,13 +189,7 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      StatusBar.setBackgroundColor(colors.surface);
-
       refetch();
-
-      return () => {
-        StatusBar.setBackgroundColor(colors.background);
-      };
     }, [refetch]),
   );
 
@@ -235,85 +204,74 @@ export default function HomeScreen() {
     }
   }, [isError]);
 
-  const openFriendsProfileScreen = useCallback(
-    (id: string) => {
-      if (id === user?.id) {
-        // ✅ Navigate to last profile tab instead
-        navigation.navigate('Tabs', {
-          screen: 'Profile',
-        });
-      } else {
-        navigation.navigate('FriendsProfileScreen', { id });
-      }
+  const onPressTask = useCallback(
+    (task: Task) => {
+      navigateToTaskDetails(navigation, task);
     },
-    [navigation, user?.id],
+    [navigation],
   );
 
-  const renderTaskNew = ({ item }: { item: Task }) => {
-    if (item.id === '2a42981b-782f-4fc6-94dc-2f6f09a32088') {
-      console.log('item', item);
-    }
-    switch (item.type) {
-      case 'decision':
-        return (
-          <DecisionCard
-            key={item.id}
-            task={item as any}
-            onPressCard={() => navigateToTaskDetails(navigation, item)}
-            onPressSuggest={t => console.log('onPressProfile', t.id)}
-            onPressView={t => console.log('View for', t.id)}
-          />
-        );
-      case 'reminder':
-        return (
-          <ReminderCard
-            onRemind={() => {}}
-            key={item.id}
-            task={item as any}
-            onPressCard={() => navigateToTaskDetails(navigation, item)}
-            onPressProfile={t => openFriendsProfileScreen(t.userId)}
-            onPressView={t => console.log('View for', t.id)}
-          />
-        );
-      case 'motivation':
-        return (
-          <MotivationCard
-            key={item.id}
-            task={item as any}
-            onPressCard={() => navigateToTaskDetails(navigation, item)}
-            onPressSuggest={t => console.log('Suggest for', t.id)}
-            onPressView={t => console.log('View for', t.id)}
-          />
-        );
-      case 'advice':
-        return (
-          <AdviceCard
-            key={item.id}
-            task={item as any}
-            onPressCard={() => navigateToTaskDetails(navigation, item)}
-            onPressSuggest={t => {
-              if (
-                checkAuthThenNavigate(
-                  'TaskDetail',
-                  {
-                    taskId: t.id,
-                    openAdviceComposer: true,
-                  },
-                  {
-                    authContext: 'Advice',
-                  },
-                )
-              ) {
-                return;
-              }
-            }}
-            onPressView={t => console.log('View for', t.id)}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+  const onNoopTaskAction = useCallback((_task: Task) => {}, []);
+
+  const onSuggestAdvice = useCallback(
+    (task: Task) => {
+      checkAuthThenNavigate(
+        'TaskDetail',
+        {
+          taskId: task.id,
+          openAdviceComposer: true,
+        },
+        {
+          authContext: 'Advice',
+        },
+      );
+    },
+    [checkAuthThenNavigate],
+  );
+
+  const keyExtractor = useCallback((item: Task) => item.id, []);
+
+  const getItemType = useCallback((item: Task) => item.type, []);
+
+  const listContentStyle = useMemo(
+    () => ({
+      paddingTop: HEADER_EXPANDED,
+      paddingBottom: spacing.lg,
+    }),
+    [HEADER_EXPANDED],
+  );
+
+  const renderTaskNew = useCallback<ListRenderItem<Task>>(
+    ({ item }) => {
+      switch (item.type) {
+        case 'decision':
+          return <DecisionCard task={item as any} onPressCard={onPressTask as any} />;
+        case 'reminder':
+          return <ReminderCard task={item as any} onPressCard={onPressTask as any} />;
+        case 'motivation':
+          return (
+            <MotivationCard
+              task={item as any}
+              onPressCard={onPressTask as any}
+              onPressSuggest={onNoopTaskAction as any}
+              onPressView={onNoopTaskAction as any}
+            />
+          );
+        case 'advice':
+          return (
+            <AdviceCard
+              task={item as any}
+              onPressCard={onPressTask as any}
+              onPressSuggest={onSuggestAdvice as any}
+              onPressView={onNoopTaskAction as any}
+            />
+          );
+        default:
+          return null;
+      }
+    },
+    [onPressTask, onNoopTaskAction, onSuggestAdvice],
+  );
 
   return (
     <Layout allowPaddingHorizontal={false} useSafeArea={false}>
@@ -322,6 +280,7 @@ export default function HomeScreen() {
           filterOpen={filterModalVisible}
           onPressSearch={() => setFilterModalVisible(true)}
           onPressFilter={() => setFilterModalVisible(true)}
+          onPressMore={openDevMenu}
         />
 
         <Animated.View style={collapsibleContentStyle}>
@@ -344,28 +303,29 @@ export default function HomeScreen() {
       <Animated.FlatList
         data={tasks}
         renderItem={renderTaskNew}
-        keyExtractor={item => item.id}
+        keyExtractor={keyExtractor}
+        getItemType={getItemType}
         onScroll={onScroll}
         scrollEventThrottle={16}
-        // refreshing={refreshing}
-        // onRefresh={handleRefresh}
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={7}
+        updateCellsBatchingPeriod={50}
+        removeClippedSubviews={isAndroid}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={colors.muted} // iOS spinner
-            colors={[colors.muted]} // Android spinner
-            progressViewOffset={HEADER_EXPANDED} // 🔥 THIS FIXES IT
+            tintColor={colors.placeHolder}
+            colors={[colors.placeHolder]}
+            progressViewOffset={refreshProgressOffset}
           />
         }
-        contentContainerStyle={{
-          paddingTop: HEADER_EXPANDED,
-          paddingBottom: spacing.lg,
-        }}
+        contentContainerStyle={listContentStyle}
         ListEmptyComponent={
-          <View style={{ flex: 1, alignItems: 'flex-start', marginLeft: 20 }}>
+          <View style={styles.emptyContainer}>
             <Height size={20} />
-            <TextElement variant="body" color="muted">
+            <TextElement variant="body" color="placeHolder">
               {isLoading ? 'Loading tasks...' : 'No tasks found.'}
             </TextElement>
           </View>
@@ -373,14 +333,6 @@ export default function HomeScreen() {
         ListFooterComponent={<View style={{ marginBottom: vs(50) }} />}
         showsVerticalScrollIndicator={false}
       />
-
-      {/* <AnimatedBottomButton
-        title="Add Task"
-        onPress={() => signOut()}
-        // onPress={() => navigation.navigate('FindFriendsScreen')}
-        style={styles.addButton}
-        visible={true}
-      /> */}
 
       <FilterTasksModal
         visible={filterModalVisible}
@@ -410,33 +362,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 20,
-    backgroundColor: 'white', // or theme background
-    // paddingHorizontal: spacing.md,
+    backgroundColor: 'white',
     paddingBottom: spacing.sm,
   },
-  container: {},
-  filters: {
-    flexDirection: 'row',
-  },
-  taskRow: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-  },
-  borderSeparator: {
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
-  },
-  addButton: {
-    marginTop: 16,
-  },
-  tagsButton: {
-    width: 120,
-    marginEnd: spacing.sm,
-    borderRadius: 50,
-    paddingVertical: spacing.sm,
-    marginTop: spacing.sm,
-  },
-  tagsText: {
-    fontSize: typography.small,
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'flex-start',
+    marginLeft: 20,
   },
 });

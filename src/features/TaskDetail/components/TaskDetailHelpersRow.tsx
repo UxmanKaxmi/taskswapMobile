@@ -17,7 +17,7 @@ type Props = {
 function formatNames(helpers: HelperUser[]) {
   if (helpers.length === 1) return helpers[0].name;
   if (helpers.length === 2) return `${helpers[0].name} & ${helpers[1].name}`;
-  if (helpers.length === 3) return `${helpers[0].name}, ${helpers[1].name} & ${helpers[2].name}`;
+  // if (helpers.length === 3) return `${helpers[0].name}, ${helpers[1].name} & ${helpers[2].name}`;
   return `${helpers[0].name}, ${helpers[1].name} +${helpers.length - 2}`;
 }
 
@@ -56,7 +56,7 @@ export default function TaskDetailHelpersRow({ helpers, onPress, taskType, isOwn
       {/* Avatars */}
       <View style={styles.avatarStack}>
         {visible.map((h, index) => (
-          <View key={h.id} style={{ marginLeft: index === 0 ? 0 : -12 }}>
+          <View key={h.id} style={{ marginLeft: index === 0 ? 0 : ms(-14) }}>
             <Avatar uri={h.photo} fallback={h.name?.[0] ?? '?'} size={28} />
           </View>
         ))}

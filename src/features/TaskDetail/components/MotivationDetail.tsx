@@ -63,54 +63,6 @@ export default function MotivationDetail({ task }: Props) {
       createdAt: p.createdAt,
     }));
 
-  const mockPushes = [
-    {
-      id: '1',
-      type: 'single',
-      user: {
-        name: 'Ali',
-        avatar: 'https://i.pravatar.cc/150?img=1',
-      },
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      type: 'single',
-      user: {
-        name: 'Sara',
-        avatar: 'https://i.pravatar.cc/150?img=2',
-      },
-      createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-    },
-    {
-      id: '3',
-      type: 'single',
-      user: {
-        name: 'John',
-        avatar: 'https://i.pravatar.cc/150?img=3',
-      },
-      createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-    },
-    {
-      id: '4',
-      type: 'single',
-      user: {
-        name: 'Fatima',
-        avatar: 'https://i.pravatar.cc/150?img=4',
-      },
-      createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    },
-    {
-      id: '5',
-      type: 'single',
-      user: {
-        name: 'Usman',
-        avatar: 'https://i.pravatar.cc/150?img=5',
-      },
-      createdAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
-    },
-  ];
-
   return (
     <>
       <SectionHeader label={'Recent Support'} icon="push" />

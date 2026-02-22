@@ -12,7 +12,12 @@ const getPackagerHost = () => {
   if (!__DEV__) return null;
   const scriptURL = NativeModules?.SourceCode?.scriptURL || '';
   const match = scriptURL.match(/https?:\/\/([^/:]+)(:\d+)?\//);
-  return '192.168.1.13';
+  const host = match?.[1] || null;
+
+  // Simulator often resolves to localhost; let env config drive that case.
+  if (!host || host === 'localhost' || host === '127.0.0.1') return null;
+
+  return host;
 };
 
 const DEV_BASE_URL = (() => {

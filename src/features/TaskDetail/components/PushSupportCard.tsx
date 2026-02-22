@@ -88,7 +88,7 @@ export default function PushSupportCard({ pushes, isOwner, currentUserId, didUse
     if (didUserPush && otherPushCount > 0) return 'You joined the support.';
     if (didUserPush) return 'You pushed this.';
 
-    return 'Recent support';
+    return 'Support received';
   }, [isOwner, didUserPush, otherPushCount]);
 
   /* --------------------------------------------------
