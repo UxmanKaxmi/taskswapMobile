@@ -64,20 +64,19 @@ export default function BottomTabsAndroid({ route }: any) {
           tabBarStyle: [
             {
               paddingTop: vs(8),
-              height: vs(60),
+              height: 70,
               paddingBottom: vs(6),
               boxShadow: '0px -6px 12px rgba(0,0,0,0.08)', // ← TOP SHADOW
 
               position: 'absolute',
               left: 25,
               right: 25,
-              bottom: isAndroid ? tabBarBottomOffset : vs(10),
+              bottom: isAndroid ? tabBarBottomOffset : vs(14),
               borderTopEndRadius: 30,
               borderTopStartRadius: 30,
 
               backgroundColor: colors.surface,
               paddingHorizontal: 16,
-
               // shadowRadius: 12,
               // elevation: 12,
             },
@@ -86,7 +85,7 @@ export default function BottomTabsAndroid({ route }: any) {
           tabBarActiveTintColor: colors.primary, // ✅ your brand's active color
           tabBarInactiveTintColor: colors.tabInactive,
           tabBarLabelStyle: {
-            paddingTop: vs(2),
+            // paddingTop: vs(2),
             fontSize: ms(10),
           },
 

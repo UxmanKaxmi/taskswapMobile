@@ -1,5 +1,12 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { View, StyleSheet, RefreshControl, ListRenderItem, Alert } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  RefreshControl,
+  ListRenderItem,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
 import { Task, TaskTypeEnum } from '@features/Tasks/types/tasks';
@@ -12,7 +19,7 @@ import { AppStackParamList } from '@navigation/types/navigation';
 
 import ReminderCard from '../components/ReminderCard';
 import DecisionCard from '../components/DecisionCard';
-import { FeedFilter, TabKey } from '../types/home';
+import { FeedFilter, TabKey, MotivationTask } from '../types/home';
 import { vs } from 'react-native-size-matters';
 import { showToast } from '@shared/utils/toast';
 import MotivationCard from '../components/MotivationCard';
@@ -20,7 +27,7 @@ import AdviceCard from '../components/AdviceCard';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { navigateToTaskDetails, useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 import FilterTasksModal from '@features/Tasks/components/FilterTasksModal';
-import { LaunchModalHost } from '@features/launchModals';
+import { LaunchModalHost } from '@features/LaunchModals';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -56,12 +63,22 @@ const TAB_TO_TYPES: Record<TabKey, TaskTypeEnum[]> = {
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
-  const { data: allTasks = [], isLoading, isError, error, refetch } = useTasksQuery();
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useTasksQuery();
 
   const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
   const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [shareTask, setShareTask] = useState<MotivationTask | null>(null);
 
   // Animation
   const insets = useSafeAreaInsets();
@@ -177,15 +194,17 @@ export default function HomeScreen() {
     };
   });
 
+  const flattenedTasks = useMemo(() => data?.pages.flatMap(page => page.data) ?? [], [data]);
+
   const tasks = useMemo(() => {
-    let list = allTasks;
+    let list = flattenedTasks;
 
     if (feedFilter.types.length) {
       list = list.filter(task => feedFilter.types.includes(task.type));
     }
 
     return list;
-  }, [allTasks, feedFilter.types]);
+  }, [flattenedTasks, feedFilter.types]);
 
   useFocusEffect(
     useCallback(() => {
@@ -212,6 +231,10 @@ export default function HomeScreen() {
   );
 
   const onNoopTaskAction = useCallback((_task: Task) => {}, []);
+
+  const handleShareMotivation = useCallback((task: MotivationTask) => {
+    setShareTask(task);
+  }, []);
 
   const onSuggestAdvice = useCallback(
     (task: Task) => {
@@ -251,10 +274,11 @@ export default function HomeScreen() {
         case 'motivation':
           return (
             <MotivationCard
-              task={item as any}
+              task={item as MotivationTask}
               onPressCard={onPressTask as any}
               onPressSuggest={onNoopTaskAction as any}
               onPressView={onNoopTaskAction as any}
+              onPressShare={handleShareMotivation}
             />
           );
         case 'advice':
@@ -330,7 +354,23 @@ export default function HomeScreen() {
             </TextElement>
           </View>
         }
-        ListFooterComponent={<View style={{ marginBottom: vs(50) }} />}
+        ListFooterComponent={() => {
+          if (!isFetchingNextPage) {
+            return (
+              <View style={styles.footerSpinner}>
+                <ActivityIndicator size="small" color={colors.placeHolder} />
+              </View>
+            );
+          }
+
+          return <View style={{ marginBottom: vs(50) }} />;
+        }}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        onEndReachedThreshold={0.5}
         showsVerticalScrollIndicator={false}
       />
 
@@ -369,5 +409,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-start',
     marginLeft: 20,
+  },
+  footerSpinner: {
+    marginTop: vs(20),
+    marginBottom: vs(20),
+    alignItems: 'center',
   },
 });

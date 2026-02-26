@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { APP_ENV } from '@shared/utils/constants';
 import { triggerLogout } from '@shared/api/authBridge';
-import { resetAllLaunchModalsSeen } from '@features/launchModals/launchModals.storage';
+import { resetAllLaunchModalsSeen } from '@features/LaunchModals/launchModals.storage';
 
 export type SecondaryProfileMenuItem = {
   label: string;

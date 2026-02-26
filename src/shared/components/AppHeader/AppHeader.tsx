@@ -56,7 +56,11 @@ export default function AppHeader({
           </View>
         )}
 
-        {right !== null ? right : <Width size={ms(50)} style={styles.side} />}
+        <View style={styles.rightSide}>
+          <View style={styles.rightSide}>
+            {right !== null ? right : <Width size={ms(50)} style={styles.side} />}
+          </View>
+        </View>
       </View>
       {inDevelopment && (
         <View style={styles.devBadge}>
@@ -97,6 +101,11 @@ const styles = StyleSheet.create({
     left: -8,
     justifyContent: 'flex-start',
     // backgroundColor: 'red',
+  },
+  rightSide: {
+    width: ms(50),
+    alignItems: 'flex-end',
+    // backgroundColor: 'yellow',
   },
   devBadge: {
     flexDirection: 'row',

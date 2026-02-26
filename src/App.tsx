@@ -14,7 +14,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ModalProvider } from '@shared/components/ModalProvider';
 import { colors } from '@shared/theme/colors';
-import { incrementAppLaunchCount } from '@features/launchModals';
+import { incrementAppLaunchCount } from '@features/LaunchModals';
 
 const queryClient = new QueryClient();
 const loginImage = require('@assets/images/loginImage5.png');

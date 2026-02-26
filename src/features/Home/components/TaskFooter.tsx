@@ -330,9 +330,12 @@ export default function TaskFooter({
         } */}
 
         {/* Share */}
-        {/* <Ripple style={styles.action} onPress={shareHandler}>
-          <Icon name="share-outline" size={16} color={colors.muted} set="ion" />
-        </Ripple> */}
+        {/* {shareHandler && (
+          <Ripple style={styles.action} onPress={shareHandler}>
+            <Icon set="ion" name="share-outline" size={ms(12)} color={colors.muted} />
+            {/* <TextElement style={styles.count}>Share</TextElement> */}
+        {/* </Ripple> */}
+        {/* )} */}
 
         {/* Extra (votes/helpers/etc) */}
         {/*

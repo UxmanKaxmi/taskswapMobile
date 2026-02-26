@@ -1,13 +1,28 @@
 import { api } from '@shared/api/axios';
-import { Task, TaskType } from '../types/tasks';
+import { Task } from '../types/tasks';
 import { ApiRoute, buildRoute } from '@shared/api/apiRoutes';
 import { CreateTaskPayload } from '@features/AddTask';
 
-/**
- * Fetch all tasks for the authenticated user.
- */
-export async function getTasks(): Promise<Task[]> {
-  const response = await api.get(ApiRoute.TASKS);
+export const TASK_PAGE_LIMIT = 20;
+
+export type TaskPage = {
+  data: Task[];
+  meta: {
+    hasMore: boolean;
+    nextCursor: string | null;
+  };
+};
+
+export async function getTasksPage(
+  cursor?: string | null,
+  limit = TASK_PAGE_LIMIT,
+): Promise<TaskPage> {
+  const response = await api.get<TaskPage>(ApiRoute.TASKS, {
+    params: {
+      cursor: cursor ?? undefined,
+      limit,
+    },
+  });
   return response.data;
 }
 

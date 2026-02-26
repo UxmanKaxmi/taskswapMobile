@@ -1,5 +1,5 @@
 // src/features/tasks/screens/TaskDetailScreen.tsx
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@navigation/types/navigation';
@@ -21,7 +21,7 @@ import {
 import TaskCardGradient from '@features/Home/components/TaskCardGradient';
 import { cardStyles } from '@features/Home/components/styles';
 import { Height } from '@shared/components/Spacing';
-import { vs } from 'react-native-size-matters';
+import { ms, vs } from 'react-native-size-matters';
 import { TaskThemeContainer } from '../components/TaskThemeContainer';
 import TaskDetailBody from '../components/TaskDetailBody';
 import TaskDetailCaption from '../components/TaskDetailCaption';
@@ -31,7 +31,7 @@ import { isAndroid } from '@shared/utils/constants';
 import TaskDetailHelpers from '../components/TaskDetailHelpers';
 import { useAuth, useIsOwner } from '@features/Auth/AuthProvider';
 import { useFollowers } from '@features/User/hooks/useFollowers';
-import { HelperUser } from '@features/Home/types/home';
+import { HelperUser, Task as ShareTask } from '@features/Home/types/home';
 import ViewHelpersModal from '../components/ViewHelpersModal';
 import { usePushInteraction } from '@features/Home/hooks/usePushInteraction';
 import { useTaskPushes, useToggleTaskPush } from '@features/Tasks/hooks/useTaskPush';
@@ -57,6 +57,10 @@ import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 import ReminderWhenPicker from '@features/AddTask/components/ReminderWhenPicker';
 import { useAddReminder } from '@features/Home/hooks/useAddTask';
 import { useModal } from '@shared/components/ModalProvider';
+import TextElement from '@shared/components/TextElement/TextElement';
+import Ripple from '@shared/components/Buttons/Ripple';
+import Icon from '@shared/components/Icons/Icon';
+import ShareModal from '@features/Share/components/ShareModal';
 export default function TaskDetailScreen({
   route,
 }: NativeStackScreenProps<AppStackParamList, 'TaskDetail'>) {
@@ -66,6 +70,8 @@ export default function TaskDetailScreen({
   const [showHelperModal, setShowHelperModal] = React.useState(false);
   const [adviceText, setAdviceText] = React.useState('');
   const [consumedAutoOpen, setConsumedAutoOpen] = React.useState(false);
+  const [shareTask, setShareTask] = useState<ShareTask | null>(null);
+
   const { user } = useAuth();
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
   const { openReminderMessageSheet } = useModal();
@@ -101,6 +107,10 @@ export default function TaskDetailScreen({
 
   const { mutate: completeTask, isPending: isMarkingPending } = useCompleteTask();
   const { mutate: incompleteTask, isPending: isUnMarkingPending } = useInCompleteTask();
+
+  const handleShareTask = useCallback((task: ShareTask) => {
+    setShareTask(task);
+  }, []);
 
   const openReminderComposer = React.useCallback(() => {
     if (!task) return;
@@ -578,7 +588,14 @@ export default function TaskDetailScreen({
         allowPaddingHorizontal
         backgroundColor="transparent"
       >
-        <AppHeader title="Task Detail" />
+        <AppHeader
+          title="Task Detail"
+          right={
+            <Ripple style={{}} onPress={() => handleShareTask(task as ShareTask)}>
+              <Icon set="ion" name="share-outline" size={ms(18)} color={colors.text} />
+            </Ripple>
+          }
+        />
         <Height size={vs(20)} />
 
         {renderContent}
@@ -588,6 +605,8 @@ export default function TaskDetailScreen({
         helpers={task.helpers}
         onClose={() => setShowHelperModal(false)}
       />
+
+      {shareTask && <ShareModal visible task={shareTask} onClose={() => setShareTask(null)} />}
     </View>
   );
 }

@@ -1,7 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import SelectTaskTypeScreen from '../screens/SelectTaskTypeScreen';
 import AddAdviceScreen from '../screens/AddAdviceScreen';
 import AddMotivationScreen from '../screens/AddMotivationScreen';
 import AddDecisionScreen from '../screens/AddDecisionScreen';
