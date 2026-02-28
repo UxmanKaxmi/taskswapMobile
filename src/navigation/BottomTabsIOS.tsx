@@ -14,6 +14,7 @@ import { useCheckAuthThenNavigate } from './types/navigationUtils';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors } from '@shared/theme';
 import { AppStackParamList } from './types/navigation';
+import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
 
 const Tab = createNativeBottomTabNavigator();
 
@@ -22,10 +23,21 @@ export default function BottomTabsIOS() {
   const { user } = useAuth();
   const { count: unreadCount } = useUnreadNotificationCount();
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
+  const checkAuthForTab = React.useCallback(
+    (e: { preventDefault: () => void }, tabName: keyof AppStackParamList) => {
+      if (!user) {
+        e.preventDefault();
+        navigation.navigate('AuthIntro', {
+          redirectTo: tabName,
+        });
+      }
+    },
+    [navigation, user],
+  );
 
   return (
     <Tab.Navigator
-      tabBarInactiveTintColor={colors.tabInactive}
+      tabBarInactiveTintColor={colors.text}
       tabBarActiveTintColor={colors.primary}
       hapticFeedbackEnabled
       minimizeBehavior="automatic"
@@ -44,7 +56,6 @@ export default function BottomTabsIOS() {
         options={{
           tabBarIcon: ({ focused }) => ({
             sfSymbol: focused ? 'house.fill' : 'house',
-            iconSize: 2, // 👈 SMALL ICON
           }),
         }}
       />
@@ -53,42 +64,53 @@ export default function BottomTabsIOS() {
       <Tab.Screen
         name="Friends"
         component={FriendsMainScreen}
+        listeners={{
+          tabPress: e => {
+            checkAuthForTab(e, 'Friends' as keyof AppStackParamList);
+          },
+        }}
         options={{
           tabBarIcon: ({ focused }) => ({
             sfSymbol: focused ? 'person.2.fill' : 'person.2',
-            iconSize: 16, // 👈 SMALL ICON
           }),
         }}
       />
 
       {/* ADD TASK → FAB BUTTON */}
-      {/* <Tab.Screen
-        name="AddTaskButton"
-        component={HomeScreen}
-        options={{
-          tabBarButton: () => (
-            <TouchableOpacity
-              onPress={() => checkAuthThenNavigate('AddTask')}
-              style={styles.addButtonContainer}
-            >
-              <View style={styles.addButton}>
-                <TextElement style={{ color: '#FFF', fontSize: 26 }}>+</TextElement>
-              </View>
-            </TouchableOpacity>
-          ),
-          tabBarIcon: () => null,
+      <Tab.Screen
+        name="AddTask"
+        component={AddTaskNavigator}
+        listeners={{
+          tabPress: e => {
+            e.preventDefault();
+            checkAuthThenNavigate('AddTask');
+          },
         }}
-      /> */}
+        options={{
+          tabBarIcon: ({ focused }) => ({
+            sfSymbol: 'plus',
+          }),
+
+          preventsDefault: true,
+          role: 'search',
+        }}
+      />
 
       {/* NOTIFICATION */}
       <Tab.Screen
         name="Notification"
         component={NotificationMainScreen}
+        listeners={{
+          tabPress: e => {
+            checkAuthForTab(e, 'Notification' as keyof AppStackParamList);
+          },
+        }}
         options={{
           tabBarIcon: ({ focused }) => ({
             sfSymbol: focused ? 'bell.fill' : 'bell',
-            iconSize: 16, // 👈 SMALL ICON
           }),
+          tabBarBadge:
+            unreadCount > 0 ? (unreadCount > 99 ? '99+' : unreadCount.toString()) : undefined,
         }}
       />
 
@@ -96,10 +118,14 @@ export default function BottomTabsIOS() {
       <Tab.Screen
         name="Profile"
         component={MyProfileMainScreen}
+        listeners={{
+          tabPress: e => {
+            checkAuthForTab(e, 'Profile' as keyof AppStackParamList);
+          },
+        }}
         options={{
           tabBarIcon: ({ focused }) => ({
             sfSymbol: focused ? 'person.crop.circle.fill' : 'person.crop.circle',
-            iconSize: 16, // 👈 SMALL ICON
           }),
         }}
       />

@@ -41,7 +41,10 @@ function formatTimelineTime(dateISO: string) {
 }
 
 function renderSenderLabel(reminder: ReminderNoteDTO) {
-  return reminder.isSenderCurrentUser ? 'You' : (reminder.senderName ?? 'Someone');
+  if (reminder.isSenderCurrentUser) return 'You';
+  const senderName = reminder.senderName?.trim();
+
+  return senderName ? senderName : 'Someone';
 }
 
 export default function ReminderNoteList({
@@ -52,8 +55,9 @@ export default function ReminderNoteList({
   onPressRemainingLink,
   viewAll = false,
 }: Props) {
-  const remainingAnim = useRef(new Animated.Value(viewAll ? 1 : 0)).current;
-  const [renderRemaining, setRenderRemaining] = useState(viewAll);
+  const extraAnim = useRef(new Animated.Value(viewAll ? 1 : 0)).current;
+  const [renderExtra, setRenderExtra] = useState(viewAll);
+  const [extraHeight, setExtraHeight] = useState(0);
 
   const remindersForUI = useMemo(() => {
     const base = reminders;
@@ -78,29 +82,37 @@ export default function ReminderNoteList({
   }, [reminders]);
   const totalRemindersForUI = remindersForUI.length;
   const firstReminder = remindersForUI[0];
-  const remainingReminders = remindersForUI.slice(1);
-  const remainingCount = remainingReminders.length;
-  const shouldShowRemainingLink = !viewAll && totalRemindersForUI > 2 && remainingCount > 0;
+  const extraReminders = remindersForUI.slice(1);
+  const extraCount = extraReminders.length;
+  const shouldShowRemainingLink = !viewAll && extraCount > 0;
+  const showExtra = renderExtra && extraCount > 0;
+  const needsMeasure = viewAll && extraHeight === 0 && extraCount > 0;
 
   useEffect(() => {
     if (viewAll) {
-      setRenderRemaining(true);
-      Animated.timing(remainingAnim, {
+      setRenderExtra(true);
+    }
+  }, [viewAll]);
+
+  useEffect(() => {
+    if (viewAll) {
+      if (extraHeight === 0) return;
+      Animated.timing(extraAnim, {
         toValue: 1,
         duration: 220,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start();
       return;
     }
 
-    Animated.timing(remainingAnim, {
+    Animated.timing(extraAnim, {
       toValue: 0,
       duration: 180,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start(({ finished }) => {
-      if (finished) setRenderRemaining(false);
+      if (finished) setRenderExtra(false);
     });
-  }, [viewAll, remainingAnim]);
+  }, [viewAll, extraAnim, extraHeight]);
 
   if (isLoading)
     return (
@@ -128,12 +140,7 @@ export default function ReminderNoteList({
       <View style={styles.timeline}>
         <View style={styles.rail} />
 
-        <View
-          style={[
-            styles.itemRow,
-            !(renderRemaining && remainingReminders.length > 0) && styles.lastRow,
-          ]}
-        >
+        <View style={[styles.itemRow, !showExtra && styles.lastRow]}>
           <View style={styles.dotWrap}>
             <View style={styles.dotHalo} />
             <View style={styles.dot} />
@@ -171,25 +178,17 @@ export default function ReminderNoteList({
           </View>
         </View>
 
-        {renderRemaining && (
-          <Animated.View
-            style={[
-              styles.remainingWrap,
-              {
-                opacity: remainingAnim,
-                transform: [
-                  {
-                    translateY: remainingAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [8, 0],
-                    }),
-                  },
-                ],
-              },
-            ]}
+        {needsMeasure && (
+          <View
+            pointerEvents="none"
+            style={[styles.measureWrap, styles.extraWrap]}
+            onLayout={event => {
+              const height = event.nativeEvent.layout.height;
+              if (height !== extraHeight) setExtraHeight(height);
+            }}
           >
-            {remainingReminders.map((reminder, index) => {
-              const isLast = index === remainingReminders.length - 1;
+            {extraReminders.map((reminder, index) => {
+              const isLast = index === extraReminders.length - 1;
 
               return (
                 <View key={reminder.id} style={[styles.itemRow, isLast && styles.lastRow]}>
@@ -231,16 +230,83 @@ export default function ReminderNoteList({
                 </View>
               );
             })}
+          </View>
+        )}
+
+        {showExtra && (
+          <Animated.View
+            style={[
+              styles.remainingWrap,
+              styles.extraWrap,
+              {
+                height: extraAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, extraHeight],
+                }),
+                opacity: extraAnim,
+                overflow: 'hidden',
+              },
+            ]}
+          >
+            {extraReminders.map((reminder, index) => {
+              const isLast = index === extraReminders.length - 1;
+
+              return (
+                <View key={reminder.id} style={[styles.itemRow, isLast && styles.lastRow]}>
+                  <View style={styles.dotWrap}>
+                    <View style={styles.dotHalo} />
+                    <View style={styles.dot} />
+                  </View>
+
+                  <View style={styles.content}>
+                    <View style={styles.topRow}>
+                      <TextElement style={styles.timeText}>
+                        {formatTimelineTime(reminder.createdAt)}
+                      </TextElement>
+                    </View>
+
+                    <View style={styles.senderRow}>
+                      <Ripple onPress={() => onPressFriendProfile(reminder.senderId)}>
+                        <Avatar
+                          uri={reminder.senderPhoto ?? ''}
+                          fallback={reminder.senderName?.[0] ?? '?'}
+                          size={28}
+                        />
+                      </Ripple>
+
+                      <Ripple
+                        style={{ minHeight: 30 }}
+                        onPress={() => onPressFriendProfile(reminder.senderId)}
+                      >
+                        <TextElement style={styles.senderLine}>
+                          <TextElement style={styles.senderNameStrong}>
+                            {renderSenderLabel(reminder)}{' '}
+                          </TextElement>
+                          sent a reminder
+                        </TextElement>
+                      </Ripple>
+                    </View>
+
+                    <View style={styles.bubble}>
+                      <TextElement style={styles.bubbleText}>{reminder.message}</TextElement>
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
           </Animated.View>
         )}
+
+        <View style={styles.endDotWrap}>
+          <View style={styles.dotHalo} />
+          <View style={styles.dot} />
+        </View>
       </View>
 
       {shouldShowRemainingLink && (
         <Ripple onPress={onPressRemainingLink} style={styles.remainingLinkWrap}>
           <TextElement style={styles.remainingLinkText}>
-            {`and ${remainingCount} ${
-              remainingCount === 1 ? 'other' : 'others'
-            } sent you a reminder`}
+            {`and ${extraCount} ${extraCount === 1 ? 'other' : 'others'} sent you a reminder`}
           </TextElement>
         </Ripple>
       )}
@@ -281,12 +347,32 @@ const styles = StyleSheet.create({
   remainingWrap: {
     overflow: 'visible',
   },
+  measureWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    opacity: 0,
+  },
+  extraWrap: {
+    marginLeft: vs(-23),
+    paddingLeft: vs(23),
+  },
 
   dotWrap: {
     width: ms(30),
     height: ms(40),
-    marginTop: vs(-6),
+    marginTop: vs(-7),
     marginLeft: vs(-23),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.onPrimary,
+  },
+  endDotWrap: {
+    width: ms(30),
+    height: ms(40),
+    marginLeft: vs(-23),
+    marginBottom: vs(-10),
+
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.onPrimary,
@@ -329,7 +415,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    marginBottom: spacing.xs,
+    marginBottom: vs(7),
     marginTop: vs(15),
   },
   senderLine: {
@@ -357,11 +443,11 @@ const styles = StyleSheet.create({
     lineHeight: ms(20),
   },
   remainingLinkWrap: {
-    marginTop: spacing.sm,
+    marginTop: vs(7),
+    marginBottom: vs(-9),
     alignSelf: 'flex-start',
-    marginLeft: vs(22),
+    marginLeft: vs(10),
     borderRadius: 999,
-    paddingVertical: spacing.xs,
   },
   remainingLinkText: {
     fontSize: ms(12),

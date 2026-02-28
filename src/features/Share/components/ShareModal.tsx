@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { Modal, Platform, Pressable, Share, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, Share, StyleSheet, View } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
@@ -21,6 +21,7 @@ import {
 } from '@shared/utils/typeVisuals';
 import { Icon } from '@shared/components/Icons';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
+import AppModal from '@shared/components/AppModal/AppModal';
 
 type Props = {
   task: Task;
@@ -127,7 +128,7 @@ export default function ShareModal({ task, visible, onClose }: Props) {
   }, [onClose, task.name, task.text]);
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <AppModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       {/* =======================
           VISIBLE UI (no swapping)
          ======================= */}
@@ -243,7 +244,7 @@ export default function ShareModal({ task, visible, onClose }: Props) {
 
       {/* Optional: block taps / mask tiny visual glitches while share sheet opens */}
       {isSharing ? <View style={styles.blocker} /> : null}
-    </Modal>
+    </AppModal>
   );
 }
 

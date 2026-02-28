@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Linking, Modal, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { Linking, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -8,8 +8,9 @@ import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import { colors, spacing } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 import type { LaunchModalProps } from '../launchModals.registry';
+import AppModal from '@shared/components/AppModal/AppModal';
 
-export default function BetaModal({ visible, onDismiss }: LaunchModalProps) {
+export default function BetaModal({ visible, onDismiss, onHidden }: LaunchModalProps) {
   const navigation = useNavigation<any>();
 
   const handleSendFeedback = useCallback(async () => {
@@ -32,7 +33,14 @@ export default function BetaModal({ visible, onDismiss }: LaunchModalProps) {
   const dots = useMemo(() => [0, 1, 2], []);
 
   return (
-    <Modal visible={visible} style={{}} transparent animationType="fade" onRequestClose={onDismiss}>
+    <AppModal
+      visible={visible}
+      style={{}}
+      transparent
+      animationType="fade"
+      onRequestClose={onDismiss}
+      onDismiss={onHidden}
+    >
       <LinearGradient
         colors={['#F4F1FF', '#EEE8FF', '#F6F3FF']}
         start={{ x: 0.5, y: 0 }}
@@ -84,7 +92,7 @@ export default function BetaModal({ visible, onDismiss }: LaunchModalProps) {
           </View>
         </View>
       </LinearGradient>
-    </Modal>
+    </AppModal>
   );
 }
 

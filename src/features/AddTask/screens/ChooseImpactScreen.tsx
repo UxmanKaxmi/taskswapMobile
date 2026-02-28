@@ -4,24 +4,56 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Layout } from '@shared/components/Layout';
-import Row from '@shared/components/Layout/Row';
-import Ripple from '@shared/components/Buttons/Ripple';
-import Icon from '@shared/components/Icons/Icon';
 import { spacing, colors } from '@shared/theme';
 
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
-import { getTypeVisual, impactTypeVisuals } from '@shared/utils/typeVisuals';
+import { impactTypeVisuals } from '@shared/utils/typeVisuals';
 import { haptics } from '@shared/utils/haptics';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { showToast } from '@shared/utils/toast';
 import ImpactOptionCard from '../components/ImpactOptionCard';
 import { ms, vs } from 'react-native-size-matters';
+import { useFeatureFlags } from '@shared/featureFlags';
 
 export default function ChooseImpactScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const { flags, loading: flagsLoading } = useFeatureFlags();
+
+  const isTypeEnabled = (type: TaskTypeEnum) => {
+    switch (type) {
+      case TaskTypeEnum.Motivation:
+        return flags.motivation;
+      case TaskTypeEnum.Advice:
+        return flags.advice;
+      case TaskTypeEnum.Decision:
+        return flags.decision;
+      case TaskTypeEnum.Reminder:
+        return flags.reminder;
+      default:
+        return false;
+    }
+  };
 
   const goToCreate = (type: TaskTypeEnum) => {
+    if (flagsLoading) {
+      showToast({
+        type: 'info',
+        title: 'Just a sec',
+        message: 'We’re checking what’s available.',
+      });
+      return;
+    }
+
+    if (!isTypeEnabled(type)) {
+      showToast({
+        type: 'info',
+        title: 'Coming soon',
+        message: 'This push type isn’t available yet.',
+      });
+      return;
+    }
+
     haptics.open();
     console.log('type', type);
     switch (type) {
@@ -42,7 +74,10 @@ export default function ChooseImpactScreen() {
         break;
 
       default:
-        showToast('Unsupported task type');
+        showToast({
+          type: 'error',
+          title: 'Unsupported task type',
+        });
     }
   };
 
@@ -95,6 +130,7 @@ export default function ChooseImpactScreen() {
       <View style={styles.options}>
         {IMPACT_TYPES.map(type => {
           const visual = impactTypeVisuals[type];
+          const isAvailable = flagsLoading ? true : isTypeEnabled(type);
           return (
             <ImpactOptionCard
               key={type}
@@ -104,6 +140,7 @@ export default function ChooseImpactScreen() {
               color={visual.color}
               bg={visual.background}
               onPress={() => goToCreate(type)}
+              dimmed={!isAvailable}
             />
           );
         })}

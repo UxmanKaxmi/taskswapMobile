@@ -15,6 +15,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ModalProvider } from '@shared/components/ModalProvider';
 import { colors } from '@shared/theme/colors';
 import { incrementAppLaunchCount } from '@features/LaunchModals';
+import { FeatureFlagsProvider } from '@shared/featureFlags';
 
 const queryClient = new QueryClient();
 const loginImage = require('@assets/images/loginImage5.png');
@@ -66,9 +67,11 @@ export default function App() {
             <NotificationPermissionPrompt />
 
             <AuthProvider>
-              <NavigationContainer theme={LightNavTheme}>
-                <RootNavigator />
-              </NavigationContainer>
+              <FeatureFlagsProvider>
+                <NavigationContainer theme={LightNavTheme}>
+                  <RootNavigator />
+                </NavigationContainer>
+              </FeatureFlagsProvider>
             </AuthProvider>
 
             <Toast config={toastConfig} position="bottom" bottomOffset={60} />

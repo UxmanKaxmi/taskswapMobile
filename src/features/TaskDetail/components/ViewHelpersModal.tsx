@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef } from 'react';
 import {
-  Modal,
   View,
   TouchableOpacity,
   FlatList,
@@ -16,6 +15,7 @@ import { colors, spacing } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Avatar from '@shared/components/Avatar/Avatar';
 import { HelperUser } from '@features/Home/types/home';
+import AppModal from '@shared/components/AppModal/AppModal';
 
 type Props = {
   visible: boolean;
@@ -51,7 +51,7 @@ export default function ViewHelpersModal({ visible, onClose, helpers }: Props) {
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <AppModal visible={visible} transparent animationType="fade">
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay} />
       </TouchableWithoutFeedback>
@@ -70,7 +70,7 @@ export default function ViewHelpersModal({ visible, onClose, helpers }: Props) {
           />
         </View>
       </Animated.View>
-    </Modal>
+    </AppModal>
   );
 }
 

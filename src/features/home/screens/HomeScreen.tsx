@@ -356,11 +356,7 @@ export default function HomeScreen() {
         }
         ListFooterComponent={() => {
           if (!isFetchingNextPage) {
-            return (
-              <View style={styles.footerSpinner}>
-                <ActivityIndicator size="small" color={colors.placeHolder} />
-              </View>
-            );
+            return <View style={{ marginBottom: vs(50) }} />;
           }
 
           return <View style={{ marginBottom: vs(50) }} />;

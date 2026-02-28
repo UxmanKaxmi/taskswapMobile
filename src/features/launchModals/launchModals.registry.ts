@@ -13,6 +13,7 @@ export type LaunchModalContext = {
 export type LaunchModalProps = {
   visible: boolean;
   onDismiss: () => void;
+  onHidden?: () => void;
   ctx: LaunchModalContext;
 };
 

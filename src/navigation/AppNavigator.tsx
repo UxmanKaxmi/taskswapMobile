@@ -23,7 +23,7 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {/* Main app tabs */}
-      <Stack.Screen name="Tabs" component={BottomTabsAndroid} />
+      <Stack.Screen name="Tabs" component={isIOS ? BottomTabsIOS : BottomTabsAndroid} />
       <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
       {/* Add Task Modal */}
       <Stack.Screen

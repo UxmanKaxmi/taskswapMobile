@@ -18,6 +18,7 @@ type Props = {
   onPress: () => void;
   /** 🔥 design-only */
   forcePressed?: boolean;
+  dimmed?: boolean;
 };
 
 export default function ImpactOptionCard({
@@ -28,10 +29,12 @@ export default function ImpactOptionCard({
   bg,
   onPress,
   forcePressed,
+  dimmed = false,
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(1)).current;
   const pressed = useRef(new Animated.Value(0)).current;
+  const baseOpacity = dimmed ? 0.6 : 1;
 
   const AnimatedIcon = Animated.createAnimatedComponent(Icon);
   const CARD_HEIGHT = vs(80); // you can tweak to 84–92
@@ -130,7 +133,7 @@ export default function ImpactOptionCard({
     <Animated.View
       style={{
         transform: [{ scale }],
-        opacity,
+        opacity: Animated.multiply(opacity, baseOpacity),
       }}
     >
       <Shadow size="sm">
@@ -147,7 +150,7 @@ export default function ImpactOptionCard({
 
                     backgroundColor: cardBg,
                     transform: [{ scale }],
-                    opacity,
+                    opacity: Animated.multiply(opacity, baseOpacity),
                   },
                 ]}
               >

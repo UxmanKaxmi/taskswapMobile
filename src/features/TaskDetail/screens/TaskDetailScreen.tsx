@@ -1,6 +1,6 @@
 // src/features/tasks/screens/TaskDetailScreen.tsx
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { Layout } from '@shared/components/Layout';
@@ -61,8 +61,10 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import Ripple from '@shared/components/Buttons/Ripple';
 import Icon from '@shared/components/Icons/Icon';
 import ShareModal from '@features/Share/components/ShareModal';
+import { deleteTask } from '@features/Tasks/api/taskApi';
 export default function TaskDetailScreen({
   route,
+  navigation,
 }: NativeStackScreenProps<AppStackParamList, 'TaskDetail'>) {
   const { task: initialTask, taskId, highlightCommentId } = route.params ?? {};
   const resolvedTaskId = taskId ?? initialTask?.id;
@@ -71,6 +73,8 @@ export default function TaskDetailScreen({
   const [adviceText, setAdviceText] = React.useState('');
   const [consumedAutoOpen, setConsumedAutoOpen] = React.useState(false);
   const [shareTask, setShareTask] = useState<ShareTask | null>(null);
+  const [shareVisible, setShareVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { user } = useAuth();
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
@@ -82,6 +86,7 @@ export default function TaskDetailScreen({
   const { data: pushData } = useTaskPushes(resolvedTaskId ?? '');
   const addComment = useAddComment(resolvedTaskId ?? '');
   const { mutate: togglePush, isPending } = useToggleTaskPush(resolvedTaskId ?? '');
+  const qc = useQueryClient();
 
   const adviceMorph = useSharedValue(0); // 0 = button, 1 = composer
 
@@ -108,9 +113,51 @@ export default function TaskDetailScreen({
   const { mutate: completeTask, isPending: isMarkingPending } = useCompleteTask();
   const { mutate: incompleteTask, isPending: isUnMarkingPending } = useInCompleteTask();
 
+  useEffect(() => {
+    if (shareVisible || !shareTask) return;
+    const timeout = setTimeout(() => {
+      setShareTask(null);
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [shareTask, shareVisible]);
+
   const handleShareTask = useCallback((task: ShareTask) => {
     setShareTask(task);
+    setShareVisible(true);
   }, []);
+
+  const handleCloseShare = useCallback(() => {
+    setShareVisible(false);
+  }, []);
+
+  const handleDeleteTask = useCallback(() => {
+    if (!task?.id || isDeleting) return;
+    Alert.alert('Delete Task (Dev)', 'Are you sure you want to delete this task?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setIsDeleting(true);
+            await deleteTask(task.id);
+            qc.removeQueries({ queryKey: buildQueryKey.taskById(task.id) });
+            qc.invalidateQueries({ queryKey: buildQueryKey.tasks() });
+            navigation.goBack();
+          } catch (error) {
+            console.error('[DELETE_TASK_ERROR]', error);
+            showToast({
+              type: 'error',
+              title: 'Error',
+              message: 'Failed to delete task.',
+            });
+          } finally {
+            setIsDeleting(false);
+          }
+        },
+      },
+    ]);
+  }, [task?.id, isDeleting, navigation, qc]);
 
   const openReminderComposer = React.useCallback(() => {
     if (!task) return;
@@ -569,6 +616,7 @@ export default function TaskDetailScreen({
 
   const bg = getTaskBackgroundVisual(task.type);
   const edges = isAndroid ? ['left', 'right', 'bottom'] : ['top', 'left', 'right', 'bottom'];
+  const showDevDelete = __DEV__ && !!task?.id;
   return (
     <View style={{ flex: 1 }}>
       {/* 🔥 Full-screen gradient */}
@@ -591,9 +639,25 @@ export default function TaskDetailScreen({
         <AppHeader
           title="Task Detail"
           right={
-            <Ripple style={{}} onPress={() => handleShareTask(task as ShareTask)}>
-              <Icon set="ion" name="share-outline" size={ms(18)} color={colors.text} />
-            </Ripple>
+            <View style={styles.headerActions}>
+              <Ripple style={styles.headerAction} onPress={() => handleShareTask(task as ShareTask)}>
+                <Icon set="ion" name="share-outline" size={ms(18)} color={colors.text} />
+              </Ripple>
+              {showDevDelete && (
+                <Ripple
+                  style={[styles.headerAction, styles.headerActionDelete]}
+                  onPress={handleDeleteTask}
+                  disabled={isDeleting}
+                >
+                  <Icon
+                    set="ion"
+                    name="trash-outline"
+                    size={ms(18)}
+                    color={isDeleting ? colors.muted : colors.error}
+                  />
+                </Ripple>
+              )}
+            </View>
           }
         />
         <Height size={vs(20)} />
@@ -606,7 +670,23 @@ export default function TaskDetailScreen({
         onClose={() => setShowHelperModal(false)}
       />
 
-      {shareTask && <ShareModal visible task={shareTask} onClose={() => setShareTask(null)} />}
+      {shareTask && (
+        <ShareModal visible={shareVisible} task={shareTask} onClose={handleCloseShare} />
+      )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  headerAction: {
+    paddingHorizontal: ms(2),
+  },
+  headerActionDelete: {
+    marginLeft: ms(6),
+  },
+});

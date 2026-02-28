@@ -8,7 +8,7 @@ import { format, isBefore } from 'date-fns';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors, spacing } from '@shared/theme';
 import { ReminderTask } from '../types/home';
-import { stripOuterQuotes } from '@shared/utils/helperFunctions';
+import { humanizeReminderDate, stripOuterQuotes } from '@shared/utils/helperFunctions';
 import { cardStyles } from './styles';
 import TaskFooter from './TaskFooter';
 import { Shadow } from '@shared/components/Shadow';
@@ -84,7 +84,7 @@ export default function ReminderCard({ task, onPressCard, onPressShare }: Props)
 
     // ⏰ Before reminder time
     if (remindAt > now) {
-      return `⏰ ${format(remindAt, 'EEE, h:mm a')}`;
+      return humanizeReminderDate(remindAt);
     }
 
     // ⏳ After reminder time, still active

@@ -1,12 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Modal,
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  Animated,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Animated } from 'react-native';
 import { colors, spacing } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
@@ -16,23 +9,43 @@ import { Tag, TagGroup } from '@shared/components/Tag';
 import { Height } from '@shared/components/Spacing';
 import { typeIcons } from '@shared/utils/typeVisuals';
 import { MakeFirstLetterUppercase } from '@shared/utils/helperFunctions';
+import AppModal from '@shared/components/AppModal/AppModal';
 
 type Props = {
   visible: boolean;
   value: FeedFilter;
   onApply: (value: FeedFilter) => void;
   onClose: () => void;
+  allowedTypes?: TaskTypeEnum[];
 };
 
-export default function FilterTasksModal({ visible, value, onApply, onClose }: Props) {
+const DEFAULT_TYPES: TaskTypeEnum[] = [
+  TaskTypeEnum.Motivation,
+  TaskTypeEnum.Decision,
+  TaskTypeEnum.Reminder,
+  TaskTypeEnum.Advice,
+];
+
+export default function FilterTasksModal({
+  visible,
+  value,
+  onApply,
+  onClose,
+  allowedTypes,
+}: Props) {
   const translateY = useRef(new Animated.Value(300)).current;
+  const availableTypes = allowedTypes ?? DEFAULT_TYPES;
   const [localFilter, setLocalFilter] = useState<FeedFilter>(value);
   const selectedCount = localFilter.types.length;
 
   const [hint, setHint] = useState<string | null>(null);
   useEffect(() => {
-    setLocalFilter(value);
-  }, [value, visible]);
+    const nextTypes = value.types.filter(type => availableTypes.includes(type as TaskTypeEnum));
+    setLocalFilter({
+      ...value,
+      types: nextTypes.length ? nextTypes : [...availableTypes],
+    });
+  }, [value, visible, availableTypes]);
 
   useEffect(() => {
     if (visible) {
@@ -50,7 +63,7 @@ export default function FilterTasksModal({ visible, value, onApply, onClose }: P
   }, [visible]);
 
   return (
-    <Modal visible={visible} transparent animationType="none">
+    <AppModal visible={visible} transparent animationType="none">
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay} />
       </TouchableWithoutFeedback>
@@ -77,12 +90,7 @@ export default function FilterTasksModal({ visible, value, onApply, onClose }: P
         </View> */}
 
         <TagGroup
-          tags={[
-            TaskTypeEnum.Motivation,
-            TaskTypeEnum.Decision,
-            TaskTypeEnum.Reminder,
-            TaskTypeEnum.Advice,
-          ]}
+          tags={availableTypes}
           value={localFilter.types}
           onChange={types => setLocalFilter(prev => ({ ...prev, types }))}
           renderTag={({ tag, selected, toggle }) => (
@@ -111,7 +119,7 @@ export default function FilterTasksModal({ visible, value, onApply, onClose }: P
           <TextElement color="error">Cancel</TextElement>
         </TouchableOpacity>
       </Animated.View>
-    </Modal>
+    </AppModal>
   );
 }
 

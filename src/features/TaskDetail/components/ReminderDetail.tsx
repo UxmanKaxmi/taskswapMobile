@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import SectionHeader from '@shared/components/SectionHeader/SectionHeader';
 import ReminderNoteList from '@features/Tasks/components/ReminderNoteList';
@@ -7,6 +7,7 @@ import { openFriendsProfile } from '@navigation/types/navigationUtils';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { useAuth } from '@features/Auth/AuthProvider';
+import type { ReminderNoteDTO } from '@features/Home/types/home';
 
 type Props = {
   task: {
@@ -17,6 +18,7 @@ type Props = {
 export default function ReminderDetail({ task }: Props) {
   const [viewAll, setViewAll] = useState(false);
   const { data: reminders, isLoading, isError } = useRemindersForTask(task.id);
+
   const totalReminders = reminders?.length ?? 0;
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const { user } = useAuth();
@@ -28,8 +30,8 @@ export default function ReminderDetail({ task }: Props) {
         <SectionHeader
           label="Reminder history"
           icon="time"
-          // rightLabel={`${viewAll ? 'Collapse all' : 'View all'} (${totalReminders})`}
-          // onPressRightIcon={() => setViewAll(prev => !prev)}
+          rightLabel={viewAll ? `Collapse all (${totalReminders})` : undefined}
+          onPressRightIcon={() => setViewAll(prev => !prev)}
         />
       )}
 

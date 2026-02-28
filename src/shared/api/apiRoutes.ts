@@ -9,6 +9,7 @@ export enum ApiRoute {
   VOTE = '/vote',
   COMMENTS = '/comments',
   REFERRALS = '/referrals',
+  FEATURE_FLAGS = '/features',
 }
 
 // ✅ Builder functions for dynamic API routes
@@ -17,6 +18,7 @@ export const buildRoute = {
   task: (id: string) => `${ApiRoute.TASKS}/${id}`,
   completeTask: (id: string) => `${ApiRoute.TASKS}/${id}/complete`,
   uncompleteTask: (id: string) => `${ApiRoute.TASKS}/${id}/incomplete`,
+  featureFlags: () => `${ApiRoute.FEATURE_FLAGS}`,
 
   // 📌 User Routes
   user: (id: string) => `${ApiRoute.USERS}/${id}`,

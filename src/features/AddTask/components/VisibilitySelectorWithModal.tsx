@@ -3,7 +3,6 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Modal,
   Animated,
   Easing,
   TouchableWithoutFeedback,
@@ -12,6 +11,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import { useTheme } from '@shared/theme/useTheme';
 import { ms } from 'react-native-size-matters';
+import AppModal from '@shared/components/AppModal/AppModal';
 
 const OPTIONS = [
   { key: 'public', label: 'Public', icon: 'globe-outline' },
@@ -76,7 +76,7 @@ export default function VisibilitySelectorWithModal({
       </TouchableOpacity>
 
       {/* MODAL identical style to DatePicker modal */}
-      <Modal visible={visible} transparent animationType="fade">
+      <AppModal visible={visible} transparent animationType="fade">
         {/* BACKDROP */}
         <TouchableWithoutFeedback onPress={closeSheet}>
           <View style={styles.backdrop} />
@@ -113,7 +113,7 @@ export default function VisibilitySelectorWithModal({
             </TouchableOpacity>
           ))}
         </Animated.View>
-      </Modal>
+      </AppModal>
     </>
   );
 }

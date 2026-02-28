@@ -14,7 +14,7 @@ type Filter = {
   label: string;
 };
 
-const FILTERS: Filter[] = [
+const DEFAULT_FILTERS: Filter[] = [
   { key: 'all', label: 'All' },
   { key: 'motivation', label: 'Motivation' },
   { key: 'advice', label: 'Advice' },
@@ -25,9 +25,14 @@ const FILTERS: Filter[] = [
 type Props = {
   value: FilterKey;
   onChange: (key: FilterKey) => void;
+  filters?: Filter[];
 };
 
-export default function HorizontalFilterTabs({ value, onChange }: Props) {
+export default function HorizontalFilterTabs({
+  value,
+  onChange,
+  filters = DEFAULT_FILTERS,
+}: Props) {
   const listRef = useRef<FlatList<Filter>>(null);
   const [activeKey, setActiveKey] = useState<FilterKey>(value);
   const [, startTransition] = useTransition();
@@ -37,18 +42,18 @@ export default function HorizontalFilterTabs({ value, onChange }: Props) {
   }, [value]);
 
   useEffect(() => {
-    const index = FILTERS.findIndex(f => f.key === activeKey);
+    const index = filters.findIndex(f => f.key === activeKey);
     if (index === -1) return;
 
     const isFirst = index === 0;
-    const isLast = index === FILTERS.length - 1;
+    const isLast = index === filters.length - 1;
 
     listRef.current?.scrollToIndex({
       index,
       animated: true,
       viewPosition: isFirst ? 0 : isLast ? 1 : 0.5,
     });
-  }, [activeKey]);
+  }, [activeKey, filters]);
 
   const handlePress = useCallback(
     (key: FilterKey) => {
@@ -70,7 +75,7 @@ export default function HorizontalFilterTabs({ value, onChange }: Props) {
   return (
     <View style={styles.container}>
       <ListView
-        data={FILTERS}
+        data={filters}
         renderItem={renderItem}
         listRef={listRef}
         flatListProps={{

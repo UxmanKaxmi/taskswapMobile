@@ -97,7 +97,7 @@ export default function NotificationMainScreen() {
 
   useEffect(() => {
     return () => {
-      debouncedFlush.cancel(); // cleanup
+      // debouncedFlush.cancel(); // cleanup
     };
   }, []);
 

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Modal, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -8,8 +8,9 @@ import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import { spacing } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 import type { LaunchModalProps } from '../launchModals.registry';
+import AppModal from '@shared/components/AppModal/AppModal';
 
-export default function AddFriendsModal({ visible, onDismiss }: LaunchModalProps) {
+export default function AddFriendsModal({ visible, onDismiss, onHidden }: LaunchModalProps) {
   const navigation = useNavigation<any>();
 
   const handleFindFriends = useCallback(() => {
@@ -18,7 +19,13 @@ export default function AddFriendsModal({ visible, onDismiss }: LaunchModalProps
   }, [navigation, onDismiss]);
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
+    <AppModal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onDismiss}
+      onDismiss={onHidden}
+    >
       {/* Backdrop gradient (same family as Beta modal) */}
       <LinearGradient
         colors={['#F4F1FF', '#EEE8FF', '#F6F3FF']}
@@ -73,7 +80,7 @@ export default function AddFriendsModal({ visible, onDismiss }: LaunchModalProps
           </View>
         </View>
       </LinearGradient>
-    </Modal>
+    </AppModal>
   );
 }
 

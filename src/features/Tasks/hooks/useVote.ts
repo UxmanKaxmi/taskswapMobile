@@ -1,7 +1,7 @@
 // useVote.ts
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { voteOnTask } from '../api/taskApi';
-import { buildQueryKey } from '@shared/constants/queryKeys';
+import { type InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
+import { voteOnTask, type TaskPage } from '../api/taskApi';
+import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
 import { Task } from '../types/tasks';
 
 /**
@@ -77,7 +77,7 @@ export function useCastVote(taskId: string) {
        * Used for rollback if the mutation fails.
        */
       const prevVotes = queryClient.getQueryData<Record<string, number>>(qkVotes);
-      const prevTasks = queryClient.getQueryData<Task[]>(qkTasks);
+      const prevTasks = queryClient.getQueryData<InfiniteData<TaskPage>>(qkTasks);
       const prevTask = queryClient.getQueryData<Task>(qkTask);
 
       /**
@@ -137,7 +137,16 @@ export function useCastVote(taskId: string) {
        * 🗂 Update task list cache
        * IMPORTANT: always update, even if cache is empty
        */
-      queryClient.setQueryData<Task[]>(qkTasks, (old = []) => old.map(applyVote));
+      queryClient.setQueryData<InfiniteData<TaskPage>>(qkTasks, old => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map(page => ({
+            ...page,
+            data: page.data.map(applyVote),
+          })),
+        };
+      });
 
       /**
        * 🧾 Update single task cache (detail screen)
@@ -149,7 +158,7 @@ export function useCastVote(taskId: string) {
       /**
        * 🔙 Return snapshot for rollback
        */
-      return { prevVotes, prevTasks, prevTask };
+      return { prevVotes, prevTasks, prevTask, qkTasks };
     },
 
     /**
@@ -162,12 +171,8 @@ export function useCastVote(taskId: string) {
         queryClient.setQueryData(buildQueryKey.votesForTask(taskId), context.prevVotes);
       }
 
-      if (context.prevTasks) {
-        queryClient.setQueryData(buildQueryKey.tasks(), context.prevTasks);
-      }
-
-      if (context.prevTasks) {
-        queryClient.setQueryData(buildQueryKey.tasks(context.prevTask?.userId), context.prevTasks);
+      if (context.prevTasks && context.qkTasks) {
+        queryClient.setQueryData(context.qkTasks, context.prevTasks);
       }
     },
 
@@ -181,7 +186,7 @@ export function useCastVote(taskId: string) {
       });
 
       queryClient.invalidateQueries({
-        queryKey: buildQueryKey.tasks(),
+        queryKey: [QueryKeys.Tasks],
       });
 
       queryClient.invalidateQueries({

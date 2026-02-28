@@ -3,10 +3,9 @@
 import { api } from '@shared/api/axios';
 import { Platform } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import Config from 'react-native-config';
 
 export async function pingServer() {
-  const LOCALHOST = Platform.OS === 'android' ? 'http://10.0.2.2:3001' : 'http://localhost:3001';
-
   console.log('Google Signin config:', await GoogleSignin.getCurrentUser());
 
   /** Check axios baseURL health */
@@ -23,7 +22,7 @@ export async function pingServer() {
 
   /** Check DB connection endpoint */
   try {
-    const res = await api.get(`${LOCALHOST}/test-db`);
+    const res = await api.get(`${Config.BASE_URL}/test-db`);
     const data = res.data;
 
     if (data.connected) {

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
@@ -17,6 +16,7 @@ import Icon from '@shared/components/Icons/Icon';
 import { useFollowers } from '@features/User/hooks/useFollowers';
 import Avatar from '@shared/components/Avatar/Avatar';
 import { HelperUser } from '@features/Home/types/home';
+import AppModal from '@shared/components/AppModal/AppModal';
 
 type Props = {
   visible: boolean;
@@ -73,7 +73,7 @@ export default function SelectHelpersModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <AppModal visible={visible} transparent animationType="fade">
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay} />
       </TouchableWithoutFeedback>
@@ -101,7 +101,7 @@ export default function SelectHelpersModal({
           </TouchableOpacity>
         </View>
       </Animated.View>
-    </Modal>
+    </AppModal>
   );
 }
 

@@ -1,9 +1,24 @@
 // utils/humanizeDate.ts
 import { BottomTabParamList } from '@navigation/types/navigation';
 import { hasNotificationPermission } from '../../lib/notifications/NotificationPermissionPrompt';
-import { parseISO, formatDistanceToNow, format, isBefore, isToday } from 'date-fns';
+import {
+  parseISO,
+  formatDistanceToNow,
+  format,
+  isBefore,
+  isToday,
+  isTomorrow,
+  isThisWeek,
+  isSameYear,
+} from 'date-fns';
 import { Dimensions } from 'react-native';
 import { HelperUser } from '@features/Home/types/home';
+
+type HumanizeDateOptions = {
+  prefix?: string; // e.g. '⏰ ' or '' (default none)
+  showPrefix?: boolean; // default true
+  weekStartsOn?: 0 | 1; // default 1 (Mon)
+};
 
 /**
  * Returns a relative string like "3 hours ago"
@@ -247,4 +262,33 @@ export function formatViewCount(count: number): string {
   }
 
   return `${(count / 1_000_000).toFixed(1).replace('.0', '')}M`;
+}
+
+export function humanizeReminderDate(
+  remindAt: string | Date,
+  options: HumanizeDateOptions = {},
+): string {
+  const { prefix = '⏰ ', showPrefix = true, weekStartsOn = 1 } = options;
+
+  const now = new Date();
+  const date = typeof remindAt === 'string' ? parseISO(remindAt) : remindAt;
+
+  const time = format(date, 'h:mm a');
+
+  let label: string;
+
+  if (isToday(date)) {
+    label = `Today at ${time}`;
+  } else if (isTomorrow(date)) {
+    label = `Tomorrow at ${time}`;
+  } else if (isThisWeek(date, { weekStartsOn })) {
+    // Human enough + short
+    label = `${format(date, 'EEE')} at ${time}`;
+  } else {
+    const datePart = isSameYear(date, now) ? format(date, 'MMM d') : format(date, 'MMM d, yyyy');
+
+    label = `${datePart} at ${time}`;
+  }
+
+  return `${showPrefix ? prefix : ''}${label}`;
 }

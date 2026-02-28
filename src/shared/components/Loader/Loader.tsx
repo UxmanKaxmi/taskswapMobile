@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet, Modal } from 'react-native';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { colors } from '@shared/theme';
+import AppModal from '@shared/components/AppModal/AppModal';
 
 type AppLoaderProps = {
   visible: boolean;
@@ -8,11 +9,11 @@ type AppLoaderProps = {
 
 export default function AppLoader({ visible }: AppLoaderProps) {
   return (
-    <Modal transparent visible={visible} animationType="fade" statusBarTranslucent>
+    <AppModal transparent visible={visible} animationType="fade" statusBarTranslucent>
       <View style={styles.overlay}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
-    </Modal>
+    </AppModal>
   );
 }
 
