@@ -25,6 +25,12 @@ const DEV_BASE_URL = (() => {
   return host ? `http://${host}:3001` : null;
 })();
 
+console.log(
+  'Config.BASE_URL_IOS || Config.BASE_URL || FALLBACK_BASE_URL_IOS',
+  Config.BASE_URL_IOS,
+  Config.BASE_URL,
+  FALLBACK_BASE_URL_IOS,
+);
 const BASE_URL =
   (__DEV__ && DEV_BASE_URL) ||
   (Platform.OS === 'android'

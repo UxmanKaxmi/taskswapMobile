@@ -34,6 +34,9 @@ export default function RootNavigator() {
     async function checkFirstLaunch() {
       const seen = await AsyncStorage.getItem('hasSeenOnboarding');
       setFirstTime(!seen); // true if first launch
+
+      console.log('first', !seen);
+
       setLoading(false);
     }
     checkFirstLaunch();

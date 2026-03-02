@@ -59,6 +59,12 @@ export default function ProfileMenu() {
       },
       iconSet: 'ion',
     },
+    // {
+    //   label: 'Debug Notification',
+    //   icon: 'terminal',
+    //   onPress: () => navigation.navigate('MainDebugScreen'),
+    //   iconSet: 'ion',
+    // },
   ] as const; // ← keep the literal types
 
   const dangerItems = [

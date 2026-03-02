@@ -7,18 +7,42 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:424884151196:android:3a347863561596a44a5e59",
+        "mobilesdk_app_id": "1:424884151196:android:965f565cb027bc4f4a5e59",
         "android_client_info": {
-          "package_name": "com.taskswap.mobile"
+          "package_name": "com.pushmeup.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "424884151196-6v6bd3q6jf37em0o985305jefbd71fv8.apps.googleusercontent.com",
+          "client_id": "424884151196-0nk7ps75u66esdvmkt93m6g5vsa26o7j.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.taskswap.mobile",
+            "package_name": "com.pushmeup.app",
+            "certificate_hash": "46faa487ece38245d6a326a1584dc14b59656dad"
+          }
+        },
+        {
+          "client_id": "424884151196-1kfevq5pab48cb72o8dhtot4sf3cmjo8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pushmeup.app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "424884151196-4cguth9hg2kou1e50oigsnkgror3ltqt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pushmeup.app",
             "certificate_hash": "92548a15af381a4d506aa2c0c7d6a51b7cf3fc12"
+          }
+        },
+        {
+          "client_id": "424884151196-c173f50m2opgivtqf02m2t91lcdgumeq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pushmeup.app",
+            "certificate_hash": "ad52499446772b3371018ab542494022e25ed875"
           }
         },
         {
@@ -35,14 +59,14 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "424884151196-8b2midonidm3m1u77konerbc6its5knv.apps.googleusercontent.com",
+              "client_id": "424884151196-1mi519f7f25hj62hup2pqoiro08403vn.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "424884151196-gam80dreofqfq59prluvfdn7l98lvpqc.apps.googleusercontent.com",
+              "client_id": "424884151196-52nlbj79v5c0sbdo6cl5ttfn72e8sr9m.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.taskswap.mobile"
+                "bundle_id": "com.pushmeup.app"
               }
             }
           ]

@@ -54,7 +54,7 @@ export default function FindFriendsMainScreen() {
   // }
 
   return (
-    <Layout>
+    <Layout edgesProp={['top']}>
       <Search
         value={searchQuery}
         onChangeText={setSearchQuery}

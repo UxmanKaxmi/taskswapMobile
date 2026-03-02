@@ -38,7 +38,7 @@ export function useSecondaryProfileMenuItems() {
           void resetAllLaunchModalsSeen();
         },
       },
-      ...(APP_ENV !== 'production'
+      ...(APP_ENV === 'production'
         ? [
             {
               label: 'Reset App Data',

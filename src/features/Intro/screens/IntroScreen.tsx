@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,10 @@ import { ms, vs } from 'react-native-size-matters';
 
 const { width, height } = Dimensions.get('window');
 const subtitleBoldStyle: TextStyle = { fontWeight: '700' };
+const DOT_SIZE = 8;
+const DOT_MARGIN = 4;
+const ACTIVE_DOT_SIZE = 14;
+const DOT_STEP = DOT_SIZE + DOT_MARGIN * 2;
 
 type IntroSlide = {
   image: any;
@@ -61,9 +65,42 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const swiperRef = useRef<Swiper>(null);
   const [activeSlide, setActiveSlide] = useState(0);
+  const scrollX = useRef(new Animated.Value(0)).current;
+
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+    { useNativeDriver: false }
+  );
+
+  const indicatorTranslateX = scrollX.interpolate({
+    inputRange: [0, width * (slides.length - 1)],
+    outputRange: [0, DOT_STEP * (slides.length - 1)],
+    extrapolate: 'clamp',
+  });
+
+  const renderPagination = () => (
+    <View pointerEvents="none" style={styles.paginationContainer}>
+      <View style={styles.paginationTrack}>
+        {slides.map((_, index) => (
+          <View key={index} style={styles.dotWrapper}>
+            <View style={styles.dot} />
+          </View>
+        ))}
+        <Animated.View
+          style={[
+            styles.activeDot,
+            {
+              left: (DOT_STEP - ACTIVE_DOT_SIZE) / 2,
+              transform: [{ translateX: indicatorTranslateX }],
+            },
+          ]}
+        />
+      </View>
+    </View>
+  );
 
   const handleStart = async () => {
-    if (isDEV) {
+    if (isPROD) {
       // Production mode — only show onboarding once
       await AsyncStorage.setItem('hasSeenOnboarding', 'true');
     } else {
@@ -122,10 +159,11 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
         width={width}
         // autoplay
         loop={false}
-        dotStyle={styles.dot}
-        activeDotStyle={styles.activeDot}
         showsPagination
         onIndexChanged={setActiveSlide}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        renderPagination={renderPagination}
       >
         {slides.map((slide, index) => (
           <View key={index} style={styles.container}>
@@ -229,18 +267,37 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 10,
   },
+  paginationContainer: {
+    position: 'absolute',
+    bottom: 25,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  paginationTrack: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+    height: ACTIVE_DOT_SIZE,
+  },
+  dotWrapper: {
+    width: DOT_STEP,
+    height: ACTIVE_DOT_SIZE,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   dot: {
     backgroundColor: '#E0E0E0',
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    margin: 4,
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: DOT_SIZE / 2,
   },
   activeDot: {
+    position: 'absolute',
+    top: 0,
+    width: ACTIVE_DOT_SIZE,
+    height: ACTIVE_DOT_SIZE,
+    borderRadius: ACTIVE_DOT_SIZE / 2,
     backgroundColor: colors.motivationPurple,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    margin: 4,
   },
 });

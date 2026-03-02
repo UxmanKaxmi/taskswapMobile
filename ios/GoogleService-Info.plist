@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>424884151196-t0vqd4fka458vljnc3l0bphliih9p61p.apps.googleusercontent.com</string>
+	<string>424884151196-52nlbj79v5c0sbdo6cl5ttfn72e8sr9m.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.424884151196-t0vqd4fka458vljnc3l0bphliih9p61p</string>
+	<string>com.googleusercontent.apps.424884151196-52nlbj79v5c0sbdo6cl5ttfn72e8sr9m</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>424884151196-6v6bd3q6jf37em0o985305jefbd71fv8.apps.googleusercontent.com</string>
+	<string>424884151196-1kfevq5pab48cb72o8dhtot4sf3cmjo8.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDnxU0RHjuJBMNyHjO8Y_gZSH9suVUL1eA</string>
 	<key>GCM_SENDER_ID</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.taskswap.mobileapp</string>
+	<string>com.pushmeup.app</string>
 	<key>PROJECT_ID</key>
 	<string>taskswap-ac888</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:424884151196:ios:45714ac340c8d4754a5e59</string>
+	<string>1:424884151196:ios:022bdee7ffffb9914a5e59</string>
 </dict>
 </plist>

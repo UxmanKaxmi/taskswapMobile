@@ -259,7 +259,7 @@ export default function NotificationMainScreen() {
   // }
 
   return (
-    <Layout allowPaddingHorizontal={false}>
+    <Layout allowPaddingHorizontal={false} edgesProp={['top']}>
       {sections.length === 0 ? (
         <Row align="center" justify="center" flex>
           <EmptyState title="No notifications" subtitle="You're all caught up!" />

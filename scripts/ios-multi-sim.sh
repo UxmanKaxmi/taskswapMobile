@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-WORKSPACE="ios/taskswapMobile.xcworkspace"
-SCHEME="taskswapMobile"
+WORKSPACE="ios/PushMeUp.xcworkspace"
+SCHEME="PushMeUp"
 DERIVED_DATA="ios/build"
 APP_PATH="${DERIVED_DATA}/Build/Products/Debug-iphonesimulator/${SCHEME}.app"
-BUNDLE_ID="com.taskswap.ios"
+BUNDLE_ID="com.pushmeup.app"
 
 echo "Building iOS app (Debug) for simulator..."
 ENVFILE=.env.dev xcodebuild \

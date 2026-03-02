@@ -1,5 +1,5 @@
 {
-  "name": "TaskSwap",
+  "name": "PushMeUp",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -14,13 +14,12 @@
     "android-release": "ENVFILE=.env.prod sh -c 'cd android && ./gradlew assembleRelease'",
     "create-feature": "node scripts/createFeature.js",
     "create-sharedComponent": "node scripts/createSharedComponent.js",
-    "ios-dev-release": "bash -lc 'set -e; HOST_IP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null); if [ -z \"$HOST_IP\" ]; then echo \"Could not determine LAN IP. Set HOST_IP env var.\"; exit 1; fi; BASE_URL_IOS=\"http://$HOST_IP:3001\"; printf \"APP_ENV=production\\nBASE_URL=%s\\nBASE_URL_IOS=%s\\nBASE_URL_ANDROID=%s\\n\" \"$BASE_URL_IOS\" \"$BASE_URL_IOS\" \"$BASE_URL_IOS\" > .env.release.local; PREV_ENVFILE=$(cat /tmp/envfile 2>/dev/null || true); echo \".env.release.local\" > /tmp/envfile; ENVFILE=.env.release.local xcodebuild INFOPLIST_KEY_CFBundleDisplayName=\"DEV Push Me Up\" -workspace ios/taskswapMobile.xcworkspace -scheme taskswapMobile -configuration Release -sdk iphoneos -derivedDataPath ios/build && ios-deploy --bundle ios/build/Build/Products/Release-iphoneos/taskswapMobile.app; if [ -n \"$PREV_ENVFILE\" ]; then echo \"$PREV_ENVFILE\" > /tmp/envfile; fi'",
-    "ios-prod-release": "bash -lc 'set -e; PREV_ENVFILE=$(cat /tmp/envfile 2>/dev/null || true); echo \".env.prod\" > /tmp/envfile; ENVFILE=.env.prod xcodebuild INFOPLIST_KEY_CFBundleDisplayName=\"Push Me Up\" -workspace ios/taskswapMobile.xcworkspace -scheme taskswapMobile -configuration Release -sdk iphoneos -derivedDataPath ios/build && ios-deploy --bundle ios/build/Build/Products/Release-iphoneos/taskswapMobile.app; if [ -n \"$PREV_ENVFILE\" ]; then echo \"$PREV_ENVFILE\" > /tmp/envfile; fi'",
+    "ios-dev-release": "bash -lc 'set -e; HOST_IP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null); if [ -z \"$HOST_IP\" ]; then echo \"Could not determine LAN IP. Set HOST_IP env var.\"; exit 1; fi; BASE_URL_IOS=\"http://$HOST_IP:3001\"; printf \"APP_ENV=production\\nBASE_URL=%s\\nBASE_URL_IOS=%s\\nBASE_URL_ANDROID=%s\\n\" \"$BASE_URL_IOS\" \"$BASE_URL_IOS\" \"$BASE_URL_IOS\" > .env.release.local; PREV_ENVFILE=$(cat /tmp/envfile 2>/dev/null || true); echo \".env.release.local\" > /tmp/envfile; ENVFILE=.env.release.local xcodebuild INFOPLIST_KEY_CFBundleDisplayName=\"DEV Push Me Up\" -workspace ios/PushMeUp.xcworkspace -scheme PushMeUp -configuration Release -sdk iphoneos -derivedDataPath ios/build && ios-deploy --bundle ios/build/Build/Products/Release-iphoneos/PushMeUp.app; if [ -n \"$PREV_ENVFILE\" ]; then echo \"$PREV_ENVFILE\" > /tmp/envfile; fi'",
+    "ios-prod-release": "bash -lc 'set -e; PREV_ENVFILE=$(cat /tmp/envfile 2>/dev/null || true); echo \".env.prod\" > /tmp/envfile; ENVFILE=.env.prod xcodebuild INFOPLIST_KEY_CFBundleDisplayName=\"Push Me Up\" -workspace ios/PushMeUp.xcworkspace -scheme PushMeUp -configuration Release -sdk iphoneos -derivedDataPath ios/build && ios-deploy --bundle ios/build/Build/Products/Release-iphoneos/PushMeUp.app; if [ -n \"$PREV_ENVFILE\" ]; then echo \"$PREV_ENVFILE\" > /tmp/envfile; fi'",
     "ios-release": "bun run ios-prod-release",
     "ios-multi": "bash scripts/ios-multi-sim.sh",
     "ios-device-dev": "BUILD_MODE=Debug APP_ENV_OVERRIDE=development SOURCE_ENVFILE=.env.dev START_METRO=true bash scripts/run-ios-device.sh",
-    "ios-device-release": "BUILD_MODE=Release APP_ENV_OVERRIDE=production SOURCE_ENVFILE=.env.prod START_METRO=false bash scripts/run-ios-device.sh",
-    "ios-device": "bun run ios-device-dev"
+    "ios-device-release": "BUILD_MODE=Release APP_ENV_OVERRIDE=production SOURCE_ENVFILE=.env.prod START_METRO=false bash scripts/run-ios-device.sh"
   },
   "_scriptComments": {
     "android": "Run Android (dev env) with adb reverse for Metro/API and auto-recovery.",
@@ -38,8 +37,7 @@
     "ios-release": "Alias for ios-prod-release.",
     "ios-multi": "Run helper script for launching multiple iOS simulators.",
     "ios-device-dev": "Run iOS app on a connected physical device using Debug mode and .env.dev.",
-    "ios-device-release": "Run iOS app on a connected physical device using Release mode and .env.prod.",
-    "ios-device": "Alias for ios-device-dev."
+    "ios-device-release": "Run iOS app on a connected physical device using Release mode and .env.prod."
   },
   "dependencies": {
     "@bottom-tabs/react-navigation": "^1.1.0",

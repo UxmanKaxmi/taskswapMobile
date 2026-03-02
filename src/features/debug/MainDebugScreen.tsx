@@ -7,6 +7,8 @@ import { Height } from '@shared/components/Spacing';
 import notifee from '@notifee/react-native';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { sendTestNotificationAPI } from '@features/Notification/api/NotificationApi';
+import Layout from '@shared/components/Layout/LayoutOld';
+import AppHeader from '@shared/components/AppHeader/AppHeader';
 
 export default function MainDebugScreen() {
   const { user } = useAuth(); // assumes user.id is available
@@ -45,7 +47,8 @@ export default function MainDebugScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20 }}>
+    <Layout>
+      <AppHeader />
       <TextElement variant="title" style={{ marginBottom: 20 }}>
         Notification Debug Tools
       </TextElement>
@@ -76,6 +79,6 @@ export default function MainDebugScreen() {
       />
 
       <PrimaryButton title="Send Test Notification" onPress={handleSendTestNotification} />
-    </ScrollView>
+    </Layout>
   );
 }
