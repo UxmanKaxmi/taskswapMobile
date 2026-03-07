@@ -6,7 +6,7 @@
     "preinstall": "node scripts/enforce-bun.js",
     "android": "bash scripts/run-android-dev.sh",
     "format": "prettier --write .",
-    "ios": "ENVFILE=.env.dev react-native run-ios --workspace ios/PushMeUp.xcworkspace --scheme PushMeUp",
+    "ios": "ENVFILE=.env.dev react-native run-ios --scheme PushMeUp",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "start": "ENVFILE=.env.dev react-native start --reset-cache",
