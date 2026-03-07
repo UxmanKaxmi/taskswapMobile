@@ -153,14 +153,14 @@ export default function FindFriendsScreen() {
               isFollowing={item.isFollowing}
               onToggleFollow={() => handleToggleFollow(item.id)}
             />
-            <TextElement
+            {/* <TextElement
               variant="caption"
               color="placeHolder"
               style={{ marginTop: spacing.xs, fontStyle: 'italic' }}
             >
               We only use your contacts to find friends. We never message anyone without your
               permission.
-            </TextElement>
+            </TextElement> */}
           </>
         )}
         ItemSeparatorComponent={AppBorder}

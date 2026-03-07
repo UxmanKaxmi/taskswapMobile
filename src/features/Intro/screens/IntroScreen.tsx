@@ -26,8 +26,9 @@ const { width, height } = Dimensions.get('window');
 const subtitleBoldStyle: TextStyle = { fontWeight: '700' };
 const DOT_SIZE = 8;
 const DOT_MARGIN = 4;
-const ACTIVE_DOT_SIZE = 14;
-const DOT_STEP = DOT_SIZE + DOT_MARGIN * 2;
+const ACTIVE_DOT_SIZE = 10;
+const ACTIVE_DOT_SCALE = 1.4;
+const DOT_STEP = DOT_SIZE + DOT_MARGIN * 2.5;
 
 type IntroSlide = {
   image: any;
@@ -67,14 +68,26 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
   const [activeSlide, setActiveSlide] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-    { useNativeDriver: false }
-  );
+  const handleScroll = Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+    useNativeDriver: false,
+  });
 
   const indicatorTranslateX = scrollX.interpolate({
     inputRange: [0, width * (slides.length - 1)],
     outputRange: [0, DOT_STEP * (slides.length - 1)],
+    extrapolate: 'clamp',
+  });
+
+  const progress = Animated.divide(scrollX, width);
+  const scaleInputRange: number[] = [];
+  const scaleOutputRange: number[] = [];
+  for (let i = 0; i < slides.length; i += 1) {
+    scaleInputRange.push(i - 0.5, i, i + 0.5);
+    scaleOutputRange.push(1, ACTIVE_DOT_SCALE, 1);
+  }
+  const indicatorScale = progress.interpolate({
+    inputRange: scaleInputRange,
+    outputRange: scaleOutputRange,
     extrapolate: 'clamp',
   });
 
@@ -91,7 +104,7 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
             styles.activeDot,
             {
               left: (DOT_STEP - ACTIVE_DOT_SIZE) / 2,
-              transform: [{ translateX: indicatorTranslateX }],
+              transform: [{ translateX: indicatorTranslateX }, { scale: indicatorScale }],
             },
           ]}
         />
@@ -278,11 +291,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     position: 'relative',
-    height: ACTIVE_DOT_SIZE,
+    height: ACTIVE_DOT_SIZE * ACTIVE_DOT_SCALE,
   },
   dotWrapper: {
     width: DOT_STEP,
-    height: ACTIVE_DOT_SIZE,
+    height: ACTIVE_DOT_SIZE * ACTIVE_DOT_SCALE,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -294,7 +307,7 @@ const styles = StyleSheet.create({
   },
   activeDot: {
     position: 'absolute',
-    top: 0,
+    top: (ACTIVE_DOT_SIZE * (ACTIVE_DOT_SCALE - 1)) / 2,
     width: ACTIVE_DOT_SIZE,
     height: ACTIVE_DOT_SIZE,
     borderRadius: ACTIVE_DOT_SIZE / 2,

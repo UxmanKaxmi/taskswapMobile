@@ -4,7 +4,6 @@ import { api } from '@shared/api/axios';
 import { buildRoute } from '@shared/api/apiRoutes';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import messaging from '@react-native-firebase/messaging';
-import { isAndroid } from '@shared/utils/constants';
 
 type GoogleSignInResponse = {
   user: {
@@ -24,7 +23,14 @@ export function useGoogleAuth() {
     mutationFn: async (): Promise<GoogleSignInResponse> => {
       const result = await signInWithGoogle();
       const idToken = result.data?.idToken;
-      const fcmToken = isAndroid ? await messaging().getToken() : ''; // ✅ correct in React Native
+      let fcmToken = '';
+
+      try {
+        await messaging().registerDeviceForRemoteMessages();
+        fcmToken = await messaging().getToken();
+      } catch (error) {
+        console.warn('Failed to fetch FCM token during sign-in', error);
+      }
 
       const userPayload = {
         id: result.data?.user?.id ?? '',

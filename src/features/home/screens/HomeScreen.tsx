@@ -111,6 +111,10 @@ export default function HomeScreen() {
     );
   }, [secondaryItems]);
 
+  const openDebugScreen = useCallback(() => {
+    navigation.navigate('MainDebugScreen');
+  }, [navigation]);
+
   const headerStyle = useAnimatedStyle(() => {
     const height = interpolate(
       scrollY.value,
@@ -305,6 +309,7 @@ export default function HomeScreen() {
           onPressSearch={() => setFilterModalVisible(true)}
           onPressFilter={() => setFilterModalVisible(true)}
           onPressMore={openDevMenu}
+          onPressDebug={openDebugScreen}
         />
 
         <Animated.View style={collapsibleContentStyle}>

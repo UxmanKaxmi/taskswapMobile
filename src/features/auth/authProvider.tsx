@@ -5,12 +5,9 @@ import { signOutGoogle } from '@shared/utils/googleAuth';
 import { api } from '@shared/api/axios';
 import { useGoogleAuth } from './api/useGoogleAuth';
 import { showToast } from '@shared/utils/toast';
-import { initializeNotifications } from '@lib/notifications/initNotifications';
-import { getMessaging } from '@react-native-firebase/messaging';
 import { queryClient } from '@lib/react-query/client';
 import { registerSignOut } from '@shared/api/authBridge';
 import { buildQueryKey } from '@shared/constants/queryKeys';
-import { CommonActions, useNavigation } from '@react-navigation/native';
 
 type User = {
   id: string;
@@ -91,7 +88,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       await AsyncStorage.setItem(STORAGE_TOKEN, token);
 
       setJustLoggedIn(true);
-      initializeNotifications().catch(() => {});
 
       showToast({
         type: 'success',

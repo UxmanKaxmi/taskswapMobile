@@ -15,6 +15,7 @@ type Props = {
   onPressSearch: () => void;
   onPressFilter: () => void;
   onPressMore?: () => void;
+  onPressDebug?: () => void;
   filterOpen?: boolean;
 };
 
@@ -22,6 +23,7 @@ export default function HomeHeader({
   onPressSearch,
   onPressFilter,
   onPressMore,
+  onPressDebug,
   filterOpen = false,
 }: Props) {
   const rotation = useSharedValue(0);
@@ -55,6 +57,17 @@ export default function HomeHeader({
 
       {/* Actions */}
       <Row gap={20}>
+        {onPressDebug && (
+          <Ripple
+            onPress={() => {
+              haptics.open();
+              onPressDebug();
+            }}
+          >
+            <Icon set="ion" name="bug-outline" size={vs(15)} />
+          </Ripple>
+        )}
+
         <Ripple
           onPress={() => {
             haptics.open();

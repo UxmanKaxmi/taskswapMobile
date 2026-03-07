@@ -36,7 +36,7 @@ export function onForegroundNotification() {
   });
 }
 
-export async function onBackgroundNotification() {
+export function registerBackgroundMessageHandler() {
   messaging().setBackgroundMessageHandler(async remoteMessage => {
     console.log('📥 Background message:', remoteMessage);
     // You can choose to show a Notifee notification here as well if needed
@@ -47,5 +47,4 @@ export async function initializeNotifications() {
   await requestUserPermission();
   await createNotificationChannel();
   onForegroundNotification();
-  await onBackgroundNotification();
 }
