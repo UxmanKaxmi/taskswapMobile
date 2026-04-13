@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { APP_ENV } from '@shared/utils/constants';
 import { triggerLogout } from '@shared/api/authBridge';
 import { resetAllLaunchModalsSeen } from '@features/LaunchModals/launchModals.storage';
 
@@ -38,17 +37,13 @@ export function useSecondaryProfileMenuItems() {
           void resetAllLaunchModalsSeen();
         },
       },
-      ...(APP_ENV === 'production'
-        ? [
-            {
-              label: 'Reset App Data',
-              icon: 'trash',
-              iconSet: 'ion',
-              destructive: true,
-              onPress: handleResetAppData,
-            } as const,
-          ]
-        : []),
+      {
+        label: 'Reset App Data',
+        icon: 'trash',
+        iconSet: 'ion',
+        destructive: true,
+        onPress: handleResetAppData,
+      },
     ],
     [handleResetAppData],
   );

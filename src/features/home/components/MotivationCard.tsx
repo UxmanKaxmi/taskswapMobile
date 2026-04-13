@@ -92,7 +92,7 @@ export default function MotivationCard({ task, onPressCard, onPressShare, onPres
             style={styles.openQuote}
           /> */}
 
-          <View style={cardStyles.messageRow}>
+          <View style={[cardStyles.messageRow, cardStyles.motivationMessageRow]}>
             <TextElement variant="title" style={cardStyles.mainText}>
               "{stripOuterQuotes(text)}"
             </TextElement>

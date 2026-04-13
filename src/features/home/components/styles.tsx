@@ -100,6 +100,12 @@ export const cardStyles = StyleSheet.create({
     marginTop: vs(8),
     marginBottom: vs(0),
   },
+  motivationMessageRow: {
+    maxWidth: 320,
+  },
+  reminderMessageRow: {
+    maxWidth: 320,
+  },
 
   emoji: {
     marginLeft: spacing.sm,

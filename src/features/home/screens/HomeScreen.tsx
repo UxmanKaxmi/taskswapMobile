@@ -92,12 +92,17 @@ export default function HomeScreen() {
   const secondaryItems = useSecondaryProfileMenuItems();
 
   const openDevMenu = useCallback(() => {
-    if (!secondaryItems.length) return;
-
     Alert.alert(
       'Developer Tools',
       undefined,
       [
+        {
+          text: 'Notification Debug Tools',
+          style: 'default' as const,
+          onPress: () => {
+            navigation.navigate('MainDebugScreen');
+          },
+        },
         ...secondaryItems.map(item => ({
           text: item.label,
           style: item.destructive ? ('destructive' as const) : ('default' as const),
@@ -109,11 +114,7 @@ export default function HomeScreen() {
       ],
       { cancelable: true },
     );
-  }, [secondaryItems]);
-
-  const openDebugScreen = useCallback(() => {
-    navigation.navigate('MainDebugScreen');
-  }, [navigation]);
+  }, [navigation, secondaryItems]);
 
   const headerStyle = useAnimatedStyle(() => {
     const height = interpolate(
@@ -305,11 +306,8 @@ export default function HomeScreen() {
     <Layout allowPaddingHorizontal={false} useSafeArea={false}>
       <Animated.View style={[styles.header, headerStyle, shadowStyle]}>
         <HomeHeader
-          filterOpen={filterModalVisible}
           onPressSearch={() => setFilterModalVisible(true)}
-          onPressFilter={() => setFilterModalVisible(true)}
           onPressMore={openDevMenu}
-          onPressDebug={openDebugScreen}
         />
 
         <Animated.View style={collapsibleContentStyle}>

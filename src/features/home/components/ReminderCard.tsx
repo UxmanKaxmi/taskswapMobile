@@ -125,7 +125,7 @@ export default function ReminderCard({ task, onPressCard, onPressShare }: Props)
           />
 
           {/* Message */}
-          <View style={cardStyles.messageRow}>
+          <View style={[cardStyles.messageRow, cardStyles.reminderMessageRow]}>
             <TextElement variant="title" style={cardStyles.mainText}>
               {stripOuterQuotes(text)}
             </TextElement>
