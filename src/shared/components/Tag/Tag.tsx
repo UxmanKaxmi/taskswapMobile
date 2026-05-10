@@ -93,6 +93,9 @@ const styles = StyleSheet.create({
   label: {
     marginHorizontal: 2,
     fontSize: ms(12),
+    lineHeight: ms(12),
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   selectOnlyContent: {
     justifyContent: 'center',

@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import Icon from '@react-native-vector-icons/fontawesome6';
+import { resolveAppTextStyle } from '@shared/theme/fonts';
 
 type Props = {
   text1: string;
@@ -21,13 +22,15 @@ const iconMap: Record<
 
 export default function TaskSwapToast({ text1, text2, type }: Props) {
   const icon = iconMap[type];
+  const titleStyle = resolveAppTextStyle(styles.title, { variant: 'label' });
+  const messageStyle = resolveAppTextStyle(styles.message, { variant: 'body' });
 
   return (
     <View style={[styles.toastContainer]}>
       <Icon name={icon.name} size={22} color={icon.color} style={styles.icon} />
       <View style={styles.textContainer}>
-        <Text style={styles.title}>{text1}</Text>
-        {!!text2 && <Text style={styles.message}>{text2}</Text>}
+        <Text style={titleStyle}>{text1}</Text>
+        {!!text2 && <Text style={messageStyle}>{text2}</Text>}
       </View>
     </View>
   );

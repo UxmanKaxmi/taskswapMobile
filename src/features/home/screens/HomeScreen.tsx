@@ -5,7 +5,7 @@ import {
   RefreshControl,
   ListRenderItem,
   Alert,
-  ActivityIndicator,
+  LayoutChangeEvent,
 } from 'react-native';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
@@ -43,6 +43,8 @@ import HorizontalFilterTabs from '../components/HorizontalFilterTabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isAndroid } from '@shared/utils/constants';
 import { useSecondaryProfileMenuItems } from '@features/MyProfile/hooks/useSecondaryProfileMenuItems';
+import { useHomeSummary } from '../hooks/useHomeSummary';
+import HomeSummarySection from '../components/HomeSummarySection';
 
 const ALL_TASK_TYPES: TaskTypeEnum[] = [
   TaskTypeEnum.Motivation,
@@ -73,19 +75,32 @@ export default function HomeScreen() {
     hasNextPage,
     isFetchingNextPage,
   } = useTasksQuery();
+  const {
+    data: homeSummary,
+    isLoading: isHomeSummaryLoading,
+    isError: isHomeSummaryError,
+    refetch: refetchHomeSummary,
+  } = useHomeSummary();
 
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const [hasHomeSummaryCards, setHasHomeSummaryCards] = useState(true);
+  const [topHeaderHeight, setTopHeaderHeight] = useState(0);
+  const [collapsibleHeaderHeight, setCollapsibleHeaderHeight] = useState(0);
 
   const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [shareTask, setShareTask] = useState<MotivationTask | null>(null);
 
   // Animation
   const insets = useSafeAreaInsets();
   const TOP_INSET = insets.top;
-  const HEADER_EXPANDED = (isAndroid ? 170 : vs(130)) + TOP_INSET;
+  const fallbackExpandedHeaderHeight =
+    (isAndroid ? 170 : vs(130)) + TOP_INSET + (hasHomeSummaryCards ? vs(88) : 0);
+  const HEADER_EXPANDED =
+    topHeaderHeight > 0 && collapsibleHeaderHeight > 0
+      ? topHeaderHeight + collapsibleHeaderHeight
+      : fallbackExpandedHeaderHeight;
   const HEADER_COLLAPSED = (isAndroid ? vs(40) : vs(30)) + TOP_INSET;
-  const SCROLL_DISTANCE = HEADER_EXPANDED - HEADER_COLLAPSED;
+  const SCROLL_DISTANCE = Math.max(HEADER_EXPANDED - HEADER_COLLAPSED, 0);
   const scrollY = useSharedValue(0);
   const refreshProgressOffset = HEADER_EXPANDED + spacing.xs;
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
@@ -168,7 +183,7 @@ export default function HomeScreen() {
     try {
       haptics.selection();
       setRefreshing(true);
-      await refetch();
+      await Promise.all([refetch(), refetchHomeSummary()]);
     } finally {
       const elapsed = Date.now() - startedAt;
       if (elapsed < MIN_REFRESH_LOADER_MS) {
@@ -176,7 +191,7 @@ export default function HomeScreen() {
       }
       setRefreshing(false);
     }
-  }, [refetch]);
+  }, [refetch, refetchHomeSummary]);
 
   const collapsibleContentStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
@@ -198,6 +213,18 @@ export default function HomeScreen() {
       transform: [{ translateY }],
     };
   });
+
+  const onTopHeaderLayout = useCallback((event: LayoutChangeEvent) => {
+    const nextHeight = Math.round(event.nativeEvent.layout.height);
+
+    setTopHeaderHeight(prev => (Math.abs(prev - nextHeight) <= 1 ? prev : nextHeight));
+  }, []);
+
+  const onCollapsibleHeaderLayout = useCallback((event: LayoutChangeEvent) => {
+    const nextHeight = Math.round(event.nativeEvent.layout.height);
+
+    setCollapsibleHeaderHeight(prev => (Math.abs(prev - nextHeight) <= 1 ? prev : nextHeight));
+  }, []);
 
   const flattenedTasks = useMemo(() => data?.pages.flatMap(page => page.data) ?? [], [data]);
 
@@ -237,9 +264,7 @@ export default function HomeScreen() {
 
   const onNoopTaskAction = useCallback((_task: Task) => {}, []);
 
-  const handleShareMotivation = useCallback((task: MotivationTask) => {
-    setShareTask(task);
-  }, []);
+  const handleShareMotivation = useCallback((_task: MotivationTask) => {}, []);
 
   const onSuggestAdvice = useCallback(
     (task: Task) => {
@@ -303,15 +328,29 @@ export default function HomeScreen() {
   );
 
   return (
-    <Layout allowPaddingHorizontal={false} useSafeArea={false}>
+    <Layout
+      allowPaddingHorizontal={false}
+      useSafeArea={false}
+      style={{ backgroundColor: colors.onAccent }}
+    >
       <Animated.View style={[styles.header, headerStyle, shadowStyle]}>
-        <HomeHeader
-          onPressSearch={() => setFilterModalVisible(true)}
-          onPressMore={openDevMenu}
-        />
-
-        <Animated.View style={collapsibleContentStyle}>
+        <View onLayout={onTopHeaderLayout}>
+          <HomeHeader onPressSearch={() => setFilterModalVisible(true)} onPressMore={openDevMenu} />
+        </View>
+        <Animated.View style={collapsibleContentStyle} onLayout={onCollapsibleHeaderLayout}>
           <Greeting name={user?.name} onPressAction={() => setFilterModalVisible(true)} />
+
+          <HomeSummarySection
+            summary={homeSummary}
+            tasks={flattenedTasks}
+            currentUserId={user?.id}
+            isGuestMode={!authLoading && !user}
+            isLoading={isHomeSummaryLoading}
+            isError={isHomeSummaryError}
+            onRetry={refetchHomeSummary}
+            onPressTask={onPressTask}
+            onHasVisibleCardsChange={setHasHomeSummaryCards}
+          />
 
           <HorizontalFilterTabs
             value={activeTab as any}
@@ -324,6 +363,7 @@ export default function HomeScreen() {
               }));
             }}
           />
+          <View style={styles.filterTabsSpacer} />
         </Animated.View>
       </Animated.View>
 
@@ -339,6 +379,7 @@ export default function HomeScreen() {
         windowSize={7}
         updateCellsBatchingPeriod={50}
         removeClippedSubviews={isAndroid}
+        ListHeaderComponent={null}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -402,16 +443,13 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 20,
     backgroundColor: 'white',
-    paddingBottom: spacing.sm,
   },
   emptyContainer: {
     flex: 1,
     alignItems: 'flex-start',
     marginLeft: 20,
   },
-  footerSpinner: {
-    marginTop: vs(20),
-    marginBottom: vs(20),
-    alignItems: 'center',
+  filterTabsSpacer: {
+    height: spacing.sm,
   },
 });

@@ -13,6 +13,15 @@ export type TaskPage = {
   };
 };
 
+export type ProgressUpdate = {
+  text: string;
+  createdAt: string;
+};
+
+export type CreateProgressUpdateResponse = {
+  progressUpdate: ProgressUpdate;
+};
+
 export async function getTasksPage(
   cursor?: string | null,
   limit = TASK_PAGE_LIMIT,
@@ -34,6 +43,16 @@ export async function updateTask(
   data: Partial<Pick<CreateTaskPayload, 'text' | 'type' | 'remindAt' | 'options' | 'deliverAt'>>,
 ): Promise<Task> {
   const response = await api.patch(buildRoute.task(id), data);
+  return response.data;
+}
+
+export async function createTaskProgressUpdate(
+  taskId: string,
+  text: string,
+): Promise<CreateProgressUpdateResponse> {
+  const response = await api.post<CreateProgressUpdateResponse>(buildRoute.taskProgress(taskId), {
+    text,
+  });
   return response.data;
 }
 

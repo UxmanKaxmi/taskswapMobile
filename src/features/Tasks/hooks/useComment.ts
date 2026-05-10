@@ -23,6 +23,15 @@ export function useAddComment(taskId: string) {
       queryClient.invalidateQueries({
         queryKey: buildQueryKey.commentsForTask(taskId),
       });
+      queryClient.invalidateQueries({
+        queryKey: buildQueryKey.taskById(taskId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: buildQueryKey.tasks(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: buildQueryKey.homeSummary(),
+      });
     },
   });
 }

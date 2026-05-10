@@ -37,16 +37,7 @@ export function useLaunchModals({ ctx, registry }: UseLaunchModalsParams) {
       const seenById: Record<string, boolean> = {};
       if (lastShownLaunch >= appLaunchCount) {
         if (mountedRef.current) setActive(null);
-        if (isDEV) {
-          console.log('LaunchModals DEV', {
-            appLaunchCount,
-            lastShownLaunch,
-            seenById,
-            nextToShow: null,
-            screen: ctx.screen,
-            reason: 'already_shown_this_launch',
-          });
-        }
+
         return;
       }
       const candidates = registry
@@ -63,28 +54,11 @@ export function useLaunchModals({ ctx, registry }: UseLaunchModalsParams) {
 
         if (!mountedRef.current) return;
         setActive(config);
-        if (isDEV) {
-          console.log('LaunchModals DEV', {
-            appLaunchCount,
-            lastShownLaunch,
-            seenById,
-            nextToShow: config.id,
-            screen: ctx.screen,
-          });
-        }
+
         return;
       }
 
       if (mountedRef.current) setActive(null);
-      if (isDEV) {
-        console.log('LaunchModals DEV', {
-          appLaunchCount,
-          lastShownLaunch,
-          seenById,
-          nextToShow: null,
-          screen: ctx.screen,
-        });
-      }
     } finally {
       evaluatingRef.current = false;
     }

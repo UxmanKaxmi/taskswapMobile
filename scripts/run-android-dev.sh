@@ -4,6 +4,8 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${PROJECT_ROOT}"
 
+METRO_PORT="${METRO_PORT:-8081}"
+
 if [[ -n "${ANDROID_HOME:-}" && -x "${ANDROID_HOME}/platform-tools/adb" ]]; then
   ADB_BIN="${ANDROID_HOME}/platform-tools/adb"
 elif [[ -x "${HOME}/Library/Android/sdk/platform-tools/adb" ]]; then
@@ -48,7 +50,7 @@ ensure_adb_responsive
 # This makes API URL stable regardless of LAN IP changes.
 "${ADB_BIN}" devices | awk 'NR>1 && $2=="device" {print $1}' | while IFS= read -r serial; do
   [ -n "${serial}" ] || continue
-  "${ADB_BIN}" -s "${serial}" reverse tcp:8081 tcp:8081 >/dev/null 2>&1 || true
+  "${ADB_BIN}" -s "${serial}" reverse "tcp:${METRO_PORT}" "tcp:${METRO_PORT}" >/dev/null 2>&1 || true
   "${ADB_BIN}" -s "${serial}" reverse tcp:3001 tcp:3001 >/dev/null 2>&1 || true
 done
 
@@ -68,4 +70,5 @@ GOOGLE_SENDER_ID="$(awk -F= '/^GOOGLE_SENDER_ID=/{print $2; exit}' .env.dev 2>/d
 echo "Using adb: ${ADB_BIN}"
 echo "Using ENVFILE=${ENVFILE_ANDROID}"
 echo "Using BASE_URL_ANDROID=http://localhost:3001 (via adb reverse tcp:3001)"
-ENVFILE="${ENVFILE_ANDROID}" react-native run-android "$@"
+echo "Using METRO_PORT=${METRO_PORT} (via adb reverse tcp:${METRO_PORT})"
+ENVFILE="${ENVFILE_ANDROID}" react-native run-android --port "${METRO_PORT}" "$@"

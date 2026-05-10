@@ -16,6 +16,7 @@ export enum ApiRoute {
 export const buildRoute = {
   // 📌 Task Routes
   task: (id: string) => `${ApiRoute.TASKS}/${id}`,
+  taskProgress: (id: string) => `${ApiRoute.TASKS}/${id}/progress`,
   completeTask: (id: string) => `${ApiRoute.TASKS}/${id}/complete`,
   uncompleteTask: (id: string) => `${ApiRoute.TASKS}/${id}/incomplete`,
   featureFlags: () => `${ApiRoute.FEATURE_FLAGS}`,
@@ -25,6 +26,7 @@ export const buildRoute = {
   syncUserToDb: () => `${ApiRoute.USERS}`,
   matchUsers: () => `${ApiRoute.USERS}/match`,
   me: () => `${ApiRoute.USERS}/me`,
+  homeSummary: () => `${ApiRoute.USERS}/me/home-summary`,
   searchFriends: (query: string, includeFollowed: boolean = true) =>
     `${ApiRoute.USERS}/search-friends?query=${encodeURIComponent(query)}&includeFollowed=${includeFollowed}`,
   friendProfile: (id: string) => `${ApiRoute.USERS}/${id}/profile`,

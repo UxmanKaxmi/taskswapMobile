@@ -3,26 +3,45 @@ import { TaskType } from '@features/Tasks/types/tasks';
 export function getTitle(type: TaskType): string {
   switch (type) {
     case 'motivation':
-      return 'What do you need motivation for today?';
+      return 'What do you need help starting today?';
 
     case 'reminder':
-      return 'What should we remind you about?';
+      return 'What do you want to be reminded about?';
 
     case 'decision':
-      return 'What decision are you trying to make?';
+      return 'What are you trying to decide?';
 
     case 'advice':
-      return 'What do you need advice on?';
+      return 'What do you want advice on?';
 
     default:
-      return 'What’s on your mind?';
+      return 'What do you need help with?';
+  }
+}
+
+export function getSubtitle(type: TaskType): string {
+  switch (type) {
+    case 'motivation':
+      return 'Be specific. Say what you want to do and why it feels hard.';
+
+    case 'reminder':
+      return 'Say what you need to remember and when it matters.';
+
+    case 'decision':
+      return 'Share the choice you are stuck on and what makes it hard to decide.';
+
+    case 'advice':
+      return 'Explain what you are dealing with so people can give thoughtful advice.';
+
+    default:
+      return '';
   }
 }
 
 export function getTaskPlaceholder(type: TaskType): string {
   switch (type) {
     case 'motivation':
-      return 'e.g. "I know I should work out, but I’m struggling to start."';
+      return 'e.g. "I want to work out, but I keep putting it off."';
 
     case 'reminder':
       return (
@@ -69,19 +88,19 @@ export function getTaskHints(type: TaskType): string {
 export function getHelperHints(type: TaskType): string {
   switch (type) {
     case 'motivation':
-      return 'Tag someone who keeps you accountable.';
+      return 'Invite someone who keeps you accountable.';
 
     case 'reminder':
-      return 'Tag someone who can nudge you or keep you accountable.';
+      return 'Invite someone who can remind you or keep you on track.';
 
     case 'decision':
-      return 'Tag people whose opinion matters to you.';
+      return 'Invite someone whose opinion you trust.';
 
     case 'advice':
-      return 'Who do you trust for advice? Tag them.';
+      return 'Invite someone you trust to give thoughtful advice.';
 
     default:
-      return 'Tag a friend whose advice you value.';
+      return 'Invite someone you trust.';
   }
 }
 

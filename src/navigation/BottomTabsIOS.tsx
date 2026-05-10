@@ -106,8 +106,10 @@ export default function BottomTabsIOS() {
           },
         }}
         options={{
+          title: 'Inbox',
+          tabBarLabel: 'Inbox',
           tabBarIcon: ({ focused }) => ({
-            sfSymbol: focused ? 'bell.fill' : 'bell',
+            sfSymbol: focused ? 'tray.fill' : 'tray',
           }),
           tabBarBadge:
             unreadCount > 0 ? (unreadCount > 99 ? '99+' : unreadCount.toString()) : undefined,

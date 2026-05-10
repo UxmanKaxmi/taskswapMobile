@@ -8,12 +8,19 @@ type Props = {
   onPress: (event: GestureResponderEvent | undefined) => void;
   isLoading?: boolean;
   icon?: React.ReactNode;
+  backgroundColor?: string;
   style?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
 };
 
-export default function PrimaryButton(props: Props) {
+export default function PrimaryButton({ backgroundColor, ...props }: Props) {
   const theme = useTheme();
-  return <ButtonBase {...props} backgroundColor={theme.colors.primary} textColor="#fff" />;
+  return (
+    <ButtonBase
+      {...props}
+      backgroundColor={backgroundColor ?? theme.colors.primary}
+      textColor="#fff"
+    />
+  );
 }

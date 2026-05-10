@@ -11,6 +11,7 @@ import CommentMention from './CommentMention';
 import TaskTypeNotification from './TaskTypeNotification';
 import TaskAdviceNotification from './TaskAdviceNotification';
 import TaskMotivationNotification from './TaskMotivationNotification';
+import TaskProgressUpdateNotification from './TaskProgressUpdateNotification';
 
 type Props = {
   item: NotificationDTO;
@@ -37,6 +38,9 @@ export default function NotificationCard({ item, onPress }: Props) {
       return <TaskMotivationNotification item={item} onPress={onPress} />;
     case 'task-motivation-milestone':
       return <TaskMotivationNotification item={item} onPress={onPress} />;
+    case 'task-motivation-progress':
+    case 'task-progress-update':
+      return <TaskProgressUpdateNotification item={item} onPress={onPress} />;
 
     default:
       return <GenericNotification item={item} onPress={onPress} />;

@@ -15,7 +15,7 @@ import AppHeader from '@shared/components/AppHeader/AppHeader';
 import TaskBackground from '../components/TaskBackground';
 import { ms, vs } from 'react-native-size-matters';
 import AppTextInput from '@shared/components/Inputs/AppTextInput';
-import { getButtonText, getTaskPlaceholder, getTitle } from '../utils/constants';
+import { getButtonText, getTaskPlaceholder, getTitle } from '../utils/taskCopy';
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 import TaskDescriptionInput from '../components/TaskDescriptionInput';
 import {
@@ -38,10 +38,12 @@ import AnimatedBottomButton, {
   BOTTOM_BUTTON_HEIGHT,
 } from '@shared/components/Buttons/AnimatedBottomButton';
 import { isAndroid } from '@shared/utils/constants';
+import { useAuth } from '@features/Auth/AuthProvider';
 
 type Props = NativeStackScreenProps<AddTaskStackParamList, 'AddAdvice'>;
 
-export default function AddAdviceScreen({ navigation }: Props) {
+export default function AddAdviceScreen({ navigation, route }: Props) {
+  const { user } = useAuth();
   const [text, setText] = useState('');
   const [visibility, setVisibility] = useState<'friends' | 'public' | 'private'>('public');
   const [helpers, setHelpers] = useState<HelperUser[]>([]);
@@ -61,7 +63,36 @@ export default function AddAdviceScreen({ navigation }: Props) {
   const contentScale = useState(new Animated.Value(1))[0];
 
   const { mutate: createTask, isPending } = useCreateTask();
-  const { data: friends = [] } = useFollowers();
+  const { data: friends = [] } = useFollowers(!!user);
+
+  useEffect(() => {
+    const draft = route.params?.draft;
+    if (!draft || draft.type !== TaskTypeEnum.Advice) return;
+
+    setText(draft.text ?? '');
+    setVisibility(draft.visibility ?? 'public');
+  }, [route.params?.draft]);
+
+  const hasAutoSubmittedRef = React.useRef(false);
+  useEffect(() => {
+    const draft = route.params?.draft;
+    if (!user) return;
+    if (!route.params?.submitAfterAuth) return;
+    if (!draft || draft.type !== TaskTypeEnum.Advice) return;
+    if (hasAutoSubmittedRef.current) return;
+
+    hasAutoSubmittedRef.current = true;
+    createTask(draft, {
+      onSuccess: () => {
+        setSuccess(true);
+        showToast({
+          type: 'success',
+          title: 'Advice posted! Let the help roll in.',
+        });
+        resetToHomeRoot(navigation);
+      },
+    });
+  }, [createTask, navigation, route.params?.draft, route.params?.submitAfterAuth, user]);
 
   useEffect(() => {
     setShowSubmit(canSubmit && !success);
@@ -77,12 +108,28 @@ export default function AddAdviceScreen({ navigation }: Props) {
       return;
     }
 
+    const effectiveVisibility = user ? visibility : 'private';
+    const effectiveHelpers = user && effectiveVisibility !== 'private' ? helperIds : [];
+
     const payload: CreateTaskPayload = {
       type: TaskTypeEnum.Advice,
       text: text.trim(),
-      visibility,
-      helpers: visibility === 'private' ? [] : helperIds,
+      visibility: effectiveVisibility,
+      helpers: effectiveHelpers,
     };
+
+    if (!user) {
+      const rootNav: any = (navigation as any).getParent?.()?.getParent?.();
+      (rootNav ?? navigation).navigate('AuthIntro', {
+        redirectTo: 'AddTask',
+        params: {
+          screen: 'AddAdvice',
+          params: { draft: payload, submitAfterAuth: true },
+        },
+        authContext: 'AddTask',
+      });
+      return;
+    }
 
     createTask(payload, {
       onSuccess: () => {
@@ -206,13 +253,15 @@ export default function AddAdviceScreen({ navigation }: Props) {
         </Shadow>
 
         {/* Visibility */}
-        <VisibilitySelector
-          taskType={TaskTypeEnum.Advice}
-          value={visibility}
-          onChange={setVisibility}
-        />
+        {user ? (
+          <VisibilitySelector
+            taskType={TaskTypeEnum.Advice}
+            value={visibility}
+            onChange={setVisibility}
+          />
+        ) : null}
         {/* Helpers */}
-        {showHelper && (
+        {user && showHelper ? (
           <Animated.View
             style={{
               opacity: helperOpacity,
@@ -225,17 +274,20 @@ export default function AddAdviceScreen({ navigation }: Props) {
               taskType={TaskTypeEnum.Advice}
             />
           </Animated.View>
-        )}
-        <SelectHelpersModal
-          visible={showHelperModal}
-          selected={helpers.map(h => h.id)}
-          onClose={() => setShowHelperModal(false)}
-          friends={friends}
-          onConfirm={ids => {
-            const selectedHelpers = friends.filter((f: { id: string }) => ids.includes(f.id));
-            setHelpers(selectedHelpers);
-          }}
-        />
+        ) : null}
+        {user ? (
+          <SelectHelpersModal
+            visible={showHelperModal}
+            selected={helpers.map(h => h.id)}
+            onClose={() => setShowHelperModal(false)}
+            friends={friends}
+            onConfirm={ids => {
+              const selectedHelpers = friends.filter((f: { id: string }) => ids.includes(f.id));
+              setHelpers(selectedHelpers);
+            }}
+            confirmButtonColor={colors.adviceBgHardest}
+          />
+        ) : null}
       </Animated.View>
     </Layout>
   );

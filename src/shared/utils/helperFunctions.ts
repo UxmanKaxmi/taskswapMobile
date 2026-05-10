@@ -28,6 +28,12 @@ type HumanizeDateOptions = {
  */
 export function timeAgo(isoDate: string): string {
   const date = parseISO(isoDate);
+  const diffSeconds = Math.floor((Date.now() - date.getTime()) / 1000);
+
+  if (diffSeconds < 60) {
+    return 'Just now';
+  }
+
   return formatDistanceToNow(date, { addSuffix: true });
 }
 

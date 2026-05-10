@@ -8,6 +8,6 @@ export function useGreeting(name?: string) {
 
   return {
     greetingText: name ? `${greeting}, ${name}` : greeting,
-    headline: 'Ready to push forward?',
+    headline: 'Here’s what needs your attention',
   };
 }

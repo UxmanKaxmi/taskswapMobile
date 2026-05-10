@@ -9,7 +9,7 @@ import SectionHeader from '@shared/components/SectionHeader/SectionHeader';
 
 import { ms } from 'react-native-size-matters';
 import { TaskType } from '@features/Home/types/home';
-import { getVisibilityHelperText } from '../utils/constants';
+import { getVisibilityHelperText } from '../utils/taskCopy';
 
 type Visibility = 'public' | 'friends' | 'private';
 
@@ -31,8 +31,8 @@ export default function VisibilitySelector({ value, onChange, taskType }: Props)
   const { colors } = useTheme();
 
   const translateX = useRef(new Animated.Value(0)).current;
-  const helperOpacity = useRef(new Animated.Value(0)).current;
-  const helperTranslateY = useRef(new Animated.Value(6)).current;
+  const helperOpacity = useRef(new Animated.Value(1)).current;
+  const helperTranslateY = useRef(new Animated.Value(0)).current;
 
   const [width, setWidth] = useState(0);
 
@@ -41,7 +41,7 @@ export default function VisibilitySelector({ value, onChange, taskType }: Props)
   const segmentWidth = trackWidth / OPTIONS.length;
   const prevValue = useRef<Visibility | null>(null);
   const userInitiatedRef = useRef(false);
-  const [showHelper, setShowHelper] = useState(false);
+  const [showHelper] = useState(true);
 
   function getIconName(baseIcon: string, selected: boolean): string {
     if (!selected) return baseIcon;
@@ -66,8 +66,6 @@ export default function VisibilitySelector({ value, onChange, taskType }: Props)
       return;
     }
 
-    // Mark helper as visible
-    setShowHelper(true);
     userInitiatedRef.current = false;
     prevValue.current = value;
 
@@ -105,7 +103,7 @@ export default function VisibilitySelector({ value, onChange, taskType }: Props)
 
   return (
     <View style={styles.wrapper}>
-      <SectionHeader label="Who can see this?" icon="eye" />
+      <SectionHeader label="Who do you want support from?" icon="eye" />
 
       <Shadow size="tint">
         <View
@@ -188,6 +186,7 @@ export default function VisibilitySelector({ value, onChange, taskType }: Props)
               color: colors[`${taskType}BgHardest`],
               fontSize: ms(12),
               fontWeight: '500',
+              opacity: 0.8,
             }}
           >
             {getVisibilityHelperText(value, taskType)}

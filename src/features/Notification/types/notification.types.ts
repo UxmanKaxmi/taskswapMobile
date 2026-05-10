@@ -13,7 +13,11 @@ export interface NotificationDTO {
     | 'reminder'
     | 'decision-done'
     | 'task-advice'
-    | 'task-motivation-push';
+    | 'task-motivation-push'
+    | 'task-motivation-milestone'
+    | 'task-motivation-progress'
+    | 'task-progress-update'
+    | 'commentMention';
 
   message: string;
   read: boolean;

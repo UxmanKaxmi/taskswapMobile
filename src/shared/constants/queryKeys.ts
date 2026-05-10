@@ -9,6 +9,7 @@ export enum QueryKeys {
   MatchedUsers = 'matched-users',
   Notification = 'notification',
   MyProfile = 'my-profile',
+  HomeSummary = 'home-summary',
   SearchFriends = 'search-friends',
   FriendProfile = 'friend-profile',
   Votes = 'votes',
@@ -28,6 +29,7 @@ export const buildQueryKey = {
   matchedUsers: () => [QueryKeys.MatchedUsers],
   notifications: () => [QueryKeys.Notification],
   myProfile: () => [QueryKeys.MyProfile],
+  homeSummary: (utcOffsetMinutes?: number) => [QueryKeys.HomeSummary, utcOffsetMinutes],
   searchFriends: (query: string, includeFollowed: boolean = true) => [
     QueryKeys.SearchFriends,
     query,

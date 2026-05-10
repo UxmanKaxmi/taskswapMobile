@@ -5,15 +5,34 @@ import { ms, vs } from 'react-native-size-matters';
 
 export const notificationStyles = StyleSheet.create({
   timeAgoText: {
-    fontSize: ms(11),
+    fontSize: ms(9),
+    lineHeight: ms(12),
     marginTop: vs(2),
   },
   nameText: {
-    fontSize: ms(15),
+    fontSize: ms(13),
+    lineHeight: ms(17),
   },
   notifyText: {
-    fontSize: ms(15),
+    fontSize: ms(13),
+    lineHeight: ms(17),
     paddingEnd: ms(7),
+  },
+  typeText: {
+    fontSize: ms(13),
+    lineHeight: ms(17),
+  },
+  bodyText: {
+    fontSize: ms(14),
+    lineHeight: ms(20),
+  },
+  bodyMetaText: {
+    fontSize: ms(12),
+    lineHeight: ms(16),
+  },
+  emojiText: {
+    fontSize: ms(22),
+    lineHeight: ms(28),
   },
   unreadCard: {
     backgroundColor: colors.adviceBg,

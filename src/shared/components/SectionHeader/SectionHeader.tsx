@@ -36,7 +36,7 @@ export default function SectionHeader({
       <View style={styles.left}>
         <Icon set="ion" name={icon} size={ms(12)} color={colors.muted} />
         <TextElement variant="caption" style={styles.label}>
-          {label.toUpperCase()}
+          {label}
         </TextElement>
       </View>
 
@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
     fontSize: ms(12),
     fontWeight: '600',
     marginLeft: spacing.xs,
+    lineHeight: ms(14),
   },
   rightHitSlop: {
     paddingHorizontal: spacing.sm,
@@ -86,5 +87,6 @@ const styles = StyleSheet.create({
     fontSize: ms(12),
     fontWeight: '600',
     marginLeft: spacing.xs,
+    lineHeight: ms(14),
   },
 });

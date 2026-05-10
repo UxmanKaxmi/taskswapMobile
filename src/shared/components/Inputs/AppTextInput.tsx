@@ -13,6 +13,7 @@ import {
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { colors, spacing, typography } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
+import { resolveAppTextStyle } from '@shared/theme/fonts';
 import Row from '../Layout/Row';
 
 interface AppTextInputProps extends TextInputProps {
@@ -106,6 +107,19 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
     }, [value, charLimit, error, onValidityChange]);
 
     const InputComponent: any = useBottomSheetTextInput ? BottomSheetTextInput : TextInput;
+    const resolvedInputStyle = resolveAppTextStyle([styles.input, inputStyle], { variant: 'body' });
+    const resolvedErrorStyle = resolveAppTextStyle(
+      [styles.charCount, error && { color: colors.error }, { transform: [{ scale: scaleAnim }] }],
+      { variant: 'label' },
+    );
+    const resolvedCharCountStyle = resolveAppTextStyle(
+      [
+        styles.charCount,
+        value.length >= charLimit && { color: colors.error },
+        { transform: [{ scale: scaleAnim }] },
+      ],
+      { variant: 'label' },
+    );
 
     return (
       <View style={containerStyle}>
@@ -130,7 +144,7 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
           <InputComponent
             ref={ref} // ✅ THIS IS THE KEY
             autoFocus={autoFocus}
-            style={[styles.input, inputStyle]}
+            style={resolvedInputStyle}
             placeholderTextColor={colors.placeHolder}
             value={value}
             multiline
@@ -150,26 +164,10 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
         </Animated.View>
 
         <Row style={{ justifyContent: errorText ? 'space-between' : 'flex-end' }}>
-          {errorText && (
-            <Animated.Text
-              style={[
-                styles.charCount,
-                error && { color: colors.error },
-                { transform: [{ scale: scaleAnim }] },
-              ]}
-            >
-              {errorText}
-            </Animated.Text>
-          )}
+          {errorText && <Animated.Text style={resolvedErrorStyle}>{errorText}</Animated.Text>}
 
           {showCharCount && (
-            <Animated.Text
-              style={[
-                styles.charCount,
-                value.length >= charLimit && { color: colors.error },
-                { transform: [{ scale: scaleAnim }] },
-              ]}
-            >
+            <Animated.Text style={resolvedCharCountStyle}>
               {value.length}/{charLimit}
             </Animated.Text>
           )}

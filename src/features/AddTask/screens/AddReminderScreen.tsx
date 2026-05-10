@@ -34,12 +34,14 @@ import { resetToHomeRoot } from '@navigation/types/navigationUtils';
 import { useFollowers } from '@features/User/hooks/useFollowers';
 import { HelperUser } from '@features/Home/types/home';
 import { isAndroid } from '@shared/utils/constants';
-import { getButtonText, getTaskPlaceholder, getTitle } from '../utils/constants';
+import { getButtonText, getTaskPlaceholder, getTitle } from '../utils/taskCopy';
 import ReminderWhenPicker from '../components/ReminderWhenPicker';
+import { useAuth } from '@features/Auth/AuthProvider';
 
 type Props = NativeStackScreenProps<AddTaskStackParamList, 'AddReminder'>;
 
-export default function AddReminderScreen({ navigation }: Props) {
+export default function AddReminderScreen({ navigation, route }: Props) {
+  const { user } = useAuth();
   const MIN_REMINDER_OFFSET_MS = 2 * 60 * 60 * 1000; // 2 hours
   const normalizeToMinute = (date: Date) =>
     new Date(
@@ -74,7 +76,7 @@ export default function AddReminderScreen({ navigation }: Props) {
   const canSubmit = text.trim().length > 0 && isReminderTimeValid && !success;
 
   const { mutate: createTask, isPending } = useCreateTask();
-  const { data: friends = [] } = useFollowers();
+  const { data: friends = [] } = useFollowers(!!user);
 
   // Content animation
   const contentOpacity = useState(new Animated.Value(1))[0];
@@ -85,6 +87,43 @@ export default function AddReminderScreen({ navigation }: Props) {
     combined.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
     setRemindAt(combined);
   }, [selectedDate, selectedTime]);
+
+  useEffect(() => {
+    const draft = route.params?.draft;
+    if (!draft || draft.type !== TaskTypeEnum.Reminder) return;
+
+    setText(draft.text ?? '');
+    setVisibility(draft.visibility ?? 'public');
+
+    if (draft.remindAt) {
+      const parsed = new Date(draft.remindAt);
+      if (!Number.isNaN(parsed.getTime())) {
+        setSelectedDate(parsed);
+        setSelectedTime(parsed);
+      }
+    }
+  }, [route.params?.draft]);
+
+  const hasAutoSubmittedRef = React.useRef(false);
+  useEffect(() => {
+    const draft = route.params?.draft;
+    if (!user) return;
+    if (!route.params?.submitAfterAuth) return;
+    if (!draft || draft.type !== TaskTypeEnum.Reminder) return;
+    if (hasAutoSubmittedRef.current) return;
+
+    hasAutoSubmittedRef.current = true;
+    createTask(draft, {
+      onSuccess: () => {
+        setSuccess(true);
+        showToast({
+          type: 'success',
+          title: 'Reminder set successfully',
+        });
+        resetToHomeRoot(navigation);
+      },
+    });
+  }, [createTask, navigation, route.params?.draft, route.params?.submitAfterAuth, user]);
 
   function onSubmit() {
     if (!canSubmit || !remindAt) {
@@ -106,13 +145,29 @@ export default function AddReminderScreen({ navigation }: Props) {
       return;
     }
 
+    const effectiveVisibility = user ? visibility : 'private';
+    const effectiveHelpers = user && effectiveVisibility !== 'private' ? helperIds : [];
+
     const payload: CreateTaskPayload = {
       type: TaskTypeEnum.Reminder,
       text: text.trim(),
-      visibility,
-      helpers: visibility === 'private' ? [] : helperIds,
+      visibility: effectiveVisibility,
+      helpers: effectiveHelpers,
       remindAt: remindAt.toISOString(),
     };
+
+    if (!user) {
+      const rootNav: any = (navigation as any).getParent?.()?.getParent?.();
+      (rootNav ?? navigation).navigate('AuthIntro', {
+        redirectTo: 'AddTask',
+        params: {
+          screen: 'AddReminder',
+          params: { draft: payload, submitAfterAuth: true },
+        },
+        authContext: 'AddTask',
+      });
+      return;
+    }
 
     createTask(payload, {
       onSuccess: () => {
@@ -184,29 +239,36 @@ export default function AddReminderScreen({ navigation }: Props) {
         {/* <Height size={vs(14)} /> */}
 
         {/* Visibility */}
-        <VisibilitySelector
-          taskType={TaskTypeEnum.Reminder}
-          value={visibility}
-          onChange={setVisibility}
-        />
+        {user ? (
+          <VisibilitySelector
+            taskType={TaskTypeEnum.Reminder}
+            value={visibility}
+            onChange={setVisibility}
+          />
+        ) : null}
 
         {/* Helpers  */}
-        <TagHelperCard
-          helpers={helpers}
-          onPress={() => setShowHelperModal(true)}
-          taskType={TaskTypeEnum.Reminder}
-        />
+        {user ? (
+          <>
+            <TagHelperCard
+              helpers={helpers}
+              onPress={() => setShowHelperModal(true)}
+              taskType={TaskTypeEnum.Reminder}
+            />
 
-        <SelectHelpersModal
-          visible={showHelperModal}
-          selected={helperIds}
-          friends={friends}
-          onClose={() => setShowHelperModal(false)}
-          onConfirm={ids => {
-            const selected = friends.filter(f => ids.includes(f.id));
-            setHelpers(selected);
-          }}
-        />
+            <SelectHelpersModal
+              visible={showHelperModal}
+              selected={helperIds}
+              friends={friends}
+              onClose={() => setShowHelperModal(false)}
+              onConfirm={ids => {
+                const selected = friends.filter(f => ids.includes(f.id));
+                setHelpers(selected);
+              }}
+              confirmButtonColor={colors.reminderBgHardest}
+            />
+          </>
+        ) : null}
       </Animated.View>
     </Layout>
   );

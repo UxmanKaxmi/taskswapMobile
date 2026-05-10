@@ -6,6 +6,7 @@ BUILD_MODE="${BUILD_MODE:-Debug}"
 SOURCE_ENVFILE="${SOURCE_ENVFILE:-.env.dev}"
 APP_ENV_OVERRIDE="${APP_ENV_OVERRIDE:-}"
 START_METRO="${START_METRO:-}"
+METRO_PORT="${METRO_PORT:-8081}"
 
 if [[ -z "${APP_ENV_OVERRIDE}" ]]; then
   if [[ "${BUILD_MODE}" == "Release" ]]; then
@@ -34,9 +35,9 @@ if [[ -z "${DEVICE_NAME}" ]]; then
   exit 1
 fi
 
-if [[ "${START_METRO}" == "true" ]] && ! lsof -i :8081 >/dev/null 2>&1; then
-  echo "Starting Metro on port 8081..."
-  ENVFILE="${SOURCE_ENVFILE}" bun run start >/tmp/metro.log 2>&1 &
+if [[ "${START_METRO}" == "true" ]] && ! lsof -i :"${METRO_PORT}" >/dev/null 2>&1; then
+  echo "Starting Metro on port ${METRO_PORT}..."
+  ENVFILE="${SOURCE_ENVFILE}" bun run start -- --port "${METRO_PORT}" >/tmp/metro.log 2>&1 &
   sleep 2
 fi
 
@@ -80,6 +81,7 @@ fi
 echo "Running on device: ${DEVICE_NAME}"
 echo "Build mode: ${BUILD_MODE}"
 echo "Start Metro: ${START_METRO}"
+echo "Metro port: ${METRO_PORT}"
 echo "Source ENVFILE=${SOURCE_ENVFILE}"
 echo "Using ENVFILE=${ENVFILE_DEVICE}"
 echo "Using BASE_URL_IOS=${BASE_URL_IOS}"
@@ -95,4 +97,4 @@ cleanup_envfile() {
 trap cleanup_envfile EXIT
 
 echo "${ENVFILE_DEVICE}" > /tmp/envfile
-ENVFILE="${ENVFILE_DEVICE}" npx react-native run-ios --device "${DEVICE_NAME}" --mode "${BUILD_MODE}"
+ENVFILE="${ENVFILE_DEVICE}" npx react-native run-ios --device "${DEVICE_NAME}" --mode "${BUILD_MODE}" --port "${METRO_PORT}"

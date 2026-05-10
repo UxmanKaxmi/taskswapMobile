@@ -36,7 +36,11 @@ export default function DecisionDone({ item, onPress }: Props) {
             {item.metadata?.senderName || item?.sender?.name || 'Someone'}
           </TextElement>{' '}
           marked a{' '}
-          <TextElement variant="caption" weight="600" style={{ color: typeColor }}>
+          <TextElement
+            variant="caption"
+            weight="600"
+            style={[notificationStyles.typeText, { color: typeColor }]}
+          >
             Decision
           </TextElement>{' '}
           as complete.

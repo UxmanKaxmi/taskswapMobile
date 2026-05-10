@@ -6,14 +6,24 @@ import AddMotivationScreen from '../screens/AddMotivationScreen';
 import AddDecisionScreen from '../screens/AddDecisionScreen';
 import AddReminderScreen from '../screens/AddReminderScreen';
 import ChooseImpactScreen from '../screens/ChooseImpactScreen';
+import type { CreateTaskPayload } from '../types/addTask.types';
+
+type DraftParams = {
+  draft?: CreateTaskPayload;
+  submitAfterAuth?: boolean;
+};
 
 export type AddTaskStackParamList = {
-  ChooseImpactScreen: undefined;
+  ChooseImpactScreen:
+    | {
+        entry?: 'intro' | 'modal';
+      }
+    | undefined;
 
-  AddAdvice: undefined;
-  AddMotivation: undefined;
-  AddDecision: undefined;
-  AddReminder: undefined;
+  AddAdvice?: DraftParams;
+  AddMotivation?: DraftParams;
+  AddDecision?: DraftParams;
+  AddReminder?: DraftParams;
 };
 
 const Stack = createNativeStackNavigator<AddTaskStackParamList>();

@@ -1,26 +1,23 @@
 import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
-import { ms, vs } from 'react-native-size-matters';
+import { ms } from 'react-native-size-matters';
 
 import Row from '@shared/components/Layout/Row';
-import Column from '@shared/components/Layout/Column';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { Height } from '@shared/components/Spacing';
-import TaskMetaRow from '@features/Home/components/TaskMetaRow';
 import HelperAvatarGroup from '@features/Home/components/HelperAvatarGroup';
 
-import { colors, spacing } from '@shared/theme';
+import { colors } from '@shared/theme';
 import { timeAgo, toShortName } from '@shared/utils/helperFunctions';
-import { getTypeVisual, typeIcons } from '@shared/utils/typeVisuals';
+import { typeIcons } from '@shared/utils/typeVisuals';
 import { TaskType } from '@features/Tasks/types/tasks';
 import { HelperUser } from '@features/Home/types/home';
 import { Icon } from '@shared/components/Icons';
-import { Shadow } from '@shared/components/Shadow';
 import Ripple from '@shared/components/Buttons/Ripple';
 import { openFriendsProfile } from '@navigation/types/navigationUtils';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { useAuth } from '@features/Auth/AuthProvider';
+import TaskStatusPill from './TaskStatusPill';
 
 type Props = {
   task: {
@@ -35,7 +32,6 @@ type Props = {
 };
 
 export function TaskDetailHeader({ task }: Props) {
-  const { emoji } = getTypeVisual(task.type);
   const avatarSize = ms(45);
 
   const iconName = typeIcons[task.type];
@@ -94,7 +90,7 @@ export function TaskDetailHeader({ task }: Props) {
         </Ripple>
 
         {/* 🔥 Meta row (inline) */}
-        <Row gap={2} justify="flex-start" align="center" style={styles.metaRow}>
+        <Row gap={1} justify="flex-start" align="center" style={styles.metaRow}>
           <Icon
             set="fa6"
             name={iconName}
@@ -110,70 +106,20 @@ export function TaskDetailHeader({ task }: Props) {
 
           <TextElement style={styles.dot}>•</TextElement>
 
-          <TextElement style={styles.timeText}>{timeAgo(task.createdAt)}</TextElement>
+          <TextElement numberOfLines={1} ellipsizeMode="tail" style={styles.timeText}>
+            {timeAgo(task.createdAt)}
+          </TextElement>
         </Row>
       </View>
-      <View
-        style={[
-          styles.statusPill,
-          // task.completed ? styles.completedPill : styles.activePill,
-          {
-            backgroundColor: getTypeColor(task.type),
-          },
-        ]}
-      >
-        <TextElement
-          style={[
-            styles.statusText,
-            {
-              color: colors.onPrimary,
-              fontWeight: '600',
-            },
-          ]}
-        >
-          {task.completed ? 'Completed' : 'Active'}
-        </TextElement>
-      </View>
+      <TaskStatusPill status={task.completed ? 'completed' : 'active'} />
     </Row>
   );
 }
 
 const styles = StyleSheet.create({
-  statusPill: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-
-  activePill: {
-    borderWidth: 2,
-    // borderColor: colors.motivationBgHard,
-    // backgroundColor: colors.onAccent,
-  },
-
-  completedPill: {
-    borderWidth: 2,
-    borderColor: colors.motivationBgHard,
-
-    // backgroundColor: colors.onAccent,
-  },
-
-  statusText: {
-    fontSize: 12,
-    fontWeight: '400',
-    color: colors.motivationBgHardest,
-  },
-
-  completedText: {
-    fontSize: 12,
-    fontWeight: '400',
-
-    color: colors.motivationBgHardest,
-  },
-
   avatarWrapper: {
     position: 'relative',
-    marginRight: spacing.sm,
+    marginRight: ms(5),
   },
 
   avatar: {
@@ -182,8 +128,8 @@ const styles = StyleSheet.create({
 
   helperOverlay: {
     position: 'absolute',
-    bottom: ms(-4),
-    right: ms(-6),
+    bottom: ms(-2),
+    right: ms(-3),
   },
 
   name: {
@@ -209,11 +155,12 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: ms(12),
     color: colors.muted,
+    flexShrink: 1,
   },
 
   dot: {
-    fontSize: ms(14),
-    marginHorizontal: ms(4),
+    fontSize: ms(10),
+    marginHorizontal: ms(2),
     color: colors.muted,
   },
 });

@@ -27,12 +27,18 @@ export type Task = {
   hasVoted?: boolean;
   voteCount?: number;
   helpers?: string[];
+  progressUpdates?: ProgressUpdate[];
   votes: {
     [option: string]: {
       count: number;
       preview: Voter[];
     };
   };
+};
+
+export type ProgressUpdate = {
+  text: string;
+  createdAt: string;
 };
 
 // ✅ Payload used for task creation
@@ -92,4 +98,6 @@ export interface ToggleCommentLikePayload {
 export type TaskPush = {
   pushCount: number;
   hasPushed: boolean;
+  pushedAt?: string | null;
+  createdAt?: string | null;
 };

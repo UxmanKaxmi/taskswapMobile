@@ -8,7 +8,7 @@ import { ms, vs } from 'react-native-size-matters';
 import SectionHeader from '@shared/components/SectionHeader/SectionHeader';
 import HelpersRow from './HelpersRow';
 import { HelperUser } from '@features/Home/types/home';
-import { getHelperHints } from '../utils/constants';
+import { getHelperHints } from '../utils/taskCopy';
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 import Column from '@shared/components/Layout/Column';
 
@@ -23,7 +23,7 @@ export default function TagHelperCard({ helpers, onPress, taskType }: Props) {
 
   return (
     <View style={styles.wrapper}>
-      <SectionHeader label="TAG A HELPER" icon="person-add" />
+      <SectionHeader label="Ask someone you trust" icon="person-add" />
 
       <Shadow size="tint">
         <Pressable style={styles.card} onPress={onPress}>
@@ -41,7 +41,7 @@ export default function TagHelperCard({ helpers, onPress, taskType }: Props) {
 
                 <Column flex={1} gap={1}>
                   <TextElement variant="caption" style={styles.subTextHeading}>
-                    Who can help?
+                    Tag a helper
                   </TextElement>
 
                   <TextElement variant="caption" color="muted" style={styles.subText}>

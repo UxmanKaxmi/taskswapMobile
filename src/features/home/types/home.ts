@@ -10,10 +10,17 @@ export type HelperUser = {
   photo?: string;
 };
 
+export type TaskHelper = HelperUser;
+
 export type Voter = {
   id: string;
   name: string;
   photo?: string;
+};
+
+export type ProgressUpdate = {
+  text: string;
+  createdAt: string;
 };
 
 // ---------------------------------------------
@@ -40,6 +47,8 @@ export type BaseTask = {
 
   pushCount: number;
   hasPushed: boolean;
+  hasAdvised?: boolean;
+  progressUpdates?: ProgressUpdate[];
 
   // 🔥 Extra state
   hasReminded: boolean;
@@ -113,4 +122,73 @@ export type TimeFilter = 'latest' | 'today' | 'thisWeek' | 'thisMonth' | 'allTim
 export type FeedFilter = {
   // time: TimeFilter;
   types: TaskType[];
+};
+
+export type HomeSummaryCounts = {
+  peopleNeedYourPushToday: number;
+  replyWaitingCount: number;
+};
+
+export type HomeHeroModuleEntity = {
+  type: 'task';
+  taskId: string;
+  taskText: string;
+  ownerId: string;
+  ownerName: string;
+  ownerPhoto: string | null;
+};
+
+export type HomeSuccessStoryHeroModule = {
+  type: 'success_story';
+  title: string;
+  body: string;
+  entity: HomeHeroModuleEntity;
+  timestamps: {
+    contributedAt: string;
+    resultAt: string;
+  };
+};
+
+export type HomeSuccessStory = HomeSuccessStoryHeroModule & {
+  id?: string;
+  ctaLabel?: string;
+};
+
+export type HomeHeroModule = HomeSuccessStoryHeroModule;
+
+export type HomeFeaturedStory = {
+  type: 'motivation-success';
+  taskId: string;
+  taskText: string;
+  ownerId: string;
+  ownerName: string;
+  ownerPhoto: string | null;
+  pushedAt: string | null;
+  completedAt: string | null;
+};
+
+export type HomeSummaryResponse = {
+  summaryCounts: HomeSummaryCounts;
+  modules?: HomeSummaryModules | null;
+  successStory: HomeSuccessStory | null;
+  heroModule: HomeHeroModule | null;
+  peopleNeedYourPushToday: number;
+  replyWaitingCount: number;
+  featuredStory: HomeFeaturedStory | null;
+};
+
+export type HomeSummaryModules = {
+  successStory?: HomeSuccessStory | null;
+  needsYourPush?: unknown;
+  updateProgress?: unknown;
+  adviceRequestWaitingOnYou?: unknown;
+};
+
+export type HomeSummaryApiResponse = Partial<HomeSummaryResponse> & {
+  summaryCounts?: Partial<HomeSummaryCounts> | null;
+  modules?: HomeSummaryModules | null;
+  successStory?: HomeSuccessStory | null;
+  heroModule?: HomeHeroModule | null;
+  featuredStory?: HomeFeaturedStory | null;
+  ctaLabel?: string;
 };

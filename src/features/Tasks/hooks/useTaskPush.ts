@@ -28,11 +28,15 @@ export function useToggleTaskPush(taskId: string) {
       const previous = queryClient.getQueryData<TaskPush>(queryKey);
 
       if (previous) {
+        const nextHasPushed = !previous.hasPushed;
+
         queryClient.setQueryData<TaskPush>(queryKey, {
-          hasPushed: !previous.hasPushed,
+          hasPushed: nextHasPushed,
           pushCount: previous.hasPushed
             ? Math.max(previous.pushCount - 1, 0)
             : previous.pushCount + 1,
+          pushedAt: nextHasPushed ? (previous.pushedAt ?? new Date().toISOString()) : null,
+          createdAt: nextHasPushed ? (previous.createdAt ?? new Date().toISOString()) : null,
         });
       }
 
@@ -49,6 +53,12 @@ export function useToggleTaskPush(taskId: string) {
       queryClient.invalidateQueries({ queryKey });
       queryClient.invalidateQueries({
         queryKey: buildQueryKey.taskById(taskId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: buildQueryKey.tasks(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: buildQueryKey.homeSummary(),
       });
     },
   });

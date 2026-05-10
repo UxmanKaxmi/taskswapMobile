@@ -10,9 +10,9 @@ import {
   TextStyle,
 } from 'react-native';
 import { moderateScale, vs } from 'react-native-size-matters';
-import Row from '../Layout/Row';
 import { hexToRgba } from '@shared/utils/helperFunctions';
 import { colors } from '@shared/theme';
+import { resolveAppTextStyle } from '@shared/theme/fonts';
 
 const AnimatedTouchable = Animated.createAnimatedComponent(Animated.View);
 
@@ -43,6 +43,15 @@ export default function ButtonBase({
 }: Props) {
   const pressAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const resolvedTextStyle = resolveAppTextStyle(
+    [
+      styles.text,
+      { color: disabled ? '#888' : textColor },
+      textStyle,
+      isLoading && styles.hiddenText,
+    ],
+    { variant: 'label' },
+  );
 
   const handlePressIn = () => {
     Animated.parallel([
@@ -113,16 +122,7 @@ export default function ButtonBase({
       <View style={styles.content}>
         {icon && <View style={[styles.iconWrapper, isLoading && styles.hiddenIcon]}>{icon}</View>}
 
-        <Text
-          style={[
-            styles.text,
-            { color: disabled ? '#888' : textColor },
-            textStyle,
-            isLoading && styles.hiddenText, // 👈 key
-          ]}
-        >
-          {title}
-        </Text>
+        <Text style={resolvedTextStyle}>{title}</Text>
 
         {isLoading && (
           <View style={styles.loaderOverlay}>
@@ -134,12 +134,36 @@ export default function ButtonBase({
   );
 }
 
-function shadeColor(hex: string, percent: number) {
-  const num = parseInt(hex.replace('#', ''), 16);
-  const r = Math.max(0, ((num >> 16) & 0xff) + percent);
-  const g = Math.max(0, ((num >> 8) & 0xff) + percent);
-  const b = Math.max(0, (num & 0xff) + percent);
-  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+function shadeColor(color: string, amount: number) {
+  const match = /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(color.trim());
+
+  if (!match) {
+    return color;
+  }
+
+  let hex = match[1];
+
+  if (hex.length === 3) {
+    hex = hex
+      .split('')
+      .map(char => char + char)
+      .join('');
+  }
+
+  const rgbHex = hex.slice(0, 6);
+  const r = clampColorChannel(parseInt(rgbHex.slice(0, 2), 16) + amount);
+  const g = clampColorChannel(parseInt(rgbHex.slice(2, 4), 16) + amount);
+  const b = clampColorChannel(parseInt(rgbHex.slice(4, 6), 16) + amount);
+
+  return `#${toHexChannel(r)}${toHexChannel(g)}${toHexChannel(b)}`;
+}
+
+function clampColorChannel(value: number) {
+  return Math.max(0, Math.min(255, value));
+}
+
+function toHexChannel(value: number) {
+  return value.toString(16).padStart(2, '0');
 }
 
 const styles = StyleSheet.create({

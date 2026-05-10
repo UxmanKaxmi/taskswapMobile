@@ -3,6 +3,7 @@
 import React from 'react';
 import { View, TextInput, StyleSheet, TextInputProps, TouchableOpacity } from 'react-native';
 import { colors, spacing } from '@shared/theme';
+import { resolveAppTextStyle } from '@shared/theme/fonts';
 import Icon from '../Icons/Icon';
 import { ms, vs } from 'react-native-size-matters';
 
@@ -20,11 +21,13 @@ export default function Search({
   onClear,
   ...rest
 }: SearchProps) {
+  const resolvedInputStyle = resolveAppTextStyle(styles.input, { variant: 'body' });
+
   return (
     <View style={styles.container}>
       <Icon set="ion" name={'search'} color={colors.muted} size={ms(15)} />
       <TextInput
-        style={styles.input}
+        style={resolvedInputStyle}
         placeholder={placeholder}
         placeholderTextColor={colors.muted}
         value={value}
@@ -51,9 +54,6 @@ const styles = StyleSheet.create({
     // paddingVertical: vs(10),
     marginTop: spacing.md,
     marginBottom: spacing.lg,
-  },
-  icon: {
-    marginRight: spacing.xs,
   },
   input: {
     flex: 1,

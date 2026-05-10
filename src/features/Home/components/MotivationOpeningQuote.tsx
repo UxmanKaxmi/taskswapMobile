@@ -4,10 +4,11 @@ import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 import { ms } from 'react-native-size-matters';
 import { colors } from '@shared/theme';
+import { resolveAppTextStyle } from '@shared/theme/fonts';
 
 export default function MotivationOpeningQuote() {
   return (
-    <Text style={styles.quote} pointerEvents="none">
+    <Text style={resolveAppTextStyle(styles.quote, { variant: 'title' })} pointerEvents="none">
       “
     </Text>
   );

@@ -60,6 +60,7 @@ export type AppStackParamList = {
         taskId?: string;
         highlightCommentId?: string;
         openAdviceComposer?: boolean;
+        openShareModal?: boolean;
       }
     | undefined;
 

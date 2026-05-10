@@ -140,11 +140,11 @@ export default function ReminderMessageModalContent({ payload, closeModal }: Pro
       {/* Note header */}
       {/* <View style={styles.noteHeaderRow}></View> */}
 
-      <Height size={vs(10)} />
+      {/* <Height size={vs(10)} /> */}
 
       {/* Tone tags */}
-      <View style={styles.tagsRow}>
-        <Tag
+      {/* <View style={styles.tagsRow}> */}
+      {/* <Tag
           label="Quick nudge 👋"
           selected={tone === 'quick'}
           onPress={() => applyTone('quick')}
@@ -170,8 +170,8 @@ export default function ReminderMessageModalContent({ payload, closeModal }: Pro
           fillColor={tone === 'direct' ? colors.reminderBgHard : undefined}
           labelColor={tone === 'direct' ? 'reminderBgHardest' : undefined}
           borderColor={tone === 'direct' ? colors.reminderBgHardest : undefined}
-        />
-      </View>
+        /> */}
+      {/* </View> */}
 
       <Height size={vs(16)} />
 

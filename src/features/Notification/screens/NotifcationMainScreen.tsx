@@ -209,6 +209,10 @@ export default function NotificationMainScreen() {
         case 'task-motivation-push':
           openTaskDetail(item.metadata?.taskId, item.metadata?.commentId);
           return;
+        case 'task-motivation-progress':
+        case 'task-progress-update':
+          openTaskDetail(item.metadata?.taskId);
+          return;
         case 'decision-done':
           openTaskDetail(item.metadata?.taskId);
           return;
@@ -339,7 +343,7 @@ const styles = StyleSheet.create({
     // marginBottom: spacing.md,
   },
   sectionHeader: {
-    fontSize: ms(20),
+    fontSize: ms(18),
     color: colors.text,
     marginLeft: spacing.md,
   },
@@ -356,20 +360,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 
-  textContainer: {
-    flex: 1,
-    marginLeft: ms(15),
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#007bff',
-    marginLeft: spacing.sm,
-  },
-  time: {
-    fontSize: ms(12),
-  },
   listFooter: {
     paddingVertical: spacing.md,
     alignItems: 'center',

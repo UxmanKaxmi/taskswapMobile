@@ -108,6 +108,7 @@ export default function AnimatedBottomButtonWithHeader({
       >
         {buttonHeader && (
           <TextElement
+            variant="subtitle"
             style={[styles.buttonHeader, !hasButton && styles.buttonHeaderOnly]}
             color="muted"
           >
@@ -164,8 +165,8 @@ const styles = StyleSheet.create({
   },
 
   buttonHeader: {
-    fontSize: ms(16),
-    fontWeight: '600',
+    fontSize: ms(14),
+    fontWeight: '500',
     textAlign: 'center',
     marginBottom: vs(12),
     opacity: 0.85,

@@ -12,6 +12,7 @@ import {
   StyleProp,
 } from 'react-native';
 import { colors } from '@shared/theme';
+import { resolveAppTextStyle } from '@shared/theme/fonts';
 
 export type AvatarProps = {
   /** Remote image URI to load. If omitted or fails, `fallback` is shown instead. */
@@ -65,6 +66,10 @@ export default function Avatar({
   style,
 }: AvatarProps) {
   const radius = size / 2;
+  const fallbackTextStyle = resolveAppTextStyle(
+    [styles.fallbackText, { fontSize: size * 0.4 }, textStyle],
+    { variant: 'label' },
+  );
 
   if (uri) {
     return (
@@ -99,7 +104,7 @@ export default function Avatar({
         style,
       ]}
     >
-      <Text style={[styles.fallbackText, { fontSize: size * 0.4 }, textStyle]}>{fallback}</Text>
+      <Text style={fallbackTextStyle}>{fallback}</Text>
     </View>
   );
 }

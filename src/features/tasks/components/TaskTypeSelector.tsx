@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { useTheme } from '@shared/theme/useTheme';
+import { resolveAppTextStyle } from '@shared/theme/fonts';
 import { TaskType } from '@features/Tasks/types/tasks';
 import { getTypeVisual } from '@shared/utils/typeVisuals';
 
@@ -40,6 +41,9 @@ export default function TaskTypeSelector({ selected, onSelect }: Props) {
         const bgColor = getTypeVisual(type).color;
         const borderColor = isSelected ? colors.primary : 'transparent';
         const textColor = isSelected ? colors.primary : colors.text;
+        const labelStyle = resolveAppTextStyle([styles.label, { color: textColor }], {
+          variant: 'label',
+        });
 
         return (
           <TouchableOpacity
@@ -66,14 +70,7 @@ export default function TaskTypeSelector({ selected, onSelect }: Props) {
               {emoji}
             </Animated.Text>
 
-            <Animated.Text
-              style={[
-                styles.label,
-                {
-                  color: textColor,
-                },
-              ]}
-            >
+            <Animated.Text style={labelStyle}>
               {type.charAt(0).toUpperCase() + type.slice(1)}
             </Animated.Text>
           </TouchableOpacity>

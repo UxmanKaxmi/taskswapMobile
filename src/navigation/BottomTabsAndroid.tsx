@@ -94,7 +94,7 @@ export default function BottomTabsAndroid({ route }: any) {
               Home: 'house-chimney-medical',
               Friends: 'people-group',
               AddTask: 'bell-slash',
-              Notification: 'bell',
+              Notification: 'inbox',
               Profile: 'person',
             };
 
@@ -171,6 +171,9 @@ export default function BottomTabsAndroid({ route }: any) {
               checkAuthForTab(e, 'Notification');
               if (!e.defaultPrevented) haptics.selection();
             },
+          }}
+          options={{
+            tabBarLabel: 'Inbox',
           }}
         />
         <Tab.Screen

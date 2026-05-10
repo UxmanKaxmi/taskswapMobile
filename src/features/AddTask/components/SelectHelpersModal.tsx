@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   FlatList,
   StyleSheet,
@@ -13,16 +12,17 @@ import { colors, spacing } from '@shared/theme';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
-import { useFollowers } from '@features/User/hooks/useFollowers';
 import Avatar from '@shared/components/Avatar/Avatar';
 import { HelperUser } from '@features/Home/types/home';
 import AppModal from '@shared/components/AppModal/AppModal';
+import { ms } from 'react-native-size-matters';
 
 type Props = {
   visible: boolean;
   onClose: () => void;
   selected: string[];
-  friends: HelperUser[]; // 👈 passed in
+  friends?: HelperUser[];
+  confirmButtonColor?: string;
 
   onConfirm: (ids: string[]) => void;
 };
@@ -31,7 +31,8 @@ export default function SelectHelpersModal({
   visible,
   onClose,
   selected,
-  friends,
+  friends = [],
+  confirmButtonColor = colors.primary,
   onConfirm,
 }: Props) {
   const [localSelection, setLocalSelection] = useState<string[]>([]);
@@ -67,7 +68,7 @@ export default function SelectHelpersModal({
       <TouchableOpacity style={styles.item} onPress={() => toggleSelection(item.id)}>
         <Avatar uri={item.photo} fallback={item.name?.[0] ?? '?'} size={36} />
         <TextElement style={styles.name}>{item.name}</TextElement>
-        {isSelected && <Icon name="checkmark" set="ion" color={colors.primary} size={20} />}
+        {isSelected && <Icon name="checkmark" set="ion" color={confirmButtonColor} size={ms(24)} />}
       </TouchableOpacity>
     );
   };
@@ -94,10 +95,10 @@ export default function SelectHelpersModal({
               onConfirm(localSelection);
               onClose();
             }}
-            style={{ backgroundColor: colors.primary }}
+            backgroundColor={confirmButtonColor}
           />
           <TouchableOpacity onPress={onClose} style={styles.cancel}>
-            <Text style={{ color: colors.error }}>Cancel</Text>
+            <TextElement color="error">Cancel</TextElement>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -105,7 +106,7 @@ export default function SelectHelpersModal({
   );
 }
 
-const { width, height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {

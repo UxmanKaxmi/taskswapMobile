@@ -33,6 +33,7 @@ import { vs } from 'react-native-size-matters';
 import { useCreateTask } from '@features/AddTask/hooks/useCreateTask';
 import { CreateTaskPayload } from '@features/AddTask';
 import VisibilitySelectorWithModal from '@features/AddTask/components/VisibilitySelectorWithModal';
+import { typeBackgroundsHardest } from '@shared/utils/typeVisuals';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
 
@@ -197,6 +198,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
               selected={helperIds}
               onClose={() => setHelperModalVisible(false)}
               onConfirm={setHelperIds}
+              confirmButtonColor={typeBackgroundsHardest[type]}
             />
           </Animated.View>
         </KeyboardAvoidingView>

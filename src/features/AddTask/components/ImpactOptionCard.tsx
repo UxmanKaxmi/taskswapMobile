@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated, Pressable } from 'react-native';
 
-import Ripple from '@shared/components/Buttons/Ripple';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import { spacing, colors } from '@shared/theme';
@@ -16,7 +15,7 @@ type Props = {
   color: string;
   bg: string;
   onPress: () => void;
-  /** 🔥 design-only */
+  /** design-only */
   forcePressed?: boolean;
   dimmed?: boolean;
 };
@@ -34,11 +33,11 @@ export default function ImpactOptionCard({
   const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(1)).current;
   const pressed = useRef(new Animated.Value(0)).current;
-  const baseOpacity = dimmed ? 0.6 : 1;
+  const baseOpacity = dimmed ? 1 : 1;
 
   const AnimatedIcon = Animated.createAnimatedComponent(Icon);
-  const CARD_HEIGHT = vs(80); // you can tweak to 84–92
-  // 🔹 Pressed preview (design-only)
+  const CARD_HEIGHT = vs(68);
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(pressed, {
@@ -58,7 +57,7 @@ export default function ImpactOptionCard({
         useNativeDriver: false,
       }),
     ]).start();
-  }, [forcePressed]);
+  }, [forcePressed, opacity, pressed, scale]);
 
   const onPressIn = () => {
     Animated.parallel([
@@ -102,22 +101,10 @@ export default function ImpactOptionCard({
     ]).start();
   };
 
-  /* ---------- Animated styles ---------- */
-
   const cardBg = pressed.interpolate({
     inputRange: [0, 1],
     outputRange: [colors.card, bg],
   });
-
-  //   const iconBg = pressed.interpolate({
-  //     inputRange: [0, 1],
-  //     outputRange: [bg, color],
-  //   });
-
-  //   const iconColor = pressed.interpolate({
-  //     inputRange: [0, 1],
-  //     outputRange: [color, colors.background],
-  //   });
 
   const chevronColor = pressed.interpolate({
     inputRange: [0, 1],
@@ -137,9 +124,7 @@ export default function ImpactOptionCard({
       }}
     >
       <Shadow size="sm">
-        {/* OUTER owns radius */}
         <View style={[styles.outer, { backgroundColor: bg }]}>
-          {/* Inset border (NO white bleed) */}
           <Animated.View style={[styles.insetBorder, { borderColor }]}>
             <Pressable onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}>
               <Animated.View
@@ -147,7 +132,6 @@ export default function ImpactOptionCard({
                   styles.card,
                   {
                     height: CARD_HEIGHT,
-
                     backgroundColor: cardBg,
                     transform: [{ scale }],
                     opacity: Animated.multiply(opacity, baseOpacity),
@@ -155,11 +139,11 @@ export default function ImpactOptionCard({
                 ]}
               >
                 <Animated.View style={[styles.iconBox, { backgroundColor: bg }]}>
-                  <Icon set={'fa6'} name={icon.name} size={22} color={color} />
+                  <Icon set={'fa6'} name={icon.name} size={20} color={color} />
                 </Animated.View>
 
                 <View style={styles.content}>
-                  <TextElement variant="subtitle" weight="600">
+                  <TextElement variant="body" weight="700" style={styles.title}>
                     {MakeFirstLetterUppercase(title)}
                   </TextElement>
                   <TextElement variant="caption" style={styles.description} color="muted">
@@ -167,7 +151,7 @@ export default function ImpactOptionCard({
                   </TextElement>
                 </View>
 
-                <AnimatedIcon set="ion" name="chevron-forward" size={vs(20)} color={chevronColor} />
+                <AnimatedIcon set="ion" name="chevron-forward" size={18} color={chevronColor} />
               </Animated.View>
             </Pressable>
           </Animated.View>
@@ -176,6 +160,7 @@ export default function ImpactOptionCard({
     </Animated.View>
   );
 }
+
 const styles = StyleSheet.create({
   outer: {
     borderRadius: 18,
@@ -185,31 +170,34 @@ const styles = StyleSheet.create({
 
   insetBorder: {
     borderRadius: 18,
-    // borderWidth: 1,
-    // padding: 1, // 🔥 inset, prevents halo
   },
   description: {
     fontSize: ms(12),
-    marginRight: spacing.sm,
+    marginRight: 0,
+  },
+  title: {
+    lineHeight: ms(18),
   },
 
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 16,
-    padding: spacing.md,
+    padding: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
 
   iconBox: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing.md,
+    marginRight: spacing.sm,
   },
 
   content: {
     flex: 1,
+    marginLeft: ms(5),
   },
 });

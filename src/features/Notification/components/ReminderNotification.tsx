@@ -5,7 +5,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
-import { getTypeColor, getTypeVisual, typeIcons } from '@shared/utils/typeVisuals';
+import { getTypeColor, typeIcons } from '@shared/utils/typeVisuals';
 import { notificationStyles } from '../styles/notification.styles';
 import { ms } from 'react-native-size-matters';
 import { Icon } from '@shared/components/Icons';
@@ -76,7 +76,11 @@ export default function TaskTypeNotification({ item, onPress }: Props) {
                 {senderName}
               </TextElement>{' '}
               left you a{' '}
-              <TextElement variant="caption" weight="600" style={{ color: typeColor }}>
+              <TextElement
+                variant="caption"
+                weight="600"
+                style={[notificationStyles.typeText, { color: typeColor }]}
+              >
                 Reminder
               </TextElement>{' '}
               note
@@ -104,7 +108,10 @@ export default function TaskTypeNotification({ item, onPress }: Props) {
                   <TextElement
                     variant="caption"
                     weight="600"
-                    style={{ textTransform: 'capitalize', color: typeColor }}
+                    style={[
+                      notificationStyles.typeText,
+                      { textTransform: 'capitalize', color: typeColor },
+                    ]}
                   >
                     {taskType}
                   </TextElement>

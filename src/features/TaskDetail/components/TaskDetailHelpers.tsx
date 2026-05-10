@@ -1,7 +1,7 @@
 // src/features/tasks/components/TaskDetailHelpers.tsx
 
 import React from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors, spacing } from '@shared/theme';
@@ -13,6 +13,7 @@ import Column from '@shared/components/Layout/Column';
 import { HelperUser } from '@features/Home/types/home';
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 
+import TagHelperCard from '@features/AddTask/components/TagHelperCard';
 import TaskDetailHelpersRow from './TaskDetailHelpersRow';
 
 type Props = {
@@ -20,47 +21,33 @@ type Props = {
   taskType: TaskTypeEnum;
   isOwner: boolean;
   onPress?: () => void;
+  onAddPress?: () => void;
 };
 
-export default function TaskDetailHelpers({ helpers, taskType, isOwner, onPress }: Props) {
+export default function TaskDetailHelpers({
+  helpers,
+  taskType,
+  isOwner,
+  onPress,
+  onAddPress,
+}: Props) {
   const hasHelpers = helpers.length > 0;
+
+  if (!hasHelpers && isOwner) {
+    return (
+      <TagHelperCard
+        helpers={helpers}
+        onPress={onAddPress ?? onPress ?? (() => {})}
+        taskType={taskType}
+      />
+    );
+  }
 
   return (
     <View style={styles.wrapper}>
       <SectionHeader label="HELPERS" icon="people" />
 
       <Shadow size="tint">
-        {/* ───────────── STATE 1: No helpers + OWNER ───────────── */}
-        {!hasHelpers && isOwner && (
-          <Pressable style={styles.card} onPress={onPress}>
-            <View style={styles.left}>
-              <View
-                style={[
-                  styles.iconCircle,
-                  { backgroundColor: colors[`${taskType}IconBackground`] },
-                ]}
-              >
-                <Icon
-                  set="ion"
-                  name="person-add"
-                  size={ms(18)}
-                  color={colors[`${taskType}BgHardest`]}
-                />
-              </View>
-
-              <Column flex={1} gap={2}>
-                <TextElement variant="caption" style={styles.subTextHeading}>
-                  No supporters yet
-                </TextElement>
-
-                <TextElement variant="caption" color="muted" style={styles.subText}>
-                  Invite someone you trust to support this task
-                </TextElement>
-              </Column>
-            </View>
-          </Pressable>
-        )}
-
         {/* ───────────── STATE 2: No helpers + NOT OWNER ───────────── */}
         {!hasHelpers && !isOwner && (
           <View style={styles.card}>
@@ -71,11 +58,11 @@ export default function TaskDetailHelpers({ helpers, taskType, isOwner, onPress 
 
               <Column flex={1} gap={2}>
                 <TextElement variant="caption" style={styles.subTextHeading}>
-                  No supporters yet
+                  No helpers yet
                 </TextElement>
 
                 <TextElement variant="caption" color="muted" style={styles.subText}>
-                  Supporters will appear here when someone joins in
+                  Helpers will appear here when someone joins in
                 </TextElement>
               </Column>
             </View>
@@ -129,14 +116,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     flex: 1,
-  },
-
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
   iconCircleMuted: {

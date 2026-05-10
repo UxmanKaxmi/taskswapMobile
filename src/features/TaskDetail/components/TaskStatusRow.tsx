@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Icon } from '@shared/components/Icons';
 import { colors, spacing } from '@shared/theme';
 import { formatViewCount } from '@shared/utils/helperFunctions';
 import { TaskType } from '@features/Tasks/types/tasks';
 import { showConfirmAlert } from '@shared/utils/confirmAlert';
+import ButtonBase from '@shared/components/Buttons/ButtonBase';
 
 type Props = {
   completed: boolean;
@@ -24,6 +25,15 @@ export default function TaskStatusRow({
   containerStyle,
   taskType,
 }: Props) {
+  const ctaColor = getCtaColor(taskType);
+  const ctaLabel = taskType === 'decision' ? "I've decided" : 'Mark complete';
+  const confirmTitle =
+    taskType === 'decision' ? 'Finalize your decision?' : 'Mark task as complete?';
+  const confirmMessage =
+    taskType === 'decision'
+      ? 'This will lock voting and finalize the result.'
+      : 'This action can’t be undone.';
+
   return (
     <View style={[styles.container, containerStyle]}>
       {/* LEFT */}
@@ -38,31 +48,44 @@ export default function TaskStatusRow({
 
       {/* RIGHT */}
       {!completed && isOwner && onMarkComplete && (
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={styles.right}
-          onPress={() => {
-            showConfirmAlert({
-              title: taskType === 'decision' ? 'Finalize your decision?' : 'Mark task as complete?',
-              message:
-                taskType === 'decision'
-                  ? 'This will lock voting and finalize the result.'
-                  : 'This action can’t be undone.',
-              confirmText: taskType === 'decision' ? "I've decided" : 'Mark complete',
-              onConfirm: () => {
-                onMarkComplete?.();
-              },
-            });
-          }}
-        >
-          <TextElement style={styles.completeText}>
-            {taskType === 'decision' ? "I've decided" : 'Mark complete'}
-          </TextElement>
-          <Icon set="ion" name="checkmark-circle-outline" size={14} color={colors.placeHolder} />
-        </TouchableOpacity>
+        <View style={styles.right}>
+          <ButtonBase
+            title={ctaLabel}
+            onPress={() => {
+              showConfirmAlert({
+                title: confirmTitle,
+                message: confirmMessage,
+                confirmText: ctaLabel,
+                onConfirm: () => {
+                  onMarkComplete?.();
+                },
+              });
+            }}
+            backgroundColor={ctaColor}
+            textColor={colors.onPrimary}
+            icon={<Icon set="ion" name="checkmark-circle" size={16} color={colors.onPrimary} />}
+            style={styles.completeButton}
+            textStyle={styles.completeButtonText}
+          />
+        </View>
       )}
     </View>
   );
+}
+
+function getCtaColor(taskType?: TaskType) {
+  switch (taskType) {
+    case 'decision':
+      return colors.decisionBgHardest;
+    case 'reminder':
+      return colors.reminderBgHardest;
+    case 'motivation':
+      return colors.motivationBgHardest;
+    case 'advice':
+      return colors.adviceBgHardest;
+    default:
+      return colors.primary;
+  }
 }
 const styles = StyleSheet.create({
   container: {
@@ -77,21 +100,6 @@ const styles = StyleSheet.create({
   left: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-
-  statusPill: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-
-  dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.muted,
-    marginHorizontal: spacing.sm,
-    opacity: 0.5,
   },
 
   views: {
@@ -109,32 +117,22 @@ const styles = StyleSheet.create({
   /* RIGHT */
 
   right: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
+    alignItems: 'flex-end',
   },
 
-  completeText: {
-    fontSize: 14,
-    color: colors.placeHolder,
-    fontWeight: '500',
+  completeButton: {
+    alignSelf: 'flex-end',
+    marginVertical: 0,
+    marginHorizontal: 0,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 0,
+    minHeight: 36,
+    borderRadius: 999,
+    borderWidth: 0,
   },
 
-  activePill: {
-    backgroundColor: colors.onAccent,
-  },
-
-  completedPill: {
-    backgroundColor: colors.onAccent,
-  },
-
-  statusText: {
+  completeButtonText: {
     fontSize: 13,
-    fontWeight: '600',
-    color: colors.success,
-  },
-
-  completedText: {
-    color: colors.placeHolder,
+    fontWeight: '700',
   },
 });

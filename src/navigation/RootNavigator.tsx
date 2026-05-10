@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { registerPostLogoutNavigation } from '@shared/api/authBridge';
+import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
 
 const Stack = createNativeStackNavigator();
 
@@ -56,7 +57,15 @@ export default function RootNavigator() {
       {firstTime && <Stack.Screen name="OnboardingIntro" component={IntroScreen} />}
 
       {/* Main App */}
-      <Stack.Screen name="App" component={AppNavigator} />
+      <Stack.Screen
+        name="App"
+        component={AppNavigator}
+        options={{
+          // Used when skipping onboarding to avoid the default "slide" feel.
+          animation: 'fade',
+          animationDuration: 220,
+        }}
+      />
 
       {/* Auth Prompt (login-required intro) */}
       <Stack.Screen
@@ -71,6 +80,8 @@ export default function RootNavigator() {
 
       {/* Login Flow */}
       <Stack.Screen name="Auth" component={AuthNavigator} />
+
+      <Stack.Screen name="AddTaskScreen" component={AddTaskNavigator} />
     </Stack.Navigator>
   );
 }

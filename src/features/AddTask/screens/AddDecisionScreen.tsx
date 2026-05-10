@@ -26,14 +26,16 @@ import { useCreateTask } from '../hooks/useCreateTask';
 import { resetToHomeRoot } from '@navigation/types/navigationUtils';
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 import { useFollowers } from '@features/User/hooks/useFollowers';
-import { getButtonText, getTaskPlaceholder, getTitle } from '../utils/constants';
+import { getButtonText, getTaskPlaceholder, getTitle } from '../utils/taskCopy';
 import DecisionChoicesInput from '../components/DecisionChoicesInput.tsx';
 import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton.tsx';
 import { isAndroid } from '@shared/utils/constants.ts';
+import { useAuth } from '@features/Auth/AuthProvider';
 
 type Props = NativeStackScreenProps<AddTaskStackParamList, 'AddDecision'>;
 
-export default function AddDecisionScreen({ navigation }: Props) {
+export default function AddDecisionScreen({ navigation, route }: Props) {
+  const { user } = useAuth();
   const [text, setText] = useState('');
   const [visibility, setVisibility] = useState<'friends' | 'public' | 'private'>('public');
 
@@ -56,7 +58,39 @@ export default function AddDecisionScreen({ navigation }: Props) {
     text.trim().length > 0 && options.length === 2 && options.every(o => o.trim().length > 0);
 
   const { mutate: createTask, isPending } = useCreateTask();
-  const { data: friends = [] } = useFollowers();
+  const { data: friends = [] } = useFollowers(!!user);
+
+  useEffect(() => {
+    const draft = route.params?.draft;
+    if (!draft || draft.type !== TaskTypeEnum.Decision) return;
+
+    setText(draft.text ?? '');
+    setVisibility(draft.visibility ?? 'public');
+    setOptions(draft.options?.length ? [...draft.options] : ['', '']);
+  }, [route.params?.draft]);
+
+  const hasAutoSubmittedRef = React.useRef(false);
+  useEffect(() => {
+    const draft = route.params?.draft;
+    if (!user) return;
+    if (!route.params?.submitAfterAuth) return;
+    if (!draft || draft.type !== TaskTypeEnum.Decision) return;
+    if (hasAutoSubmittedRef.current) return;
+
+    hasAutoSubmittedRef.current = true;
+    createTask(draft, {
+      onSuccess: () => {
+        showToast({
+          type: 'success',
+          title: 'Decision shared! Let’s decide together 🤝',
+        });
+
+        playExitAnimation(() => {
+          resetToHomeRoot(navigation);
+        });
+      },
+    });
+  }, [createTask, navigation, route.params?.draft, route.params?.submitAfterAuth, user]);
 
   useEffect(() => {
     setShowSubmit(canSubmitDecision);
@@ -81,13 +115,30 @@ export default function AddDecisionScreen({ navigation }: Props) {
 
   function onSubmit() {
     if (!canSubmitDecision) return;
+
+    const effectiveVisibility = user ? visibility : 'private';
+    const effectiveHelpers = user && effectiveVisibility !== 'private' ? helperIds : [];
+
     const payload: CreateTaskPayload = {
       type: TaskTypeEnum.Decision,
       text: text.trim(),
-      visibility,
-      helpers: visibility === 'private' ? [] : helperIds,
+      visibility: effectiveVisibility,
+      helpers: effectiveHelpers,
       options: options.map(o => o.trim()),
     };
+
+    if (!user) {
+      const rootNav: any = (navigation as any).getParent?.()?.getParent?.();
+      (rootNav ?? navigation).navigate('AuthIntro', {
+        redirectTo: 'AddTask',
+        params: {
+          screen: 'AddDecision',
+          params: { draft: payload, submitAfterAuth: true },
+        },
+        authContext: 'AddTask',
+      });
+      return;
+    }
 
     createTask(payload, {
       onSuccess: () => {
@@ -181,13 +232,15 @@ export default function AddDecisionScreen({ navigation }: Props) {
 
         <DecisionChoicesInput choices={options} onChange={setOptions} />
 
-        <VisibilitySelector
-          taskType={TaskTypeEnum.Decision}
-          value={visibility}
-          onChange={setVisibility}
-        />
+        {user ? (
+          <VisibilitySelector
+            taskType={TaskTypeEnum.Decision}
+            value={visibility}
+            onChange={setVisibility}
+          />
+        ) : null}
 
-        {showHelper && (
+        {user && showHelper ? (
           <Animated.View
             style={{
               opacity: helperOpacity,
@@ -200,18 +253,21 @@ export default function AddDecisionScreen({ navigation }: Props) {
               taskType={TaskTypeEnum.Decision}
             />
           </Animated.View>
-        )}
+        ) : null}
 
-        <SelectHelpersModal
-          visible={showHelperModal}
-          selected={helpers.map(h => h.id)}
-          onClose={() => setShowHelperModal(false)}
-          friends={friends}
-          onConfirm={ids => {
-            const selectedHelpers = friends.filter((f: { id: string }) => ids.includes(f.id));
-            setHelpers(selectedHelpers);
-          }}
-        />
+        {user ? (
+          <SelectHelpersModal
+            visible={showHelperModal}
+            selected={helpers.map(h => h.id)}
+            onClose={() => setShowHelperModal(false)}
+            friends={friends}
+            onConfirm={ids => {
+              const selectedHelpers = friends.filter((f: { id: string }) => ids.includes(f.id));
+              setHelpers(selectedHelpers);
+            }}
+            confirmButtonColor={colors.decisionBgHardest}
+          />
+        ) : null}
       </Animated.View>
     </Layout>
   );

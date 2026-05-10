@@ -84,6 +84,16 @@ export default function TaskFooter({
   const hasMounted = useRef(false);
   const { emoji } = getTypeVisual(taskDetails?.type);
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
+  const ownerMotivationPushCount =
+    isOwner && taskDetails?.type === TaskTypeEnum.Motivation
+      ? Math.max(pushCount - (hasPushed ? 1 : 0), 0)
+      : pushCount;
+  const ownerMotivationText =
+    ownerMotivationPushCount === 0
+      ? 'No pushes yet'
+      : ownerMotivationPushCount === 1
+        ? '1 friend pushed you'
+        : `${ownerMotivationPushCount} friends pushed you`;
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -107,21 +117,20 @@ export default function TaskFooter({
       <AppBorder
         color={colors[`${taskDetails?.type}BgHard` as keyof typeof colors]}
         style={{ marginBottom: vs(14) }}
+        thickness={0.5}
       />
       <View style={styles.footer}>
         {taskDetails?.type === TaskTypeEnum.Motivation && (
           <Animated.View style={[animatedStyle, { flex: 1 }]}>
-            {!pushed ? (
+            {isOwner ? (
+              <TextElement style={styles.pushedText}>{ownerMotivationText}</TextElement>
+            ) : !pushed ? (
               <PushButton
                 onPress={handlePush}
                 loading={isPushing}
                 taskType={TaskTypeEnum.Motivation}
-                label={
-                  (isOwner ? ' 💪 ' : emoji) +
-                  `Push ${isOwner ? 'myself' : getFirstName(taskDetails?.name)}!`
-                }
+                label={emoji + `Push ${getFirstName(taskDetails?.name)}!`}
                 size="sm"
-                isOwner={isOwner}
               />
             ) : (
               <>

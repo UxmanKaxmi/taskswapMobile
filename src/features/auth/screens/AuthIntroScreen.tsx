@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { View, Image, StyleSheet, Dimensions, Animated, TouchableOpacity } from 'react-native';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -7,8 +7,8 @@ import { Height } from '@shared/components/Spacing';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { colors } from '@shared/theme';
 import { MainStackParamList } from '@navigation/types/navigation';
-import { resetToHomeRoot, resetToStack } from '@navigation/types/navigationUtils';
-import { vs } from 'react-native-size-matters';
+import { resetToHomeRoot } from '@navigation/types/navigationUtils';
+import { ms, vs } from 'react-native-size-matters';
 
 const { width, height } = Dimensions.get('window');
 const loginImage = require('@assets/images/loginImage5.png');
@@ -42,9 +42,9 @@ const authCopyMap: Record<
   },
 
   Notification: {
-    title: 'See What’s New',
+    title: 'Open Your Inbox',
     subtitle: 'Log in to view updates, responses, and gentle nudges meant for you.',
-    cta: 'Log In to View',
+    cta: 'Log In to View Inbox',
   },
 
   Profile: {
@@ -75,6 +75,24 @@ const authCopyMap: Record<
     title: 'Log In to Send a Push',
     subtitle: 'Log in to send a quick push of motivation. It only takes a second.',
     cta: 'Log In to Push',
+  },
+
+  guest_motivation: {
+    title: 'Need a boost to move forward?',
+    subtitle: 'Share a goal and let friends back you up.',
+    cta: 'Log In to Push',
+  },
+
+  guest_advice: {
+    title: 'Stuck on something?',
+    subtitle: 'Ask people you trust for a fresh perspective.',
+    cta: 'Log In to Ask',
+  },
+
+  guest_accountability: {
+    title: 'Keep momentum with support',
+    subtitle: 'Check in and let friends keep you on track.',
+    cta: 'Log In to Stay Accountable',
   },
 
   Decision: {
@@ -140,7 +158,7 @@ export default function AuthIntroScreen() {
             defaultSource={loginImage}
           />
 
-          <TextElement marginVertical={18} variant="title" style={styles.title}>
+          <TextElement variant="title" style={styles.title}>
             {copy.title}
           </TextElement>
 
@@ -149,7 +167,7 @@ export default function AuthIntroScreen() {
           </TextElement>
         </View>
 
-        <PrimaryButton title={copy.cta} onPress={handleContinue} />
+        <PrimaryButton title={copy.cta} textStyle={styles.ctaText} onPress={handleContinue} />
         <Height size={10} />
 
         <TouchableOpacity onPress={handleSkip}>
@@ -163,14 +181,8 @@ export default function AuthIntroScreen() {
 }
 
 const styles = StyleSheet.create({
-  logoWrapper: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: height * 0.02,
-  },
-  logo: {
-    width: width * 0.45,
-    height: height * 0.12,
+  ctaText: {
+    fontSize: ms(14),
   },
   container: {
     flex: 1,
@@ -181,23 +193,25 @@ const styles = StyleSheet.create({
   image: {
     width: width,
     height: height * 0.42,
-    // marginBottom: 20,
+    marginBottom: vs(10),
   },
   title: {
-    marginBottom: 10,
     fontWeight: '700',
     textAlign: 'center',
-    marginTop: vs(-20),
+    marginTop: vs(18),
+    marginBottom: 6,
+    lineHeight: 24,
   },
   subtitle: {
     color: '#707070',
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 40,
+    marginBottom: 24,
   },
   skipText: {
     textAlign: 'center',
     color: colors.primary,
     fontWeight: '600',
+    fontSize: ms(14),
   },
 });

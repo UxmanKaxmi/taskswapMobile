@@ -1,16 +1,9 @@
-// src/features/tasks/components/TaskDetailBody.tsx
-
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { ms } from 'react-native-size-matters';
 
-import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
-import { TaskType } from '@features/Tasks/types/tasks';
-import { stripOuterQuotes } from '@shared/utils/helperFunctions';
-import MotivationDetail from './MotivationDetail';
+import { ProgressUpdate, TaskType } from '@features/Tasks/types/tasks';
 import AdviceDetail from './AdviceDetail';
 import DecisionDetail from './DecisionDetail';
+import MotivationDetail from './MotivationDetail';
 import ReminderDetail from './ReminderDetail';
 
 type Props = {
@@ -20,11 +13,12 @@ type Props = {
     id: string;
     name: string;
     userId: string;
+    avatar?: string;
+    progressUpdates?: ProgressUpdate[];
   };
 };
 
 export default function TaskDetailBody({ task }: Props) {
-  console.log('task.type', task.type);
   switch (task.type) {
     case 'motivation':
       return <MotivationDetail task={task} />;
@@ -42,5 +36,3 @@ export default function TaskDetailBody({ task }: Props) {
       return null;
   }
 }
-
-const styles = StyleSheet.create({});

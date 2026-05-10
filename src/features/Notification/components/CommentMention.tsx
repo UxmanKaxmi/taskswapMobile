@@ -25,14 +25,17 @@ export default function CommentMention({ item, onPress }: Props) {
     >
       <Avatar uri={item.sender?.photo} fallback={item.sender?.name} />
       <View style={styles.textContainer}>
-        <TextElement variant="body">
-          <TextElement weight="bold">{item.sender?.name || 'Someone'}</TextElement> {item.message}
+        <TextElement variant="body" style={notificationStyles.bodyText}>
+          <TextElement weight="bold" style={notificationStyles.bodyText}>
+            {item.sender?.name || 'Someone'}
+          </TextElement>{' '}
+          {item.message}
           {'\n'}
-          <TextElement variant="body" style={styles.quotedText}>
+          <TextElement variant="body" style={[notificationStyles.bodyText, styles.quotedText]}>
             “{item.metadata?.commentText}”
           </TextElement>
         </TextElement>
-        <TextElement variant="caption" color="muted">
+        <TextElement variant="caption" style={notificationStyles.bodyMetaText} color="muted">
           {timeAgo(item.createdAt)}
         </TextElement>
       </View>
@@ -50,11 +53,5 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     marginLeft: spacing.md,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginLeft: spacing.sm,
   },
 });

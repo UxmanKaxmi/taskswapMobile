@@ -1,7 +1,6 @@
 // src/shared/components/Buttons/OutlineButton.tsx
 import React from 'react';
-import { ViewStyle, TextStyle, StyleSheet } from 'react-native';
-import { moderateScale } from 'react-native-size-matters';
+import { ViewStyle, TextStyle } from 'react-native';
 import { useTheme } from '@shared/theme/useTheme';
 import ButtonBase from '@shared/components/Buttons/ButtonBase';
 
@@ -37,7 +36,7 @@ export default function OutlineButton({
   style,
   textStyle,
 }: OutlineButtonProps) {
-  const { colors, spacing, typography } = useTheme();
+  const { colors, typography } = useTheme();
 
   const borderColor = disabled ? colors.muted : type === 'alt' ? colors.primary : colors.primary;
 
@@ -55,11 +54,8 @@ export default function OutlineButton({
       backgroundColor={bgColor}
       textColor={textColor}
       borderColor={borderColor}
-      style={StyleSheet.flatten([
-        { paddingVertical: moderateScale(10), paddingHorizontal: moderateScale(20), width: 100 },
-        style,
-      ])}
-      textStyle={StyleSheet.flatten([{ fontSize: typography.body }, textStyle])}
+      style={style}
+      textStyle={[{ fontSize: typography.body }, textStyle]}
     />
   );
 }

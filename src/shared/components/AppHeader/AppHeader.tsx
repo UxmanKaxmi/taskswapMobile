@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@shared/theme';
 import Icon from '@shared/components/Icons/Icon'; // assumes you have an icon component
-import { ms, vs } from 'react-native-size-matters';
+import { ms } from 'react-native-size-matters';
 import { isAndroid } from '@shared/utils/constants';
 import { Width } from '../Spacing';
 import Ripple from '../Buttons/Ripple';
@@ -31,16 +31,29 @@ export default function AppHeader({
   const insets = useSafeAreaInsets();
   const androidTopOffset = isAndroid ? insets.top : 0;
 
+  const handleGoBack = () => {
+    // In nested navigators, `goBack()` on the child may be a no-op when the child
+    // stack is at its root. Walk up parents until we find a navigator that can go back.
+    let current: any = navigation;
+    while (current) {
+      if (typeof current.canGoBack === 'function' && current.canGoBack()) {
+        current.goBack();
+        return;
+      }
+      current = typeof current.getParent === 'function' ? current.getParent() : undefined;
+    }
+  };
+
   return (
     <>
       <View style={[styles.container, { marginTop: androidTopOffset }]}>
         <View style={styles.leftSide}>
           {showCross ? (
-            <Ripple onPress={navigation.goBack}>
+            <Ripple onPress={handleGoBack}>
               <Icon set="ion" name="close" size={26} color={colors.text} />
             </Ripple>
           ) : showNavigation ? (
-            <Ripple onPress={navigation.goBack}>
+            <Ripple onPress={handleGoBack}>
               <Icon set="ion" name="chevron-back" size={24} color={colors.tabActive} />
             </Ripple>
           ) : (

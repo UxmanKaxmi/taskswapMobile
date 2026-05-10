@@ -5,7 +5,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
-import { getTypeColor, getTypeVisual, typeIcons } from '@shared/utils/typeVisuals';
+import { getTypeColor, typeIcons } from '@shared/utils/typeVisuals';
 import { notificationStyles } from '../styles/notification.styles';
 import { ms } from 'react-native-size-matters';
 import { Icon } from '@shared/components/Icons';
@@ -40,7 +40,7 @@ export default function TaskAdviceNotification({ item, onPress }: Props) {
           <TextElement
             variant="caption"
             weight="600"
-            style={{ color: typeColor, textTransform: 'capitalize' }}
+            style={[notificationStyles.typeText, { color: typeColor, textTransform: 'capitalize' }]}
           >
             {taskType}
           </TextElement>

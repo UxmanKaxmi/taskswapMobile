@@ -16,6 +16,7 @@ import { ModalProvider } from '@shared/components/ModalProvider';
 import { colors } from '@shared/theme/colors';
 import { incrementAppLaunchCount } from '@features/LaunchModals';
 import { FeatureFlagsProvider } from '@shared/featureFlags';
+import { navigationRef } from './navigation/navigationRef';
 
 const queryClient = new QueryClient();
 const loginImage = require('@assets/images/loginImage5.png');
@@ -68,7 +69,7 @@ export default function App() {
 
             <AuthProvider>
               <FeatureFlagsProvider>
-                <NavigationContainer theme={LightNavTheme}>
+                <NavigationContainer ref={navigationRef} theme={LightNavTheme}>
                   <RootNavigator />
                 </NavigationContainer>
               </FeatureFlagsProvider>

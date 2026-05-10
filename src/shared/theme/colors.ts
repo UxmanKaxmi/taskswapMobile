@@ -35,6 +35,7 @@ export const colors = {
   adviceBgHard: '#B3EBF0',
   decisionBgHard: '#C9B8FF',
   motivationBgHard: '#8DF3C3',
+  motivationBgDark: '#047857',
 
   reminderBgHardest: '#F59E0B',
   adviceBgHardest: '#3B82F6',

@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState, useTransition } from 'react';
-import { View, FlatList, Pressable, StyleSheet, ListRenderItem } from 'react-native';
-import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { View, FlatList, StyleSheet, ListRenderItem } from 'react-native';
+import { spacing } from '@shared/theme';
 import ListView from '@shared/components/ListView/ListView';
-import { ms, vs } from 'react-native-size-matters';
-import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { ms } from 'react-native-size-matters';
 import FilterPill from './FilterPill';
 
 type FilterKey = 'all' | 'motivation' | 'advice' | 'decision' | 'reminder';
@@ -82,7 +80,6 @@ export default function HorizontalFilterTabs({
           horizontal: true,
           showsHorizontalScrollIndicator: false,
           contentContainerStyle: styles.listContent,
-
           // IMPORTANT: prevents scrollToIndex crash
           getItemLayout: (_, index) => ({
             length: ms(88), // approximate pill width
@@ -96,7 +93,8 @@ export default function HorizontalFilterTabs({
 }
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: spacing.sm,
+    paddingTop: spacing.sm,
+    paddingBottom: 0,
     marginHorizontal: -spacing.md, // 👈 escape parent padding
     paddingHorizontal: spacing.md,
   },

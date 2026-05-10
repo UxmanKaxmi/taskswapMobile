@@ -1,15 +1,12 @@
 // src/features/friends/components/FriendFollowRow.tsx
 
 import React from 'react';
-import { Image, View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import { useTheme } from '@shared/theme/useTheme';
 import { moderateScale, ms, vs } from 'react-native-size-matters';
-import { typography } from '@shared/theme';
 import Avatar from '@shared/components/Avatar/Avatar';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '@navigation/types/navigation';
 
 type Props = {
   name: string;
@@ -48,7 +45,6 @@ export default function FriendFollowRow({
           </TextElement>
         </View>
       </View>
-
       <OutlineButton
         isLoading={isLoading}
         title={isFollowing ? 'Following' : 'Follow'}
@@ -56,8 +52,7 @@ export default function FriendFollowRow({
         type={isFollowing ? 'alt' : 'default'}
         textStyle={{
           color: isFollowing ? colors.onAccent : colors.primary,
-          fontSize: moderateScale(9),
-          lineHeight: moderateScale(16),
+          fontSize: moderateScale(10),
         }}
         style={styles.button}
       />
@@ -81,17 +76,13 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: ms(10),
   },
-  avatar: {
-    width: ms(40),
-    height: ms(40),
-    borderRadius: ms(20),
-    marginRight: ms(10),
-  },
   textContainer: {
     flexShrink: 1,
     marginLeft: 10,
   },
   button: {
-    width: ms(90),
+    minWidth: ms(100),
+    // maxHeight: ms(40),
+    paddingVertical: vs(8),
   },
 });

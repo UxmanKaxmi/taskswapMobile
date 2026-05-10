@@ -24,7 +24,7 @@ export default function FilterPill({ label, active, onPress }: Props) {
 const styles = StyleSheet.create({
   pill: {
     paddingHorizontal: ms(18),
-    paddingVertical: vs(5),
+    paddingVertical: vs(3),
     borderRadius: 100,
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     borderColor: colors.tabActive,
   },
   label: {
-    fontSize: ms(14),
+    fontSize: ms(13),
     color: colors.tabInactive, // ✅ dark grey
     fontWeight: '400',
   },

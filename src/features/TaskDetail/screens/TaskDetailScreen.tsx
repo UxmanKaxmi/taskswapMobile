@@ -14,6 +14,7 @@ import TaskBackground from '@features/AddTask/components/TaskBackground';
 import {
   getTaskBackgroundVisual,
   getTypeVisual,
+  getTypeColor,
   typeBackgroundsHard,
   typeBackgroundsHardest,
   typeIcons,
@@ -27,16 +28,22 @@ import TaskDetailBody from '../components/TaskDetailBody';
 import TaskDetailCaption from '../components/TaskDetailCaption';
 import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
 import { colors } from '@shared/theme';
-import { isAndroid } from '@shared/utils/constants';
+import {
+  isAndroid,
+  PROGRESS_UPDATE_COOLDOWN_LABEL,
+  PROGRESS_UPDATE_COOLDOWN_MS,
+  PROGRESS_UPDATE_DEFAULT_REMAINING_TIME,
+} from '@shared/utils/constants';
 import TaskDetailHelpers from '../components/TaskDetailHelpers';
 import { useAuth, useIsOwner } from '@features/Auth/AuthProvider';
 import { useFollowers } from '@features/User/hooks/useFollowers';
 import { HelperUser, Task as ShareTask } from '@features/Home/types/home';
 import ViewHelpersModal from '../components/ViewHelpersModal';
+import SelectHelpersModal from '@features/AddTask/components/SelectHelpersModal';
 import { usePushInteraction } from '@features/Home/hooks/usePushInteraction';
 import { useTaskPushes, useToggleTaskPush } from '@features/Tasks/hooks/useTaskPush';
 import { formatViewCount, getFirstName } from '@shared/utils/helperFunctions';
-import { TaskTypeEnum } from '@features/Tasks/types/tasks';
+import { ProgressUpdate, TaskTypeEnum } from '@features/Tasks/types/tasks';
 import AnimatedBottomButtonWithHeader, {
   BOTTOM_BUTTON_HEIGHT,
 } from '@shared/components/Buttons/AnimatedBottomButtonWithHeader';
@@ -62,29 +69,38 @@ import Ripple from '@shared/components/Buttons/Ripple';
 import Icon from '@shared/components/Icons/Icon';
 import ShareModal from '@features/Share/components/ShareModal';
 import { deleteTask } from '@features/Tasks/api/taskApi';
+import { api } from '@shared/api/axios';
+import { buildRoute } from '@shared/api/apiRoutes';
+import { showConfirmAlert } from '@shared/utils/confirmAlert';
+import { useCreateTaskProgressUpdate } from '@features/Tasks/hooks/useTaskProgress';
+
 export default function TaskDetailScreen({
   route,
   navigation,
 }: NativeStackScreenProps<AppStackParamList, 'TaskDetail'>) {
   const { task: initialTask, taskId, highlightCommentId } = route.params ?? {};
   const resolvedTaskId = taskId ?? initialTask?.id;
-  const openAdviceComposer = route.params?.task?.openAdviceComposer || false;
+  const openAdviceComposer =
+    route.params?.openAdviceComposer || Boolean((route.params?.task as any)?.openAdviceComposer);
   const [showHelperModal, setShowHelperModal] = React.useState(false);
+  const [showAddHelperModal, setShowAddHelperModal] = React.useState(false);
   const [adviceText, setAdviceText] = React.useState('');
   const [consumedAutoOpen, setConsumedAutoOpen] = React.useState(false);
+  const [consumedAutoShare, setConsumedAutoShare] = React.useState(false);
   const [shareTask, setShareTask] = useState<ShareTask | null>(null);
   const [shareVisible, setShareVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const { user } = useAuth();
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
-  const { openReminderMessageSheet } = useModal();
+  const { openReminderMessageSheet, openShareUpdateSheet } = useModal();
 
   const { data: friends = [] } = useFollowers();
 
   const [showCTA, setShowCTA] = React.useState(false);
   const { data: pushData } = useTaskPushes(resolvedTaskId ?? '');
   const addComment = useAddComment(resolvedTaskId ?? '');
+  const shareProgressUpdate = useCreateTaskProgressUpdate(resolvedTaskId ?? '');
   const { mutate: togglePush, isPending } = useToggleTaskPush(resolvedTaskId ?? '');
   const qc = useQueryClient();
 
@@ -100,9 +116,22 @@ export default function TaskDetailScreen({
   const task = taskData ?? initialTask;
   const isOwner = useIsOwner(task?.userId);
   const hasHelpers = !!task?.helpers?.length;
+  const helperIds =
+    task?.helpers?.map((helper: HelperUser | string) =>
+      typeof helper === 'string' ? helper : helper.id,
+    ) ?? [];
 
   const hasPushed = pushData?.hasPushed || false;
   const pushCount = pushData?.pushCount || 0;
+  const supporterCount = pushData?.pushCount ?? task?.pushCount ?? 0;
+  const helperCount = task?.helpers?.length ?? 0;
+  const hasShareUpdateRecipients = supporterCount > 0 || helperCount > 0;
+  const latestProgressUpdate = React.useMemo(
+    () => getLatestProgressUpdate(task?.progressUpdates),
+    [task?.progressUpdates],
+  );
+  const isShareUpdateCoolingDown = isProgressUpdateCoolingDown(latestProgressUpdate);
+  const canShareProgressUpdate = hasShareUpdateRecipients && !isShareUpdateCoolingDown;
   const hasVoted = task?.hasVoted;
   const hasReminded = task?.hasReminded;
 
@@ -112,6 +141,13 @@ export default function TaskDetailScreen({
 
   const { mutate: completeTask, isPending: isMarkingPending } = useCompleteTask();
   const { mutate: incompleteTask, isPending: isUnMarkingPending } = useInCompleteTask();
+  const openHelpersSheet = useCallback(() => {
+    setShowHelperModal(true);
+  }, []);
+
+  const openAddHelperSheet = useCallback(() => {
+    setShowAddHelperModal(true);
+  }, []);
 
   useEffect(() => {
     if (shareVisible || !shareTask) return;
@@ -130,34 +166,92 @@ export default function TaskDetailScreen({
     setShareVisible(false);
   }, []);
 
+  const handleHelpersConfirmed = useCallback(
+    async (ids: string[]) => {
+      if (!task?.id) return;
+
+      const selectedHelpers = friends.filter((friend: HelperUser) => ids.includes(friend.id));
+
+      try {
+        const { data: updatedTask } = await api.patch<ShareTask>(buildRoute.task(task.id), {
+          helpers: ids,
+        });
+
+        qc.setQueryData(buildQueryKey.taskById(task.id), {
+          ...(task as ShareTask),
+          ...updatedTask,
+          helpers: updatedTask.helpers ?? selectedHelpers,
+        });
+        qc.invalidateQueries({ queryKey: buildQueryKey.tasks() });
+
+        showToast({
+          type: 'success',
+          title: 'Helpers updated',
+          message: 'Your task has been updated.',
+        });
+      } catch (error) {
+        console.error('[UPDATE_HELPERS_ERROR]', error);
+        showToast({
+          type: 'error',
+          title: 'Error',
+          message: 'Could not update helpers. Try again.',
+        });
+      }
+    },
+    [friends, qc, task],
+  );
+
+  useEffect(() => {
+    if (!route.params?.openShareModal || !task || consumedAutoShare) return;
+
+    setShareTask(task as ShareTask);
+    setShareVisible(true);
+    setConsumedAutoShare(true);
+  }, [consumedAutoShare, route.params?.openShareModal, task]);
+
   const handleDeleteTask = useCallback(() => {
     if (!task?.id || isDeleting) return;
-    Alert.alert('Delete Task (Dev)', 'Are you sure you want to delete this task?', [
-      { text: 'Cancel', style: 'cancel' },
+
+    (async () => {
+      try {
+        setIsDeleting(true);
+        await deleteTask(task.id);
+        qc.removeQueries({ queryKey: buildQueryKey.taskById(task.id) });
+        qc.invalidateQueries({ queryKey: buildQueryKey.tasks() });
+        navigation.goBack();
+      } catch (error) {
+        console.error('[DELETE_TASK_ERROR]', error);
+        showToast({
+          type: 'error',
+          title: 'Error',
+          message: 'Failed to delete task.',
+        });
+      } finally {
+        setIsDeleting(false);
+      }
+    })();
+  }, [task?.id, isDeleting, navigation, qc]);
+
+  const handleOpenTaskMenu = useCallback(() => {
+    if (!task?.id) return;
+
+    Alert.alert('Task options', '', [
       {
-        text: 'Delete',
+        text: 'Delete task',
         style: 'destructive',
-        onPress: async () => {
-          try {
-            setIsDeleting(true);
-            await deleteTask(task.id);
-            qc.removeQueries({ queryKey: buildQueryKey.taskById(task.id) });
-            qc.invalidateQueries({ queryKey: buildQueryKey.tasks() });
-            navigation.goBack();
-          } catch (error) {
-            console.error('[DELETE_TASK_ERROR]', error);
-            showToast({
-              type: 'error',
-              title: 'Error',
-              message: 'Failed to delete task.',
-            });
-          } finally {
-            setIsDeleting(false);
-          }
+        onPress: () => {
+          showConfirmAlert({
+            title: 'Delete task?',
+            message: 'This action cannot be undone.',
+            confirmText: 'Delete',
+            destructive: true,
+            onConfirm: handleDeleteTask,
+          });
         },
       },
+      { text: 'Cancel', style: 'cancel' },
     ]);
-  }, [task?.id, isDeleting, navigation, qc]);
+  }, [handleDeleteTask, task?.id]);
 
   const openReminderComposer = React.useCallback(() => {
     if (!task) return;
@@ -189,11 +283,55 @@ export default function TaskDetailScreen({
     });
   }, [task, addReminder, openReminderMessageSheet]);
 
+  const openShareUpdateComposer = React.useCallback(() => {
+    if (!task) return;
+
+    if (isProgressUpdateCoolingDown(latestProgressUpdate)) {
+      showToast({
+        type: 'info',
+        title: 'Update already shared.',
+        message: `You can share every ${PROGRESS_UPDATE_COOLDOWN_LABEL}. Try again in ${getProgressUpdateRemainingTime(
+          latestProgressUpdate,
+        )}.`,
+      });
+      return;
+    }
+
+    openShareUpdateSheet({
+      taskName: task.name || 'you',
+      taskText: task.text,
+      type: task.type,
+      onShare: msg =>
+        new Promise<void>((resolve, reject) => {
+          shareProgressUpdate.mutate(msg, {
+            onSuccess: () => {
+              showToast({
+                type: 'success',
+                title: 'Update shared',
+                message: 'Your update has been posted.',
+              });
+              resolve();
+            },
+            onError: (err: any) => {
+              const apiMessage = err?.response?.data?.message || err?.response?.data?.error;
+              showToast({
+                type: 'error',
+                title: 'Error',
+                message: apiMessage || 'Could not share update. Try again.',
+              });
+              reject(err);
+            },
+          });
+        }),
+    });
+  }, [latestProgressUpdate, openShareUpdateSheet, shareProgressUpdate, task]);
+
   const push = usePushInteraction({
     hasPushed,
     pushCount,
     onPush: () => {
       if (!resolvedTaskId) return;
+      if (task?.type === TaskTypeEnum.Motivation && isOwner) return;
       togglePush();
     },
     onUnpush: () => {
@@ -337,11 +475,38 @@ export default function TaskDetailScreen({
     }
 
     // 🔥 MOTIVATION
-    if (task.type === TaskTypeEnum.Motivation && !hasPushed) {
+    if (task.type === TaskTypeEnum.Motivation && isOwner && !task.completed) {
       return (
         <AnimatedBottomButtonWithHeader
           visible
-          title={(isOwner ? '💪 ' : emoji) + `Push ${isOwner ? 'myself' : getFirstName(task.name)}`}
+          showButton={canShareProgressUpdate || !isShareUpdateCoolingDown}
+          title={canShareProgressUpdate ? 'Share update' : 'Share request'}
+          onPress={
+            canShareProgressUpdate
+              ? openShareUpdateComposer
+              : () => handleShareTask(task as ShareTask)
+          }
+          isLoading={canShareProgressUpdate ? shareProgressUpdate.isPending : false}
+          buttonColor={colors.motivationBgHardest}
+          containerColor={colors.onPrimary}
+          buttonHeader={
+            canShareProgressUpdate
+              ? 'Keep everyone supporting you in the loop.'
+              : isShareUpdateCoolingDown
+                ? `You can share another update in ${getProgressUpdateRemainingTime(
+                    latestProgressUpdate,
+                  )}.`
+                : 'Invite people to support this request.'
+          }
+        />
+      );
+    }
+
+    if (task.type === TaskTypeEnum.Motivation && !isOwner && !hasPushed) {
+      return (
+        <AnimatedBottomButtonWithHeader
+          visible
+          title={emoji + `Push ${getFirstName(task.name)}`}
           onPress={push.handlePush}
           isLoading={isPending}
           buttonColor={colors.motivationBgHardest}
@@ -420,12 +585,22 @@ export default function TaskDetailScreen({
     adviceText,
     shouldOpenComposerDirectly,
     hasPushed,
+    hasShareUpdateRecipients,
+    isShareUpdateCoolingDown,
+    canShareProgressUpdate,
+    latestProgressUpdate,
     isOwner,
     emoji,
     isPending,
     hasVoted,
     hasReminded,
     openReminderComposer,
+    openShareUpdateComposer,
+    handleShareTask,
+    shareProgressUpdate.isPending,
+    hasHelpers,
+    openHelpersSheet,
+    openAddHelperSheet,
   ]);
 
   const renderAdvice = React.useCallback(() => {
@@ -440,12 +615,13 @@ export default function TaskDetailScreen({
           completed={task.completed}
           viewsCount={task.viewCount || 0}
           isOwner={isOwner}
+          taskType={task.type}
           onMarkComplete={() => {
             task.completed ? incompleteTask(task.id) : completeTask(task.id);
           }}
         />
 
-        {hasHelpers && (
+        {(isOwner || hasHelpers) && (
           <>
             <Height
               style={{
@@ -456,7 +632,8 @@ export default function TaskDetailScreen({
               helpers={task.helpers}
               taskType={task.type}
               isOwner={isOwner}
-              onPress={() => setShowHelperModal(true)}
+              onPress={openHelpersSheet}
+              onAddPress={openAddHelperSheet}
             />
           </>
         )}
@@ -466,7 +643,7 @@ export default function TaskDetailScreen({
         {showCTA && <Height size={vs(BOTTOM_BUTTON_HEIGHT)} />}
       </>
     );
-  }, [task, isOwner, showCTA]);
+  }, [task, isOwner, showCTA, hasHelpers, openHelpersSheet, openAddHelperSheet]);
 
   const renderMotivation = React.useCallback(() => {
     return (
@@ -486,7 +663,8 @@ export default function TaskDetailScreen({
               helpers={task.helpers}
               taskType={task.type}
               isOwner={isOwner}
-              onPress={() => setShowHelperModal(true)}
+              onPress={openHelpersSheet}
+              onAddPress={openAddHelperSheet}
             />
           </>
         )}
@@ -497,13 +675,14 @@ export default function TaskDetailScreen({
           completed={task.completed}
           viewsCount={task.viewCount || 0}
           isOwner={isOwner}
+          taskType={task.type}
           onMarkComplete={() => {
             task.completed ? incompleteTask(task.id) : completeTask(task.id);
           }}
         />
       </>
     );
-  }, [task, isOwner, hasHelpers]);
+  }, [task, isOwner, hasHelpers, openHelpersSheet, openAddHelperSheet]);
 
   const renderDecision = React.useCallback(() => {
     return (
@@ -531,7 +710,8 @@ export default function TaskDetailScreen({
               helpers={task.helpers}
               taskType={task.type}
               isOwner={isOwner}
-              onPress={() => setShowHelperModal(true)}
+              onPress={openHelpersSheet}
+              onAddPress={openAddHelperSheet}
             />
           </>
         )}
@@ -540,7 +720,7 @@ export default function TaskDetailScreen({
         <TaskDetailBody task={task} />
       </>
     );
-  }, [task, isOwner]);
+  }, [task, isOwner, hasHelpers, openHelpersSheet, openAddHelperSheet]);
 
   const renderReminder = React.useCallback(() => {
     const remindAtDateAndTime = new Date(task?.remindAt);
@@ -578,7 +758,8 @@ export default function TaskDetailScreen({
               helpers={task.helpers}
               taskType={task.type}
               isOwner={isOwner}
-              onPress={() => setShowHelperModal(true)}
+              onPress={openHelpersSheet}
+              onAddPress={openAddHelperSheet}
             />
           </>
         )}
@@ -587,7 +768,7 @@ export default function TaskDetailScreen({
         <TaskDetailBody task={task} />
       </>
     );
-  }, [task, isOwner]);
+  }, [task, isOwner, hasHelpers, openHelpersSheet, openAddHelperSheet]);
 
   const renderContent = React.useMemo(() => {
     switch (task?.type) {
@@ -615,8 +796,10 @@ export default function TaskDetailScreen({
   if (!task) return null;
 
   const bg = getTaskBackgroundVisual(task.type);
-  const edges = isAndroid ? ['left', 'right', 'bottom'] : ['top', 'left', 'right', 'bottom'];
-  const showDevDelete = __DEV__ && !!task?.id;
+  const edges: Array<'top' | 'bottom' | 'left' | 'right'> = isAndroid
+    ? ['left', 'right', 'bottom']
+    : ['top', 'left', 'right', 'bottom'];
+  const showOwnerMenu = isOwner && !!task?.id;
   return (
     <View style={{ flex: 1 }}>
       {/* 🔥 Full-screen gradient */}
@@ -637,24 +820,21 @@ export default function TaskDetailScreen({
         backgroundColor="transparent"
       >
         <AppHeader
-          title="Task Detail"
           right={
             <View style={styles.headerActions}>
-              <Ripple style={styles.headerAction} onPress={() => handleShareTask(task as ShareTask)}>
-                <Icon set="ion" name="share-outline" size={ms(18)} color={colors.text} />
+              <Ripple
+                style={styles.headerAction}
+                onPress={() => handleShareTask(task as ShareTask)}
+              >
+                <Icon set="ion" name="share-social-outline" size={ms(18)} color={colors.muted} />
               </Ripple>
-              {showDevDelete && (
+              {showOwnerMenu && (
                 <Ripple
-                  style={[styles.headerAction, styles.headerActionDelete]}
-                  onPress={handleDeleteTask}
+                  style={styles.headerAction}
+                  onPress={handleOpenTaskMenu}
                   disabled={isDeleting}
                 >
-                  <Icon
-                    set="ion"
-                    name="trash-outline"
-                    size={ms(18)}
-                    color={isDeleting ? colors.muted : colors.error}
-                  />
+                  <Icon set="ion" name="ellipsis-vertical" size={ms(18)} color={colors.muted} />
                 </Ripple>
               )}
             </View>
@@ -666,8 +846,17 @@ export default function TaskDetailScreen({
       </Layout>
       <ViewHelpersModal
         visible={showHelperModal}
-        helpers={task.helpers}
+        helpers={task.helpers ?? []}
         onClose={() => setShowHelperModal(false)}
+      />
+
+      <SelectHelpersModal
+        visible={showAddHelperModal}
+        selected={helperIds}
+        friends={friends}
+        onConfirm={handleHelpersConfirmed}
+        onClose={() => setShowAddHelperModal(false)}
+        confirmButtonColor={typeBackgroundsHardest[task.type]}
       />
 
       {shareTask && (
@@ -677,6 +866,35 @@ export default function TaskDetailScreen({
   );
 }
 
+function getLatestProgressUpdate(updates?: ProgressUpdate[]): ProgressUpdate | null {
+  return updates?.[0] ?? null;
+}
+
+function isProgressUpdateCoolingDown(update?: ProgressUpdate | null) {
+  if (!update?.createdAt) return false;
+
+  const createdAtTime = new Date(update.createdAt).getTime();
+  if (!Number.isFinite(createdAtTime)) return false;
+
+  return Date.now() - createdAtTime < PROGRESS_UPDATE_COOLDOWN_MS;
+}
+
+function getProgressUpdateRemainingTime(update?: ProgressUpdate | null) {
+  if (!update?.createdAt) return PROGRESS_UPDATE_DEFAULT_REMAINING_TIME;
+
+  const createdAtTime = new Date(update.createdAt).getTime();
+  if (!Number.isFinite(createdAtTime)) return PROGRESS_UPDATE_DEFAULT_REMAINING_TIME;
+
+  const remainingMs = Math.max(0, PROGRESS_UPDATE_COOLDOWN_MS - (Date.now() - createdAtTime));
+  const totalMinutes = Math.ceil(remainingMs / (60 * 1000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h`;
+  return `${Math.max(1, minutes)}m`;
+}
+
 const styles = StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
@@ -684,9 +902,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   headerAction: {
-    paddingHorizontal: ms(2),
-  },
-  headerActionDelete: {
-    marginLeft: ms(6),
+    paddingHorizontal: ms(5),
   },
 });

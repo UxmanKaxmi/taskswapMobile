@@ -11,7 +11,7 @@ type Props = {
 };
 
 export default function Greeting({ name, onPressAction }: Props) {
-  const { greetingText, headline } = useGreeting(name);
+  const { greetingText, headline } = useGreeting(name?.split(' ')[0]);
 
   return (
     <View style={styles.container}>
@@ -31,7 +31,6 @@ export default function Greeting({ name, onPressAction }: Props) {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
     paddingBottom: spacing.xs,
   },
   greeting: {
@@ -40,6 +39,6 @@ const styles = StyleSheet.create({
     // marginBottom: spacing.xs,
   },
   headline: {
-    fontSize: ms(20),
+    fontSize: ms(18),
   },
 });

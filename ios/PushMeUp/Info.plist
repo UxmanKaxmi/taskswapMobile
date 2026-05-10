@@ -50,10 +50,23 @@
 	<string>Allow local network access to connect to your local server.</string>
 	<key>UIAppFonts</key>
 	<array>
+		<string>BeVietnamPro-Black.ttf</string>
+		<string>BeVietnamPro-Bold.ttf</string>
+		<string>BeVietnamPro-ExtraBold.ttf</string>
+		<string>BeVietnamPro-Light.ttf</string>
+		<string>BeVietnamPro-Medium.ttf</string>
+		<string>BeVietnamPro-Regular.ttf</string>
+		<string>BeVietnamPro-SemiBold.ttf</string>
 		<string>FontAwesome6_Brands.ttf</string>
 		<string>FontAwesome6_Regular.ttf</string>
 		<string>FontAwesome6_Solid.ttf</string>
 		<string>Ionicons.ttf</string>
+		<string>PlusJakartaSans-Bold.ttf</string>
+		<string>PlusJakartaSans-ExtraBold.ttf</string>
+		<string>PlusJakartaSans-Light.ttf</string>
+		<string>PlusJakartaSans-Medium.ttf</string>
+		<string>PlusJakartaSans-Regular.ttf</string>
+		<string>PlusJakartaSans-SemiBold.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

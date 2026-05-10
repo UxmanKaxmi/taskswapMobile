@@ -101,7 +101,7 @@ export const impactTypeVisuals: Record<
 > = {
   motivation: {
     title: TaskTypeEnum.Motivation,
-    description: 'Get a boost when you’re feeling stuck or low.',
+    description: 'Get a boost when you feel stuck.',
     icon: { set: 'fa6', name: typeIcons.motivation },
     color: colors.motivationBgHardest,
     background: colors.motivationBg,

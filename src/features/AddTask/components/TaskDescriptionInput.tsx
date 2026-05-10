@@ -9,7 +9,7 @@ import Row from '@shared/components/Layout/Row';
 import { ms, s, vs } from 'react-native-size-matters';
 import { colors, spacing } from '@shared/theme';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
-import { getTaskHints } from '../utils/constants';
+import { getTaskHints } from '../utils/taskCopy';
 // import InspireMeButton from '@features/addTask/components/InspireMeButton';
 
 type Props = {

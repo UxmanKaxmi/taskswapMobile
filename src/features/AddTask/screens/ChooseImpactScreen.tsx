@@ -1,193 +1,168 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { View, StyleSheet, Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Layout } from '@shared/components/Layout';
-import { spacing, colors } from '@shared/theme';
+import { colors } from '@shared/theme';
+import Icon from '@shared/components/Icons/Icon';
 
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
-import AppHeader from '@shared/components/AppHeader/AppHeader';
-import { impactTypeVisuals } from '@shared/utils/typeVisuals';
 import { haptics } from '@shared/utils/haptics';
-import { AppStackParamList } from '@navigation/types/navigation';
-import { showToast } from '@shared/utils/toast';
 import ImpactOptionCard from '../components/ImpactOptionCard';
-import { ms, vs } from 'react-native-size-matters';
-import { useFeatureFlags } from '@shared/featureFlags';
+import { impactTypeVisuals } from '@shared/utils/typeVisuals';
+import type { AddTaskStackParamList } from '../navigation/AddTaskNavigator';
+import { useModal } from '@shared/components/ModalProvider';
+
+const IMPACT_OPTIONS = [
+  {
+    type: TaskTypeEnum.Motivation,
+    title: 'Motivation',
+    description: 'Need energy to get started.',
+  },
+  {
+    type: TaskTypeEnum.Advice,
+    title: 'Advice',
+    description: 'Want thoughts from someone you trust.',
+  },
+  {
+    type: TaskTypeEnum.Decision,
+    title: 'Decision',
+    description: 'Need help choosing.',
+  },
+  {
+    type: TaskTypeEnum.Reminder,
+    title: 'Reminder',
+    description: 'Want a nudge later.',
+  },
+] as const;
+
+const ENABLED_TASK_TYPES = new Set<TaskTypeEnum>([TaskTypeEnum.Motivation]);
 
 export default function ChooseImpactScreen() {
-  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
-  const { flags, loading: flagsLoading } = useFeatureFlags();
+  const navigation = useNavigation<NativeStackNavigationProp<AddTaskStackParamList>>();
+  const { openComingSoonSheet } = useModal();
 
   const isTypeEnabled = (type: TaskTypeEnum) => {
-    switch (type) {
-      case TaskTypeEnum.Motivation:
-        return flags.motivation;
-      case TaskTypeEnum.Advice:
-        return flags.advice;
-      case TaskTypeEnum.Decision:
-        return flags.decision;
-      case TaskTypeEnum.Reminder:
-        return flags.reminder;
-      default:
-        return false;
+    return ENABLED_TASK_TYPES.has(type);
+  };
+
+  const handleGoBack = () => {
+    let current: any = navigation;
+    while (current) {
+      if (typeof current.canGoBack === 'function' && current.canGoBack()) {
+        current.goBack();
+        return;
+      }
+      current = typeof current.getParent === 'function' ? current.getParent() : undefined;
     }
   };
 
   const goToCreate = (type: TaskTypeEnum) => {
-    if (flagsLoading) {
-      showToast({
-        type: 'info',
-        title: 'Just a sec',
-        message: 'We’re checking what’s available.',
-      });
-      return;
-    }
-
     if (!isTypeEnabled(type)) {
-      showToast({
-        type: 'info',
-        title: 'Coming soon',
-        message: 'This push type isn’t available yet.',
+      openComingSoonSheet({
+        type,
+        onCreateMotivation: () => navigation.navigate('AddMotivation'),
       });
       return;
     }
 
     haptics.open();
-    console.log('type', type);
+
     switch (type) {
       case TaskTypeEnum.Advice:
-        navigation.navigate('AddTask', { screen: 'AddAdvice' });
+        navigation.navigate('AddAdvice');
         break;
-
       case TaskTypeEnum.Motivation:
-        navigation.navigate('AddTask', { screen: 'AddMotivation' });
+        navigation.navigate('AddMotivation');
         break;
-
       case TaskTypeEnum.Decision:
-        navigation.navigate('AddTask', { screen: 'AddDecision' });
+        navigation.navigate('AddDecision');
         break;
-
       case TaskTypeEnum.Reminder:
-        navigation.navigate('AddTask', { screen: 'AddReminder' });
+        navigation.navigate('AddReminder');
         break;
-
-      default:
-        showToast({
-          type: 'error',
-          title: 'Unsupported task type',
-        });
     }
   };
 
-  const IMPACT_TYPES: TaskTypeEnum[] = [
-    TaskTypeEnum.Motivation,
-    TaskTypeEnum.Advice,
-    TaskTypeEnum.Decision,
-    TaskTypeEnum.Reminder,
-  ];
-
   return (
-    <Layout>
-      <AppHeader title="" showCross />
-      {/* Header */}
-      {/* <Row justify="space-between" align="center" style={styles.header}>
-        <Ripple onPress={() => navigation.goBack()}>
-          <Icon set="ion" name="close" size={26} color={colors.text} />
-        </Ripple>
-
-        <TextElement weight="600">New Push</TextElement>
-
-        <View style={{ width: 20 }} />
-      </Row> */}
-
-      {/* Title */}
-      <View style={styles.titleRow}>
-        <TextElement style={styles.titleText} variant="title" weight="600">
-          What kind of{' '}
-        </TextElement>
-
-        <View style={styles.underlinedWord}>
-          <TextElement style={styles.titleText} variant="title" weight="600" color="primary">
-            push
-          </TextElement>
-          <View style={styles.underline} />
+    <Layout
+      backgroundColor={colors.background}
+      allowPaddingHorizontal={false}
+      allowPaddingVertical={false}
+      edgesProp={['top', 'left', 'right']}
+    >
+      <View style={styles.screen}>
+        <View style={styles.closeRow}>
+          <Pressable hitSlop={10} onPress={handleGoBack} style={styles.closeButton}>
+            <Icon set="ion" name="close" size={26} color={colors.text} />
+          </Pressable>
         </View>
 
-        <TextElement style={styles.titleText} variant="title" weight="600">
-          do you want?
-        </TextElement>
-      </View>
+        <View style={styles.copyBlock}>
+          <TextElement variant="headline" weight="700" style={styles.title}>
+            What kind of support do you need?
+          </TextElement>
+          <TextElement variant="bodySmall" color="muted" style={styles.subtitle}>
+            Choose what would help most right now.
+          </TextElement>
+        </View>
 
-      <View>
-        <TextElement color="muted" style={styles.subtitle}>
-          Choose what you need right now to keep moving forward.
-        </TextElement>
-      </View>
+        <View style={styles.options}>
+          {IMPACT_OPTIONS.map(option => {
+            const visual = impactTypeVisuals[option.type];
+            const isAvailable = isTypeEnabled(option.type);
 
-      {/* Options */}
-      <View style={styles.options}>
-        {IMPACT_TYPES.map(type => {
-          const visual = impactTypeVisuals[type];
-          const isAvailable = flagsLoading ? true : isTypeEnabled(type);
-          return (
-            <ImpactOptionCard
-              key={type}
-              title={visual.title}
-              description={visual.description}
-              icon={visual.icon}
-              color={visual.color}
-              bg={visual.background}
-              onPress={() => goToCreate(type)}
-              dimmed={!isAvailable}
-            />
-          );
-        })}
+            return (
+              <ImpactOptionCard
+                key={option.type}
+                title={option.title}
+                description={option.description}
+                icon={visual.icon}
+                color={visual.color}
+                bg={visual.background}
+                onPress={() => goToCreate(option.type)}
+                dimmed={!isAvailable}
+              />
+            );
+          })}
+        </View>
       </View>
     </Layout>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    // paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+  screen: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 24,
   },
-  titleWrap: {
-    // paddingHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-    marginBottom: spacing.lg,
+  closeRow: {
+    alignItems: 'flex-start',
+  },
+  closeButton: {
+    padding: 2,
+  },
+  copyBlock: {
+    marginTop: 36,
+  },
+  title: {
+    color: colors.text,
+    fontSize: 30,
+    lineHeight: 35,
+    letterSpacing: -0.6,
   },
   subtitle: {
-    marginTop: spacing.sm,
-    marginBottom: vs(20),
-    fontSize: ms(14),
+    marginTop: 8,
+    fontSize: 16,
+    lineHeight: 22,
+    color: colors.muted,
   },
   options: {
-    gap: spacing.md,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'flex-end',
-    marginTop: vs(30),
-    // marginBottom: vs(20),
-  },
-
-  underlinedWord: {
-    position: 'relative',
-    marginHorizontal: 2,
-  },
-
-  underline: {
-    height: 4,
-    borderRadius: 4,
-    backgroundColor: colors.primary,
-    opacity: 0.35,
-    marginTop: -4, // pulls underline closer to text
-  },
-  titleText: {
-    fontSize: ms(28),
+    marginTop: 24,
+    gap: 10,
   },
 });
