@@ -23,7 +23,7 @@ export const buildRoute = {
 
   // 📌 User Routes
   user: (id: string) => `${ApiRoute.USERS}/${id}`,
-  syncUserToDb: () => `${ApiRoute.USERS}`,
+  syncUserToDb: () => `${ApiRoute.USERS}/google-sync`,
   matchUsers: () => `${ApiRoute.USERS}/match`,
   me: () => `${ApiRoute.USERS}/me`,
   homeSummary: () => `${ApiRoute.USERS}/me/home-summary`,

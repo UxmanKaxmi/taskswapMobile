@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: vs(18),
     marginBottom: 6,
-    lineHeight: 24,
+    // lineHeight: 24,
   },
   subtitle: {
     color: '#707070',

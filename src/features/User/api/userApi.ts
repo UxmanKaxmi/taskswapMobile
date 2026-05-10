@@ -1,5 +1,6 @@
 import { buildRoute } from '@shared/api/apiRoutes';
 import { api } from '@shared/api/axios';
+import type { CustomAxiosRequestConfig } from '@shared/api/axios';
 
 // export const followUser = async (followingId: string) => {
 //   const res = await api.post(buildRoute.follow());
@@ -37,7 +38,19 @@ export const getFollowing = async () => {
 //   return res.data; // Array of User
 // };
 
-export const syncUserToDb = async (userId: string, fcmToken: string) => {
-  const res = await api.post(buildRoute.syncUserToDb(), { userId, fcmToken });
+type GoogleSyncPayload = {
+  id: string;
+  name: string;
+  email: string;
+  photo?: string;
+  fcmToken?: string;
+};
+
+export const syncUserToDb = async (payload: GoogleSyncPayload, googleIdToken: string) => {
+  const res = await api.post(buildRoute.syncUserToDb(), payload, {
+    headers: { Authorization: `Bearer ${googleIdToken}` },
+    skipAuthLogout: true,
+    skipAuthRefresh: true,
+  } as CustomAxiosRequestConfig);
   return res.data;
 };

@@ -1,9 +1,10 @@
 // src/shared/api/axios.ts
 import { showToast } from '@shared/utils/toast';
 import axios, { AxiosRequestConfig, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { triggerLogout } from './authBridge';
+import { refreshBackendSession, triggerLogout } from './authBridge';
 import { Platform, NativeModules } from 'react-native';
 import Config from 'react-native-config';
+import { buildRoute } from './apiRoutes';
 
 const FALLBACK_BASE_URL_IOS = 'http://localhost:3001';
 const FALLBACK_BASE_URL_ANDROID = 'http://192.168.1.5:3001';
@@ -40,10 +41,60 @@ const BASE_URL =
 export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   skipToast?: boolean;
   skipAuthLogout?: boolean;
+  skipAuthRefresh?: boolean;
+  _authRetry?: boolean;
 }
 interface CustomAxiosError extends Omit<AxiosError, 'config'> {
   config: CustomAxiosRequestConfig & { headers?: Record<string, string> };
 }
+
+const GOOGLE_SYNC_ROUTES = new Set([buildRoute.syncUserToDb(), '/users']);
+
+const isGoogleSyncRequest = (config?: AxiosRequestConfig | null) =>
+  config?.method?.toLowerCase() === 'post' &&
+  typeof config.url === 'string' &&
+  GOOGLE_SYNC_ROUTES.has(config.url);
+
+const getAuthorizationHeader = (config: InternalAxiosRequestConfig) => {
+  const headers: any = config.headers;
+
+  if (typeof headers?.get === 'function') {
+    return headers.get('Authorization') || headers.get('authorization');
+  }
+
+  return headers?.Authorization || headers?.authorization;
+};
+
+const setAuthorizationHeader = (config: CustomAxiosRequestConfig, token: string) => {
+  const headers: any = config.headers || {};
+
+  if (typeof headers?.set === 'function') {
+    headers.set('Authorization', `Bearer ${token}`);
+    config.headers = headers;
+    return;
+  }
+
+  config.headers = {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+  };
+};
+
+const getJwtAlg = (authorization?: string | null) => {
+  const token = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+  const header = token?.split('.')[0];
+
+  if (!header) return null;
+
+  try {
+    const normalized = header.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    const decoded = globalThis.atob(padded);
+    return JSON.parse(decoded)?.alg ?? null;
+  } catch {
+    return null;
+  }
+};
 
 export const api = axios.create({
   baseURL: BASE_URL, // use your LAN IP on device
@@ -56,6 +107,14 @@ api.interceptors.request.use(
     // If you attach token elsewhere (AuthProvider defaults), keep this commented out
     // const token = await AsyncStorage.getItem('accessToken');
     // if (token) config.headers.Authorization = `Bearer ${token}`;
+
+    const authorization = getAuthorizationHeader(config);
+
+    if (isGoogleSyncRequest(config) && getJwtAlg(authorization) === 'HS256') {
+      return Promise.reject(
+        new Error('Google sync expects a Google ID token, but received the backend app JWT.'),
+      );
+    }
 
     console.log(`➡️ [${config.method?.toUpperCase()}] ${config.baseURL}${config.url}`);
     if (config.data) console.log('Payload:', config.data);
@@ -92,6 +151,24 @@ api.interceptors.response.use(
       // don’t show duplicate error toast from the generic handler
       error.config = { ...(error.config || {}), skipToast: true };
 
+      if (
+        !error.config.skipAuthRefresh &&
+        !error.config._authRetry &&
+        !isGoogleSyncRequest(error.config)
+      ) {
+        try {
+          const refreshedToken = await refreshBackendSession();
+
+          if (refreshedToken) {
+            error.config._authRetry = true;
+            setAuthorizationHeader(error.config, refreshedToken);
+            return api(error.config);
+          }
+        } catch {
+          // Fall through to logout when Google refresh is unavailable or rejected.
+        }
+      }
+
       // friendly info toast
       showToast({
         type: 'info',
@@ -102,7 +179,7 @@ api.interceptors.response.use(
       // trigger app-level sign out via the bridge
       try {
         await triggerLogout();
-      } catch (e) {
+      } catch {
         // no-op; still reject the original error
       }
       return Promise.reject(error);

@@ -31,6 +31,29 @@ export async function signInWithGoogle() {
 }
 
 /**
+ * Return a Google ID token for backend Google-sync calls.
+ */
+export async function getGoogleIdToken() {
+  await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+  try {
+    const { idToken } = await GoogleSignin.getTokens();
+    if (idToken) return idToken;
+  } catch {
+    // Fall through to silent sign-in before surfacing an auth error.
+  }
+
+  await GoogleSignin.signInSilently();
+
+  const { idToken } = await GoogleSignin.getTokens();
+  if (!idToken) {
+    throw new Error('Google ID token is missing. Please sign in with Google again.');
+  }
+
+  return idToken;
+}
+
+/**
  * Sign the user out of Google.
  */
 export async function signOutGoogle() {

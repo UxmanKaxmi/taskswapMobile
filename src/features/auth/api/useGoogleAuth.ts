@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { signInWithGoogle } from '@shared/utils/googleAuth';
 import { api } from '@shared/api/axios';
+import type { CustomAxiosRequestConfig } from '@shared/api/axios';
 import { buildRoute } from '@shared/api/apiRoutes';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import messaging from '@react-native-firebase/messaging';
@@ -25,6 +26,10 @@ export function useGoogleAuth() {
       const idToken = result.data?.idToken;
       let fcmToken = '';
 
+      if (!idToken) {
+        throw new Error('Google ID token is missing. Please sign in with Google again.');
+      }
+
       try {
         await messaging().registerDeviceForRemoteMessages();
         fcmToken = await messaging().getToken();
@@ -44,7 +49,9 @@ export function useGoogleAuth() {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
-      });
+        skipAuthLogout: true,
+        skipAuthRefresh: true,
+      } as CustomAxiosRequestConfig);
 
       return {
         user: response.data.user,

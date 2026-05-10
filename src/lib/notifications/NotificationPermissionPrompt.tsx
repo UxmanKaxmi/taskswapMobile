@@ -5,30 +5,56 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '@shared/api/axios';
 import type { CustomAxiosRequestConfig } from '@shared/api/axios';
 import { buildRoute } from '@shared/api/apiRoutes';
+import { getGoogleIdToken } from '@shared/utils/googleAuth';
 
 const PERMISSION_KEY = 'notification_permission_granted';
 const FCM_TOKEN_KEY = 'fcm_token';
 const AUTH_USER_KEY = 'auth:user';
 const AUTH_TOKEN_KEY = 'auth:token';
 
+type StoredUser = {
+  id?: string;
+  name?: string;
+  email?: string;
+  photo?: string;
+};
+
 const syncFcmTokenToBackend = async (fcmToken: string) => {
   try {
-    const [userRaw, authToken] = await Promise.all([
-      AsyncStorage.getItem(AUTH_USER_KEY),
-      AsyncStorage.getItem(AUTH_TOKEN_KEY),
-    ]);
+    const userRaw = await AsyncStorage.getItem(AUTH_USER_KEY);
 
-    if (!userRaw || !authToken) return;
+    if (!userRaw) return;
 
-    const parsedUser = JSON.parse(userRaw) as { id?: string };
+    const parsedUser = JSON.parse(userRaw) as StoredUser;
     const userId = parsedUser?.id;
-    if (!userId) return;
+    if (!userId || !parsedUser.email) return;
 
-    await api.post(buildRoute.syncUserToDb(), { userId, fcmToken }, {
-      headers: { Authorization: `Bearer ${authToken}` },
-      skipToast: true,
-      skipAuthLogout: true,
-    } as CustomAxiosRequestConfig);
+    const idToken = await getGoogleIdToken();
+    const response = await api.post(
+      buildRoute.syncUserToDb(),
+      {
+        id: userId,
+        name: parsedUser.name ?? '',
+        email: parsedUser.email,
+        photo: parsedUser.photo ?? '',
+        fcmToken,
+      },
+      {
+        headers: { Authorization: `Bearer ${idToken}` },
+        skipToast: true,
+        skipAuthLogout: true,
+        skipAuthRefresh: true,
+      } as CustomAxiosRequestConfig,
+    );
+
+    if (response.data?.token) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      await AsyncStorage.setItem(AUTH_TOKEN_KEY, response.data.token);
+    }
+
+    if (response.data?.user) {
+      await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(response.data.user));
+    }
   } catch (error) {
     console.warn('Failed to sync FCM token to backend', error);
   }
