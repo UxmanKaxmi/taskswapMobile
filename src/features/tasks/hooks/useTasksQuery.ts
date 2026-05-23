@@ -10,7 +10,8 @@ export function useTasksQuery() {
 
   return useInfiniteQuery<TaskPage>({
     queryKey: buildQueryKey.tasks(user?.id),
-    queryFn: ({ pageParam }) => getTasksPage(pageParam ?? null),
+    initialPageParam: null as string | null,
+    queryFn: ({ pageParam }) => getTasksPage((pageParam as string | null) ?? null),
     getNextPageParam: lastPage => (lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined),
     refetchOnMount: true,
     refetchOnReconnect: true,

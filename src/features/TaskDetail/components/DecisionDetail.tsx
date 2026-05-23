@@ -28,7 +28,7 @@ export default function DecisionDetail({ task }: Props) {
 
   const voteMutation = useCastVote(task.id);
 
-  const { option1, option2, percent1, percent2, vote1, vote2 } = useVoteStats(task);
+  const { option1, option2, percent1, percent2, vote1, vote2 } = useVoteStats(task as any);
   const { openInfo } = useModal();
 
   const totalVotes = vote1 + vote2;

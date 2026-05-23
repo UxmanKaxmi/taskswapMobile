@@ -59,6 +59,7 @@ export default function BottomTabsAndroid({ route }: any) {
   return (
     <View style={styles.root}>
       <Tab.Navigator
+        id={undefined as any}
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarStyle: [
@@ -135,7 +136,7 @@ export default function BottomTabsAndroid({ route }: any) {
           name="Friends"
           component={FindFriendsMainScreen}
           listeners={{
-            tabPress: e => {
+            tabPress: (e: any) => {
               checkAuthForTab(e, 'Friends');
               if (!e.defaultPrevented) haptics.selection();
             },
@@ -167,7 +168,7 @@ export default function BottomTabsAndroid({ route }: any) {
           name="Notification"
           component={NotificationMainScreen}
           listeners={{
-            tabPress: e => {
+            tabPress: (e: any) => {
               checkAuthForTab(e, 'Notification');
               if (!e.defaultPrevented) haptics.selection();
             },
@@ -180,7 +181,7 @@ export default function BottomTabsAndroid({ route }: any) {
           name="Profile"
           component={MyProfileMainScreen}
           listeners={{
-            tabPress: e => {
+            tabPress: (e: any) => {
               checkAuthForTab(e, 'Profile');
               if (!e.defaultPrevented) haptics.selection();
             },

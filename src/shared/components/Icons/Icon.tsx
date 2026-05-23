@@ -1,5 +1,5 @@
 import React from 'react';
-import { Animated, ViewStyle } from 'react-native';
+import { Animated, ColorValue, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from '@shared/theme/useTheme';
 
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -10,35 +10,18 @@ import { svgIcons, SvgIconName } from './svgRegistry';
 
 type SharedProps = {
   size?: number;
-  color?: string | Animated.AnimatedInterpolation<string>;
+  color?: ColorValue | Animated.AnimatedInterpolation<string>;
   variant?: 'primary' | 'accent' | 'success' | 'error' | 'text';
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
-
-// Extract Ionicons name type
-type IoniconsName = Parameters<typeof Ionicons>['0']['name'];
 
 // -------------------------------- ICON TYPES --------------------------------
 
-type SvgIconProps = SharedProps & {
-  set: 'svg';
-  name: SvgIconName;
-  iconStyle?: never;
-};
-
-type FontAwesomeProps = SharedProps & {
-  set: 'fa6';
+export type IconProps = SharedProps & {
+  set: 'svg' | 'fa6' | 'ion';
   name: string;
   iconStyle?: 'solid' | 'regular' | 'brand';
 };
-
-type IoniconProps = SharedProps & {
-  set: 'ion';
-  name: IoniconsName;
-  iconStyle?: never;
-};
-
-export type IconProps = SvgIconProps | FontAwesomeProps | IoniconProps;
 
 // -------------------------------- COMPONENT --------------------------------
 
@@ -52,11 +35,11 @@ export default function Icon({
   iconStyle = 'regular',
 }: IconProps) {
   const theme = useTheme();
-  const iconColor = color ?? theme.colors[variant];
+  const iconColor = (color ?? theme.colors[variant]) as ColorValue;
 
   // ---- SVG ICON ----
   if (set === 'svg') {
-    const Component = svgIcons[name];
+    const Component = svgIcons[name as SvgIconName];
     return (
       <SvgWrapper size={size} color={iconColor} style={style}>
         <Component />
@@ -67,16 +50,21 @@ export default function Icon({
   // ---- FONT AWESOME ----
   if (set === 'fa6') {
     return (
-      <FontAwesome6 size={size} iconStyle={iconStyle} color={iconColor} style={style} name={name} />
+      <FontAwesome6
+        size={size}
+        iconStyle={iconStyle}
+        color={iconColor}
+        style={style}
+        name={name as any}
+      />
     );
   }
 
   // ---- IONICONS ----
   if (set === 'ion') {
-    return <Ionicons size={size + 2} color={iconColor} style={style} name={name} />;
+    return <Ionicons size={size + 2} color={iconColor} style={style} name={name as any} />;
   }
 
   // ---- Exhaustive check (never happens) ----
-  const _exhaustiveCheck: never = set;
-  return _exhaustiveCheck;
+  return null;
 }

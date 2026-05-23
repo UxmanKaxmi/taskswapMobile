@@ -1,6 +1,7 @@
 // src/features/tasks/hooks/useAddTask.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createTask, CreateTaskPayload } from '../api/taskApi';
+import { createTask } from '@features/AddTask/api/addTask.api';
+import type { CreateTaskPayload } from '@features/AddTask/types/addTask.types';
 import { Task } from '../types/tasks';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 

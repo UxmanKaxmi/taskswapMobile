@@ -34,12 +34,18 @@ export type ComingSoonModalPayload = {
   onCreateMotivation: () => void;
 };
 
+export type CompleteTaskConfirmationModalPayload = {
+  type: TaskType;
+  onConfirm: () => void | Promise<void>;
+};
+
 export type ModalPayloadMap = {
   info: InfoModalPayload;
   reminderMessage: ReminderMessageModalPayload;
   shareUpdate: ShareUpdateModalPayload;
   motivationSuccess: MotivationSuccessModalPayload;
   comingSoon: ComingSoonModalPayload;
+  completeTaskConfirmation: CompleteTaskConfirmationModalPayload;
 };
 
 export type ModalType = keyof ModalPayloadMap;
@@ -64,5 +70,9 @@ export type ModalState =
   | {
       type: 'comingSoon';
       payload: ComingSoonModalPayload;
+    }
+  | {
+      type: 'completeTaskConfirmation';
+      payload: CompleteTaskConfirmationModalPayload;
     }
   | null;

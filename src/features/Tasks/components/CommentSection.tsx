@@ -145,7 +145,7 @@ export default function CommentsSection({
       {data.map(item => (
         <Animated.View
           key={item.id}
-          ref={ref => handleLayout(item.id, ref)}
+          ref={ref => handleLayout(item.id, ref as View | null)}
           style={[styles.commentRow, { backgroundColor: bgFor(item.id) as any }]}
           // onLayout={e => handleLayout(item.id, e)}
         >

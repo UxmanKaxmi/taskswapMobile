@@ -16,6 +16,7 @@ import Avatar from '@shared/components/Avatar/Avatar';
 import { HelperUser } from '@features/Home/types/home';
 import AppModal from '@shared/components/AppModal/AppModal';
 import { ms } from 'react-native-size-matters';
+import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
 type Props = {
   visible: boolean;
@@ -113,8 +114,9 @@ const styles = StyleSheet.create({
     maxHeight: height * 0.65,
     backgroundColor: colors.background,
     padding: spacing.md,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: MODAL_TOP_RADIUS,
+    borderTopRightRadius: MODAL_TOP_RADIUS,
+    overflow: 'hidden',
   },
   overlay: {
     flex: 1,
@@ -127,8 +129,8 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: colors.background,
     padding: spacing.md,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderTopLeftRadius: MODAL_TOP_RADIUS,
+    borderTopRightRadius: MODAL_TOP_RADIUS,
     position: 'absolute',
     bottom: 0,
     width: '100%',

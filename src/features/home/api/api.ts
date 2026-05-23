@@ -1,4 +1,5 @@
 import { api } from '@shared/api/axios';
+import type { CustomAxiosRequestConfig } from '@shared/api/axios';
 import {
   HomeSummaryApiResponse,
   HomeSummaryCounts,
@@ -55,8 +56,8 @@ export async function getRemindersByTaskAPI(taskId: string) {
   return res.data;
 }
 
-export async function getTaskByIdAPI(taskId: string) {
-  const res = await api.get(buildRoute.task(taskId));
+export async function getTaskByIdAPI(taskId: string, config?: CustomAxiosRequestConfig) {
+  const res = await api.get(buildRoute.task(taskId), config);
   return res.data;
 }
 

@@ -1,4 +1,15 @@
-import { Comment } from '@features/TaskDetail/components/AdviceDetail';
+type Comment = {
+  id: string;
+  text: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    photo: string;
+  };
+  likesCount: number;
+  likedByMe: boolean;
+};
 
 export const MOCK_ADVICE: Comment[] = [
   {

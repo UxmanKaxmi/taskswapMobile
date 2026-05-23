@@ -30,9 +30,9 @@ interface Props {
   extra?: ExtraMeta;
   onPressComments?: () => void;
   taskDetails?: any;
-  hasPushed: boolean;
-  pushCount: number;
-  onPressPush: () => void;
+  hasPushed?: boolean;
+  pushCount?: number;
+  onPressPush?: () => void;
   isPushing?: boolean;
   onPressUnpush?: () => void; //TEST ONLY
 
@@ -64,6 +64,7 @@ export default function TaskFooter({
   reminderText,
   reminderExpired,
 }: Props) {
+  const isCompleted = Boolean(taskDetails?.completed || taskDetails?.completedAt);
   const {
     hasPushed: pushed,
     pushedText,
@@ -72,7 +73,7 @@ export default function TaskFooter({
   } = usePushInteraction({
     hasPushed,
     pushCount,
-    onPush: onPressPush,
+    onPush: onPressPush ?? (() => {}),
     onUnpush: onPressUnpush,
     isPushing,
   });
@@ -120,7 +121,18 @@ export default function TaskFooter({
         thickness={0.5}
       />
       <View style={styles.footer}>
-        {taskDetails?.type === TaskTypeEnum.Motivation && (
+        {isCompleted ? (
+          <View style={styles.completedRow}>
+            <Icon
+              set="fa6"
+              name="circle-check"
+              iconStyle="solid"
+              size={ms(12)}
+              color={colors.motivationBgHardest}
+            />
+            <TextElement style={styles.completedLine}>Completed</TextElement>
+          </View>
+        ) : taskDetails?.type === TaskTypeEnum.Motivation ? (
           <Animated.View style={[animatedStyle, { flex: 1 }]}>
             {isOwner ? (
               <TextElement style={styles.pushedText}>{ownerMotivationText}</TextElement>
@@ -144,9 +156,7 @@ export default function TaskFooter({
               </>
             )}
           </Animated.View>
-        )}
-
-        {taskDetails?.type === TaskTypeEnum.Advice && (
+        ) : taskDetails?.type === TaskTypeEnum.Advice ? (
           <View style={{ flex: 1, alignItems: 'center' }}>
             {/* OWNER */}
             {isOwner ? (
@@ -196,9 +206,7 @@ export default function TaskFooter({
               </View>
             )}
           </View>
-        )}
-
-        {taskDetails?.type === TaskTypeEnum.Reminder && (
+        ) : taskDetails?.type === TaskTypeEnum.Reminder ? (
           <View style={{ flex: 1 }}>
             {/* OWNER */}
             {isOwner ? (
@@ -282,8 +290,7 @@ export default function TaskFooter({
               </Row>
             )}
           </View>
-        )}
-        {taskDetails?.type === TaskTypeEnum.Decision && (
+        ) : taskDetails?.type === TaskTypeEnum.Decision ? (
           <View style={{ flex: 1, alignItems: 'flex-start' }}>
             {(() => {
               const voteCount = taskDetails.voteCount ?? 0;
@@ -320,7 +327,7 @@ export default function TaskFooter({
               );
             })()}
           </View>
-        )}
+        ) : null}
 
         {/* View Count */}
         {/* {typeof viewCount === 'number' && (
@@ -399,6 +406,18 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     color: colors.muted,
     fontSize: ms(14),
+  },
+  completedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  completedLine: {
+    fontSize: ms(11),
+    lineHeight: ms(14),
+    color: colors.muted,
+    fontWeight: '400',
+    flexShrink: 1,
   },
   adviceCount: {
     color: colors.adviceBgHardest,

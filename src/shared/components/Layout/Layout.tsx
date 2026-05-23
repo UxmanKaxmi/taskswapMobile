@@ -57,7 +57,8 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
         ? (['top', 'left', 'right'] as const)
         : (['left', 'right'] as const)
       : [];
-    const finalEdges = Array.isArray(edgesProp) && edgesProp.length > 0 ? edgesProp : edges;
+    const finalEdges: Array<'top' | 'bottom' | 'left' | 'right'> =
+      Array.isArray(edgesProp) && edgesProp.length > 0 ? edgesProp : [...edges];
     const hasBottomSafeEdge = finalEdges.includes('bottom');
     const footerBottomInset = hasBottomSafeEdge ? 0 : insets.bottom || spacing.sm;
     const {

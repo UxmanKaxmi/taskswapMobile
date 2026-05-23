@@ -16,17 +16,20 @@ export interface NotificationDTO {
     | 'task-motivation-push'
     | 'task-motivation-milestone'
     | 'task-motivation-progress'
+    | 'task-motivation-unfinished-reminder'
+    | 'task-motivation-help-push-reminder'
     | 'task-progress-update'
-    | 'commentMention';
+    | 'commentMention'
+    | 'task-completed';
 
   message: string;
   read: boolean;
   createdAt: string;
-  metadata?: Record<string, any>; // Flexible for all notification types
+  metadata?: Record<string, any> | null; // Flexible for all notification types
   sender?: {
     id: string;
     name: string;
-    photo?: string;
-  };
-  taskType?: 'reminder' | 'decision' | 'motivation' | 'advice';
+    photo?: string | null;
+  } | null;
+  taskType?: 'reminder' | 'decision' | 'motivation' | 'advice' | null;
 }

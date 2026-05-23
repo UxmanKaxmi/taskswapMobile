@@ -16,9 +16,9 @@ import { resolveAppTextStyle } from '@shared/theme/fonts';
 
 export type AvatarProps = {
   /** Remote image URI to load. If omitted or fails, `fallback` is shown instead. */
-  uri?: string;
+  uri?: string | null;
   /** String to display when no `uri` is provided (e.g. initials or emoji). */
-  fallback?: string;
+  fallback?: string | null;
   /** Pixel diameter of the avatar. Default is 44. */
   size?: number;
   /** Border color around the avatar. Default is `colors.border`. */
@@ -32,6 +32,26 @@ export type AvatarProps = {
   /** Optional wrapper style for avatar container */
   style?: StyleProp<ImageStyle>;
 };
+
+function getFallbackText(fallback?: string) {
+  const trimmedFallback = fallback?.trim();
+
+  if (!trimmedFallback) {
+    return '?';
+  }
+
+  const words = trimmedFallback.split(/\s+/).filter(Boolean);
+
+  if (words.length > 1) {
+    return words
+      .slice(0, 2)
+      .map(word => Array.from(word)[0])
+      .join('')
+      .toUpperCase();
+  }
+
+  return Array.from(trimmedFallback).slice(0, 2).join('').toUpperCase();
+}
 
 /**
  * A circular avatar component that displays either a remote image or a fallback text/emoji.
@@ -65,16 +85,23 @@ export default function Avatar({
   textStyle,
   style,
 }: AvatarProps) {
+  const [imageFailed, setImageFailed] = React.useState(false);
   const radius = size / 2;
+  const fallbackText = getFallbackText(fallback);
   const fallbackTextStyle = resolveAppTextStyle(
-    [styles.fallbackText, { fontSize: size * 0.4 }, textStyle],
+    [styles.fallbackText, { fontSize: size * 0.36, lineHeight: size * 0.48 }, textStyle],
     { variant: 'label' },
   );
 
-  if (uri) {
+  React.useEffect(() => {
+    setImageFailed(false);
+  }, [uri]);
+
+  if (uri && !imageFailed) {
     return (
       <Image
         source={{ uri }}
+        onError={() => setImageFailed(true)}
         style={[
           styles.image,
           {
@@ -104,7 +131,9 @@ export default function Avatar({
         style,
       ]}
     >
-      <Text style={fallbackTextStyle}>{fallback}</Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit style={fallbackTextStyle}>
+        {fallbackText}
+      </Text>
     </View>
   );
 }
@@ -119,9 +148,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
+    overflow: 'hidden',
   },
   fallbackText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontWeight: '700',
+    includeFontPadding: false,
+    textAlign: 'center',
   },
 });

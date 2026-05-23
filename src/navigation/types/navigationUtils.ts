@@ -45,7 +45,7 @@ export function navigateStack<T extends keyof AppStackParamList>(
     ? [] | [AppStackParamList[T]]
     : [AppStackParamList[T]]
 ) {
-  navigation.navigate(screen, ...(params ? [params] : []));
+  (navigation.navigate as any)(screen, ...(params ? [params] : []));
 }
 
 /**
@@ -111,7 +111,7 @@ export function openFriendsProfile(
  * openAddTask(nav);
  */
 export function openAddTask(navigation: NavigationProp<AppStackParamList>, task?: Task) {
-  navigation.navigate('AddTask', { task });
+  (navigation.navigate as any)('AddTask', { task });
 }
 
 /**
@@ -187,7 +187,7 @@ export function useCheckAuthThenNavigate() {
       console.log('screen', screen);
       console.log('route.name', route.name);
 
-      navigation.navigate('AuthIntro', {
+      (navigation.navigate as any)('AuthIntro', {
         redirectTo: (screen ?? route.name) as keyof AppStackParamList,
         params,
         authContext: options?.authContext,
@@ -197,7 +197,7 @@ export function useCheckAuthThenNavigate() {
     }
 
     if (screen) {
-      navigation.navigate(screen, params);
+      (navigation.navigate as any)(screen, params);
     }
 
     return true;

@@ -10,7 +10,7 @@ import { ms, vs } from 'react-native-size-matters';
 import { colors, spacing } from '@shared/theme';
 
 type Props = {
-  // type: TaskType;
+  type?: TaskType;
   value: string;
   onChange: (text: string) => void;
   error?: string; // ✅ new prop for error

@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '@features/Auth/AuthProvider';
 import AuthIntroScreen from '@features/Auth/screens/AuthIntroScreen';
 
-export function ProtectedTabScreen({ children }: { children: JSX.Element }) {
+export function ProtectedTabScreen({ children }: { children: React.ReactElement }) {
   const { user } = useAuth();
 
   if (!user) return <AuthIntroScreen />;

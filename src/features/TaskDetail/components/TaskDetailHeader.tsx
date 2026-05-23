@@ -28,6 +28,7 @@ type Props = {
     text: string;
     helpers?: HelperUser[];
     completed?: boolean;
+    userId?: string;
   };
 };
 
@@ -56,7 +57,6 @@ export function TaskDetailHeader({ task }: Props) {
   return (
     <Row align="center" justify="flex-start">
       {/* Avatar + helpers */}
-      {console.log('task 222', task)}
       <View style={[styles.avatarWrapper, { width: avatarSize, height: avatarSize }]}>
         <Ripple onPress={() => openFriendsProfile(navigation, task?.userId || '', user?.id)}>
           <Image

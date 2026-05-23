@@ -12,7 +12,8 @@ export type TaskCategoryType =
   | 'follow'
   | 'comment'
   | 'task'
-  | 'push';
+  | 'push'
+  | 'task-completed';
 
 // -------- EMOJIS ONLY (NO COLORS HERE) --------
 export const typeEmojis: Record<TaskCategoryType, string> = {
@@ -25,6 +26,7 @@ export const typeEmojis: Record<TaskCategoryType, string> = {
   comment: '💬',
   task: '📝',
   push: '⚡',
+  'task-completed': '✅',
 };
 
 // Cleaner getVisual function

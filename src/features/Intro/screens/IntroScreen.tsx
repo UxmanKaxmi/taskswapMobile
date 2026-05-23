@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
   },
   responseAuthorText: {
     color: colors.onPrimary,
-    letterSpacing: 1,
+    letterSpacing: 0,
   },
   responseRoleText: {
     color: colors.gradientDarkPurple,

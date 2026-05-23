@@ -8,6 +8,7 @@ import { haptics } from '@shared/utils/haptics';
 import { vs } from 'react-native-size-matters';
 import { spacing } from '@shared/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { isPROD } from '@shared/utils/constants';
 
 type Props = {
   onPressSearch: () => void;
@@ -36,16 +37,16 @@ export default function HomeHeader({ onPressSearch, onPressMore }: Props) {
 
       {/* Actions */}
       <Row gap={20}>
-        <Ripple
+        {/* <Ripple
           onPress={() => {
             haptics.open();
             onPressSearch();
           }}
         >
           <Icon set="ion" name="search" size={vs(15)} />
-        </Ripple>
+        </Ripple> */}
 
-        {onPressMore && (
+        {!isPROD && onPressMore && (
           <Ripple
             onPress={() => {
               haptics.open();

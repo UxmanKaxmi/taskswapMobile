@@ -34,6 +34,7 @@ import { api } from '@shared/api/axios';
 import { buildRoute } from '@shared/api/apiRoutes';
 import { useModal } from '@shared/components/ModalProvider';
 import { navigationRef } from '@navigation/navigationRef';
+import { requestNotificationPermissionPromptForValueMoment } from '@lib/notifications/NotificationPermissionPrompt';
 
 type Props = NativeStackScreenProps<AddTaskStackParamList, 'AddMotivation'>;
 
@@ -81,14 +82,14 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
       resetToHomeRoot(rootNavigation ?? navigation);
 
       setTimeout(() => {
-        openModal('motivationSuccess', {
-          type: TaskTypeEnum.Motivation,
-          onDone: () => {
-            resetToHomeRoot(rootNavigation ?? navigation);
-          },
-          onViewRequest: () => {
-            if (navigationRef.isReady()) {
-              navigationRef.navigate('App', {
+      openModal('motivationSuccess', {
+        type: TaskTypeEnum.Motivation,
+        onDone: () => {
+          resetToHomeRoot(rootNavigation ?? navigation);
+        },
+        onViewRequest: () => {
+          if (navigationRef.isReady()) {
+            navigationRef.navigate('App', {
                 screen: 'TaskDetail',
                 params: { task },
               });
@@ -110,6 +111,10 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
           },
         });
       }, 300);
+
+      setTimeout(() => {
+        void requestNotificationPermissionPromptForValueMoment();
+      }, 900);
     },
     [navigation, openModal, rootNavigation],
   );

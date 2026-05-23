@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ViewStyle,
   TextStyle,
+  StyleProp,
 } from 'react-native';
 import { moderateScale, vs } from 'react-native-size-matters';
 import { hexToRgba } from '@shared/utils/helperFunctions';
@@ -25,8 +26,8 @@ type Props = {
   textColor: string;
   borderColor?: string;
   disabled?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 };
 
 export default function ButtonBase({

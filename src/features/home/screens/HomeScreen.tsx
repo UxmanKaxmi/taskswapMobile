@@ -45,6 +45,7 @@ import { isAndroid } from '@shared/utils/constants';
 import { useSecondaryProfileMenuItems } from '@features/MyProfile/hooks/useSecondaryProfileMenuItems';
 import { useHomeSummary } from '../hooks/useHomeSummary';
 import HomeSummarySection from '../components/HomeSummarySection';
+import { forceNotificationPermissionPrompt } from '@lib/notifications/NotificationPermissionPrompt';
 
 const ALL_TASK_TYPES: TaskTypeEnum[] = [
   TaskTypeEnum.Motivation,
@@ -112,10 +113,19 @@ export default function HomeScreen() {
       undefined,
       [
         {
-          text: 'Notification Debug Tools',
+          text: 'Notification Test Center',
           style: 'default' as const,
           onPress: () => {
             navigation.navigate('MainDebugScreen');
+          },
+        },
+        {
+          text: 'Notification Permission Modal',
+          style: 'default' as const,
+          onPress: () => {
+            setTimeout(() => {
+              forceNotificationPermissionPrompt();
+            }, 250);
           },
         },
         ...secondaryItems.map(item => ({
@@ -284,8 +294,6 @@ export default function HomeScreen() {
 
   const keyExtractor = useCallback((item: Task) => item.id, []);
 
-  const getItemType = useCallback((item: Task) => item.type, []);
-
   const listContentStyle = useMemo(
     () => ({
       paddingTop: HEADER_EXPANDED,
@@ -304,7 +312,7 @@ export default function HomeScreen() {
         case 'motivation':
           return (
             <MotivationCard
-              task={item as MotivationTask}
+              task={item as unknown as MotivationTask}
               onPressCard={onPressTask as any}
               onPressSuggest={onNoopTaskAction as any}
               onPressView={onNoopTaskAction as any}
@@ -342,13 +350,13 @@ export default function HomeScreen() {
 
           <HomeSummarySection
             summary={homeSummary}
-            tasks={flattenedTasks}
+            tasks={flattenedTasks as any}
             currentUserId={user?.id}
             isGuestMode={!authLoading && !user}
             isLoading={isHomeSummaryLoading}
             isError={isHomeSummaryError}
             onRetry={refetchHomeSummary}
-            onPressTask={onPressTask}
+            onPressTask={onPressTask as any}
             onHasVisibleCardsChange={setHasHomeSummaryCards}
           />
 
@@ -371,7 +379,6 @@ export default function HomeScreen() {
         data={tasks}
         renderItem={renderTaskNew}
         keyExtractor={keyExtractor}
-        getItemType={getItemType}
         onScroll={onScroll}
         scrollEventThrottle={16}
         initialNumToRender={6}

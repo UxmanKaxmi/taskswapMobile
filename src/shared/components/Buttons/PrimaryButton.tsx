@@ -1,6 +1,6 @@
 import { useTheme } from '@shared/theme/useTheme';
 import ButtonBase from './ButtonBase';
-import type { GestureResponderEvent, ViewStyle, TextStyle } from 'react-native';
+import type { GestureResponderEvent, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import React from 'react';
 
 type Props = {
@@ -9,8 +9,8 @@ type Props = {
   isLoading?: boolean;
   icon?: React.ReactNode;
   backgroundColor?: string;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   disabled?: boolean;
 };
 

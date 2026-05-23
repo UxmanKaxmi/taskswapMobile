@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAddTask } from "../api/getAddTask.api";
+import { getTasksPage } from "@features/Tasks/api/taskApi";
 
 export function useAddTask() {
   return useQuery({
     queryKey: ["AddTask"],
-    queryFn: getAddTask,
+    queryFn: () => getTasksPage(),
   });
 }

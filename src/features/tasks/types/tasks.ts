@@ -10,9 +10,9 @@ export enum TaskTypeEnum {
 
 // ✅ Full Task object (received from API)
 export type Task = {
-  votedOption: any;
-  completedAt: string;
-  completed: boolean;
+  votedOption?: any;
+  completedAt?: string | null;
+  completed?: boolean;
   id: string;
   text: string;
   type: TaskType;
@@ -21,14 +21,24 @@ export type Task = {
   remindAt?: string; // for reminder tasks
   options?: string[]; // for decision tasks
   deliverAt?: string; // for motivation tasks
+  visibility?: 'friends' | 'public' | 'private';
   avatar?: string;
   name?: string;
   hasAdvised?: boolean;
   hasVoted?: boolean;
   voteCount?: number;
-  helpers?: string[];
+  helpers?: Array<
+    string | { id: string; name?: string; photo?: string | null; avatar?: string | null }
+  >;
   progressUpdates?: ProgressUpdate[];
-  votes: {
+  pushCount?: number;
+  hasPushed?: boolean;
+  viewCount?: number;
+  commentsCount?: number;
+  reminderNoteCount?: number;
+  hasReminded?: boolean;
+  pushHistory?: TaskPushEvent[];
+  votes?: {
     [option: string]: {
       count: number;
       preview: Voter[];
@@ -37,6 +47,7 @@ export type Task = {
 };
 
 export type ProgressUpdate = {
+  id?: string;
   text: string;
   createdAt: string;
 };
@@ -100,4 +111,16 @@ export type TaskPush = {
   hasPushed: boolean;
   pushedAt?: string | null;
   createdAt?: string | null;
+};
+
+export type TaskPushEvent = {
+  id?: string;
+  createdAt?: string;
+  pushedAt?: string;
+  message?: string | null;
+  user?: {
+    id: string;
+    name: string;
+    photo?: string | null;
+  };
 };

@@ -11,10 +11,11 @@ import { ms, vs } from 'react-native-size-matters';
 type PushEvent = {
   createdAt?: string;
   pushedAt?: string;
-  user: {
+  message?: string | null;
+  user?: {
     id: string;
     name: string;
-    photo: string;
+    photo?: string | null;
   };
 };
 
@@ -39,7 +40,7 @@ export default function PushSupportCard({
      0️⃣ Normalize users (presence only, NOT intent)
   -------------------------------------------------- */
   const users = useMemo(() => {
-    const map = new Map<string, { id: string; name: string; avatar: string }>();
+    const map = new Map<string, { id: string; name: string; avatar?: string | null }>();
 
     pushes.forEach(p => {
       if (!p.user) return;
@@ -194,6 +195,8 @@ export default function PushSupportCard({
   }, [didUserPush, users, otherUsers, currentUserId]);
 
   const showSelfPushOnlyFooter = didUserPush && otherPushCount === 0 && !isEmptyState;
+  const iconName = 'lightbulb';
+  const shouldShowDescription = displayUsers.length > 0;
 
   /* --------------------------------------------------
      6️⃣ Render
@@ -204,7 +207,7 @@ export default function PushSupportCard({
         <View style={styles.emptyCard}>
           <View style={styles.emptyLeft}>
             <View style={styles.emptyIconCircle}>
-              <Icon name="lightbulb" set="fa6" size={14} color={colors.motivationBgHardest} />
+              <Icon name={iconName} set="fa6" size={14} color={colors.motivationBgHardest} />
             </View>
 
             <View style={styles.emptyTextWrap}>
@@ -233,7 +236,7 @@ export default function PushSupportCard({
             ]}
           >
             <View style={styles.iconWrap}>
-              <Icon name="lightbulb" set="fa6" size={14} color={colors.motivationBgHardest} />
+              <Icon name={iconName} set="fa6" size={14} color={colors.motivationBgHardest} />
             </View>
             <TextElement
               variant="title"
@@ -258,7 +261,7 @@ export default function PushSupportCard({
           )}
 
           {/* Description */}
-          {displayUsers.length > 0 &&
+          {shouldShowDescription &&
             (showSelfPushOnlyFooter ? (
               <View style={styles.selfPushFooterRow}>
                 <View style={styles.dot} />

@@ -20,6 +20,7 @@ type Props = {
   helpers: HelperUser[];
   taskType: TaskTypeEnum;
   isOwner: boolean;
+  completed?: boolean;
   onPress?: () => void;
   onAddPress?: () => void;
 };
@@ -28,10 +29,13 @@ export default function TaskDetailHelpers({
   helpers,
   taskType,
   isOwner,
+  completed = false,
   onPress,
   onAddPress,
 }: Props) {
   const hasHelpers = helpers.length > 0;
+
+  if (completed) return null;
 
   if (!hasHelpers && isOwner) {
     return (

@@ -1,11 +1,11 @@
 import React from 'react';
-import { ViewStyle } from 'react-native';
+import { ColorValue, StyleProp, ViewStyle } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 
 type Props = {
   size?: number;
-  color?: string;
-  style?: ViewStyle;
+  color?: ColorValue;
+  style?: StyleProp<ViewStyle>;
   children: React.ReactElement<SvgProps>;
 };
 
@@ -16,7 +16,7 @@ export default function SvgWrapper({ size = 24, color, style, children, ...rest 
   return React.cloneElement(children, {
     width: size,
     height: size,
-    fill: color ?? children.props.fill, // fallback to original SVG fill
+    fill: (color ?? children.props.fill) as string, // fallback to original SVG fill
     style,
     ...rest,
   });

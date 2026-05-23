@@ -41,8 +41,8 @@ const DEFAULT_AVATARS: SupportAvatar[] = [
 
 const VISIBLE_AVATARS = 3;
 const RECENT_HISTORY_LIMIT = 4;
-const MIN_CYCLE_DELAY_MS = 3000;
-const MAX_CYCLE_DELAY_MS = 6000;
+const MIN_CYCLE_DELAY_MS = 8000;
+const MAX_CYCLE_DELAY_MS = 12000;
 const FADE_DURATION_MS = 600;
 
 function getInitialVisibleAvatarIds(avatars: SupportAvatar[]) {

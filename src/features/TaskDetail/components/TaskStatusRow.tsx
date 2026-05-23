@@ -5,7 +5,6 @@ import { Icon } from '@shared/components/Icons';
 import { colors, spacing } from '@shared/theme';
 import { formatViewCount } from '@shared/utils/helperFunctions';
 import { TaskType } from '@features/Tasks/types/tasks';
-import { showConfirmAlert } from '@shared/utils/confirmAlert';
 import ButtonBase from '@shared/components/Buttons/ButtonBase';
 
 type Props = {
@@ -27,12 +26,6 @@ export default function TaskStatusRow({
 }: Props) {
   const ctaColor = getCtaColor(taskType);
   const ctaLabel = taskType === 'decision' ? "I've decided" : 'Mark complete';
-  const confirmTitle =
-    taskType === 'decision' ? 'Finalize your decision?' : 'Mark task as complete?';
-  const confirmMessage =
-    taskType === 'decision'
-      ? 'This will lock voting and finalize the result.'
-      : 'This action can’t be undone.';
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -51,16 +44,7 @@ export default function TaskStatusRow({
         <View style={styles.right}>
           <ButtonBase
             title={ctaLabel}
-            onPress={() => {
-              showConfirmAlert({
-                title: confirmTitle,
-                message: confirmMessage,
-                confirmText: ctaLabel,
-                onConfirm: () => {
-                  onMarkComplete?.();
-                },
-              });
-            }}
+            onPress={onMarkComplete}
             backgroundColor={ctaColor}
             textColor={colors.onPrimary}
             icon={<Icon set="ion" name="checkmark-circle" size={16} color={colors.onPrimary} />}

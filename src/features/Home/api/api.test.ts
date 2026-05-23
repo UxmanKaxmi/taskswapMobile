@@ -61,6 +61,8 @@ describe('home summary api', () => {
         replyWaitingCount: 2,
       },
       heroModule: raw.heroModule,
+      modules: null,
+      successStory: null,
       peopleNeedYourPushToday: 4,
       replyWaitingCount: 2,
       featuredStory: raw.featuredStory,

@@ -31,6 +31,7 @@ const Stack = createNativeStackNavigator<AddTaskStackParamList>();
 export default function AddTaskNavigator() {
   return (
     <Stack.Navigator
+      id={undefined as any}
       initialRouteName="ChooseImpactScreen"
       screenOptions={{
         headerShown: false,

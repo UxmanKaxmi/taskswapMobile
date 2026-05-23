@@ -57,7 +57,7 @@ export default function Tag({
         <TextElement
           variant="body"
           weight="500"
-          color={labelColor ? colors[labelColor] : selected ? colors.background : colors.primary}
+          color={(labelColor ? colors[labelColor] : selected ? colors.background : colors.primary) as any}
           style={[styles.label, selectOnly && styles.selectOnlyLabel]}
         >
           {label}

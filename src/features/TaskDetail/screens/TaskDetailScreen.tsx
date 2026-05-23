@@ -1,6 +1,6 @@
 // src/features/tasks/screens/TaskDetailScreen.tsx
-import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, findNodeHandle, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { Layout } from '@shared/components/Layout';
@@ -49,7 +49,6 @@ import AnimatedBottomButtonWithHeader, {
 } from '@shared/components/Buttons/AnimatedBottomButtonWithHeader';
 import TaskStatusRow from '../components/TaskStatusRow';
 import { useCompleteTask } from '@features/Home/hooks/useCompleteTask';
-import { useInCompleteTask } from '@features/Home/hooks/useInCompleteTask';
 import { showToast } from '@shared/utils/toast';
 import { useAddComment } from '@features/Tasks/hooks/useComment';
 import Animated, {
@@ -73,12 +72,22 @@ import { api } from '@shared/api/axios';
 import { buildRoute } from '@shared/api/apiRoutes';
 import { showConfirmAlert } from '@shared/utils/confirmAlert';
 import { useCreateTaskProgressUpdate } from '@features/Tasks/hooks/useTaskProgress';
+import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
+import EmptyState from '@features/Empty/EmptyState';
+import CompletionBurst from '../components/CompletionBurst';
 
 export default function TaskDetailScreen({
   route,
   navigation,
 }: NativeStackScreenProps<AppStackParamList, 'TaskDetail'>) {
-  const { task: initialTask, taskId, highlightCommentId } = route.params ?? {};
+  const {
+    task: initialTask,
+    taskId,
+    highlightCommentId,
+    scrollTo,
+    openUpdateComposer,
+    progressUpdateId,
+  } = route.params ?? {};
   const resolvedTaskId = taskId ?? initialTask?.id;
   const openAdviceComposer =
     route.params?.openAdviceComposer || Boolean((route.params?.task as any)?.openAdviceComposer);
@@ -90,10 +99,25 @@ export default function TaskDetailScreen({
   const [shareTask, setShareTask] = useState<ShareTask | null>(null);
   const [shareVisible, setShareVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [progressSectionHighlighted, setProgressSectionHighlighted] = useState(false);
+  const [completionBurstKey, setCompletionBurstKey] = useState(0);
+  const scrollViewRef = useRef<any>(null);
+  const progressSectionRef = useRef<any>(null);
+  const adviceSectionRef = useRef<any>(null);
+  const handledProgressScrollRef = useRef(false);
+  const handledProgressComposerRef = useRef(false);
+  const handledAdviceScrollRef = useRef(false);
+
+  useEffect(() => {
+    handledProgressScrollRef.current = false;
+    handledProgressComposerRef.current = false;
+    handledAdviceScrollRef.current = false;
+    setProgressSectionHighlighted(false);
+  }, [resolvedTaskId, scrollTo, openUpdateComposer, progressUpdateId, highlightCommentId]);
 
   const { user } = useAuth();
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
-  const { openReminderMessageSheet, openShareUpdateSheet } = useModal();
+  const { openModal, openReminderMessageSheet, openShareUpdateSheet } = useModal();
 
   const { data: friends = [] } = useFollowers();
 
@@ -106,14 +130,24 @@ export default function TaskDetailScreen({
 
   const adviceMorph = useSharedValue(0); // 0 = button, 1 = composer
 
-  const { data: taskData, isLoading } = useQuery({
+  const {
+    data: taskData,
+    isLoading,
+    isError: isTaskQueryError,
+  } = useQuery({
     queryKey: buildQueryKey.taskById(resolvedTaskId!),
-    queryFn: () => getTaskByIdAPI(resolvedTaskId!),
+    queryFn: () =>
+      getTaskByIdAPI(resolvedTaskId!, {
+        skipToast: true,
+        skipAuthLogout: true,
+      }),
     enabled: !!resolvedTaskId, // ✅ IMPORTANT
     initialData: initialTask, // ✅ IMPORTANT
   });
 
-  const task = taskData ?? initialTask;
+  const task = isTaskQueryError ? null : (taskData ?? initialTask);
+  const taskError = isTaskQueryError;
+  const isCompleted = Boolean(task?.completed || task?.completedAt);
   const isOwner = useIsOwner(task?.userId);
   const hasHelpers = !!task?.helpers?.length;
   const helperIds =
@@ -139,8 +173,7 @@ export default function TaskDetailScreen({
 
   const { mutate: addReminder } = useAddReminder(task?.id ?? '');
 
-  const { mutate: completeTask, isPending: isMarkingPending } = useCompleteTask();
-  const { mutate: incompleteTask, isPending: isUnMarkingPending } = useInCompleteTask();
+  const { mutate: completeTask } = useCompleteTask();
   const openHelpersSheet = useCallback(() => {
     setShowHelperModal(true);
   }, []);
@@ -165,6 +198,27 @@ export default function TaskDetailScreen({
   const handleCloseShare = useCallback(() => {
     setShareVisible(false);
   }, []);
+
+  const handleMarkCompletePress = useCallback(() => {
+    if (!task?.id) return;
+
+    openModal('completeTaskConfirmation', {
+      type: task.type,
+      onConfirm: () => {
+        completeTask(task.id, {
+          onSuccess: () => {
+            if (!isOwner) return;
+
+            setCompletionBurstKey(key => key + 1);
+            showToast({
+              type: 'success',
+              title: 'Completed — you followed through.',
+            });
+          },
+        });
+      },
+    });
+  }, [completeTask, isOwner, openModal, task?.id, task?.type]);
 
   const handleHelpersConfirmed = useCallback(
     async (ids: string[]) => {
@@ -284,7 +338,7 @@ export default function TaskDetailScreen({
   }, [task, addReminder, openReminderMessageSheet]);
 
   const openShareUpdateComposer = React.useCallback(() => {
-    if (!task) return;
+    if (!task || isCompleted) return;
 
     if (isProgressUpdateCoolingDown(latestProgressUpdate)) {
       showToast({
@@ -326,6 +380,120 @@ export default function TaskDetailScreen({
     });
   }, [latestProgressUpdate, openShareUpdateSheet, shareProgressUpdate, task]);
 
+  useEffect(() => {
+    if (handledProgressComposerRef.current) return;
+    if (!openUpdateComposer || !task) return;
+    if (task.type !== TaskTypeEnum.Motivation || !isOwner) return;
+    if (isShareUpdateCoolingDown || !canShareProgressUpdate) return;
+
+    handledProgressComposerRef.current = true;
+    openShareUpdateComposer();
+  }, [
+    canShareProgressUpdate,
+    isOwner,
+    isShareUpdateCoolingDown,
+    openShareUpdateComposer,
+    openUpdateComposer,
+    task,
+  ]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (handledProgressScrollRef.current) return;
+    if (scrollTo !== 'progress') return;
+    if (!task) return;
+
+    const measureAndScroll = () => {
+      if (cancelled) return;
+
+      const sectionRef = progressSectionRef.current;
+      const scrollHandle = findNodeHandle(scrollViewRef.current);
+
+      if (!sectionRef || !scrollHandle) {
+        globalThis.requestAnimationFrame(measureAndScroll);
+        return;
+      }
+
+      sectionRef.measureLayout(
+        scrollHandle,
+        (_x, y) => {
+          if (cancelled) return;
+          handledProgressScrollRef.current = true;
+          scrollViewRef.current?.scrollTo?.({ y: Math.max(0, y - 24), animated: true });
+          setProgressSectionHighlighted(true);
+
+          setTimeout(() => {
+            if (cancelled) return;
+            setProgressSectionHighlighted(false);
+          }, 1600);
+        },
+        () => {
+          globalThis.requestAnimationFrame(measureAndScroll);
+        },
+      );
+    };
+
+    if (task.type !== TaskTypeEnum.Motivation) {
+      handledProgressScrollRef.current = true;
+      return;
+    }
+
+    if (!(task.progressUpdates?.length ?? 0)) {
+      handledProgressScrollRef.current = true;
+      return;
+    }
+
+    globalThis.requestAnimationFrame(measureAndScroll);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [scrollTo, task]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (handledAdviceScrollRef.current) return;
+    if (!highlightCommentId) return;
+    if (!task) return;
+
+    const measureAndScroll = () => {
+      if (cancelled) return;
+
+      const sectionRef = adviceSectionRef.current;
+      const scrollHandle = findNodeHandle(scrollViewRef.current);
+
+      if (!sectionRef || !scrollHandle) {
+        globalThis.requestAnimationFrame(measureAndScroll);
+        return;
+      }
+
+      sectionRef.measureLayout(
+        scrollHandle,
+        (_x, y) => {
+          if (cancelled) return;
+          handledAdviceScrollRef.current = true;
+          scrollViewRef.current?.scrollTo?.({ y: Math.max(0, y - 24), animated: true });
+        },
+        () => {
+          globalThis.requestAnimationFrame(measureAndScroll);
+        },
+      );
+    };
+
+    if (task.type !== TaskTypeEnum.Advice) {
+      handledAdviceScrollRef.current = true;
+      return;
+    }
+
+    globalThis.requestAnimationFrame(measureAndScroll);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [highlightCommentId, task]);
+
   const push = usePushInteraction({
     hasPushed,
     pushCount,
@@ -344,7 +512,7 @@ export default function TaskDetailScreen({
   //ADVICE
   const isAdviceTask = task?.type === TaskTypeEnum.Advice || task?.type === TaskTypeEnum.Motivation;
   const hasAdvised = Boolean(task?.hasAdvised);
-  const canGiveAdvice = isAdviceTask && !isOwner && !hasAdvised;
+  const canGiveAdvice = isAdviceTask && !isCompleted && !isOwner && !hasAdvised;
   const shouldOpenComposerDirectly = openAdviceComposer && canGiveAdvice && !consumedAutoOpen;
 
   useEffect(() => {
@@ -403,6 +571,7 @@ export default function TaskDetailScreen({
 
   const footerContent = React.useMemo(() => {
     if (!task) return null;
+    if (isCompleted) return null;
     if (task.type === TaskTypeEnum.Reminder) {
       // OWNER
       if (isOwner) {
@@ -475,7 +644,7 @@ export default function TaskDetailScreen({
     }
 
     // 🔥 MOTIVATION
-    if (task.type === TaskTypeEnum.Motivation && isOwner && !task.completed) {
+    if (task.type === TaskTypeEnum.Motivation && isOwner && !isCompleted) {
       return (
         <AnimatedBottomButtonWithHeader
           visible
@@ -502,7 +671,7 @@ export default function TaskDetailScreen({
       );
     }
 
-    if (task.type === TaskTypeEnum.Motivation && !isOwner && !hasPushed) {
+    if (task.type === TaskTypeEnum.Motivation && !isCompleted && !isOwner && !hasPushed) {
       return (
         <AnimatedBottomButtonWithHeader
           visible
@@ -546,7 +715,7 @@ export default function TaskDetailScreen({
     }
 
     // 🔥 ADVICE — STEP 1 (CTA BUTTON)
-    if (task.type === TaskTypeEnum.Advice && canGiveAdvice && !consumedAutoOpen) {
+    if (task.type === TaskTypeEnum.Advice && !isCompleted && canGiveAdvice && !consumedAutoOpen) {
       return (
         <AnimatedAdviceMorph
           progress={adviceMorph}
@@ -597,6 +766,7 @@ export default function TaskDetailScreen({
     openReminderComposer,
     openShareUpdateComposer,
     handleShareTask,
+    push.handlePush,
     shareProgressUpdate.isPending,
     hasHelpers,
     openHelpersSheet,
@@ -612,16 +782,14 @@ export default function TaskDetailScreen({
 
         <TaskStatusRow
           containerStyle={{ marginTop: vs(-12) }}
-          completed={task.completed}
+          completed={isCompleted}
           viewsCount={task.viewCount || 0}
           isOwner={isOwner}
           taskType={task.type}
-          onMarkComplete={() => {
-            task.completed ? incompleteTask(task.id) : completeTask(task.id);
-          }}
+          onMarkComplete={handleMarkCompletePress}
         />
 
-        {(isOwner || hasHelpers) && (
+        {!isCompleted && (isOwner || hasHelpers) && (
           <>
             <Height
               style={{
@@ -632,6 +800,7 @@ export default function TaskDetailScreen({
               helpers={task.helpers}
               taskType={task.type}
               isOwner={isOwner}
+              completed={isCompleted}
               onPress={openHelpersSheet}
               onAddPress={openAddHelperSheet}
             />
@@ -643,7 +812,7 @@ export default function TaskDetailScreen({
         {showCTA && <Height size={vs(BOTTOM_BUTTON_HEIGHT)} />}
       </>
     );
-  }, [task, isOwner, showCTA, hasHelpers, openHelpersSheet, openAddHelperSheet]);
+  }, [task, isOwner, showCTA, hasHelpers, openHelpersSheet, openAddHelperSheet, isCompleted]);
 
   const renderMotivation = React.useCallback(() => {
     return (
@@ -654,15 +823,23 @@ export default function TaskDetailScreen({
 
         <Height size={vs(14)} />
 
-        <TaskDetailBody task={task} />
+        <TaskDetailBody
+          task={task}
+          adviceSectionRef={adviceSectionRef}
+          progressSectionRef={progressSectionRef}
+          highlightProgressSection={progressSectionHighlighted}
+          highlightProgressUpdateId={progressUpdateId}
+          highlightCommentId={highlightCommentId}
+        />
 
-        {(isOwner || hasHelpers) && (
+        {!isCompleted && (isOwner || hasHelpers) && (
           <>
             <Height size={vs(12)} />
             <TaskDetailHelpers
               helpers={task.helpers}
               taskType={task.type}
               isOwner={isOwner}
+              completed={isCompleted}
               onPress={openHelpersSheet}
               onAddPress={openAddHelperSheet}
             />
@@ -672,17 +849,24 @@ export default function TaskDetailScreen({
         <Height size={vs(12)} />
 
         <TaskStatusRow
-          completed={task.completed}
+          completed={isCompleted}
           viewsCount={task.viewCount || 0}
           isOwner={isOwner}
           taskType={task.type}
-          onMarkComplete={() => {
-            task.completed ? incompleteTask(task.id) : completeTask(task.id);
-          }}
+          onMarkComplete={handleMarkCompletePress}
         />
       </>
     );
-  }, [task, isOwner, hasHelpers, openHelpersSheet, openAddHelperSheet]);
+  }, [
+    task,
+    isOwner,
+    hasHelpers,
+    openHelpersSheet,
+    openAddHelperSheet,
+    progressSectionHighlighted,
+    progressUpdateId,
+    isCompleted,
+  ]);
 
   const renderDecision = React.useCallback(() => {
     return (
@@ -695,21 +879,20 @@ export default function TaskDetailScreen({
 
         <TaskStatusRow
           // containerStyle={{ paddingBottom: vs() }}
-          completed={task.completed}
+          completed={isCompleted}
           viewsCount={task.viewCount || 0}
           isOwner={isOwner}
-          onMarkComplete={() => {
-            task.completed ? incompleteTask(task.id) : completeTask(task.id);
-          }}
+          onMarkComplete={handleMarkCompletePress}
           taskType={task.type}
         />
 
-        {(isOwner || hasHelpers) && (
+        {!isCompleted && (isOwner || hasHelpers) && (
           <>
             <TaskDetailHelpers
               helpers={task.helpers}
               taskType={task.type}
               isOwner={isOwner}
+              completed={isCompleted}
               onPress={openHelpersSheet}
               onAddPress={openAddHelperSheet}
             />
@@ -720,7 +903,7 @@ export default function TaskDetailScreen({
         <TaskDetailBody task={task} />
       </>
     );
-  }, [task, isOwner, hasHelpers, openHelpersSheet, openAddHelperSheet]);
+  }, [task, isOwner, hasHelpers, openHelpersSheet, openAddHelperSheet, isCompleted]);
 
   const renderReminder = React.useCallback(() => {
     const remindAtDateAndTime = new Date(task?.remindAt);
@@ -734,12 +917,10 @@ export default function TaskDetailScreen({
 
         <TaskStatusRow
           // containerStyle={{ paddingBottom: vs(0) }}
-          completed={task.completed}
+          completed={isCompleted}
           viewsCount={task.viewCount || 0}
           isOwner={isOwner}
-          onMarkComplete={() => {
-            task.completed ? incompleteTask(task.id) : completeTask(task.id);
-          }}
+          onMarkComplete={handleMarkCompletePress}
           taskType={task.type}
         />
         <Height size={vs(2)} />
@@ -752,12 +933,13 @@ export default function TaskDetailScreen({
           removeBottomDescription
         />
 
-        {(isOwner || hasHelpers) && (
+        {!isCompleted && (isOwner || hasHelpers) && (
           <>
             <TaskDetailHelpers
               helpers={task.helpers}
               taskType={task.type}
               isOwner={isOwner}
+              completed={isCompleted}
               onPress={openHelpersSheet}
               onAddPress={openAddHelperSheet}
             />
@@ -793,7 +975,33 @@ export default function TaskDetailScreen({
     return <AppLoader visible />;
   }
 
-  if (!task) return null;
+  if (taskError || !task) {
+    return (
+      <Layout allowPaddingVertical allowPaddingHorizontal>
+        <AppHeader />
+
+        <View style={styles.errorState}>
+          <EmptyState
+            title="Task unavailable"
+            subtitle="This task may have been deleted, moved to private, or you may not have access."
+          />
+
+          <View style={styles.errorActions}>
+            <PrimaryButton
+              title="Go back"
+              onPress={() => navigation.canGoBack() && navigation.goBack()}
+            />
+            <PrimaryButton
+              title="Open Inbox"
+              onPress={() => navigation.navigate('NotificationMainScreen')}
+              backgroundColor={colors.surface}
+              textStyle={{ color: colors.text }}
+            />
+          </View>
+        </View>
+      </Layout>
+    );
+  }
 
   const bg = getTaskBackgroundVisual(task.type);
   const edges: Array<'top' | 'bottom' | 'left' | 'right'> = isAndroid
@@ -812,7 +1020,8 @@ export default function TaskDetailScreen({
       <Layout
         // scrollable={task.type !== TaskTypeEnum.Advice}
         scrollable
-        footerContent={footerContent}
+        ref={scrollViewRef}
+        footerContent={!isCompleted ? footerContent : null}
         footerHeight={BOTTOM_BUTTON_HEIGHT}
         edgesProp={edges}
         allowPaddingVertical
@@ -862,6 +1071,8 @@ export default function TaskDetailScreen({
       {shareTask && (
         <ShareModal visible={shareVisible} task={shareTask} onClose={handleCloseShare} />
       )}
+
+      <CompletionBurst playKey={completionBurstKey} />
     </View>
   );
 }
@@ -903,5 +1114,13 @@ const styles = StyleSheet.create({
   },
   headerAction: {
     paddingHorizontal: ms(5),
+  },
+  errorState: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  errorActions: {
+    marginTop: 16,
+    gap: 12,
   },
 });

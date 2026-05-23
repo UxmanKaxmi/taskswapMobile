@@ -19,8 +19,21 @@ export type Voter = {
 };
 
 export type ProgressUpdate = {
+  id?: string;
   text: string;
   createdAt: string;
+};
+
+export type TaskPushEvent = {
+  id?: string;
+  createdAt?: string;
+  pushedAt?: string;
+  message?: string | null;
+  user?: {
+    id: string;
+    name: string;
+    photo?: string | null;
+  };
 };
 
 // ---------------------------------------------
@@ -49,6 +62,7 @@ export type BaseTask = {
   hasPushed: boolean;
   hasAdvised?: boolean;
   progressUpdates?: ProgressUpdate[];
+  pushHistory?: TaskPushEvent[];
 
   // 🔥 Extra state
   hasReminded: boolean;
@@ -86,12 +100,15 @@ export type DecisionTask = BaseTask & {
       preview: Voter[];
     }
   >;
+  hasVoted?: boolean;
   votedOption?: string | null;
 };
 
 export type MotivationTask = BaseTask & {
   type: 'motivation';
   deliverAt?: string;
+  completed?: boolean;
+  completedAt?: string | null;
 };
 
 export type AdviceTask = BaseTask & {
@@ -120,7 +137,7 @@ export interface ReminderNoteDTO {
 export type TimeFilter = 'latest' | 'today' | 'thisWeek' | 'thisMonth' | 'allTime';
 
 export type FeedFilter = {
-  // time: TimeFilter;
+  time?: TimeFilter;
   types: TaskType[];
 };
 

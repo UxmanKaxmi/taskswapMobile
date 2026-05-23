@@ -1,6 +1,5 @@
 import { buildRoute } from '@shared/api/apiRoutes';
-import { api } from '@shared/api/axios';
-import type { CustomAxiosRequestConfig } from '@shared/api/axios';
+import { api, type CustomAxiosRequestConfig } from '@shared/api/axios';
 
 // export const followUser = async (followingId: string) => {
 //   const res = await api.post(buildRoute.follow());

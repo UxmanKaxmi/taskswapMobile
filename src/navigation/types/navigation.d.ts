@@ -24,9 +24,11 @@ export type BottomTabParamList = {
 
 // Root of the app — decides App vs Auth
 export type MainStackParamList = {
-  App: {
-    showFindFriends?: boolean;
-  };
+  App:
+    | NavigatorScreenParams<AppStackParamList>
+    | {
+        showFindFriends?: boolean;
+      };
   Auth: NavigatorScreenParams<AuthStackParamList>;
   AuthIntro?:
     | {
@@ -40,6 +42,8 @@ export type MainStackParamList = {
         };
       }
     | undefined;
+  OnboardingIntro: undefined;
+  AddTaskScreen: NavigatorScreenParams<AddTaskStackParamList>;
 };
 
 /* ------------------------------ APP NAVIGATOR ------------------------------ */
@@ -47,6 +51,21 @@ export type MainStackParamList = {
 // This controls everything above the tabs
 export type AppStackParamList = {
   Tabs: NavigatorScreenParams<BottomTabParamList>;
+  AuthIntro:
+    | {
+        redirectTo?: keyof AppStackParamList | keyof BottomTabParamList;
+        params?: any;
+        authContext?: string;
+        authCopy?: {
+          title: string;
+          subtitle: string;
+          cta: string;
+        };
+      }
+    | undefined;
+  Friends: undefined;
+  Notification: undefined;
+  Profile: undefined;
 
   // STACK ONLY SCREENS (open above tabs)
   AddTask: NavigatorScreenParams<AddTaskStackParamList> & {
@@ -61,6 +80,10 @@ export type AppStackParamList = {
         highlightCommentId?: string;
         openAdviceComposer?: boolean;
         openShareModal?: boolean;
+        scrollTo?: 'progress';
+        openUpdateComposer?: boolean;
+        pushId?: string;
+        progressUpdateId?: string;
       }
     | undefined;
 
@@ -94,6 +117,7 @@ export type AuthStackParamList = {
   Login:
     | {
         redirectTo?: keyof AppStackParamList;
+        params?: AppStackParamList[keyof AppStackParamList];
       }
     | undefined;
 };

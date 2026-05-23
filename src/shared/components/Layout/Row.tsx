@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { View, ViewStyle, StyleSheet } from 'react-native';
+import { View, ViewStyle, StyleSheet, StyleProp } from 'react-native';
 import { useTheme } from '@shared/theme/useTheme';
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
   /** Main-axis distribution of children */
   justify?: ViewStyle['justifyContent'];
   /** Custom styles to override or extend the row */
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   /** Flex value to apply to the row container */
   flex?: boolean | number;
   /** Whether the row should take full width */

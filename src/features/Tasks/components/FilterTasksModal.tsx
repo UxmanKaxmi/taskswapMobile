@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Animated } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  Animated,
+} from 'react-native';
 import { colors, spacing } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
@@ -10,6 +16,7 @@ import { Height } from '@shared/components/Spacing';
 import { typeIcons } from '@shared/utils/typeVisuals';
 import { MakeFirstLetterUppercase } from '@shared/utils/helperFunctions';
 import AppModal from '@shared/components/AppModal/AppModal';
+import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
 type Props = {
   visible: boolean;
@@ -124,13 +131,6 @@ export default function FilterTasksModal({
 }
 
 const styles = StyleSheet.create({
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: spacing.md,
-    marginBottom: spacing.sm,
-  },
   overlay: {
     flex: 1,
     backgroundColor: '#00000066',
@@ -140,13 +140,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     backgroundColor: colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: MODAL_TOP_RADIUS,
+    borderTopRightRadius: MODAL_TOP_RADIUS,
     padding: spacing.lg,
-  },
-  sectionTitle: {
-    marginTop: spacing.md,
-    marginBottom: spacing.sm,
   },
   cancel: {
     alignItems: 'center',

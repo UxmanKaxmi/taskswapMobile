@@ -9,6 +9,7 @@ import {
   ViewStyle,
   TextStyle,
   Animated,
+  StyleProp,
 } from 'react-native';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { colors, spacing, typography } from '@shared/theme';
@@ -18,8 +19,8 @@ import Row from '../Layout/Row';
 
 interface AppTextInputProps extends TextInputProps {
   label?: string;
-  containerStyle?: ViewStyle;
-  inputStyle?: TextStyle;
+  containerStyle?: StyleProp<ViewStyle>;
+  inputStyle?: StyleProp<TextStyle>;
   showCharCount?: boolean;
   charLimit?: number;
   onChangeText: (text: string) => void;
@@ -28,7 +29,7 @@ interface AppTextInputProps extends TextInputProps {
   autoFocus?: boolean;
   error?: boolean;
   errorText?: string;
-  wrapperStyle?: ViewStyle;
+  wrapperStyle?: StyleProp<ViewStyle>;
   onCharCountChange?: (count: number, limit: number) => void;
   useBottomSheetTextInput?: boolean;
 }

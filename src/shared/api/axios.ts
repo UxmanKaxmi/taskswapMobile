@@ -26,17 +26,17 @@ const DEV_BASE_URL = (() => {
   return host ? `http://${host}:3001` : null;
 })();
 
-console.log(
-  'Config.BASE_URL_IOS || Config.BASE_URL || FALLBACK_BASE_URL_IOS',
-  Config.BASE_URL_IOS,
-  Config.BASE_URL,
-  FALLBACK_BASE_URL_IOS,
-);
-const BASE_URL =
-  (__DEV__ && DEV_BASE_URL) ||
-  (Platform.OS === 'android'
-    ? Config.BASE_URL_ANDROID || Config.BASE_URL || FALLBACK_BASE_URL_ANDROID
-    : Config.BASE_URL_IOS || Config.BASE_URL || FALLBACK_BASE_URL_IOS);
+const CONFIG_BASE_URL =
+  Platform.OS === 'android'
+    ? Config.BASE_URL_ANDROID || Config.BASE_URL
+    : Config.BASE_URL_IOS || Config.BASE_URL;
+
+const FALLBACK_BASE_URL =
+  Platform.OS === 'android' ? FALLBACK_BASE_URL_ANDROID : FALLBACK_BASE_URL_IOS;
+
+const BASE_URL = CONFIG_BASE_URL || (__DEV__ && DEV_BASE_URL) || FALLBACK_BASE_URL;
+
+console.log('API base URL:', BASE_URL);
 
 export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   skipToast?: boolean;

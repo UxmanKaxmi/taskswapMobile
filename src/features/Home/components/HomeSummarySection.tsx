@@ -440,7 +440,7 @@ export default function HomeSummarySection({
                 flexShrink: 0,
               },
               index === visibleCards.length - 1 && styles.lastCardShell,
-              getDismissAnimationStyle(dismissAnimationRefs, card.key),
+              getDismissAnimationStyle(dismissAnimationRefs, card.key) as any,
             ]}
           >
             <MinimalCard
@@ -723,7 +723,8 @@ function buildAdviceBody(task: Task | null) {
 
 function selectMotivationTask(tasks: Task[], currentUserId: string | null) {
   const motivationTasks = tasks.filter(
-    (task): task is Extract<Task, { type: 'motivation' }> => task.type === 'motivation',
+    (task): task is Extract<Task, { type: 'motivation' }> =>
+      task.type === 'motivation' && !task.completed && !task.completedAt,
   );
 
   const otherUserTasks = motivationTasks.filter(task => task.userId !== currentUserId);
@@ -735,7 +736,8 @@ function selectMotivationTask(tasks: Task[], currentUserId: string | null) {
 
 function selectProgressTask(tasks: Task[], currentUserId: string | null) {
   const motivationTasks = tasks.filter(
-    (task): task is Extract<Task, { type: 'motivation' }> => task.type === 'motivation',
+    (task): task is Extract<Task, { type: 'motivation' }> =>
+      task.type === 'motivation' && !task.completed && !task.completedAt,
   );
 
   const ownTasks = motivationTasks.filter(task => task.userId === currentUserId);

@@ -5,6 +5,7 @@ import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import { spacing } from '@shared/theme';
+import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
 type Props = {
   title: string;
@@ -22,6 +23,15 @@ const AppInfoBottomSheet = forwardRef<BottomSheet, Props>(
         index={-1}
         snapPoints={snapPoints}
         enablePanDownToClose
+        style={{
+          borderTopLeftRadius: MODAL_TOP_RADIUS,
+          borderTopRightRadius: MODAL_TOP_RADIUS,
+          overflow: 'hidden',
+        }}
+        backgroundStyle={{
+          borderTopLeftRadius: MODAL_TOP_RADIUS,
+          borderTopRightRadius: MODAL_TOP_RADIUS,
+        }}
         backdropComponent={props => (
           <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
         )}
@@ -39,7 +49,7 @@ const AppInfoBottomSheet = forwardRef<BottomSheet, Props>(
 
           {children}
 
-          <PrimaryButton title="Got it" onPress={() => ref?.current?.close()} />
+          <PrimaryButton title="Got it" onPress={() => (ref as any)?.current?.close()} />
         </View>
       </BottomSheet>
     );

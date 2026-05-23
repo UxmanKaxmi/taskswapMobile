@@ -3,6 +3,7 @@ set -euo pipefail
 
 DEVICE_NAME="${1:-${DEVICE_NAME:-}}"
 BUILD_MODE="${BUILD_MODE:-Debug}"
+IOS_SCHEME="${IOS_SCHEME:-PushMeUp}"
 SOURCE_ENVFILE="${SOURCE_ENVFILE:-.env.dev}"
 APP_ENV_OVERRIDE="${APP_ENV_OVERRIDE:-}"
 START_METRO="${START_METRO:-}"
@@ -80,6 +81,7 @@ fi
 
 echo "Running on device: ${DEVICE_NAME}"
 echo "Build mode: ${BUILD_MODE}"
+echo "iOS scheme: ${IOS_SCHEME}"
 echo "Start Metro: ${START_METRO}"
 echo "Metro port: ${METRO_PORT}"
 echo "Source ENVFILE=${SOURCE_ENVFILE}"
@@ -97,4 +99,4 @@ cleanup_envfile() {
 trap cleanup_envfile EXIT
 
 echo "${ENVFILE_DEVICE}" > /tmp/envfile
-ENVFILE="${ENVFILE_DEVICE}" npx react-native run-ios --device "${DEVICE_NAME}" --mode "${BUILD_MODE}" --port "${METRO_PORT}"
+ENVFILE="${ENVFILE_DEVICE}" npx react-native run-ios --device "${DEVICE_NAME}" --mode "${BUILD_MODE}" --scheme "${IOS_SCHEME}" --port "${METRO_PORT}"

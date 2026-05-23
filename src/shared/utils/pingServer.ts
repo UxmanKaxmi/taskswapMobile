@@ -1,9 +1,7 @@
 // src/shared/utils/pingServer.ts
 
 import { api } from '@shared/api/axios';
-import { Platform } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import Config from 'react-native-config';
 
 export async function pingServer() {
   console.log('Google Signin config:', await GoogleSignin.getCurrentUser());
@@ -22,7 +20,7 @@ export async function pingServer() {
 
   /** Check DB connection endpoint */
   try {
-    const res = await api.get(`${Config.BASE_URL}/test-db`);
+    const res = await api.get('/test-db');
     const data = res.data;
 
     if (data.connected) {

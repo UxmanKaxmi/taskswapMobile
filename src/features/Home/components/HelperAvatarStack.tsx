@@ -4,11 +4,12 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { ms } from 'react-native-size-matters';
 import { colors } from '@shared/theme';
 import { Shadow } from '@shared/components/Shadow';
+import Avatar from '@shared/components/Avatar/Avatar';
 
 type Helper = {
   id: string;
   name?: string;
-  avatar: string;
+  avatar?: string | null;
 };
 
 type Props = {
@@ -31,6 +32,7 @@ export default function HelperAvatarStack({ helpers, size = ms(40), maxVisible =
           size="tint"
           style={[
             styles.avatarWrap,
+
             {
               marginLeft: index === 0 ? 0 : -size * 0.35,
               width: size,
@@ -40,15 +42,12 @@ export default function HelperAvatarStack({ helpers, size = ms(40), maxVisible =
             },
           ]}
         >
-          <Image
-            source={
-              helper.avatar ? { uri: helper.avatar } : require('@assets/images/emptyFriend.png')
-            }
-            style={{
-              width: size,
-              height: size,
-              borderRadius: size / 2,
-            }}
+          <Avatar
+            uri={helper.avatar}
+            fallback={helper.name}
+            size={size}
+            borderColor={colors.border}
+            style={styles.avatar}
           />
         </Shadow>
       ))}
@@ -57,10 +56,14 @@ export default function HelperAvatarStack({ helpers, size = ms(40), maxVisible =
         <View
           style={[
             styles.more,
+
             {
               width: size,
+
               height: size,
+
               borderRadius: size / 2,
+
               marginLeft: -size * 0.2,
             },
           ]}
@@ -78,7 +81,7 @@ const styles = StyleSheet.create({
   },
 
   avatarWrap: {
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: colors.card,
     backgroundColor: colors.card,
   },
@@ -87,7 +90,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.motivationIconBackground,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: colors.motivationIconBackground,
   },
 
@@ -96,4 +99,5 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.motivationBgHardest,
   },
+  avatar: {},
 });

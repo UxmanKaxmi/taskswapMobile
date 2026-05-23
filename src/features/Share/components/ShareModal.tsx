@@ -1,27 +1,22 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, Share, StyleSheet, View } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
-import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 
 import { spacing } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { showToast } from '@shared/utils/toast';
-import { stripOuterQuotes, toShortName } from '@shared/utils/helperFunctions';
+import { getFirstName, stripOuterQuotes, toShortName } from '@shared/utils/helperFunctions';
 import { Task } from '@features/Home/types/home';
 import TaskHeader from '@features/Home/components/TaskHeader';
 import TaskCardGradient from '@features/Home/components/TaskCardGradient';
 import { TaskType, TaskTypeEnum } from '@features/Tasks/types/tasks';
 import { cardStyles } from '@features/Home/components/styles';
-import {
-  getTypeColor,
-  typeBackgrounds,
-  typeBackgroundsHard,
-  typeIcons,
-} from '@shared/utils/typeVisuals';
+import { getTypeColor, typeIcons } from '@shared/utils/typeVisuals';
 import { Icon } from '@shared/components/Icons';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import AppModal from '@shared/components/AppModal/AppModal';
+import { useAuth } from '@features/Auth/AuthProvider';
 
 type Props = {
   task: Task;
@@ -34,13 +29,6 @@ const TYPE_LABELS: Record<TaskType, string> = {
   advice: 'Advice',
   decision: 'Decision',
   reminder: 'Reminder',
-};
-
-const TYPE_SUBTITLES: Record<TaskType, string> = {
-  motivation: 'Hold me accountable.',
-  advice: 'I could use your advice.',
-  decision: 'Help me decide.',
-  reminder: 'Don’t let me forget.',
 };
 
 const MODAL_SUBTITLES: Record<TaskType, string> = {
@@ -67,11 +55,121 @@ const SHARE_BUTTON_LABELS: Record<TaskType, string> = {
 const SHARE_MESSAGE = (text: string, name?: string) =>
   `"${stripOuterQuotes(text)}" — ${toShortName(name) || 'TaskSwap'}`;
 
+type ShareCopy = {
+  modalTitle: string;
+  modalSubtitle: string;
+  posterTitle: string;
+  posterSubtitle: string;
+  buttonLabel: string;
+};
+
+function getSupporterUserIds(task: Task) {
+  const ids = new Set<string>();
+
+  task.pushHistory?.forEach(push => {
+    if (push.user?.id) ids.add(push.user.id);
+  });
+
+  return ids;
+}
+
+function buildShareCopy({
+  task,
+  typeLabel,
+  currentUserId,
+}: {
+  task: Task;
+  typeLabel: string;
+  currentUserId?: string;
+}): ShareCopy {
+  const taskType = task.type as TaskType;
+  const ownerFirstName = getFirstName(task.name) || 'Someone';
+  const isOwner = !!currentUserId && task.userId === currentUserId;
+  const isCompleted = Boolean(
+    ('completed' in task && task.completed) || ('completedAt' in task && task.completedAt),
+  );
+  const supporterUserIds = getSupporterUserIds(task);
+  const didCurrentUserHelp =
+    !!currentUserId && (supporterUserIds.has(currentUserId) || Boolean(task.hasPushed));
+  const supporterCount = Math.max(
+    Array.from(supporterUserIds).filter(id => id !== task.userId).length,
+    task.pushCount ?? 0,
+  );
+
+  if (isCompleted) {
+    if (isOwner) {
+      const supportLabel =
+        supporterCount > 1
+          ? `${supporterCount} people helped you finish.`
+          : supporterCount === 1
+            ? 'A friend helped you finish.'
+            : 'You followed through.';
+
+      return {
+        modalTitle: 'Share Your Win',
+        modalSubtitle:
+          supporterCount > 0
+            ? 'Share the completed task and the support behind it.'
+            : 'Share the completed task and mark the follow-through.',
+        posterTitle: `I completed this ${typeLabel.toLowerCase()}`,
+        posterSubtitle: supportLabel,
+        buttonLabel: 'Share my win',
+      };
+    }
+
+    if (didCurrentUserHelp) {
+      return {
+        modalTitle: `Share ${ownerFirstName}'s Win`,
+        modalSubtitle: `You helped ${ownerFirstName} complete this. Share the moment.`,
+        posterTitle: `I helped ${ownerFirstName} complete this`,
+        posterSubtitle: 'A small push made a difference.',
+        buttonLabel: 'Share the win',
+      };
+    }
+
+    return {
+      modalTitle: `Share ${ownerFirstName}'s Win`,
+      modalSubtitle: `${ownerFirstName} completed this. Share the result.`,
+      posterTitle: `${ownerFirstName} completed this`,
+      posterSubtitle: 'A task moved from posted to done.',
+      buttonLabel: 'Share their win',
+    };
+  }
+
+  if (isOwner) {
+    return {
+      modalTitle: `Share Your ${typeLabel}`,
+      modalSubtitle: MODAL_SUBTITLES[taskType] ?? 'Share this card with your friends.',
+      posterTitle: `My ${typeLabel}`,
+      posterSubtitle: POSTER_SUBTITLES[taskType] ?? 'Keep me on track.',
+      buttonLabel: SHARE_BUTTON_LABELS[taskType] ?? 'Share',
+    };
+  }
+
+  return {
+    modalTitle: `Share ${ownerFirstName}'s ${typeLabel}`,
+    modalSubtitle:
+      taskType === 'motivation'
+        ? `Share this so friends can help ${ownerFirstName} follow through.`
+        : `Share this so friends can help ${ownerFirstName}.`,
+    posterTitle: `${ownerFirstName}'s ${typeLabel}`,
+    posterSubtitle:
+      taskType === 'motivation'
+        ? `${ownerFirstName} could use a push.`
+        : (POSTER_SUBTITLES[taskType] ?? 'Help keep this on track.'),
+    buttonLabel:
+      taskType === 'motivation'
+        ? `Share ${ownerFirstName}'s request`
+        : (SHARE_BUTTON_LABELS[taskType] ?? 'Share'),
+  };
+}
+
 // Give RN a beat so the hidden poster has rendered before capture
 const waitForLayout = () => new Promise<void>(r => setTimeout(r, 80));
 
 export default function ShareModal({ task, visible, onClose }: Props) {
   const [isSharing, setIsSharing] = useState(false);
+  const { user } = useAuth();
 
   // ✅ Capture ONLY the hidden share poster (off-screen)
   const posterShotRef = useRef<InstanceType<typeof ViewShot> | null>(null);
@@ -80,7 +178,10 @@ export default function ShareModal({ task, visible, onClose }: Props) {
   const iconName = typeIcons[taskType];
   const typeColor = getTypeColor(taskType);
   const typeLabel = TYPE_LABELS[taskType] ?? 'Task';
-  const backdropColors = [typeBackgrounds[taskType], typeBackgroundsHard[taskType]];
+  const shareCopy = useMemo(
+    () => buildShareCopy({ task, typeLabel, currentUserId: user?.id }),
+    [task, typeLabel, user?.id],
+  );
 
   const handleShare = useCallback(async () => {
     if (!posterShotRef.current) return;
@@ -90,7 +191,7 @@ export default function ShareModal({ task, visible, onClose }: Props) {
       // ensure poster is laid out
       await waitForLayout();
 
-      const uri = await posterShotRef.current.capture({
+      const uri = await (posterShotRef.current as any).capture({
         format: 'png',
         quality: 1,
         result: 'tmpfile',
@@ -142,9 +243,9 @@ export default function ShareModal({ task, visible, onClose }: Props) {
             </View>
           </View>
 
-          <TextElement style={styles.title}>Share Your {typeLabel}</TextElement>
+          <TextElement style={styles.title}>{shareCopy.modalTitle}</TextElement>
           <TextElement style={styles.body} color="muted">
-            {MODAL_SUBTITLES[taskType] ?? 'Share this card with your friends.'}
+            {shareCopy.modalSubtitle}
           </TextElement>
 
           <View style={styles.previewWrap}>
@@ -172,7 +273,7 @@ export default function ShareModal({ task, visible, onClose }: Props) {
         <View style={styles.footer}>
           <PrimaryButton
             onPress={handleShare}
-            title={SHARE_BUTTON_LABELS[taskType] ?? 'Share'}
+            title={shareCopy.buttonLabel}
             isLoading={isSharing}
             style={[styles.shareButton, { backgroundColor: typeColor }]}
             disabled={isSharing}
@@ -208,9 +309,9 @@ export default function ShareModal({ task, visible, onClose }: Props) {
                 </View>
               </View>
 
-              <TextElement style={styles.title}>My {typeLabel}</TextElement>
+              <TextElement style={styles.title}>{shareCopy.posterTitle}</TextElement>
               <TextElement style={styles.posterSubtitle} color="muted">
-                {POSTER_SUBTITLES[taskType] ?? 'Keep me on track.'}
+                {shareCopy.posterSubtitle}
               </TextElement>
 
               <View style={styles.previewWrap}>
@@ -255,8 +356,6 @@ const styles = StyleSheet.create({
     lineHeight: ms(30),
     fontWeight: '600',
   },
-  backdrop: { flex: 1 },
-
   sheet: {
     position: 'absolute',
     left: spacing.md,
@@ -358,10 +457,6 @@ const styles = StyleSheet.create({
   posterRoot: {
     width: 390, // iPhone-ish width
     height: 844, // iPhone-ish height
-  },
-
-  posterBg: {
-    flex: 1,
   },
 
   posterSheet: {

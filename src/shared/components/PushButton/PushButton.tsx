@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TextStyle } from 'react-native';
+import { StyleProp, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 import { colors } from '@shared/theme';
 import { TaskType } from '@features/Tasks/types/tasks';
@@ -13,8 +13,9 @@ interface PushButtonProps {
   disabled?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
-  style?: any;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  buttonStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   backgroundColor?: string;
   textColor?: string;
   borderColor?: string;
@@ -29,6 +30,7 @@ export default function PushButton({
   loading = false,
   icon,
   style,
+  buttonStyle,
   textStyle,
   backgroundColor,
   textColor = colors.onPrimary,
@@ -57,7 +59,7 @@ export default function PushButton({
       backgroundColor={resolvedBg}
       textColor={textColor}
       borderColor={borderColor}
-      style={StyleSheet.flatten([sizeStyles[size], style])}
+      style={StyleSheet.flatten([sizeStyles[size], style, buttonStyle])}
       textStyle={StyleSheet.flatten([textSizeStyles[size], textStyle])}
     />
   );

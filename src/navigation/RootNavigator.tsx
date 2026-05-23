@@ -52,7 +52,7 @@ export default function RootNavigator() {
   }
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator id={undefined as any} screenOptions={{ headerShown: false }}>
       {/* First-time onboarding */}
       {firstTime && <Stack.Screen name="OnboardingIntro" component={IntroScreen} />}
 

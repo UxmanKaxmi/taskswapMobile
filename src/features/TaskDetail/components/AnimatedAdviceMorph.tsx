@@ -11,6 +11,16 @@ import { vs } from 'react-native-size-matters';
 
 const BUTTON_HEIGHT = BOTTOM_BUTTON_HEIGHT + 20; // header height
 
+type Props = {
+  progress: { value: number };
+  adviceText: string;
+  onChangeText: (text: string) => void;
+  onSubmit: () => void;
+  autoFocus?: boolean;
+  onOpenComposer: () => void;
+  isComposerOpen: boolean;
+};
+
 export default function AnimatedAdviceMorph({
   progress,
   adviceText,
@@ -19,7 +29,7 @@ export default function AnimatedAdviceMorph({
   autoFocus,
   onOpenComposer,
   isComposerOpen,
-}) {
+}: Props) {
   const containerStyle = useAnimatedStyle(() => {
     return {
       height: interpolate(progress.value, [0, 1], [BUTTON_HEIGHT, COMPOSER_HEIGHT]),

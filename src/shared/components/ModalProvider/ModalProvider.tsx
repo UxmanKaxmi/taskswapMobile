@@ -15,6 +15,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import { spacing } from '@shared/theme';
 import { colors } from '@shared/theme/colors';
+import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
 import {
   type ComingSoonModalPayload,
@@ -148,6 +149,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
       {children}
 
       <BottomSheetModal
+        key={modal?.type ?? 'default'}
         ref={sheetRef}
         snapPoints={sheetSnapPoints}
         enablePanDownToClose
@@ -155,8 +157,17 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
         keyboardBlurBehavior="restore"
         android_keyboardInputMode="adjustResize"
         enableDynamicSizing={true}
-        backgroundStyle={{ backgroundColor: colors.surface }}
         {...bottomSheetProps}
+        style={{
+          borderTopLeftRadius: MODAL_TOP_RADIUS,
+          borderTopRightRadius: MODAL_TOP_RADIUS,
+          overflow: 'hidden',
+        }}
+        backgroundStyle={{
+          backgroundColor: colors.surface,
+          borderTopLeftRadius: MODAL_TOP_RADIUS,
+          borderTopRightRadius: MODAL_TOP_RADIUS,
+        }}
         backdropComponent={props => (
           <BottomSheetBackdrop
             {...props}

@@ -131,7 +131,16 @@ export default function NotificationMainScreen() {
   }
 
   const visibleNotifications = useMemo(() => {
+    const hiddenNotificationTypes = new Set([
+      'task-motivation-unfinished-reminder',
+      'task-motivation-help-push-reminder',
+    ]);
+
     const filtered = notifications.filter(n => {
+      if (hiddenNotificationTypes.has(n.type)) {
+        return false;
+      }
+
       const needsTaskType = [
         'task-helper',
         'taskHelper',
@@ -164,22 +173,37 @@ export default function NotificationMainScreen() {
     if (!taskId) return;
     void queryClient.prefetchQuery({
       queryKey: buildQueryKey.taskById(taskId),
-      queryFn: () => getTaskByIdAPI(taskId),
+      queryFn: () =>
+        getTaskByIdAPI(taskId, {
+          skipToast: true,
+          skipAuthLogout: true,
+        }),
       staleTime: 30_000,
     });
   }, []);
 
   const openTaskDetail = useCallback(
-    (taskId?: string, highlightCommentId?: string) => {
+    (
+      taskId?: string,
+      highlightCommentId?: string,
+      extraParams?: Partial<NonNullable<AppStackParamList['TaskDetail']>>,
+    ) => {
       if (!taskId) return;
       prefetchTaskDetail(taskId);
       navigation.navigate('TaskDetail', {
         taskId,
         ...(highlightCommentId ? { highlightCommentId } : {}),
+        ...(extraParams ?? {}),
       });
     },
     [navigation, prefetchTaskDetail],
   );
+
+  const openHomeFeed = useCallback(() => {
+    navigation.navigate('Tabs', {
+      screen: 'Home',
+    });
+  }, [navigation]);
 
   const handleNotificationPress = useCallback(
     (item: NotificationDTO) => {
@@ -209,9 +233,22 @@ export default function NotificationMainScreen() {
         case 'task-motivation-push':
           openTaskDetail(item.metadata?.taskId, item.metadata?.commentId);
           return;
+        case 'task-motivation-unfinished-reminder':
+          openTaskDetail(item.metadata?.taskId, undefined, {
+            scrollTo: 'progress',
+            openUpdateComposer: true,
+          });
+          return;
+        case 'task-motivation-help-push-reminder':
+          openHomeFeed();
+          return;
+        case 'task-completed':
         case 'task-motivation-progress':
         case 'task-progress-update':
-          openTaskDetail(item.metadata?.taskId);
+          openTaskDetail(item.metadata?.taskId, undefined, {
+            scrollTo: 'progress',
+            progressUpdateId: item.metadata?.progressUpdateId,
+          });
           return;
         case 'decision-done':
           openTaskDetail(item.metadata?.taskId);
@@ -246,7 +283,7 @@ export default function NotificationMainScreen() {
           return;
       }
     },
-    [navigation, openTaskDetail],
+    [navigation, openHomeFeed, openTaskDetail],
   );
 
   if (isLoading) {

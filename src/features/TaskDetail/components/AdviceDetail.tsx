@@ -35,14 +35,20 @@ type Props = {
   task: {
     id: string;
   };
+  adviceSectionRef?: React.RefObject<any>;
+  highlightCommentId?: string;
 };
 
-export default function AdviceDetail({ task }: Props) {
+export default function AdviceDetail({
+  task,
+  adviceSectionRef,
+  highlightCommentId,
+}: Props) {
   /** 👉 UI-only mock */
   const { data: advice = [], isLoading } = useComments(task.id);
   const { mutate: toggleLike } = useToggleCommentLike(task.id);
   return (
-    <View style={{ flex: 1 }}>
+    <View ref={adviceSectionRef} style={{ flex: 1 }}>
       {advice.length > 0 && <Height size={spacing.lg} />}
 
       {/* ================= SUPPORTIVE ADVICE ================= */}
@@ -71,7 +77,10 @@ export default function AdviceDetail({ task }: Props) {
             </Shadow>
           )}
           renderItem={({ item }) => (
-            <Shadow size="tint" style={styles.adviceCard}>
+            <Shadow
+              size="tint"
+              style={[styles.adviceCard, highlightCommentId === item.id && styles.highlightedCard]}
+            >
               {/* Header */}
               <View style={styles.headerRow}>
                 <Avatar uri={item.user.photo} size={ms(36)} />
@@ -175,6 +184,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: ms(14),
     borderRadius: ms(20),
     backgroundColor: colors.surface,
+  },
+  highlightedCard: {
+    backgroundColor: colors.onPrimary,
+    borderWidth: 1,
+    borderColor: colors.adviceBgHard,
   },
 
   headerRow: {

@@ -22,7 +22,7 @@ export default function TaskStatusPill({ status }: Props) {
       {isActive ? (
         <View style={styles.dot} />
       ) : (
-        <Icon set="ion" name="checkmark" size={12} color={tone.text} />
+        <Icon set="ion" name="checkmark-circle" size={14} color={tone.icon} />
       )}
 
       <TextElement style={[styles.label, { color: tone.text }]}>
@@ -38,20 +38,22 @@ const activeTone = {
     borderColor: hexToRgba(colors.motivationBgHardest, 0.24),
   },
   text: colors.motivationBgHardest,
+  icon: colors.motivationBgHardest,
 };
 
 const completedTone = {
   pill: {
-    backgroundColor: colors.onPrimary,
-    borderColor: '#D7E3DD',
+    backgroundColor: hexToRgba(colors.motivationBgHardest, 0.08),
+    borderColor: hexToRgba(colors.motivationBgHardest, 0.12),
   },
-  text: '#6B7D75',
+  text: '#7B8A84',
+  icon: colors.motivationBgHardest,
 };
 
 const styles = StyleSheet.create({
   pill: {
-    minHeight: 32,
-    paddingHorizontal: 12,
+    minHeight: 28,
+    paddingHorizontal: 10,
     borderRadius: 999,
     borderWidth: 1,
     flexDirection: 'row',
@@ -68,7 +70,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: ms(12),
+    fontSize: ms(11),
     fontWeight: '500',
   },
 });

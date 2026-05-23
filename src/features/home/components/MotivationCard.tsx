@@ -116,9 +116,9 @@ export default function MotivationCard({ task, onPressCard, onPressShare, onPres
               taskDetails={task}
               hasPushed={hasPushedValue}
               pushCount={pushCountValue}
-              onPressPush={togglePush}
+              onPressPush={() => togglePush()}
               isPushing={isPending}
-              onPressUnpush={togglePush}
+              onPressUnpush={() => togglePush()}
               // onPressComments={onPressSuggest(task)}
             />
           </View>

@@ -17,6 +17,8 @@ import { colors } from '@shared/theme/colors';
 import { incrementAppLaunchCount } from '@features/LaunchModals';
 import { FeatureFlagsProvider } from '@shared/featureFlags';
 import { navigationRef } from './navigation/navigationRef';
+import NotificationNavigationBridge from './lib/notifications/NotificationNavigationBridge';
+import { setNotificationNavigationReady } from './lib/notifications/notificationNavigation';
 
 const queryClient = new QueryClient();
 const loginImage = require('@assets/images/loginImage5.png');
@@ -44,7 +46,17 @@ export default function App() {
 
   useEffect(() => {
     console.log('✅ Firebase apps:', firebase.apps);
-    initializeNotifications();
+    let cleanup = () => {};
+
+    void initializeNotifications()
+      .then(unsubscribe => {
+        cleanup = unsubscribe;
+      })
+      .catch(() => {});
+
+    return () => {
+      cleanup();
+    };
   }, []);
 
   useEffect(() => {
@@ -69,7 +81,12 @@ export default function App() {
 
             <AuthProvider>
               <FeatureFlagsProvider>
-                <NavigationContainer ref={navigationRef} theme={LightNavTheme}>
+                <NavigationContainer
+                  ref={navigationRef}
+                  theme={LightNavTheme}
+                  onReady={() => setNotificationNavigationReady(true)}
+                >
+                  <NotificationNavigationBridge />
                   <RootNavigator />
                 </NavigationContainer>
               </FeatureFlagsProvider>

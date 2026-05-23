@@ -6,6 +6,7 @@ import ReminderMessageModalContent from './modals/ReminderMessageModalContent';
 import ShareUpdateModalContent from './modals/ShareUpdateModalContent';
 import MotivationSuccessModalContent from './modals/MotivationSuccessModalContent';
 import ComingSoonModalContent from './modals/ComingSoonModalContent';
+import CompleteTaskConfirmationModalContent from './modals/CompleteTaskConfirmationModalContent';
 import { type ModalPayloadMap, type ModalType } from './modalTypes';
 
 type RenderContext = {
@@ -69,6 +70,15 @@ export const modalRegistry: { [K in ModalType]: ModalDefinition<K> } = {
     },
     render: (payload, { closeModal }) => (
       <ComingSoonModalContent payload={payload} closeModal={closeModal} />
+    ),
+  },
+  completeTaskConfirmation: {
+    snapPoints: [400],
+    bottomSheetProps: {
+      enableDynamicSizing: false,
+    },
+    render: (payload, { closeModal }) => (
+      <CompleteTaskConfirmationModalContent payload={payload} closeModal={closeModal} />
     ),
   },
 };

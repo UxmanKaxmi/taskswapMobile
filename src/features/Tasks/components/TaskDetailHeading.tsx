@@ -8,7 +8,12 @@ import Row from '@shared/components/Layout/Row';
 import TypeTag from '@shared/components/TypeTag/TypeTag';
 import { cardStyles } from '@features/Home/components/styles';
 
-type Props = {};
+type Props = {
+  emoji?: string;
+  text?: string;
+  senderName?: string;
+  createdAt?: string;
+};
 
 export default function TaskDetailHeading({ emoji = '🕒', text, senderName, createdAt }: Props) {
   return (

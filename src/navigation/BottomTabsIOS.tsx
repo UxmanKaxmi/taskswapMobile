@@ -37,6 +37,7 @@ export default function BottomTabsIOS() {
 
   return (
     <Tab.Navigator
+      id={undefined as any}
       tabBarInactiveTintColor={colors.text}
       tabBarActiveTintColor={colors.primary}
       hapticFeedbackEnabled
@@ -65,7 +66,7 @@ export default function BottomTabsIOS() {
         name="Friends"
         component={FriendsMainScreen}
         listeners={{
-          tabPress: e => {
+          tabPress: (e: any) => {
             checkAuthForTab(e, 'Friends' as keyof AppStackParamList);
           },
         }}
@@ -81,7 +82,7 @@ export default function BottomTabsIOS() {
         name="AddTask"
         component={AddTaskNavigator}
         listeners={{
-          tabPress: e => {
+          tabPress: (e: any) => {
             e.preventDefault();
             checkAuthThenNavigate('AddTask');
           },
@@ -101,7 +102,7 @@ export default function BottomTabsIOS() {
         name="Notification"
         component={NotificationMainScreen}
         listeners={{
-          tabPress: e => {
+          tabPress: (e: any) => {
             checkAuthForTab(e, 'Notification' as keyof AppStackParamList);
           },
         }}
@@ -121,7 +122,7 @@ export default function BottomTabsIOS() {
         name="Profile"
         component={MyProfileMainScreen}
         listeners={{
-          tabPress: e => {
+          tabPress: (e: any) => {
             checkAuthForTab(e, 'Profile' as keyof AppStackParamList);
           },
         }}

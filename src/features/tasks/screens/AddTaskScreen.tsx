@@ -123,7 +123,7 @@ export default function AddTaskScreen({ route, navigation }: Props) {
       type,
       remindAt: type === 'reminder' ? remindAt.toISOString() : undefined,
       helpers: helperIds,
-      visibility: visibility,
+      visibility: visibility as 'friends' | 'public' | 'private',
     };
 
     createTask(payload as CreateTaskPayload, {

@@ -3,7 +3,6 @@
 import React, { useEffect, useRef } from 'react';
 import {
   View,
-  TouchableOpacity,
   FlatList,
   StyleSheet,
   Dimensions,
@@ -16,6 +15,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import Avatar from '@shared/components/Avatar/Avatar';
 import { HelperUser } from '@features/Home/types/home';
 import AppModal from '@shared/components/AppModal/AppModal';
+import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
 type Props = {
   visible: boolean;
@@ -81,8 +81,9 @@ const styles = StyleSheet.create({
     maxHeight: height * 0.6,
     backgroundColor: colors.background,
     padding: spacing.md,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: MODAL_TOP_RADIUS,
+    borderTopRightRadius: MODAL_TOP_RADIUS,
+    overflow: 'hidden',
   },
 
   overlay: {

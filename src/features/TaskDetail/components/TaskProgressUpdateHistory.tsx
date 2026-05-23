@@ -14,6 +14,7 @@ type Props = {
   ownerName: string;
   ownerAvatar?: string;
   isOwner?: boolean;
+  highlightUpdateId?: string;
 };
 
 function formatTimelineTime(dateISO: string) {
@@ -37,7 +38,12 @@ function formatTimelineTime(dateISO: string) {
   return `${dayLabel}, ${timeLabel}`.toUpperCase();
 }
 
-export default function TaskProgressUpdateHistory({ updates = [], ownerName, isOwner }: Props) {
+export default function TaskProgressUpdateHistory({
+  updates = [],
+  ownerName,
+  isOwner,
+  highlightUpdateId,
+}: Props) {
   const [expanded, setExpanded] = useState(false);
   const extraAnim = useRef(new Animated.Value(0)).current;
   const [renderExtra, setRenderExtra] = useState(false);
@@ -89,6 +95,7 @@ export default function TaskProgressUpdateHistory({ updates = [], ownerName, isO
           ownerFirstName={firstName}
           isLast={!showExtra}
           isOwner={isOwner}
+          isHighlighted={highlightUpdateId === firstUpdate.id}
         />
 
         {needsMeasure && (
@@ -108,6 +115,7 @@ export default function TaskProgressUpdateHistory({ updates = [], ownerName, isO
                 isLast={index === extraUpdates.length - 1}
                 isOwner={isOwner}
                 isPrevious
+                isHighlighted={highlightUpdateId === update.id}
               />
             ))}
           </View>
@@ -136,6 +144,7 @@ export default function TaskProgressUpdateHistory({ updates = [], ownerName, isO
                 isLast={index === extraUpdates.length - 1}
                 isOwner={isOwner}
                 isPrevious
+                isHighlighted={highlightUpdateId === update.id}
               />
             ))}
           </Animated.View>
@@ -166,15 +175,19 @@ function ProgressUpdateRow({
   isLast,
   isOwner,
   isPrevious,
+  isHighlighted,
 }: {
   update: ProgressUpdate;
   ownerFirstName: string;
   isLast: boolean;
   isOwner: boolean | undefined;
   isPrevious?: boolean;
+  isHighlighted?: boolean;
 }) {
   return (
-    <View style={[styles.itemRow, isLast && styles.lastRow]}>
+    <View
+      style={[styles.itemRow, isLast && styles.lastRow, isHighlighted && styles.highlightedRow]}
+    >
       <View style={styles.dotWrap}>
         <View style={styles.dotHalo} />
         <View style={styles.dot} />
@@ -231,6 +244,13 @@ const styles = StyleSheet.create({
   itemRow: {
     flexDirection: 'row',
     marginBottom: spacing.lg,
+  },
+  highlightedRow: {
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    marginHorizontal: -8,
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
   },
   lastRow: {
     marginBottom: 0,

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -12,6 +12,7 @@ import Icon from '@shared/components/Icons/Icon';
 import { useTheme } from '@shared/theme/useTheme';
 import { ms } from 'react-native-size-matters';
 import AppModal from '@shared/components/AppModal/AppModal';
+import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
 const OPTIONS = [
   { key: 'public', label: 'Public', icon: 'globe-outline' },
@@ -152,8 +153,9 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 18,
     paddingBottom: 30,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderTopLeftRadius: MODAL_TOP_RADIUS,
+    borderTopRightRadius: MODAL_TOP_RADIUS,
+    overflow: 'hidden',
   },
 
   optionRow: {

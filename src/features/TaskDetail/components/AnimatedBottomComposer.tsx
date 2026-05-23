@@ -121,7 +121,7 @@ export default function AnimatedBottomComposer({
             }}
             placeholder="What helped you in a similar situation?"
             charLimit={MAX_CHARS}
-            showCharCount={false}
+            showCharCount={value.length > 0}
             multiline
             wrapperStyle={[styles.inputWrapper, { backgroundColor: colors.inputBackground }]}
             inputStyle={[styles.inputText, { height: inputHeight }]}
@@ -140,7 +140,6 @@ export default function AnimatedBottomComposer({
               );
               setInputHeight(nextHeight);
             }}
-            showCharCount={value.length > 0} // 👈 key line
           />
           {/* Footer */}
           <View style={styles.footerRow}>

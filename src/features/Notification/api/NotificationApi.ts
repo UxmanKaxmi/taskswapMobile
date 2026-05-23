@@ -16,11 +16,18 @@ export async function markNotificationAsRead(id: string): Promise<NotificationDT
 }
 
 // ✅ Send a test push notification (used for debugging)
-export async function sendTestNotificationAPI(userId: string) {
+export type NotificationTestPayload = {
+  title: string;
+  body: string;
+  data?: Record<string, string>;
+};
+
+export async function sendTestNotificationAPI(userId: string, payload?: NotificationTestPayload) {
   return api.post('/notification/test', {
     userId,
-    title: '🔔 Debug Test',
-    body: 'This is a test push notification!',
+    title: payload?.title ?? '🔔 Debug Test',
+    body: payload?.body ?? 'This is a test push notification!',
+    ...(payload?.data ? { data: payload.data } : {}),
   });
 }
 

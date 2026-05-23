@@ -47,10 +47,14 @@ export default function PushActivityList({ data }: Props) {
         <SinglePushRow key={item.id} item={item} />
       ))}
 
-      {remaining.length > 0 && <CombinedPushRow users={remaining.map(d => d.user)} />}
+      {remaining.length > 0 && <CombinedPushRow users={remaining.flatMap(getPushUsers)} />}
     </View>
   );
 }
+function getPushUsers(item: PushActivity) {
+  return item.type === 'single' ? [item.user] : item.users;
+}
+
 function CombinedPushRow({ users }: { users: { name: string; avatar: string }[] }) {
   const firstName = users[0]?.name;
   const othersCount = users.length - 1;
@@ -62,7 +66,14 @@ function CombinedPushRow({ users }: { users: { name: string; avatar: string }[] 
 
   return (
     <Shadow size="tint" style={styles.row}>
-      <HelperAvatarGroup users={users.slice(0, 3)} size={40} />
+      <HelperAvatarGroup
+        helpers={users.slice(0, 3).map((item, index) => ({
+          id: `${item.name}-${index}`,
+          name: item.name,
+          photo: item.avatar,
+        }))}
+        avatarSize={40}
+      />
 
       <View style={styles.content}>
         <TextElement style={styles.name}>{text}</TextElement>

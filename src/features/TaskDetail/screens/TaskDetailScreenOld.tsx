@@ -34,6 +34,7 @@ import { queryClient } from '@lib/react-query/client';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import { openFriendsProfile } from '@navigation/types/navigationUtils';
 import { colors, spacing } from '@shared/theme';
+import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 import AppLoader from '@shared/components/Loader/Loader';
 import { useInCompleteTask } from '@features/Home/hooks/useInCompleteTask';
 import { useCastVote } from '@features/Tasks/hooks/useVote';
@@ -399,8 +400,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingTop: 8,
     paddingBottom: Platform.select({ ios: 24, android: 16 }),
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderTopLeftRadius: MODAL_TOP_RADIUS,
+    borderTopRightRadius: MODAL_TOP_RADIUS,
     shadowColor: '#000',
     shadowOpacity: 0.12,
     shadowRadius: 10,

@@ -14,14 +14,13 @@ import { isAndroid, isIOS } from '@shared/utils/constants';
 import BottomTabsIOS from './BottomTabsIOS';
 import BottomTabsAndroid from './BottomTabsAndroid';
 import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
-import TaskDetailScreenOld from '@features/TaskDetail/screens/TaskDetailScreenOld';
 import TaskDetailScreen from '@features/TaskDetail/screens/TaskDetailScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
 export default function AppNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator id={undefined as any} screenOptions={{ headerShown: false }}>
       {/* Main app tabs */}
       <Stack.Screen name="Tabs" component={isIOS ? BottomTabsIOS : BottomTabsAndroid} />
       <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />

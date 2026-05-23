@@ -38,19 +38,14 @@ export default function RecentTaskCard({ task, onPress }: Props) {
             key={item.id}
             task={item as any}
             onPressCard={() => navigateToTaskDetails(navigation, item)}
-            onPressSuggest={t => console.log('onPressProfile', t.id)}
-            onPressView={t => console.log('View for', t.id)}
           />
         );
       case 'reminder':
         return (
           <ReminderCard
-            onRemind={() => {}}
             key={item.id}
             task={item as any}
             onPressCard={() => navigateToTaskDetails(navigation, item)}
-            onPressProfile={t => openFriendsProfile(navigation, t.userId, user?.id)}
-            onPressView={t => console.log('View for', t.id)}
           />
         );
       case 'motivation':

@@ -91,7 +91,7 @@ export default function LoginScreen() {
         ],
       });
     } catch (e) {
-      Alert.alert('Login failed', e.message);
+      Alert.alert('Login failed', e instanceof Error ? e.message : 'Something went wrong.');
     }
   };
 
