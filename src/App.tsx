@@ -28,7 +28,7 @@ const LightNavTheme = {
   dark: false,
   colors: {
     ...DefaultTheme.colors,
-    // background: '#FFFFFF',
+    background: colors.onboardingPaper,
   },
 };
 
@@ -39,7 +39,7 @@ export default function App() {
     StatusBar.setBarStyle('dark-content');
 
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor(colors.surface);
+      StatusBar.setBackgroundColor(colors.onboardingPaper);
       StatusBar.setTranslucent(false);
     }
   }, []);
@@ -73,7 +73,7 @@ export default function App() {
   return visible ? (
     <AnimatedBootSplash onAnimationEnd={() => setVisible(false)} />
   ) : (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.onboardingPaper }}>
       <BottomSheetModalProvider>
         <ModalProvider>
           <QueryClientProvider client={queryClient}>

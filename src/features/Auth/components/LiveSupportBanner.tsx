@@ -41,8 +41,8 @@ const DEFAULT_AVATARS: SupportAvatar[] = [
 
 const VISIBLE_AVATARS = 3;
 const RECENT_HISTORY_LIMIT = 4;
-const MIN_CYCLE_DELAY_MS = 8000;
-const MAX_CYCLE_DELAY_MS = 12000;
+const MIN_CYCLE_DELAY_MS = 14000;
+const MAX_CYCLE_DELAY_MS = 30000;
 const FADE_DURATION_MS = 600;
 
 function getInitialVisibleAvatarIds(avatars: SupportAvatar[]) {
@@ -188,7 +188,7 @@ export default function LiveSupportBanner({
               styles.avatarWrap,
               {
                 opacity: opacityValues[index] ?? 1,
-                marginLeft: index === 0 ? 0 : -ms(10),
+                marginLeft: index === 0 ? 0 : -ms(12),
                 zIndex: visibleAvatars.length - index + 1,
               },
             ]}
@@ -204,12 +204,14 @@ export default function LiveSupportBanner({
         </View>
       </View>
 
-      <TextElement variant="bodySmall" weight="500" style={styles.copy}>
-        <TextElement variant="bodySmall" weight="700" style={styles.copyStrong}>
-          Join {totalLabel} people
-        </TextElement>{' '}
-        getting pushes today
-      </TextElement>
+      <View style={styles.copyWrap}>
+        <TextElement variant="body" weight="800" style={styles.copyStrong}>
+          Join {totalLabel} people{' '}
+          <TextElement variant="bodySmall" weight="500" style={styles.copyMuted}>
+            getting pushes today
+          </TextElement>
+        </TextElement>
+      </View>
     </View>
   );
 }
@@ -217,58 +219,65 @@ export default function LiveSupportBanner({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    minHeight: vs(45),
     borderRadius: ms(10),
-    backgroundColor: colors.inputBackground,
-    paddingHorizontal: ms(12),
-    paddingVertical: vs(8),
+    backgroundColor: '#FFF',
+    paddingHorizontal: ms(18),
+    paddingVertical: vs(10),
     flexDirection: 'row',
     alignItems: 'center',
-    gap: ms(9),
+    gap: ms(12),
+    shadowColor: colors.onboardingInk,
+    shadowOpacity: 0.04,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
   },
   avatarGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    minWidth: ms(88),
+    minWidth: ms(94),
   },
   avatarWrap: {
-    width: ms(28),
-    height: ms(28),
-    borderRadius: ms(14),
-    borderWidth: 2,
-    borderColor: colors.card,
+    width: ms(30),
+    height: ms(30),
+    borderRadius: ms(15),
+    borderWidth: 1,
+    borderColor: '#F8F6EF',
     overflow: 'hidden',
     backgroundColor: colors.card,
   },
   avatar: {
     width: '100%',
     height: '100%',
-    borderRadius: ms(12),
+    borderRadius: ms(14),
   },
   moreBubble: {
-    width: ms(30),
-    height: ms(30),
+    width: ms(32),
+    height: ms(32),
     borderRadius: ms(15),
     marginLeft: -ms(6),
-    backgroundColor: colors.primary,
+    backgroundColor: colors.tactileMomentumPrimary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.card,
   },
   moreText: {
-    color: colors.onPrimary,
-    fontSize: ms(8),
-    lineHeight: ms(10),
-  },
-  copy: {
-    flex: 1,
-    color: '#555555',
+    color: colors.tactileMomentumSecondary,
     fontSize: ms(10),
-    lineHeight: ms(14),
+  },
+  copyWrap: {
+    flex: 1,
+    minWidth: 0,
   },
   copyStrong: {
-    color: colors.text,
+    color: colors.onboardingInk,
     fontSize: ms(12),
+    lineHeight: vs(14),
+    // letterSpacing: -0.25,
+  },
+  copyMuted: {
+    color: colors.onboardingMuted,
+    fontSize: ms(12),
+    // lineHeight: ms(19),
+    // marginTop: vs(2),
   },
 });

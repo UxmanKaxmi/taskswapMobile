@@ -1,356 +1,76 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Dimensions, Animated, Pressable, Easing } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  Animated,
+  Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Pressable,
+  ScrollView as RNScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { Layout } from '@shared/components/Layout';
-import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
+import PushButton from '@shared/components/PushButton';
+import PushTicks from '@shared/components/PushTicks/PushTicks';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { Icon } from '@shared/components/Icons';
-import Avatar from '@shared/components/Avatar/Avatar';
-import { colors, spacing } from '@shared/theme';
+import LiveSupportBanner from '@features/Auth/components/LiveSupportBanner';
+import { colors } from '@shared/theme';
 import { isPROD } from '@shared/utils/constants';
 import { ms, vs } from 'react-native-size-matters';
-import LiveSupportBanner from '@features/Auth/components/LiveSupportBanner';
 
-const { height } = Dimensions.get('window');
-const HERO_HEIGHT = Math.min(330, height * 0.3);
+const { width, height } = Dimensions.get('window');
+const SCREEN_HORIZONTAL_PADDING = ms(28);
+const SLIDE_WIDTH = width;
+const HERO_HEIGHT = Math.min(330, height * 0.25);
 
 type IntroContent = {
-  promptAuthor: string;
-  promptAuthorTint: string;
-  promptAuthorText: string;
+  heading: string;
+  headingAccent: string;
+  subtitle: string;
   prompt: string;
-  responseAuthor: string;
-  responseRole: string;
-  responseAuthorTint: string;
-  responseAuthorText: string;
-  response: string;
-  responseIcon?: {
-    set: 'ion';
-    name: string;
-    color: string;
-  };
+  feeling: string;
+  responseMode: 'sentence' | 'momentum' | 'done';
+  pushCount?: number;
 };
 
 const introExamples: IntroContent[] = [
   {
-    promptAuthor: 'ME',
-    promptAuthorTint: colors.reminderBg,
-    promptAuthorText: colors.reminderBgHardest,
-    prompt: 'I need motivation for my workout',
-    responseAuthor: 'ALEX',
-    responseRole: 'Trusted friend',
-    responseAuthorTint: colors.adviceBg,
-    responseAuthorText: colors.calmBlue,
-    response: "You've got this! Show up for 10 minutes today.",
-    responseIcon: {
-      set: 'ion',
-      name: 'flash',
-      color: colors.secondary,
-    },
+    heading: 'Say it',
+    headingAccent: 'out loud.',
+    subtitle: 'Post the thing you keep putting off. One honest sentence is enough.',
+    prompt: 'Go for my first run in three weeks',
+    feeling: 'Avoiding it',
+    responseMode: 'sentence',
   },
   {
-    promptAuthor: 'ME',
-    promptAuthorTint: colors.reminderBg,
-    promptAuthorText: colors.reminderBgHardest,
-    prompt: 'Should I text her back right now?',
-    responseAuthor: 'MAYA',
-    responseRole: 'Close friend',
-    responseAuthorTint: colors.adviceBg,
-    responseAuthorText: colors.calmBlue,
-    response: 'Yes, send it simply and do not overthink it.',
-    responseIcon: {
-      set: 'ion',
-      name: 'chatbubble-ellipses',
-      color: colors.secondary,
-    },
+    heading: 'Strangers',
+    headingAccent: 'push you.',
+    subtitle: 'Every push is a real person rooting for you. Watch the momentum build.',
+    prompt: 'Go for my first run in three weeks',
+    feeling: 'Needs a push',
+    responseMode: 'momentum',
+    pushCount: 25,
   },
   {
-    promptAuthor: 'ME',
-    promptAuthorTint: colors.reminderBg,
-    promptAuthorText: colors.reminderBgHardest,
-    prompt: 'Remind me to call my dad tonight',
-    responseAuthor: 'SAM',
-    responseRole: 'Trusted friend',
-    responseAuthorTint: colors.adviceBg,
-    responseAuthorText: colors.calmBlue,
-    response: 'Done. You are calling him tonight, no excuses.',
-    responseIcon: {
-      set: 'ion',
-      name: 'alarm',
-      color: colors.secondary,
-    },
-  },
-  {
-    promptAuthor: 'ME',
-    promptAuthorTint: colors.reminderBg,
-    promptAuthorText: colors.reminderBgHardest,
-    prompt: 'Which offer should I accept this week?',
-    responseAuthor: 'ZARA',
-    responseRole: 'Trusted friend',
-    responseAuthorTint: colors.adviceBg,
-    responseAuthorText: colors.calmBlue,
-    response: 'Pick the one with better growth and momentum.',
-    responseIcon: {
-      set: 'ion',
-      name: 'checkmark-circle',
-      color: colors.secondary,
-    },
+    heading: 'Take the win.',
+    headingAccent: 'Pass it on.',
+    subtitle: 'Mark it done, feel the momentum — then push someone else forward.',
+    prompt: 'Go for my first run in three weeks',
+    feeling: 'Momentum built',
+    responseMode: 'done',
+    pushCount: 9,
   },
 ];
 
 const IntroScreen = ({ navigation }: { navigation: any }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const promptCardOpacity = useRef(new Animated.Value(0)).current;
-  const promptCardTranslateY = useRef(new Animated.Value(-10)).current;
-
-  const promptHeaderOpacity = useRef(new Animated.Value(0)).current;
-  const promptHeaderTranslateY = useRef(new Animated.Value(-4)).current;
-  const promptTextOpacity = useRef(new Animated.Value(0)).current;
-  const promptTextTranslateY = useRef(new Animated.Value(6)).current;
-
-  const responseCardOpacity = useRef(new Animated.Value(0)).current;
-  const responseCardTranslateY = useRef(new Animated.Value(18)).current;
-  const responseCardScale = useRef(new Animated.Value(0.96)).current;
-
-  const responseHeaderOpacity = useRef(new Animated.Value(0)).current;
-  const responseHeaderTranslateY = useRef(new Animated.Value(6)).current;
-  const responseTextOpacity = useRef(new Animated.Value(0)).current;
-  const responseTextTranslateY = useRef(new Animated.Value(8)).current;
-
-  const copyOpacity = useRef(new Animated.Value(0)).current;
-  const copyTranslateY = useRef(new Animated.Value(12)).current;
-
-  const loopRef = useRef<Animated.CompositeAnimation | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const mountedRef = useRef(true);
-  const firstRunRef = useRef(true);
-
-  const currentExample = introExamples[currentIndex];
-
-  const resetBubbleAnimatedValues = () => {
-    promptCardOpacity.setValue(0);
-    promptCardTranslateY.setValue(-10);
-
-    promptHeaderOpacity.setValue(0);
-    promptHeaderTranslateY.setValue(-4);
-    promptTextOpacity.setValue(0);
-    promptTextTranslateY.setValue(6);
-
-    responseCardOpacity.setValue(0);
-    responseCardTranslateY.setValue(18);
-    responseCardScale.setValue(0.96);
-
-    responseHeaderOpacity.setValue(0);
-    responseHeaderTranslateY.setValue(6);
-    responseTextOpacity.setValue(0);
-    responseTextTranslateY.setValue(8);
-  };
-
-  const playBubbleSequence = () => {
-    resetBubbleAnimatedValues();
-
-    const sequence = Animated.sequence([
-      Animated.parallel([
-        Animated.timing(promptCardOpacity, {
-          toValue: 1,
-          duration: 260,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(promptCardTranslateY, {
-          toValue: 0,
-          duration: 260,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]),
-
-      Animated.parallel([
-        Animated.timing(promptHeaderOpacity, {
-          toValue: 1,
-          duration: 170,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(promptHeaderTranslateY, {
-          toValue: 0,
-          duration: 170,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]),
-
-      Animated.parallel([
-        Animated.timing(promptTextOpacity, {
-          toValue: 1,
-          duration: 180,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(promptTextTranslateY, {
-          toValue: 0,
-          duration: 180,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]),
-
-      Animated.parallel([
-        Animated.timing(responseCardOpacity, {
-          toValue: 1,
-          duration: 240,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(responseCardTranslateY, {
-          toValue: 0,
-          duration: 240,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.spring(responseCardScale, {
-          toValue: 1,
-          tension: 90,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-      ]),
-
-      Animated.parallel([
-        Animated.timing(responseHeaderOpacity, {
-          toValue: 1,
-          duration: 170,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(responseHeaderTranslateY, {
-          toValue: 0,
-          duration: 170,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]),
-
-      Animated.parallel([
-        Animated.timing(responseTextOpacity, {
-          toValue: 1,
-          duration: 190,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(responseTextTranslateY, {
-          toValue: 0,
-          duration: 190,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]),
-
-      Animated.delay(2200),
-
-      Animated.parallel([
-        Animated.timing(promptCardOpacity, {
-          toValue: 0,
-          duration: 220,
-          easing: Easing.in(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(promptCardTranslateY, {
-          toValue: -8,
-          duration: 220,
-          easing: Easing.in(Easing.cubic),
-          useNativeDriver: true,
-        }),
-
-        Animated.timing(promptHeaderOpacity, {
-          toValue: 0,
-          duration: 140,
-          useNativeDriver: true,
-        }),
-        Animated.timing(promptTextOpacity, {
-          toValue: 0,
-          duration: 140,
-          useNativeDriver: true,
-        }),
-
-        Animated.timing(responseCardOpacity, {
-          toValue: 0,
-          duration: 240,
-          easing: Easing.in(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(responseCardTranslateY, {
-          toValue: 16,
-          duration: 240,
-          easing: Easing.in(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(responseHeaderOpacity, {
-          toValue: 0,
-          duration: 140,
-          useNativeDriver: true,
-        }),
-        Animated.timing(responseTextOpacity, {
-          toValue: 0,
-          duration: 140,
-          useNativeDriver: true,
-        }),
-      ]),
-    ]);
-
-    loopRef.current = sequence;
-    sequence.start(({ finished }) => {
-      if (!finished || !mountedRef.current) return;
-
-      timeoutRef.current = setTimeout(() => {
-        if (!mountedRef.current) return;
-        setCurrentIndex(prev => (prev + 1) % introExamples.length);
-      }, 300);
-    });
-  };
-
-  useEffect(() => {
-    mountedRef.current = true;
-
-    Animated.parallel([
-      Animated.timing(copyOpacity, {
-        toValue: 1,
-        duration: 320,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.timing(copyTranslateY, {
-        toValue: 0,
-        duration: 320,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    return () => {
-      mountedRef.current = false;
-      loopRef.current?.stop?.();
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [copyOpacity, copyTranslateY]);
-
-  useEffect(() => {
-    if (!mountedRef.current) return;
-
-    if (firstRunRef.current) {
-      firstRunRef.current = false;
-    }
-
-    playBubbleSequence();
-
-    return () => {
-      loopRef.current?.stop?.();
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [currentIndex]);
-
+  const [slideHeight, setSlideHeight] = useState(0);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollRef = useRef<RNScrollView | null>(null);
+  const isLastSlide = currentIndex === introExamples.length - 1;
+  const [isActive, setIsActive] = useState(false);
   const handleStart = async () => {
     if (isPROD) {
       await AsyncStorage.setItem('hasSeenOnboarding', 'true');
@@ -374,15 +94,208 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
     navigation.replace('App');
   };
 
+  const handleNext = () => {
+    if (isLastSlide) {
+      void handleStart();
+      return;
+    }
+
+    goToSlide(currentIndex + 1);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+    scrollRef.current?.scrollTo({ x: index * SLIDE_WIDTH, animated: true });
+  };
+
+  const handleMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / SLIDE_WIDTH);
+    setCurrentIndex(Math.max(0, Math.min(introExamples.length - 1, nextIndex)));
+  };
+  const renderSlide = (example: IntroContent) => {
+    return (
+      <View
+        style={[styles.slide, slideHeight > 0 && { height: slideHeight }]}
+        key={example.heading}
+      >
+        <View style={styles.slideContent}>
+          <View style={[styles.hero, example.responseMode === 'done' && styles.doneHero]}>
+            {example.responseMode === 'sentence' && (
+              <View style={[styles.demoCard, styles.sayCard]}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.avatar}>
+                    <TextElement variant="tiny" weight="700" style={styles.avatarText}>
+                      You
+                    </TextElement>
+                  </View>
+
+                  <View>
+                    <TextElement variant="bodySmall" weight="700" style={styles.cardName}>
+                      You
+                    </TextElement>
+                    <TextElement variant="label" weight="500" style={styles.cardMeta}>
+                      Just now
+                    </TextElement>
+                  </View>
+
+                  <View style={styles.feelingPill}>
+                    <TextElement variant="tiny" weight="600" style={styles.feelingText}>
+                      {example.feeling}
+                    </TextElement>
+                  </View>
+                </View>
+
+                <TextElement variant="bodySmall" weight="600" style={styles.promptText}>
+                  {example.prompt}
+                </TextElement>
+              </View>
+            )}
+
+            {example.responseMode === 'momentum' && (
+              <View style={[styles.demoCard, styles.pushDemoCard]}>
+                <TextElement variant="bodySmall" weight="700" style={styles.promptTextCompact}>
+                  {example.prompt}
+                </TextElement>
+
+                <View style={styles.responseBody}>
+                  <View style={styles.ticksWrap}>
+                    <PushTicks
+                      count={example.pushCount ?? 0}
+                      isActive={currentIndex === 1}
+                      animateNonce={currentIndex}
+                      showCount
+                    />
+                  </View>
+
+                  <PushButton
+                    onPress={() => setIsActive(true)}
+                    label="Push"
+                    size="sm"
+                    variant="push"
+                    style={styles.pushButton}
+                    active={isActive}
+                  />
+
+                  {/* <PushButton
+                    onPress={() => {}}
+                    label="Push"
+                    size="sm"
+                    variant="push"
+                    style={styles.pushButton}
+                  /> */}
+                </View>
+              </View>
+            )}
+
+            {example.responseMode === 'done' && (
+              <View style={styles.doneVisual}>
+                <View style={[styles.demoCard, styles.completedCard]}>
+                  <TextElement variant="bodySmall" weight="700" style={styles.completedTaskText}>
+                    {example.prompt}
+                  </TextElement>
+
+                  <View style={styles.completedMetaRow}>
+                    <View style={styles.doneChip}>
+                      <TextElement variant="caption" weight="700" style={styles.doneChipText}>
+                        Done ✓
+                      </TextElement>
+                    </View>
+
+                    <TextElement variant="label" weight="600" style={styles.pushedByText}>
+                      {example.pushCount} people pushed you
+                    </TextElement>
+                  </View>
+                </View>
+
+                <View style={[styles.demoCard, styles.nextTaskCard]}>
+                  <View style={styles.nextTaskCopy}>
+                    <TextElement variant="overline" weight="700" style={styles.nextTaskLabel}>
+                      Someone else needs a push
+                    </TextElement>
+                    <TextElement variant="caption" weight="700" style={styles.nextTaskText}>
+                      Send the email I've been avoiding
+                    </TextElement>
+                  </View>
+
+                  <PushButton
+                    onPress={() => {}}
+                    label="Push"
+                    size="sm"
+                    variant="push"
+                    style={styles.miniPushButton}
+                  />
+                </View>
+              </View>
+            )}
+          </View>
+
+          <View
+            style={[
+              styles.headlineWrap,
+              example.responseMode === 'done' && styles.doneHeadlineWrap,
+            ]}
+          >
+            <TextElement variant="display" weight="800" style={styles.headlineLine}>
+              {example.heading}
+            </TextElement>
+            <View style={styles.headlineAccentWrap}>
+              <View style={styles.headlineUnderline} />
+              <TextElement variant="display" weight="800" style={styles.headlineAccent}>
+                {example.headingAccent}
+              </TextElement>
+            </View>
+          </View>
+
+          <TextElement
+            variant="bodySmall"
+            style={[styles.subtitle, example.responseMode === 'done' && styles.doneSubtitle]}
+          >
+            {example.subtitle}
+          </TextElement>
+        </View>
+      </View>
+    );
+  };
+
+  const getDotAnimatedStyle = (index: number) => {
+    const inputRange = introExamples.map((_, slideIndex) => slideIndex * SLIDE_WIDTH);
+
+    return {
+      width: scrollX.interpolate({
+        inputRange,
+        outputRange: introExamples.map((_, slideIndex) => (slideIndex === index ? ms(20) : ms(6))),
+        extrapolate: 'clamp',
+      }),
+      backgroundColor: scrollX.interpolate({
+        inputRange,
+        outputRange: introExamples.map((_, slideIndex) =>
+          slideIndex === index ? colors.onboardingInk : '#D8D8D0',
+        ),
+        extrapolate: 'clamp',
+      }),
+    };
+  };
+
   return (
     <Layout
       allowPaddingHorizontal={false}
       style={styles.layout}
-      backgroundColor={colors.surface}
+      backgroundColor={colors.onboardingPaper}
       edgesProp={['top', 'left', 'right']}
     >
       <View style={styles.screen}>
         <View style={styles.topRow}>
+          <View style={styles.wordmark}>
+            <View style={styles.logoTicks} accessibilityElementsHidden>
+              <View style={styles.logoTick} />
+              <View style={[styles.logoTick, styles.logoTickAccent]} />
+              <View style={styles.logoTick} />
+            </View>
+            <TextElement variant="body" weight="800" style={styles.wordmarkText}>
+              PushMeUp
+            </TextElement>
+          </View>
+
           <Pressable hitSlop={12} onPress={() => void handleSkip()} style={styles.skipButton}>
             <TextElement variant="label" weight="600" style={styles.skipText}>
               Skip
@@ -390,147 +303,51 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
           </Pressable>
         </View>
 
-        <View style={styles.slide}>
-          <View style={styles.hero}>
-            <Animated.View
-              style={[
-                styles.promptCard,
-                {
-                  opacity: promptCardOpacity,
-                  transform: [{ translateY: promptCardTranslateY }],
-                },
-              ]}
-            >
-              <Animated.View
-                style={{
-                  opacity: promptHeaderOpacity,
-                  transform: [{ translateY: promptHeaderTranslateY }],
-                }}
-              >
-                <View style={styles.cardHeader}>
-                  <Avatar
-                    size={ms(30)}
-                    fallback={currentExample.promptAuthor.charAt(0)}
-                    borderColor={colors.surface}
-                    fallbackStyle={{ backgroundColor: currentExample.promptAuthorTint }}
-                    textStyle={{ color: currentExample.promptAuthorText }}
-                  />
+        <Animated.ScrollView
+          ref={scrollRef}
+          horizontal
+          pagingEnabled
+          bounces={false}
+          showsHorizontalScrollIndicator={false}
+          scrollEventThrottle={16}
+          style={styles.slideWindow}
+          contentContainerStyle={styles.slideTrack}
+          onLayout={event => setSlideHeight(Math.round(event.nativeEvent.layout.height))}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+            useNativeDriver: false,
+          })}
+        >
+          {introExamples.map(renderSlide)}
+        </Animated.ScrollView>
 
-                  <TextElement variant="overline" weight="700" style={styles.promptAuthorText}>
-                    {currentExample.promptAuthor}
-                  </TextElement>
-                </View>
-              </Animated.View>
-
-              <Animated.View
-                style={{
-                  opacity: promptTextOpacity,
-                  transform: [{ translateY: promptTextTranslateY }],
-                }}
-              >
-                <TextElement variant="bodySmall" weight="600" style={styles.promptText}>
-                  {currentExample.prompt}
-                </TextElement>
-              </Animated.View>
-            </Animated.View>
-
-            <Animated.View
-              style={[
-                styles.responseCard,
-                {
-                  opacity: responseCardOpacity,
-                  transform: [{ translateY: responseCardTranslateY }, { scale: responseCardScale }],
-                },
-              ]}
-            >
-              <Animated.View
-                style={{
-                  opacity: responseHeaderOpacity,
-                  transform: [{ translateY: responseHeaderTranslateY }],
-                }}
-              >
-                <View style={styles.cardHeader}>
-                  <Avatar
-                    size={ms(30)}
-                    fallback={currentExample.responseAuthor.charAt(0)}
-                    borderColor={colors.surface}
-                    fallbackStyle={{ backgroundColor: currentExample.responseAuthorTint }}
-                    textStyle={{ color: currentExample.responseAuthorText }}
-                  />
-
-                  <View style={styles.responseHeaderText}>
-                    <TextElement variant="label" weight="700" style={styles.responseAuthorText}>
-                      {currentExample.responseAuthor}
-                    </TextElement>
-                    <TextElement variant="caption" weight="500" style={styles.responseRoleText}>
-                      {currentExample.responseRole}
-                    </TextElement>
-                  </View>
-                </View>
-              </Animated.View>
-
-              <Animated.View
-                style={{
-                  opacity: responseTextOpacity,
-                  transform: [{ translateY: responseTextTranslateY }],
-                }}
-              >
-                <View style={styles.responseBody}>
-                  <TextElement variant="bodySmall" weight="700" style={styles.responseText}>
-                    {currentExample.response}{' '}
-                    {currentExample.responseIcon ? (
-                      <Icon
-                        set={currentExample.responseIcon.set}
-                        name={currentExample.responseIcon.name}
-                        size={ms(18)}
-                        color={currentExample.responseIcon.color}
-                      />
-                    ) : null}
-                  </TextElement>
-                </View>
-              </Animated.View>
-            </Animated.View>
-          </View>
-
-          <Animated.View
-            style={[
-              styles.copyBlock,
-              {
-                opacity: copyOpacity,
-                transform: [{ translateY: copyTranslateY }],
-              },
-            ]}
-          >
-            <View style={styles.headlineWrap}>
-              <TextElement variant="headline" weight="700" style={styles.headlineLine}>
-                Get the right
-              </TextElement>
-
-              <View style={styles.headlineRow}>
-                <TextElement variant="headline" weight="700" style={styles.headlineLine}>
-                  push to{' '}
-                </TextElement>
-                <TextElement variant="headline" weight="700" style={styles.headlineAccent}>
-                  move
-                </TextElement>
-              </View>
-
-              <TextElement variant="headline" weight="700" style={styles.headlineAccent}>
-                forward.
-              </TextElement>
+        <View style={styles.footer}>
+          <View style={styles.footerRow}>
+            <View style={styles.dots}>
+              {introExamples.map((_, index) => (
+                <Pressable
+                  key={index}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Go to onboarding slide ${index + 1}`}
+                  hitSlop={10}
+                  onPress={() => goToSlide(index)}
+                >
+                  <Animated.View style={[styles.dot, getDotAnimatedStyle(index)]} />
+                </Pressable>
+              ))}
             </View>
 
-            <TextElement variant="body" color="muted" style={styles.subtitle}>
-              Ask for motivation, advice, decisions, or reminders from people you trust.
-            </TextElement>
-          </Animated.View>
+            <PushButton
+              onPress={handleNext}
+              label={isLastSlide ? 'Get started' : 'Next'}
+              size="sm"
+              variant="push"
+              style={styles.nextButton}
+            />
+          </View>
+
+          <LiveSupportBanner totalLabel="2,400+" />
         </View>
-        <PrimaryButton
-          title="Get started"
-          onPress={() => void handleStart()}
-          style={styles.ctaButton}
-        />
-        <LiveSupportBanner />
       </View>
     </Layout>
   );
@@ -540,127 +357,302 @@ export default IntroScreen;
 
 const styles = StyleSheet.create({
   layout: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.onboardingPaper,
   },
   screen: {
     flex: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: vs(10),
-    paddingBottom: vs(28),
+    paddingTop: vs(18),
+    paddingBottom: vs(34),
   },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    marginBottom: vs(18),
+    justifyContent: 'space-between',
+    marginBottom: vs(22),
+    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
+  },
+  wordmark: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: ms(8),
+  },
+  logoTicks: {
+    flexDirection: 'row',
+    gap: ms(3),
+  },
+  logoTick: {
+    width: ms(4),
+    height: vs(16),
+    borderRadius: 1,
+    backgroundColor: colors.onboardingInk,
+    transform: [{ skewX: '-18deg' }],
+  },
+  logoTickAccent: {
+    backgroundColor: colors.onboardingPush,
+  },
+  wordmarkText: {
+    color: colors.onboardingInk,
+    letterSpacing: -0.4,
   },
   skipButton: {
     width: ms(56),
     alignItems: 'flex-end',
   },
   skipText: {
-    color: colors.primary,
+    color: colors.onboardingMuted,
+  },
+  slideWindow: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+  slideTrack: {
+    alignItems: 'stretch',
   },
   slide: {
-    flex: 1,
+    width: SLIDE_WIDTH,
+    flexShrink: 0,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: vs(12),
+  },
+  slideContent: {
+    width: '100%',
+    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
   },
   hero: {
     width: '100%',
     minHeight: HERO_HEIGHT,
-    justifyContent: 'flex-end',
-    marginBottom: vs(28),
+    justifyContent: 'center',
   },
-  promptCard: {
-    position: 'absolute',
-    top: vs(25),
-    right: 0,
-    width: '76%',
-    backgroundColor: colors.card,
+  doneHero: {
+    minHeight: HERO_HEIGHT - vs(18),
+    justifyContent: 'flex-start',
+    paddingTop: vs(8),
+  },
+  demoCard: {
+    backgroundColor: colors.onboardingCard,
     borderRadius: 18,
     paddingHorizontal: ms(16),
-    paddingVertical: vs(14),
-    shadowColor: colors.text,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 4,
-    zIndex: 2,
-  },
-  responseCard: {
-    width: '90%',
-    alignSelf: 'flex-start',
-    borderRadius: 24,
-    paddingHorizontal: ms(18),
     paddingVertical: vs(16),
-    backgroundColor: colors.primary,
-    shadowColor: colors.primary,
-    shadowOpacity: 0.14,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 5,
+    shadowColor: colors.onboardingInk,
+    shadowOpacity: 0.06,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
   },
-  subtitle: {
-    marginTop: vs(5),
-    marginBottom: vs(12),
+  sayCard: {
+    width: '100%',
+    transform: [{ rotate: '-1.5deg' }],
+  },
+  pushDemoCard: {
+    width: '100%',
+    transform: [{ rotate: '1deg' }],
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: ms(10),
   },
-  promptAuthorText: {
-    color: colors.muted,
-    letterSpacing: 0.8,
+  avatar: {
+    width: ms(38),
+    height: ms(38),
+    borderRadius: ms(19),
+    backgroundColor: colors.onboardingPush,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  responseHeaderText: {
-    flex: 1,
+  avatarText: {
+    color: colors.onboardingInk,
   },
-  responseAuthorText: {
-    color: colors.onPrimary,
-    letterSpacing: 0,
+  cardName: {
+    color: colors.onboardingInk,
+    fontSize: ms(14),
+    lineHeight: ms(18),
   },
-  responseRoleText: {
-    color: colors.gradientDarkPurple,
-    marginTop: vs(-2),
+  cardMeta: {
+    color: colors.onboardingMuted,
+    fontSize: ms(12),
+    lineHeight: ms(15),
+  },
+  feelingPill: {
+    marginLeft: 'auto',
+    backgroundColor: colors.onboardingPaper,
+    borderWidth: 1,
+    borderColor: colors.onboardingLine,
+    paddingVertical: vs(4),
+    paddingHorizontal: ms(9),
+    borderRadius: 999,
+  },
+  feelingText: {
+    color: colors.onboardingInkSoft,
+    fontSize: ms(10.5),
   },
   promptText: {
     marginTop: vs(10),
-    color: colors.text,
+    color: colors.onboardingInk,
+    fontSize: ms(16.5),
+    lineHeight: ms(23),
+    letterSpacing: -0.2,
+  },
+  promptTextCompact: {
+    color: colors.onboardingInk,
+    fontSize: ms(15),
+    lineHeight: ms(21),
+    letterSpacing: -0.15,
   },
   responseBody: {
-    marginTop: vs(8),
+    marginTop: vs(14),
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: ms(6),
+    justifyContent: 'space-between',
+    gap: ms(12),
   },
-  responseText: {
+  ticksWrap: {
     flex: 1,
-    color: colors.onPrimary,
   },
-  copyBlock: {
+  pushButton: {
+    minWidth: ms(88),
+    alignSelf: 'flex-start',
+  },
+  doneVisual: {
     width: '100%',
-    alignItems: 'flex-start',
-    paddingHorizontal: ms(4),
+    alignItems: 'center',
+    gap: vs(16),
+    marginTop: vs(-6),
+    paddingBottom: vs(6),
+  },
+  completedCard: {
+    width: '100%',
+    gap: vs(12),
+  },
+  completedTaskText: {
+    color: colors.onboardingInk,
+    fontSize: ms(16),
+    lineHeight: ms(22),
+    letterSpacing: -0.15,
+  },
+  completedMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: ms(10),
+  },
+  doneChip: {
+    backgroundColor: colors.onboardingDone,
+    borderRadius: 999,
+    paddingVertical: vs(8),
+    paddingHorizontal: ms(18),
+  },
+  doneChipText: {
+    color: colors.onboardingCard,
+    fontSize: ms(13),
+  },
+  pushedByText: {
+    color: colors.onboardingMuted,
+    flexShrink: 1,
+    textAlign: 'right',
+  },
+  nextTaskCard: {
+    width: '84%',
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: ms(8),
+    paddingVertical: vs(10),
+    paddingHorizontal: ms(14),
+    marginLeft: ms(20),
+    backgroundColor: '#FAFAF7',
+    borderWidth: 1,
+    borderColor: '#E9E6DB',
+    shadowColor: colors.onboardingInk,
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 1,
+    transform: [{ translateX: ms(10) }, { rotate: '1deg' }],
+  },
+  nextTaskCopy: {
+    flex: 1,
+  },
+  nextTaskLabel: {
+    color: colors.onboardingMuted,
+    letterSpacing: 0.5,
+  },
+  nextTaskText: {
+    color: colors.onboardingInkSoft,
+    marginTop: vs(3),
+    fontSize: ms(12.5),
+    lineHeight: ms(16),
+  },
+  miniPushButton: {
+    minWidth: ms(74),
+    alignSelf: 'flex-start',
   },
   headlineWrap: {
     alignItems: 'flex-start',
     width: '100%',
+    marginTop: vs(4),
   },
-  headlineRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
+  doneHeadlineWrap: {
+    marginTop: vs(28),
   },
   headlineLine: {
-    color: colors.text,
-    textAlign: 'center',
+    color: colors.onboardingInk,
+    fontSize: ms(40),
+    lineHeight: ms(42),
+    letterSpacing: -1.2,
   },
   headlineAccent: {
-    fontStyle: 'italic',
-    color: colors.primary,
-    textAlign: 'center',
+    color: colors.onboardingInk,
+    fontSize: ms(40),
+    lineHeight: ms(42),
+    letterSpacing: -1.2,
   },
-  ctaButton: {},
+  headlineAccentWrap: {
+    alignSelf: 'flex-start',
+    position: 'relative',
+  },
+  headlineUnderline: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: vs(2),
+    height: vs(8),
+    backgroundColor: colors.onboardingPush,
+  },
+  subtitle: {
+    marginTop: vs(12),
+    marginBottom: vs(12),
+    color: colors.onboardingMuted,
+    fontSize: ms(15),
+    lineHeight: ms(23),
+  },
+  doneSubtitle: {
+    marginTop: vs(10),
+  },
+  footer: {
+    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
+    paddingTop: vs(6),
+    gap: vs(14),
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: ms(6),
+  },
+  dot: {
+    width: ms(6),
+    height: ms(6),
+    borderRadius: 999,
+    backgroundColor: '#D8D8D0',
+  },
+  nextButton: {
+    minWidth: ms(96),
+    alignSelf: 'flex-end',
+  },
 });

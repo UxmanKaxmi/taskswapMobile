@@ -1,7 +1,10 @@
 export type PushButtonProps = {
-  count: number;
   onPress: () => void;
+  label?: string;
+  activeLabel?: string;
+  size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
-  label?: string; // default: "Pushes"
-  size?: 'sm' | 'md';
+  loading?: boolean;
+  active?: boolean;
+  variant?: 'default' | 'push' | 'cheer';
 };

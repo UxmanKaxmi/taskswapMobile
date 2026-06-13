@@ -2,10 +2,10 @@
     <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
-        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:statusBarColor">@color/bootsplash_background</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:enforceStatusBarContrast">false</item>
-        <item name="android:navigationBarColor">@android:color/white</item>
+        <item name="android:navigationBarColor">@color/bootsplash_background</item>
         <item name="android:windowLightNavigationBar">true</item>
         <item name="android:enforceNavigationBarContrast">false</item>
     </style>

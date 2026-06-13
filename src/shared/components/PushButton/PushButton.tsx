@@ -1,18 +1,24 @@
 import React from 'react';
-import { StyleProp, StyleSheet, TextStyle, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 import { colors } from '@shared/theme';
 import { TaskType } from '@features/Tasks/types/tasks';
+import { haptics } from '@shared/utils/haptics';
 import ButtonBase from '../Buttons/ButtonBase';
+import TextElement from '@shared/components/TextElement/TextElement';
+import Icon from '@shared/components/Icons/Icon';
 
 interface PushButtonProps {
   onPress: () => void;
   label?: string;
+  activeLabel?: string;
   size?: 'sm' | 'md' | 'lg';
   taskType?: TaskType;
   disabled?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
+  active?: boolean;
+  variant?: 'default' | 'push' | 'cheer';
   style?: StyleProp<ViewStyle>;
   buttonStyle?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
@@ -24,11 +30,14 @@ interface PushButtonProps {
 export default function PushButton({
   onPress,
   label = 'Push',
+  activeLabel,
   size = 'sm',
   taskType,
   disabled = false,
   loading = false,
   icon,
+  active = false,
+  variant = 'default',
   style,
   buttonStyle,
   textStyle,
@@ -36,7 +45,67 @@ export default function PushButton({
   textColor = colors.onPrimary,
   borderColor = 'transparent',
 }: PushButtonProps) {
+  const isLocked = disabled || loading || active;
   const resolvedBg = backgroundColor ?? colors[`${taskType || 'reminder'}BgHardest`];
+
+  if (variant !== 'default') {
+    const isPushVariant = variant === 'push';
+    const sizeConfig = customSizeStyles[size];
+    const textVariant = customTextVariants[size];
+
+    const resolvedIcon = icon ? (
+      icon
+    ) : isPushVariant && active ? (
+      <Icon set="ion" name="checkmark" size={15} color={colors.tactileMomentumPrimary} />
+    ) : isPushVariant ? (
+      <Icon set="ion" name="arrow-forward" size={15} color={colors.tactileMomentumSecondary} />
+    ) : null;
+
+    return (
+      <Pressable
+        onPressIn={() => {
+          if (isLocked) return;
+          haptics.selection();
+        }}
+        onPress={() => {
+          if (isLocked) return;
+          onPress();
+        }}
+        disabled={isLocked}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: isLocked, selected: active }}
+        style={({ pressed }) => [
+          styles.pillBase,
+          isPushVariant ? styles.pushPill : styles.cheerPill,
+          sizeConfig,
+          active && (isPushVariant ? styles.pushActive : styles.cheerActive),
+          pressed && !isLocked && styles.pillPressed,
+          style,
+          buttonStyle,
+        ]}
+      >
+        <View style={styles.contentRow}>
+          {/* {resolvedIcon ? <View style={styles.iconWrap}>{resolvedIcon}</View> : null} */}
+          <TextElement
+            variant={textVariant}
+            weight="700"
+            style={[
+              styles.pillText,
+              isPushVariant
+                ? active
+                  ? styles.pushActiveText
+                  : styles.pushIdleText
+                : styles.cheerText,
+              textStyle,
+            ]}
+          >
+            {active ? (activeLabel ?? (isPushVariant ? 'Pushed' : 'Cheered ✓')) : label}
+          </TextElement>
+          {resolvedIcon ? <View style={styles.iconWrapRight}>{resolvedIcon}</View> : null}
+        </View>
+      </Pressable>
+    );
+  }
 
   const sizeStyles = {
     sm: styles.small,
@@ -49,12 +118,13 @@ export default function PushButton({
     md: styles.textMd,
     lg: styles.textLg,
   };
+
   return (
     <ButtonBase
       title={label}
       onPress={onPress}
       isLoading={loading}
-      disabled={disabled}
+      disabled={isLocked}
       icon={icon}
       backgroundColor={resolvedBg}
       textColor={textColor}
@@ -64,6 +134,28 @@ export default function PushButton({
     />
   );
 }
+
+const customSizeStyles = {
+  sm: {
+    paddingVertical: vs(8),
+    paddingHorizontal: ms(18),
+  },
+  md: {
+    paddingVertical: vs(9),
+    paddingHorizontal: ms(20),
+  },
+  lg: {
+    paddingVertical: vs(11),
+    paddingHorizontal: ms(24),
+  },
+} as const;
+
+const customTextVariants = {
+  sm: 'bodySmall',
+  md: 'body',
+  lg: 'subtitle',
+} as const;
+
 const styles = StyleSheet.create({
   /* Button sizes */
   small: {
@@ -97,5 +189,70 @@ const styles = StyleSheet.create({
   textLg: {
     fontSize: ms(16),
     fontWeight: '700',
+  },
+
+  pillBase: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 999,
+    borderWidth: 1.5,
+    alignSelf: 'flex-start',
+    minHeight: 38,
+    shadowColor: colors.tactileMomentumSecondary,
+    shadowOpacity: 0.16,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowRadius: 0,
+    elevation: 2,
+  },
+  pushPill: {
+    backgroundColor: colors.tactileMomentumPrimary,
+    borderColor: colors.tactileMomentumPrimary,
+  },
+  pushActive: {
+    backgroundColor: colors.tactileMomentumSecondary,
+    borderColor: colors.tactileMomentumSecondary,
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  cheerPill: {
+    backgroundColor: '#FFFFFF',
+    borderColor: colors.border,
+    shadowColor: colors.border,
+  },
+  cheerActive: {
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  pillPressed: {
+    transform: [{ translateY: 2 }],
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  contentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconWrapRight: {
+    marginLeft: 7,
+  },
+  pillText: {
+    includeFontPadding: false,
+  },
+  pushIdleText: {
+    color: colors.tactileMomentumSecondary,
+  },
+  pushActiveText: {
+    color: colors.tactileMomentumPrimary,
+  },
+  cheerText: {
+    color: colors.tactileMomentumSecondary,
   },
 });

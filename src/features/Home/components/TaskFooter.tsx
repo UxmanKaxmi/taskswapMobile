@@ -136,24 +136,29 @@ export default function TaskFooter({
           <Animated.View style={[animatedStyle, { flex: 1 }]}>
             {isOwner ? (
               <TextElement style={styles.pushedText}>{ownerMotivationText}</TextElement>
-            ) : !pushed ? (
-              <PushButton
-                onPress={handlePush}
-                loading={isPushing}
-                taskType={TaskTypeEnum.Motivation}
-                label={emoji + `Push ${getFirstName(taskDetails?.name)}!`}
-                size="sm"
-              />
             ) : (
-              <>
+              <View style={styles.pushActionRow}>
                 <TextElement style={styles.pushedText}>{pushedText}</TextElement>
 
-                {isDEV && (
-                  <TouchableOpacity onPress={handleUnpush} style={styles.unpushButton}>
-                    <TextElement style={styles.unpushText}>Unpush (dev)</TextElement>
-                  </TouchableOpacity>
-                )}
-              </>
+                <View style={styles.pushButtonColumn}>
+                  <PushButton
+                    onPress={handlePush}
+                    loading={isPushing}
+                    taskType={TaskTypeEnum.Motivation}
+                    label={emoji + `Push ${getFirstName(taskDetails?.name)}!`}
+                    activeLabel="Pushed"
+                    active={pushed}
+                    variant="push"
+                    size="sm"
+                  />
+
+                  {isDEV && pushed && (
+                    <TouchableOpacity onPress={handleUnpush} style={styles.unpushButton}>
+                      <TextElement style={styles.unpushText}>Unpush (dev)</TextElement>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
             )}
           </Animated.View>
         ) : taskDetails?.type === TaskTypeEnum.Advice ? (
@@ -373,6 +378,16 @@ const styles = StyleSheet.create({
     color: colors.muted,
     opacity: 0.6,
     textAlign: 'center',
+  },
+  pushActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 12,
+    flex: 1,
+  },
+  pushButtonColumn: {
+    alignItems: 'flex-end',
   },
   unpushButton: {
     marginTop: vs(6),

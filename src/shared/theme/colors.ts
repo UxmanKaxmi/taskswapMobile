@@ -6,6 +6,24 @@ export const colors = {
   accent: '#FF7043', // Deep orange – motivation actions
   onAccent: '#FFFFFF', // Text/iconography on accent backgrounds
 
+  // Tactile Momentum palette
+  tactileMomentumPrimary: '#FFD23F',
+  tactileMomentumSecondary: '#16171F',
+  tactileMomentumTertiary: '#2FECFD',
+  tactileMomentumNeutral: '#7D766A',
+
+  // Onboarding
+  onboardingInk: '#16171F',
+  onboardingInkSoft: '#2A2B36',
+  onboardingPaper: '#F4F4EF',
+  onboardingCard: '#FFFFFF',
+  onboardingPush: '#FFD23F',
+  onboardingPushDeep: '#EDBB17',
+  onboardingDone: '#1FA86B',
+  onboardingDoneSoft: '#E3F4EC',
+  onboardingMuted: '#73757D',
+  onboardingLine: '#E6E6DF',
+
   // Neutral
   background: '#F7F8F4', // warm off-white
   card: '#FFFFFF',
