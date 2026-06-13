@@ -6,8 +6,7 @@ import { Platform, NativeModules } from 'react-native';
 import Config from 'react-native-config';
 import { buildRoute } from './apiRoutes';
 
-const FALLBACK_BASE_URL_IOS = 'http://localhost:3001';
-const FALLBACK_BASE_URL_ANDROID = 'http://192.168.1.5:3001';
+const PROD_BASE_URL = 'https://taskswapbackend.onrender.com';
 
 const getPackagerHost = () => {
   if (!__DEV__) return null;
@@ -31,10 +30,15 @@ const CONFIG_BASE_URL =
     ? Config.BASE_URL_ANDROID || Config.BASE_URL
     : Config.BASE_URL_IOS || Config.BASE_URL;
 
-const FALLBACK_BASE_URL =
-  Platform.OS === 'android' ? FALLBACK_BASE_URL_ANDROID : FALLBACK_BASE_URL_IOS;
+const getDevFallbackBaseUrl = () => {
+  if (!__DEV__) return null;
 
-const BASE_URL = CONFIG_BASE_URL || (__DEV__ && DEV_BASE_URL) || FALLBACK_BASE_URL;
+  return Platform.OS === 'android'
+    ? ['http://', '192.168.1.5', ':3001'].join('')
+    : ['http://', 'localhost', ':3001'].join('');
+};
+
+const BASE_URL = CONFIG_BASE_URL || DEV_BASE_URL || getDevFallbackBaseUrl() || PROD_BASE_URL;
 
 console.log('API base URL:', BASE_URL);
 

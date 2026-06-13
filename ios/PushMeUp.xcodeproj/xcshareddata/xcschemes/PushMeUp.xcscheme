@@ -84,5 +84,14 @@
    <ArchiveAction
       buildConfiguration = "Release"
       revealArchiveInOrganizer = "YES">
+      <PreActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Use production env for archive"
+               scriptText = "echo &quot;.env.prod&quot; &gt; /tmp/envfile&#10;">
+            </ActionContent>
+         </ExecutionAction>
+      </PreActions>
    </ArchiveAction>
 </Scheme>
