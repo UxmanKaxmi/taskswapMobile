@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Image, StyleSheet, Dimensions, Animated, TouchableOpacity } from 'react-native';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
-import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
+import PushButton from '@shared/components/PushButton';
 import { Height } from '@shared/components/Spacing';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { colors } from '@shared/theme';
@@ -140,7 +140,7 @@ export default function AuthIntroScreen() {
 
   return (
     <Animated.View style={{ flex: 1 }}>
-      <Layout backgroundColor="onAccent">
+      <Layout backgroundColor={colors.onboardingPaper}>
         {/* <View style={styles.logoWrapper}>
           <Image
             source={require('@assets/images/logo.png')}
@@ -167,7 +167,15 @@ export default function AuthIntroScreen() {
           </TextElement>
         </View>
 
-        <PrimaryButton title={copy.cta} textStyle={styles.ctaText} onPress={handleContinue} />
+        <PushButton
+          label={copy.cta}
+          variant="push"
+          size="lg"
+          hideIcon
+          style={styles.ctaButton}
+          onPress={handleContinue}
+          textStyle={{ fontWeight: '800', fontSize: ms(16) }}
+        />
         <Height size={10} />
 
         <TouchableOpacity onPress={handleSkip}>
@@ -181,37 +189,42 @@ export default function AuthIntroScreen() {
 }
 
 const styles = StyleSheet.create({
-  ctaText: {
-    fontSize: ms(14),
+  ctaButton: {
+    alignSelf: 'stretch',
+    width: '100%',
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingTop: vs(8),
   },
   image: {
     width: width,
-    height: height * 0.42,
-    marginBottom: vs(10),
+    height: height * 0.4,
+    // marginTop: vs(-18),
+    // marginBottom: vs(2),
   },
   title: {
-    fontWeight: '700',
+    fontWeight: '900',
     textAlign: 'center',
-    marginTop: vs(18),
-    marginBottom: 6,
+    marginTop: vs(10),
+    marginBottom: vs(10),
+    fontSize: ms(30),
     // lineHeight: 24,
   },
   subtitle: {
-    color: '#707070',
+    color: colors.onboardingMuted,
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 24,
+    marginBottom: 18,
   },
   skipText: {
     textAlign: 'center',
-    color: colors.primary,
+    color: colors.onboardingInk,
     fontWeight: '600',
     fontSize: ms(14),
+    marginTop: vs(7),
   },
 });

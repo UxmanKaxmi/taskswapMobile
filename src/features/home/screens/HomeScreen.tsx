@@ -339,7 +339,7 @@ export default function HomeScreen() {
     <Layout
       allowPaddingHorizontal={false}
       useSafeArea={false}
-      style={{ backgroundColor: colors.onAccent }}
+      style={{ backgroundColor: colors.onboardingPaper }}
     >
       <Animated.View style={[styles.header, headerStyle, shadowStyle]}>
         <View onLayout={onTopHeaderLayout}>

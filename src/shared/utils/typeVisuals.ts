@@ -89,7 +89,7 @@ export function getTaskBackgroundVisual(type: TaskType) {
   };
 }
 
-// ---- IMPACT CREATION VISUALS (ChooseImpactScreen) ----
+// ---- IMPACT CREATION VISUALS ----
 
 export const impactTypeVisuals: Record<
   TaskType,

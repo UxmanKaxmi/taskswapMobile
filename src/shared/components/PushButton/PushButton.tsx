@@ -17,6 +17,7 @@ interface PushButtonProps {
   disabled?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
+  hideIcon?: boolean;
   active?: boolean;
   variant?: 'default' | 'push' | 'cheer';
   style?: StyleProp<ViewStyle>;
@@ -36,6 +37,7 @@ export default function PushButton({
   disabled = false,
   loading = false,
   icon,
+  hideIcon = false,
   active = false,
   variant = 'default',
   style,
@@ -53,7 +55,7 @@ export default function PushButton({
     const sizeConfig = customSizeStyles[size];
     const textVariant = customTextVariants[size];
 
-    const resolvedIcon = icon ? (
+    const resolvedIcon = hideIcon ? null : icon ? (
       icon
     ) : isPushVariant && active ? (
       <Icon set="ion" name="checkmark" size={15} color={colors.tactileMomentumPrimary} />
@@ -161,7 +163,7 @@ const styles = StyleSheet.create({
   small: {
     paddingVertical: vs(6),
     paddingHorizontal: ms(12),
-    borderRadius: ms(20),
+    borderRadius: ms(24),
     alignSelf: 'flex-start',
     marginVertical: 0,
     marginHorizontal: 0,
@@ -169,12 +171,12 @@ const styles = StyleSheet.create({
   medium: {
     paddingVertical: vs(10),
     paddingHorizontal: ms(18),
-    borderRadius: ms(22),
+    borderRadius: ms(24),
   },
   large: {
     paddingVertical: vs(14),
     paddingHorizontal: ms(24),
-    borderRadius: ms(26),
+    borderRadius: ms(24),
   },
 
   /* Text sizes */
@@ -195,7 +197,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 999,
+    borderRadius: ms(24),
     borderWidth: 1.5,
     alignSelf: 'flex-start',
     minHeight: 38,

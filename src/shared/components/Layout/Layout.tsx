@@ -36,7 +36,7 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
       children = null,
       style = {},
       variant = 'auto',
-      backgroundColor = colors.background,
+      backgroundColor = colors.onboardingPaper,
       useSafeArea = true,
       statusBarHidden = false,
       scrollable = false,
@@ -129,7 +129,7 @@ export default Layout;
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.onboardingPaper,
     // paddingTop: isAndroid ? spacing.md : 0,
   },
   container: {

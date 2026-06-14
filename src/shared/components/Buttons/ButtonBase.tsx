@@ -10,12 +10,13 @@ import {
   TextStyle,
   StyleProp,
 } from 'react-native';
-import { moderateScale, vs } from 'react-native-size-matters';
+import { moderateScale, ms, vs } from 'react-native-size-matters';
 import { hexToRgba } from '@shared/utils/helperFunctions';
 import { colors } from '@shared/theme';
 import { resolveAppTextStyle } from '@shared/theme/fonts';
 
 const AnimatedTouchable = Animated.createAnimatedComponent(Animated.View);
+const BUTTON_RADIUS = ms(24);
 
 type Props = {
   title: string;
@@ -190,7 +191,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', // 👈 Ensure centered
     paddingVertical: moderateScale(16), // 👈 Optional tweak
     paddingHorizontal: moderateScale(24),
-    borderRadius: 10,
+    borderRadius: BUTTON_RADIUS,
     borderWidth: 1,
     marginVertical: vs(10),
     marginHorizontal: moderateScale(6),

@@ -34,16 +34,6 @@ export default function AppNavigator() {
         }}
       />
 
-      {/* Choose Impact screen */}
-      {/* <Stack.Screen
-        name="ChooseImpactScreen"
-        component={ChooseImpactScreen}
-        options={{
-          animation: 'slide_from_bottom',
-          animationDuration: 300,
-        }}
-      /> */}
-
       {/* Friend flows */}
       <Stack.Screen
         name="FindFriendsScreen"

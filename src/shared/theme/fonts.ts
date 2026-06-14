@@ -32,22 +32,22 @@ const FONT_ROLE_BY_VARIANT: Record<AppFontVariant, FontRole> = {
 
 const FONT_FAMILIES: Record<FontRole, Record<FontWeightKey, string>> = {
   headline: {
-    '300': 'PlusJakartaSans-Light',
-    '400': 'PlusJakartaSans-Regular',
-    '500': 'PlusJakartaSans-Medium',
-    '600': 'PlusJakartaSans-SemiBold',
-    '700': 'PlusJakartaSans-Bold',
-    '800': 'PlusJakartaSans-ExtraBold',
-    '900': 'PlusJakartaSans-ExtraBold',
+    '300': 'BricolageGrotesque-Light',
+    '400': 'BricolageGrotesque-Regular',
+    '500': 'BricolageGrotesque-Medium',
+    '600': 'BricolageGrotesque-SemiBold',
+    '700': 'BricolageGrotesque-Bold',
+    '800': 'BricolageGrotesque-ExtraBold',
+    '900': 'BricolageGrotesque-ExtraBold',
   },
   body: {
-    '300': 'BeVietnamPro-Light',
-    '400': 'BeVietnamPro-Regular',
-    '500': 'BeVietnamPro-Medium',
-    '600': 'BeVietnamPro-SemiBold',
-    '700': 'BeVietnamPro-Bold',
-    '800': 'BeVietnamPro-ExtraBold',
-    '900': 'BeVietnamPro-Black',
+    '300': 'HankenGrotesk-Light',
+    '400': 'HankenGrotesk-Regular',
+    '500': 'HankenGrotesk-Medium',
+    '600': 'HankenGrotesk-SemiBold',
+    '700': 'HankenGrotesk-Bold',
+    '800': 'HankenGrotesk-ExtraBold',
+    '900': 'HankenGrotesk-Black',
   },
 };
 

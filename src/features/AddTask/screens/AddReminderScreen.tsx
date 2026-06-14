@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -32,6 +32,7 @@ import { CreateTaskPayload } from '../types/addTask.types';
 import { useCreateTask } from '../hooks/useCreateTask';
 import { resetToHomeRoot } from '@navigation/types/navigationUtils';
 import { useFollowers } from '@features/User/hooks/useFollowers';
+import { useFollowing } from '@features/User/hooks/useFollowing';
 import { HelperUser } from '@features/Home/types/home';
 import { isAndroid } from '@shared/utils/constants';
 import { getButtonText, getTaskPlaceholder, getTitle } from '../utils/taskCopy';
@@ -76,7 +77,15 @@ export default function AddReminderScreen({ navigation, route }: Props) {
   const canSubmit = text.trim().length > 0 && isReminderTimeValid && !success;
 
   const { mutate: createTask, isPending } = useCreateTask();
-  const { data: friends = [] } = useFollowers(!!user);
+  const { data: followers = [] } = useFollowers(!!user);
+  const { data: following = [] } = useFollowing();
+  const friends = useMemo(() => {
+    const map = new Map<string, HelperUser>();
+    [...followers, ...following].forEach(friend => {
+      map.set(friend.id, friend);
+    });
+    return Array.from(map.values());
+  }, [followers, following]);
 
   // Content animation
   const contentOpacity = useState(new Animated.Value(1))[0];

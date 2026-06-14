@@ -9,18 +9,19 @@ type Props = {
   isLoading?: boolean;
   icon?: React.ReactNode;
   backgroundColor?: string;
+  textColor?: string;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   disabled?: boolean;
 };
 
-export default function PrimaryButton({ backgroundColor, ...props }: Props) {
+export default function PrimaryButton({ backgroundColor, textColor, ...props }: Props) {
   const theme = useTheme();
   return (
     <ButtonBase
       {...props}
       backgroundColor={backgroundColor ?? theme.colors.primary}
-      textColor="#fff"
+      textColor={textColor ?? '#fff'}
     />
   );
 }

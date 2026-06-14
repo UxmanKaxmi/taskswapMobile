@@ -79,8 +79,7 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
     }
 
     navigation.push('AddTaskScreen', {
-      screen: 'ChooseImpactScreen',
-      params: { entry: 'intro' },
+      screen: 'AddMotivation',
     });
   };
 

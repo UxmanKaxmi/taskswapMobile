@@ -15,6 +15,12 @@ export interface OutlineButtonProps {
   icon?: React.ReactNode;
   /** Disable interaction */
   disabled?: boolean;
+  /** Optional override for the outline border color */
+  borderColor?: string;
+  /** Optional override for the button background color */
+  backgroundColor?: string;
+  /** Optional override for the text color */
+  textColor?: string;
   /** Variant: 'default' for transparent outline, 'alt' for filled */
   type?: 'default' | 'alt';
   /** Override container style */
@@ -32,17 +38,24 @@ export default function OutlineButton({
   isLoading = false,
   icon,
   disabled = false,
+  borderColor,
+  backgroundColor,
+  textColor,
   type = 'default',
   style,
   textStyle,
 }: OutlineButtonProps) {
   const { colors, typography } = useTheme();
 
-  const borderColor = disabled ? colors.muted : type === 'alt' ? colors.primary : colors.primary;
+  const resolvedBorderColor = disabled
+    ? colors.muted
+    : (borderColor ?? (type === 'alt' ? colors.primary : colors.primary));
 
-  const textColor = disabled ? colors.muted : type === 'alt' ? colors.onPrimary : colors.primary;
+  const resolvedTextColor = disabled
+    ? colors.muted
+    : (textColor ?? (type === 'alt' ? colors.onPrimary : colors.primary));
 
-  const bgColor = type === 'alt' ? colors.primary : 'transparent';
+  const bgColor = backgroundColor ?? (type === 'alt' ? colors.primary : 'transparent');
 
   return (
     <ButtonBase
@@ -52,8 +65,8 @@ export default function OutlineButton({
       disabled={disabled}
       icon={icon}
       backgroundColor={bgColor}
-      textColor={textColor}
-      borderColor={borderColor}
+      textColor={resolvedTextColor}
+      borderColor={resolvedBorderColor}
       style={style}
       textStyle={[{ fontSize: typography.body }, textStyle]}
     />

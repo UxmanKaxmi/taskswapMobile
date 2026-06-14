@@ -3,19 +3,14 @@ import { StyleSheet, View } from 'react-native';
 
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
-import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
-import { spacing } from '@shared/theme';
+import PushButton from '@shared/components/PushButton';
+import { colors, spacing } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
-import {
-  getTypeColor,
-  typeBackgrounds,
-  typeBackgroundsHard,
-  typeIcons,
-} from '@shared/utils/typeVisuals';
 import type { MotivationSuccessModalPayload } from '../modalTypes';
 
 const CLOSE_ANIMATION_DELAY_MS = 280;
+const BUTTON_RADIUS = ms(24);
 
 type Props = {
   payload: MotivationSuccessModalPayload;
@@ -28,10 +23,10 @@ export default function MotivationSuccessModalContent({
   closeModal,
   markNextCloseAsCustom,
 }: Props) {
-  const iconName = typeIcons[payload.type];
-  const typeColor = getTypeColor(payload.type);
-  const bubbleColor = typeBackgrounds[payload.type];
-  const shadowColor = typeBackgroundsHard[payload.type];
+  const iconName = 'paper-plane';
+  const outlineColor = colors.onboardingLine;
+  const bubbleColor = '#FFF5D8';
+  const shadowColor = '#E6C84D';
 
   const runAfterClose = React.useCallback(
     (callback: () => void) => {
@@ -62,7 +57,13 @@ export default function MotivationSuccessModalContent({
             },
           ]}
         >
-          <Icon set="fa6" name={iconName} iconStyle="solid" size={35} color={typeColor} />
+          <Icon
+            set="fa6"
+            name={iconName}
+            iconStyle="solid"
+            size={36}
+            color={colors.onboardingInk}
+          />
         </View>
       </View>
 
@@ -74,27 +75,24 @@ export default function MotivationSuccessModalContent({
         People can now support you. We’ll notify you when someone shows up.
       </TextElement>
 
-      <PrimaryButton
-        title="View Request"
+      <PushButton
+        label="View Request"
         onPress={handleViewRequest}
-        backgroundColor={typeColor}
+        variant="push"
+        size="lg"
+        hideIcon
         style={StyleSheet.flatten([styles.actionButton, styles.primaryButton])}
+        textStyle={styles.primaryButtonText}
       />
 
       <OutlineButton
         title="Invite someone you trust"
         onPress={handleInviteHelper}
-        style={StyleSheet.flatten([
-          styles.actionButton,
-          styles.secondary,
-          { borderColor: typeColor },
-        ])}
-        textStyle={{ color: typeColor }}
+        borderColor={outlineColor}
+        textColor={colors.onboardingInk}
+        style={StyleSheet.flatten([styles.actionButton, styles.secondary])}
+        textStyle={{ color: colors.onboardingInk }}
       />
-
-      <TextElement variant="label" color="muted" style={styles.helperText}>
-        Bring someone in to support you right away.
-      </TextElement>
     </View>
   );
 }
@@ -106,44 +104,46 @@ const styles = StyleSheet.create({
   },
 
   iconWrap: {
-    marginTop: vs(8),
-    marginBottom: vs(18),
+    marginTop: vs(6),
+    marginBottom: vs(20),
   },
   iconBubble: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
+    width: ms(100),
+    height: ms(100),
+    borderRadius: ms(50),
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOpacity: 0.22,
-    shadowRadius: 12,
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
     shadowOffset: { width: 0, height: 6 },
-    elevation: 5,
+    elevation: 2,
   },
   title: {
     textAlign: 'center',
-    fontSize: ms(31),
-    lineHeight: ms(36),
+    fontSize: ms(30),
+    lineHeight: ms(34),
   },
   body: {
     textAlign: 'center',
-    marginTop: vs(12),
+    marginTop: vs(14),
+    fontSize: ms(16),
+    lineHeight: ms(24),
   },
   actionButton: {
     marginVertical: 0,
     marginHorizontal: 0,
     alignSelf: 'stretch',
-    borderRadius: 18,
+    borderRadius: BUTTON_RADIUS,
   },
   primaryButton: {
     marginTop: vs(20),
   },
-  secondary: {
-    marginTop: vs(7),
+  primaryButtonText: {
+    fontSize: ms(16),
+    fontWeight: '800',
+    color: colors.onboardingInk,
   },
-  helperText: {
-    textAlign: 'center',
+  secondary: {
     marginTop: vs(10),
-    paddingHorizontal: spacing.md,
   },
 });

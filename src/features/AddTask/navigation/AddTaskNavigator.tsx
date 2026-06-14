@@ -5,7 +5,6 @@ import AddAdviceScreen from '../screens/AddAdviceScreen';
 import AddMotivationScreen from '../screens/AddMotivationScreen';
 import AddDecisionScreen from '../screens/AddDecisionScreen';
 import AddReminderScreen from '../screens/AddReminderScreen';
-import ChooseImpactScreen from '../screens/ChooseImpactScreen';
 import type { CreateTaskPayload } from '../types/addTask.types';
 
 type DraftParams = {
@@ -14,12 +13,6 @@ type DraftParams = {
 };
 
 export type AddTaskStackParamList = {
-  ChooseImpactScreen:
-    | {
-        entry?: 'intro' | 'modal';
-      }
-    | undefined;
-
   AddAdvice?: DraftParams;
   AddMotivation?: DraftParams;
   AddDecision?: DraftParams;
@@ -32,14 +25,12 @@ export default function AddTaskNavigator() {
   return (
     <Stack.Navigator
       id={undefined as any}
-      initialRouteName="ChooseImpactScreen"
+      initialRouteName="AddMotivation"
       screenOptions={{
         headerShown: false,
         animation: 'slide_from_right',
       }}
     >
-      <Stack.Screen name="ChooseImpactScreen" component={ChooseImpactScreen} />
-
       <Stack.Screen name="AddAdvice" component={AddAdviceScreen} />
 
       <Stack.Screen name="AddMotivation" component={AddMotivationScreen} />

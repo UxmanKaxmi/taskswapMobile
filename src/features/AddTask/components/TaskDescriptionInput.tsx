@@ -1,12 +1,11 @@
 // src/features/tasks/components/TaskDescriptionInput.tsx
 
-import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import AppTextInput from '@shared/components/Inputs/AppTextInput';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { TaskType, TaskTypeEnum } from '@features/Tasks/types/tasks';
-import Row from '@shared/components/Layout/Row';
-import { ms, s, vs } from 'react-native-size-matters';
+import { TaskType } from '@features/Tasks/types/tasks';
+import { ms, vs } from 'react-native-size-matters';
 import { colors, spacing } from '@shared/theme';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
 import { getTaskHints } from '../utils/taskCopy';
@@ -17,8 +16,13 @@ type Props = {
   onChange: (text: string) => void;
   placeholder: string;
   error?: string;
-  onPressInspire?: () => void;
   taskType: TaskType;
+  charLimit?: number;
+  footerText?: string;
+  footerTextColor?: keyof typeof colors;
+  dividerColor?: string;
+  inputWrapperStyle?: StyleProp<ViewStyle>;
+  inputStyle?: StyleProp<TextStyle>;
 };
 
 export default function TaskDescriptionInput({
@@ -26,10 +30,20 @@ export default function TaskDescriptionInput({
   onChange,
   placeholder,
   error,
-  onPressInspire,
   taskType,
+  charLimit = 80,
+  footerText,
+  footerTextColor = 'muted',
+  dividerColor = colors.border,
+  inputWrapperStyle,
+  inputStyle,
 }: Props) {
   const [charCount, setCharCount] = useState(0);
+  const resolvedFooterText = footerText ?? getTaskHints(taskType);
+
+  useEffect(() => {
+    setCharCount(value.length);
+  }, [value]);
 
   return (
     <View>
@@ -39,24 +53,27 @@ export default function TaskDescriptionInput({
         onChangeText={onChange}
         placeholder={placeholder}
         multiline
-        inputStyle={styles.input}
+        inputStyle={[styles.input, inputStyle]}
         containerStyle={styles.inputContainer}
         error={!!error}
         errorText={error}
-        wrapperStyle={styles.wrapperStyle}
-        charLimit={80}
+        wrapperStyle={[styles.wrapperStyle, inputWrapperStyle]}
+        charLimit={charLimit}
         onCharCountChange={count => setCharCount(count)}
         numberOfLines={4}
       />
-      <AppBorder />
+      <AppBorder color={dividerColor} />
       {/* FOOTER */}
       <View style={styles.footer}>
-        <TextElement style={styles.footerText} color="muted">
-          {getTaskHints(taskType)}
+        <TextElement style={styles.footerText} color={footerTextColor}>
+          {resolvedFooterText}
         </TextElement>
 
-        <TextElement style={styles.charCount} color={charCount >= 80 ? 'error' : 'muted'}>
-          {charCount}/80
+        <TextElement
+          style={styles.charCount}
+          color={charCount >= charLimit ? 'error' : footerTextColor}
+        >
+          {charCount}/{charLimit}
         </TextElement>
       </View>
     </View>
@@ -67,7 +84,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
     fontSize: ms(12),
     alignSelf: 'flex-end',
-    color: colors.muted,
   },
   footerText: {
     letterSpacing: 0.2,

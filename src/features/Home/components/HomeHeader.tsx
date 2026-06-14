@@ -1,7 +1,6 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import Row from '@shared/components/Layout/Row';
-import HeadingText from '@shared/components/HeadingText';
 import Ripple from '@shared/components/Buttons/Ripple';
 import { Icon } from '@shared/components/Icons';
 import { haptics } from '@shared/utils/haptics';
@@ -9,6 +8,7 @@ import { vs } from 'react-native-size-matters';
 import { spacing } from '@shared/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isPROD } from '@shared/utils/constants';
+import AppLogo from '@shared/components/AppLogo';
 
 type Props = {
   onPressSearch: () => void;
@@ -29,11 +29,7 @@ export default function HomeHeader({ onPressSearch, onPressMore }: Props) {
         },
       ]}
     >
-      {/* <AppBorder color={colors.border} style={styles.borderWidthFull} /> */}
-      {/* App name (kept subtle) */}
-      <HeadingText level={2} marginHorizontal={0}>
-        Push Me Up
-      </HeadingText>
+      <AppLogo size="md" align="left" />
 
       {/* Actions */}
       <Row gap={20}>

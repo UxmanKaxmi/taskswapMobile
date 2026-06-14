@@ -31,6 +31,9 @@ export default function Tag({
   borderColor,
   labelColor,
 }: Props) {
+  const resolvedLabelColor: keyof typeof colors =
+    labelColor ?? (selected ? 'background' : 'primary');
+
   return (
     <Ripple
       onPress={onPress}
@@ -48,7 +51,7 @@ export default function Tag({
             set="fa6"
             name={iconName}
             size={ms(12)}
-            color={labelColor ? colors[labelColor] : selected ? colors.background : colors.primary}
+            color={colors[resolvedLabelColor]}
             iconStyle={selected ? 'solid' : 'regular'}
           />
         )}
@@ -56,8 +59,8 @@ export default function Tag({
         {/* Label */}
         <TextElement
           variant="body"
-          weight="500"
-          color={(labelColor ? colors[labelColor] : selected ? colors.background : colors.primary) as any}
+          weight={selected ? '800' : '500'}
+          color={resolvedLabelColor}
           style={[styles.label, selectOnly && styles.selectOnlyLabel]}
         >
           {label}
@@ -93,7 +96,7 @@ const styles = StyleSheet.create({
   label: {
     marginHorizontal: 2,
     fontSize: ms(12),
-    lineHeight: ms(12),
+    lineHeight: ms(14),
     includeFontPadding: false,
     textAlignVertical: 'center',
   },

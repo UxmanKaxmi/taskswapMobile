@@ -39,7 +39,7 @@ export default function BottomTabsIOS() {
     <Tab.Navigator
       id={undefined as any}
       tabBarInactiveTintColor={colors.text}
-      tabBarActiveTintColor={colors.primary}
+      tabBarActiveTintColor={colors.tactileMomentumPrimary}
       hapticFeedbackEnabled
       minimizeBehavior="automatic"
       sidebarAdaptable={false}

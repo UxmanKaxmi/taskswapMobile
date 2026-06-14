@@ -5,15 +5,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ViewStyle,
+  StyleProp,
   GestureResponderEvent,
   ActivityIndicator,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '../TextElement/TextElement';
 import { vs } from 'react-native-size-matters';
-import { isIOS } from '@shared/utils/constants';
 
 export interface AnimatedBottomButtonProps {
   title: string;
@@ -29,6 +28,7 @@ export interface AnimatedBottomButtonProps {
   containerColor?: string;
 
   style?: ViewStyle;
+  buttonStyle?: StyleProp<ViewStyle>;
 }
 
 export const BOTTOM_BUTTON_HEIGHT = vs(105);
@@ -42,9 +42,9 @@ export default function AnimatedBottomButton({
   buttonColor,
   containerColor,
   style,
+  buttonStyle,
 }: AnimatedBottomButtonProps) {
-  const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   const translateY = useRef(new Animated.Value(visible ? 0 : BOTTOM_BUTTON_HEIGHT)).current;
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
@@ -85,7 +85,7 @@ export default function AnimatedBottomButton({
         ]}
       >
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: buttonColor ?? colors.primary }]}
+          style={[styles.button, { backgroundColor: buttonColor ?? colors.primary }, buttonStyle]}
           onPress={onPress}
           activeOpacity={0.9}
           disabled={isLoading}

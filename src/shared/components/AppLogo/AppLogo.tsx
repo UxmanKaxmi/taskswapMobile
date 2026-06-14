@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { ms } from 'react-native-size-matters';
+import { ms, vs } from 'react-native-size-matters';
 import TextElement from '../TextElement/TextElement';
+import { colors } from '@shared/theme';
 
 type AppLogoProps = {
   size?: 'sm' | 'md' | 'lg';
@@ -11,9 +12,16 @@ type AppLogoProps = {
 const AppLogo = ({ size = 'md', align = 'center' }: AppLogoProps) => {
   return (
     <View style={[styles.container, align === 'left' && styles.alignLeft]}>
-      <TextElement variant="subtitle" style={[styles.title, titleSizes[size]]}>
-        Push Me Up
-      </TextElement>
+      <View style={styles.wordmark}>
+        <View style={[styles.logoTicks, tickSizes[size]]} accessibilityElementsHidden>
+          <View style={[styles.logoTick, tickHeights[size]]} />
+          <View style={[styles.logoTick, styles.logoTickAccent, tickHeights[size]]} />
+          <View style={[styles.logoTick, tickHeights[size]]} />
+        </View>
+        <TextElement variant="body" weight="800" style={[styles.title, titleSizes[size]]}>
+          PushMeUp
+        </TextElement>
+      </View>
     </View>
   );
 };
@@ -27,9 +35,28 @@ const styles = StyleSheet.create({
   alignLeft: {
     alignItems: 'flex-start',
   },
+  wordmark: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logoTicks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoTick: {
+    borderRadius: 1,
+    backgroundColor: colors.onboardingInk,
+    transform: [{ skewX: '-18deg' }],
+  },
+  logoTickAccent: {
+    backgroundColor: colors.onboardingPush,
+  },
   title: {
     fontWeight: '700',
-    letterSpacing: 0.3,
+    letterSpacing: -0.4,
+    color: colors.onboardingInk,
+    marginLeft: ms(7),
   },
 });
 
@@ -44,3 +71,30 @@ const titleSizes = {
     fontSize: ms(24),
   },
 };
+
+const tickSizes = {
+  sm: {
+    gap: ms(3),
+  },
+  md: {
+    gap: ms(3),
+  },
+  lg: {
+    gap: ms(4),
+  },
+} as const;
+
+const tickHeights = {
+  sm: {
+    width: ms(4),
+    height: vs(14),
+  },
+  md: {
+    width: ms(4),
+    height: vs(16),
+  },
+  lg: {
+    width: ms(5),
+    height: vs(20),
+  },
+} as const;

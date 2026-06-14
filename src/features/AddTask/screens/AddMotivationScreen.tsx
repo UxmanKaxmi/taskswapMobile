@@ -1,42 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { ms, vs } from 'react-native-size-matters';
 
 import { AddTaskStackParamList } from '../navigation/AddTaskNavigator';
-
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
-
 import { colors, spacing } from '@shared/theme';
-import AppHeader from '@shared/components/AppHeader/AppHeader';
-import TaskBackground from '../components/TaskBackground';
-import { vs } from 'react-native-size-matters';
 import TaskDescriptionInput from '../components/TaskDescriptionInput';
-import { typeBackgrounds, typeBackgroundsHard, typeIcons } from '@shared/utils/typeVisuals';
-import { Shadow } from '@shared/components/Shadow/ShadowComponent';
-import { Height } from '@shared/components/Spacing';
-import TagHelperCard from '../components/TagHelperCard';
-import { HelperUser } from '@features/Home/types/home';
-import SelectHelpersModal from '../components/SelectHelpersModal';
 import { CreateTaskPayload } from '../types/addTask.types';
-import VisibilitySelector from '../components/VisibilitySelector';
 import { useCreateTask } from '../hooks/useCreateTask';
 import { navigateToTaskDetails, resetToHomeRoot } from '@navigation/types/navigationUtils';
 import { Task, TaskTypeEnum } from '@features/Tasks/types/tasks';
-import { useFollowers } from '@features/User/hooks/useFollowers';
-import { getButtonText, getSubtitle, getTaskPlaceholder, getTitle } from '../utils/taskCopy';
-import AnimatedBottomButton, {
-  BOTTOM_BUTTON_HEIGHT,
-} from '@shared/components/Buttons/AnimatedBottomButton';
+import { BOTTOM_BUTTON_HEIGHT } from '@shared/components/Buttons/AnimatedBottomButton';
 import { isAndroid } from '@shared/utils/constants';
 import { useAuth } from '@features/Auth/AuthProvider';
-import { api } from '@shared/api/axios';
-import { buildRoute } from '@shared/api/apiRoutes';
 import { useModal } from '@shared/components/ModalProvider';
 import { navigationRef } from '@navigation/navigationRef';
 import { requestNotificationPermissionPromptForValueMoment } from '@lib/notifications/NotificationPermissionPrompt';
+import Tag from '@shared/components/Tag/Tag';
+import AnimatedBottomButtonWithHeader from '@shared/components/Buttons/AnimatedBottomButtonWithHeader';
+import TagHelperCard from '../components/TagHelperCard';
+import SelectHelpersModal from '../components/SelectHelpersModal';
+import { HelperUser } from '@features/Home/types/home';
+import { useFollowers } from '@features/User/hooks/useFollowers';
+import { useFollowing } from '@features/User/hooks/useFollowing';
 
 type Props = NativeStackScreenProps<AddTaskStackParamList, 'AddMotivation'>;
+
+const FEELINGS = [
+  'Stuck',
+  'Nervous',
+  'Tired',
+  'Avoiding it',
+  'Overwhelmed',
+  'Almost there',
+] as const;
+type Feeling = (typeof FEELINGS)[number];
 
 export default function AddMotivationScreen({ navigation, route }: Props) {
   const { user } = useAuth();
@@ -45,51 +45,49 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
     () => (navigation as any).getParent?.()?.getParent?.(),
     [navigation],
   );
+
   const [text, setText] = useState('');
-  const [visibility, setVisibility] = useState<'friends' | 'public' | 'private'>('public');
+  const [selectedFeeling, setSelectedFeeling] = useState<Feeling>('Nervous');
   const [helpers, setHelpers] = useState<HelperUser[]>([]);
-  const [createdTask, setCreatedTask] = useState<Task | null>(null);
-  const helperIds = helpers.map(h => h.id);
-  const canSubmit = text.trim().length > 0;
-  const [showSubmit, setShowSubmit] = useState(false);
-
-  const [showHelper, setShowHelper] = useState(visibility !== 'private');
-  const helperOpacity = useState(new Animated.Value(showHelper ? 1 : 0))[0];
-  const helperTranslateY = useState(new Animated.Value(showHelper ? 0 : -12))[0];
   const [showHelperModal, setShowHelperModal] = useState(false);
-
   const [success, setSuccess] = useState(false);
 
   const { mutate: createTask, isPending } = useCreateTask();
-  const { data: friends = [] } = useFollowers(!!user);
+  const { data: followers = [] } = useFollowers(!!user);
+  const { data: following = [] } = useFollowing();
+  const friends = useMemo(() => {
+    const map = new Map<string, HelperUser>();
+    [...followers, ...following].forEach(friend => {
+      map.set(friend.id, friend);
+    });
+    return Array.from(map.values());
+  }, [followers, following]);
 
   useEffect(() => {
     const draft = route.params?.draft;
     if (!draft || draft.type !== TaskTypeEnum.Motivation) return;
 
     setText(draft.text ?? '');
-    setVisibility(draft.visibility ?? 'public');
-    // Helpers require user context; keep empty for guest drafts.
   }, [route.params?.draft]);
 
   const hasAutoSubmittedRef = React.useRef(false);
+  const canSubmit = text.trim().length > 0;
 
   const handleTaskCreated = React.useCallback(
     (task: Task) => {
-      setCreatedTask(task);
       setSuccess(true);
 
       resetToHomeRoot(rootNavigation ?? navigation);
 
       setTimeout(() => {
-      openModal('motivationSuccess', {
-        type: TaskTypeEnum.Motivation,
-        onDone: () => {
-          resetToHomeRoot(rootNavigation ?? navigation);
-        },
-        onViewRequest: () => {
-          if (navigationRef.isReady()) {
-            navigationRef.navigate('App', {
+        openModal('motivationSuccess', {
+          type: TaskTypeEnum.Motivation,
+          onDone: () => {
+            resetToHomeRoot(rootNavigation ?? navigation);
+          },
+          onViewRequest: () => {
+            if (navigationRef.isReady()) {
+              navigationRef.navigate('App', {
                 screen: 'TaskDetail',
                 params: { task },
               });
@@ -134,21 +132,14 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
     });
   }, [createTask, handleTaskCreated, route.params?.draft, route.params?.submitAfterAuth, user]);
 
-  useEffect(() => {
-    setShowSubmit(canSubmit && !success);
-  }, [canSubmit, success]);
-
   function onSubmit() {
     if (!canSubmit) return;
-
-    const effectiveVisibility = user ? visibility : 'private';
-    const effectiveHelpers = user && effectiveVisibility !== 'private' ? helperIds : [];
 
     const payload: CreateTaskPayload = {
       type: TaskTypeEnum.Motivation,
       text: text.trim(),
-      visibility: effectiveVisibility,
-      helpers: effectiveHelpers,
+      visibility: 'public',
+      helpers: helpers.map(helper => helper.id),
     };
 
     if (!user) {
@@ -171,159 +162,290 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
     });
   }
 
-  useEffect(() => {
-    if (visibility !== 'private') {
-      setShowHelper(true);
-
-      Animated.parallel([
-        Animated.timing(helperOpacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(helperTranslateY, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(helperOpacity, {
-          toValue: 0,
-          duration: 160,
-          useNativeDriver: true,
-        }),
-        Animated.timing(helperTranslateY, {
-          toValue: -12,
-          duration: 160,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setShowHelper(false);
-      });
-    }
-  }, [visibility]);
-
-  const handleHelpersConfirmed = React.useCallback(
-    async (ids: string[]) => {
-      const selectedHelpers = friends.filter((friend: HelperUser) => ids.includes(friend.id));
-      setHelpers(selectedHelpers);
-      setShowHelperModal(false);
-
-      if (!createdTask) return;
-
-      try {
-        const { data: updatedTask } = await api.patch<Task>(buildRoute.task(createdTask.id), {
-          helpers: ids,
-        });
-        setCreatedTask(updatedTask);
-      } catch {
-        // no-op
-      }
-    },
-    [createdTask, friends],
-  );
-
   return (
     <Layout
-      footerHeight={showSubmit ? BOTTOM_BUTTON_HEIGHT : 0}
+      footerHeight={canSubmit && !success ? BOTTOM_BUTTON_HEIGHT : 0}
       footerContent={
-        <AnimatedBottomButton
-          title={getButtonText(TaskTypeEnum.Motivation)}
-          visible={showSubmit && !success}
+        <AnimatedBottomButtonWithHeader
+          title="Post it"
+          visible={canSubmit && !success}
           isLoading={isPending}
           onPress={onSubmit}
-          buttonColor={colors.motivationBgHardest}
+          buttonColor={colors.onboardingInk}
+          containerColor={colors.onboardingPaper}
+          // buttonStyle={styles.postButton}
+          buttonHeader="Your goal is visible to the community. "
           style={{ bottom: isAndroid ? vs(-20) : vs(-10) }}
         />
       }
       scrollable
+      // allowPaddingHorizontal={false}
+      allowPaddingVertical={false}
+      backgroundColor={colors.onboardingPaper}
       style={styles.container}
     >
-      <View>
-        <TaskBackground icon={typeIcons.motivation} color={typeBackgroundsHard.motivation} />
-
-        <AppHeader title={''} />
-
-        <TextElement variant="title" style={styles.subtitle}>
-          {getTitle(TaskTypeEnum.Motivation)}
-        </TextElement>
-
-        <TextElement variant="caption" style={styles.subtitle2}>
-          {getSubtitle(TaskTypeEnum.Motivation)}
-        </TextElement>
-
-        <Height size={vs(15)} />
-
-        <Shadow size="high" color={typeBackgrounds.motivation}>
-          <View style={styles.inputCard}>
-            <TaskDescriptionInput
-              value={text}
-              onChange={setText}
-              placeholder={getTaskPlaceholder(TaskTypeEnum.Motivation)}
-              taskType={TaskTypeEnum.Motivation}
-            />
+      <View style={styles.screen}>
+        <View style={styles.headerBlock}>
+          <View style={styles.titleWrap}>
+            <TextElement variant="headline" weight="900" style={styles.titleLine}>
+              What are you
+            </TextElement>
+            <View style={styles.titleSecondLine}>
+              <TextElement variant="headline" weight="900" style={styles.titleLine}>
+                trying to
+              </TextElement>
+              <View style={styles.highlightWrap}>
+                <View style={styles.highlightBar} />
+                <TextElement variant="headline" weight="900" style={styles.highlightText}>
+                  get done?
+                </TextElement>
+              </View>
+            </View>
           </View>
-        </Shadow>
 
-        {user ? (
-          <VisibilitySelector
+          <TextElement variant="body" style={styles.subtitle} color="muted">
+            Put it out there. People here will push you forward — no judgment, just momentum.
+          </TextElement>
+        </View>
+
+        <View style={styles.inputCard}>
+          <TaskDescriptionInput
+            value={text}
+            onChange={setText}
+            placeholder={'e.g. "I want to work out, but I keep putting it off."'}
             taskType={TaskTypeEnum.Motivation}
-            value={visibility}
-            onChange={setVisibility}
+            charLimit={120}
+            footerText="No pressure. Say it as it is."
+            footerTextColor="onboardingMuted"
+            dividerColor={colors.onboardingLine}
+            inputWrapperStyle={styles.inputWrapper}
+            inputStyle={styles.input}
           />
-        ) : null}
+        </View>
 
-        {user && showHelper ? (
-          <Animated.View
-            style={{
-              opacity: helperOpacity,
-              transform: [{ translateY: helperTranslateY }],
-            }}
-          >
-            <TagHelperCard
-              helpers={helpers}
-              onPress={() => setShowHelperModal(true)}
-              taskType={TaskTypeEnum.Motivation}
-            />
-          </Animated.View>
-        ) : null}
+        <View style={styles.feelingsBlock}>
+          <TextElement variant="label" weight="700" style={styles.sectionLabel}>
+            HOW DOES IT FEEL RIGHT NOW?
+          </TextElement>
 
-        {user ? (
-          <SelectHelpersModal
-            visible={showHelperModal}
-            selected={helpers.map(h => h.id)}
-            onClose={() => setShowHelperModal(false)}
-            friends={friends}
-            onConfirm={handleHelpersConfirmed}
-            confirmButtonColor={colors.motivationBgHardest}
-          />
-        ) : null}
+          <View style={styles.tagWrap}>
+            {FEELINGS.map(feeling => {
+              const selected = selectedFeeling === feeling;
+
+              return (
+                <Tag
+                  key={feeling}
+                  label={feeling}
+                  selectOnly
+                  selected={selected}
+                  onPress={() => setSelectedFeeling(feeling)}
+                  fillColor={selected ? colors.onboardingInk : colors.onboardingCard}
+                  borderColor={selected ? colors.onboardingInk : colors.onboardingLine}
+                  labelColor={selected ? 'onPrimary' : 'onboardingInk'}
+                  style={styles.feelTag}
+                />
+              );
+            })}
+          </View>
+        </View>
+
+        <TagHelperCard
+          variant="prompt"
+          helpers={helpers}
+          onPress={() => setShowHelperModal(true)}
+          taskType={TaskTypeEnum.Motivation}
+          headerLabel="TAG A FRIEND  —"
+          headerSuffix="optional"
+          title="Tag someone who keeps you honest"
+          subtitle="They'll get a nudge to push you."
+        />
+        {/* <View style={styles.footerCopy}>
+          <TextElement variant="body" style={styles.footerText} color="onboardingMuted">
+            Your goal is visible to the community. First pushes usually land within minutes — no one
+            posts into silence.
+          </TextElement>
+        </View> */}
+
+        <SelectHelpersModal
+          visible={showHelperModal}
+          selected={helpers.map(helper => helper.id)}
+          onClose={() => setShowHelperModal(false)}
+          friends={friends}
+          onConfirm={ids => {
+            const selectedHelpers = friends.filter(friend => ids.includes(friend.id));
+            setHelpers(selectedHelpers);
+          }}
+        />
       </View>
     </Layout>
   );
 }
 
 const styles = StyleSheet.create({
-  subtitle: {
-    marginTop: vs(20),
-    fontSize: vs(22),
-    lineHeight: vs(26),
-    fontWeight: '600',
+  container: {
+    backgroundColor: colors.onboardingPaper,
   },
-  subtitle2: {
-    marginTop: vs(7),
-    fontWeight: '300',
-    marginEnd: spacing.lg,
-    color: colors.text,
+  screen: {
+    paddingTop: vs(18),
+    paddingBottom: vs(34),
+    // paddingHorizontal: ms(28),
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: vs(14),
+  },
+  wordmark: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: ms(8),
+  },
+  logoTicks: {
+    flexDirection: 'row',
+    gap: ms(3),
+  },
+  logoTick: {
+    width: ms(4),
+    height: vs(16),
+    borderRadius: 1,
+    backgroundColor: colors.onboardingInk,
+    transform: [{ skewX: '-18deg' }],
+  },
+  logoTickAccent: {
+    backgroundColor: colors.onboardingPush,
+  },
+  wordmarkText: {
+    color: colors.onboardingInk,
+    letterSpacing: -0.4,
+  },
+  streakPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: ms(6),
+    paddingHorizontal: ms(14),
+    paddingVertical: vs(8),
+    borderRadius: 999,
+    backgroundColor: colors.onboardingInk,
+  },
+  streakTicks: {
+    flexDirection: 'row',
+    gap: ms(2),
+  },
+  streakTick: {
+    width: ms(3),
+    height: vs(12),
+    borderRadius: 1,
+    backgroundColor: colors.onboardingPush,
+    transform: [{ skewX: '-18deg' }],
+  },
+  streakTickAccent: {
+    opacity: 0.75,
+  },
+  streakText: {
+    color: colors.onboardingPush,
+    letterSpacing: -0.2,
+  },
+  kicker: {
+    color: colors.onboardingMuted,
+    marginBottom: vs(18),
+    fontSize: ms(14),
+    lineHeight: ms(20),
+  },
+  headerBlock: {
+    marginTop: vs(8),
+  },
+  titleWrap: {},
+  titleLine: {
+    color: colors.onboardingInk,
+    fontSize: ms(28),
+    lineHeight: ms(28),
+    letterSpacing: -0.6,
+  },
+  titleSecondLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  highlightWrap: {
+    position: 'relative',
+    marginLeft: ms(4),
+    paddingHorizontal: ms(2),
+    paddingBottom: vs(2),
+  },
+  highlightBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: vs(2),
+    height: vs(11),
+    backgroundColor: colors.onboardingPush,
+  },
+  highlightText: {
+    position: 'relative',
+    color: colors.onboardingInk,
+    fontSize: ms(28),
+    lineHeight: ms(28),
+    letterSpacing: -0.6,
+  },
+  subtitle: {
+    marginTop: vs(10),
+    fontSize: ms(14),
+    lineHeight: ms(20),
+    letterSpacing: -0.1,
   },
   inputCard: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
+    backgroundColor: colors.onboardingCard,
+    borderRadius: 28,
     padding: spacing.md,
+    marginTop: vs(16),
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 3,
   },
-  container: {
-    backgroundColor: typeBackgrounds.motivation,
+  inputWrapper: {
+    height: vs(70),
+    borderColor: colors.onboardingPush,
+    // borderWidth: 2,
+    minHeight: vs(120),
+    backgroundColor: colors.onboardingCard,
+  },
+  input: {
+    // minHeight: vs(90),
+    fontSize: ms(17),
+    lineHeight: ms(23),
+    paddingHorizontal: spacing.sm,
+    paddingTop: 0,
+    color: colors.onboardingInk,
+  },
+  feelingsBlock: {
+    marginTop: vs(24),
+  },
+  sectionLabel: {
+    color: colors.muted,
+    letterSpacing: 1.4,
+    fontSize: ms(12),
+    fontWeight: '800',
+  },
+  tagWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: vs(7),
+  },
+  feelTag: {
+    borderRadius: 999,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
+  footerCopy: {
+    marginTop: vs(24),
+    marginBottom: vs(8),
+  },
+  footerText: {
+    fontSize: ms(14),
+    lineHeight: ms(20),
   },
 });

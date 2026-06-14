@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -26,6 +26,7 @@ import { useCreateTask } from '../hooks/useCreateTask';
 import { resetToHomeRoot } from '@navigation/types/navigationUtils';
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 import { useFollowers } from '@features/User/hooks/useFollowers';
+import { useFollowing } from '@features/User/hooks/useFollowing';
 import { getButtonText, getTaskPlaceholder, getTitle } from '../utils/taskCopy';
 import DecisionChoicesInput from '../components/DecisionChoicesInput.tsx';
 import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton.tsx';
@@ -58,7 +59,15 @@ export default function AddDecisionScreen({ navigation, route }: Props) {
     text.trim().length > 0 && options.length === 2 && options.every(o => o.trim().length > 0);
 
   const { mutate: createTask, isPending } = useCreateTask();
-  const { data: friends = [] } = useFollowers(!!user);
+  const { data: followers = [] } = useFollowers(!!user);
+  const { data: following = [] } = useFollowing();
+  const friends = useMemo(() => {
+    const map = new Map<string, HelperUser>();
+    [...followers, ...following].forEach(friend => {
+      map.set(friend.id, friend);
+    });
+    return Array.from(map.values());
+  }, [followers, following]);
 
   useEffect(() => {
     const draft = route.params?.draft;
