@@ -2,12 +2,11 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Avatar from '@shared/components/Avatar/Avatar';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
 import { notificationStyles } from '../styles/notification.styles';
-import { Icon } from '@shared/components/Icons';
-import { ms } from 'react-native-size-matters';
+import NotificationIconBadge from './NotificationIconBadge';
 
 type Props = {
   item: NotificationDTO;
@@ -36,31 +35,14 @@ export default function FollowNotification({ item, onPress }: Props) {
         </TextElement>
       </View>
 
-      <Icon
-        style={styles.icon}
-        set="fa6"
-        name="user"
-        size={ms(20)}
-        color={colors.muted}
-        iconStyle="solid"
-      />
+      <NotificationIconBadge iconName="user" />
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {},
   textContainer: {
     flex: 1,
     marginLeft: spacing.md,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginLeft: spacing.sm,
-  },
-  icon: {
-    marginRight: ms(5),
   },
 });

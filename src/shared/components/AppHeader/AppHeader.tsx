@@ -61,18 +61,16 @@ export default function AppHeader({
           )}
         </View>
 
-        {showTitle && (
-          <View style={styles.titleRow}>
+        <View style={styles.titleRow}>
+          {showTitle && (
             <TextElement variant="subtitle" style={styles.title}>
               {title}
             </TextElement>
-          </View>
-        )}
+          )}
+        </View>
 
         <View style={styles.rightSide}>
-          <View style={styles.rightSide}>
-            {right !== null ? right : <Width size={ms(50)} style={styles.side} />}
-          </View>
+          {right !== null ? right : <Width size={ms(50)} style={styles.side} />}
         </View>
       </View>
       {inDevelopment && (
@@ -89,7 +87,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     // borderBottomColor: colors.border,
   },
   title: {
@@ -111,8 +109,8 @@ const styles = StyleSheet.create({
   },
   leftSide: {
     width: ms(50),
-    left: -8,
     justifyContent: 'flex-start',
+    alignItems: 'flex-start',
     // backgroundColor: 'red',
   },
   rightSide: {

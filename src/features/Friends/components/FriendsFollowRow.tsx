@@ -7,10 +7,12 @@ import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import { useTheme } from '@shared/theme/useTheme';
 import { moderateScale, ms, vs } from 'react-native-size-matters';
 import Avatar from '@shared/components/Avatar/Avatar';
-
+import { getAvatarColor } from '@shared/utils/avatarColor';
+import { colors } from '@shared/theme';
 type Props = {
+  userId?: string | null;
   name: string;
-  email: string;
+  username?: string | null;
   isFollowing: boolean;
   onToggleFollow: () => void;
   photo?: string;
@@ -19,8 +21,9 @@ type Props = {
 };
 
 export default function FriendFollowRow({
+  userId,
   name,
-  email,
+  username,
   isFollowing,
   photo,
   isLoading,
@@ -28,32 +31,48 @@ export default function FriendFollowRow({
   onPressRow,
 }: Props) {
   const { colors, spacing } = useTheme();
+  const handle = username?.trim() ? `@${username.trim()}` : null;
 
   return (
     <Pressable
       onPress={() => onPressRow()}
-      style={[styles.container, { borderColor: colors.border, paddingVertical: spacing.sm }]}
+      style={[styles.container, { borderColor: colors.border, paddingVertical: vs(11) }]}
     >
       <View style={styles.leftSection}>
-        <Avatar uri={photo} size={45} borderColor="#5C6BC0" />
+        <Avatar
+          uri={photo}
+          fallback={name}
+          size={44}
+          borderColor="transparent"
+          fallbackStyle={{ backgroundColor: getAvatarColor(userId || name) }}
+          textStyle={styles.avatarText}
+        />
         <View style={styles.textContainer}>
-          <TextElement variant="body" weight="600">
+          <TextElement style={styles.nameText} numberOfLines={1} ellipsizeMode="tail">
             {name}
           </TextElement>
-          <TextElement variant="caption" style={styles.emailText} color="muted">
-            {email}
-          </TextElement>
+          {handle ? (
+            <TextElement
+              variant="caption"
+              style={styles.emailText}
+              color="muted"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {handle}
+            </TextElement>
+          ) : null}
         </View>
       </View>
       <OutlineButton
         isLoading={isLoading}
         title={isFollowing ? 'Following' : 'Follow'}
         onPress={onToggleFollow}
-        type={isFollowing ? 'alt' : 'default'}
-        textStyle={{
-          color: isFollowing ? colors.onAccent : colors.primary,
-          fontSize: moderateScale(10),
-        }}
+        type={isFollowing ? 'default' : 'alt'}
+        backgroundColor={isFollowing ? colors.tactileMomentumPrimary : colors.onboardingInk}
+        borderColor={isFollowing ? colors.onboardingLine : colors.onboardingInk}
+        textColor={isFollowing ? colors.onboardingInk : colors.onPrimary}
+        textStyle={{ fontSize: moderateScale(12), fontWeight: '700' }}
         style={styles.button}
       />
     </Pressable>
@@ -61,8 +80,17 @@ export default function FriendFollowRow({
 }
 
 const styles = StyleSheet.create({
+  avatarText: {
+    color: colors.onboardingInk,
+    fontWeight: '800',
+  },
+  nameText: {
+    fontSize: moderateScale(15),
+    fontWeight: '700',
+  },
   emailText: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(12),
+    marginTop: vs(1),
   },
   container: {
     flexDirection: 'row',
@@ -81,8 +109,9 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   button: {
-    minWidth: ms(100),
-    // maxHeight: ms(40),
-    paddingVertical: vs(8),
+    minWidth: ms(96),
+    borderRadius: 999,
+    paddingVertical: vs(7),
+    paddingHorizontal: ms(14),
   },
 });

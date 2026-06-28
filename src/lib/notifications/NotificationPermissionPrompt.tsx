@@ -35,16 +35,19 @@ const syncFcmTokenToBackend = async (fcmToken: string) => {
     if (!userRaw) return;
 
     const parsedUser = JSON.parse(userRaw) as StoredUser;
-    const userId = parsedUser?.id;
-    if (!userId || !parsedUser.email) return;
+    const userId = parsedUser?.id?.trim();
+    const name = parsedUser?.name?.trim();
+    const email = parsedUser?.email?.trim();
+
+    if (!userId || !name || !email) return;
 
     const idToken = await getGoogleIdToken();
     const response = await api.post(
       buildRoute.syncUserToDb(),
       {
         id: userId,
-        name: parsedUser.name ?? '',
-        email: parsedUser.email,
+        name,
+        email,
         photo: parsedUser.photo ?? '',
         fcmToken,
       },

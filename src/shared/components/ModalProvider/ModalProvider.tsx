@@ -19,6 +19,7 @@ import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
 import {
   type ComingSoonModalPayload,
+  type CheerModalPayload,
   type InfoModalPayload,
   type ModalPayloadMap,
   type ModalState,
@@ -36,6 +37,7 @@ type ModalContextType = {
   openInfo: (payload: InfoModalPayload) => void;
   openReminderMessageSheet: (payload: ReminderMessageModalPayload) => void;
   openShareUpdateSheet: (payload: ShareUpdateModalPayload) => void;
+  openCheerSheet: (payload: CheerModalPayload) => void;
   openComingSoonSheet: (payload: ComingSoonModalPayload) => void;
 };
 
@@ -79,6 +81,13 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
   const openShareUpdateSheet = useCallback(
     (payload: ShareUpdateModalPayload) => {
       openModal('shareUpdate', payload);
+    },
+    [openModal],
+  );
+
+  const openCheerSheet = useCallback(
+    (payload: CheerModalPayload) => {
+      openModal('cheer', payload);
     },
     [openModal],
   );
@@ -143,6 +152,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
         openInfo,
         openReminderMessageSheet,
         openShareUpdateSheet,
+        openCheerSheet,
         openComingSoonSheet,
       }}
     >

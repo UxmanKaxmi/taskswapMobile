@@ -13,14 +13,12 @@ import TabButton from '../components/TabButton';
 import { Layout } from '@shared/components/Layout';
 import Row from '@shared/components/Layout/Row';
 import Search from '@shared/components/Search/Search';
+import PageHeader from '@shared/components/PageHeader/PageHeader';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Height } from '@shared/components/Spacing';
-import { AppStackParamList } from '@navigation/types/navigation';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
-import AuthIntroScreen from '@features/Auth/screens/AuthIntroScreen';
 import { useAuth } from '@features/Auth/AuthProvider';
-import { colors } from '@shared/theme';
+import { colors, spacing } from '@shared/theme';
+import { ms } from 'react-native-size-matters';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -29,8 +27,6 @@ export default function FindFriendsMainScreen() {
   const [activeTab, setActiveTab] = useState<'following' | 'followers'>('following');
   const [searchQuery, setSearchQuery] = useState('');
   const isSearching = !!searchQuery.trim();
-  const previousIsSearching = useRef(isSearching);
-  const navigation = useNavigation();
   const { loading } = useAuth();
 
   const searchAnim = useRef(new Animated.Value(0)).current;
@@ -54,81 +50,101 @@ export default function FindFriendsMainScreen() {
   // }
 
   return (
-    <Layout edgesProp={['top']}>
-      <Search
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        onClear={() => setSearchQuery('')}
-        placeholder="Search friends..."
-      />
+    <Layout
+      allowPaddingHorizontal={false}
+      edgesProp={['top']}
+      backgroundColor={colors.onboardingPaper}
+    >
+      <View style={styles.screen}>
+        <View style={styles.headerBlock}>
+          <PageHeader title="Friends" />
 
-      {/* Tabs */}
-      <Animated.View
-        style={{
-          opacity: searchAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [1, 0],
-          }),
-          transform: [
-            {
-              translateY: searchAnim.interpolate({
+          <Search
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onClear={() => setSearchQuery('')}
+            placeholder="Search friends..."
+          />
+
+          {/* Tabs */}
+          <Animated.View
+            style={{
+              opacity: searchAnim.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, -8],
+                outputRange: [1, 0],
               }),
-            },
-          ],
-        }}
-      >
-        {!isSearching && (
-          <>
-            <Row
-              justify="flex-start"
-              style={{
-                borderBottomWidth: StyleSheet.hairlineWidth,
-                borderBottomColor: colors.border,
-              }}
-            >
-              <TabButton
-                title="Following"
-                isActive={activeTab === 'following'}
-                onPress={() => setActiveTab('following')}
-              />
-              <TabButton
-                title="Followers"
-                isActive={activeTab === 'followers'}
-                onPress={() => setActiveTab('followers')}
-              />
-            </Row>
-            <Height size={6} />
-          </>
-        )}
-      </Animated.View>
+              transform: [
+                {
+                  translateY: searchAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -8],
+                  }),
+                },
+              ],
+            }}
+          >
+            {!isSearching && (
+              <>
+                <Row
+                  justify="flex-start"
+                  gap={ms(18)}
+                  style={{
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                    borderBottomColor: colors.border,
+                  }}
+                >
+                  <TabButton
+                    title="Following"
+                    isActive={activeTab === 'following'}
+                    onPress={() => setActiveTab('following')}
+                  />
+                  <TabButton
+                    title="Followers"
+                    isActive={activeTab === 'followers'}
+                    onPress={() => setActiveTab('followers')}
+                  />
+                </Row>
+                <Height size={6} />
+              </>
+            )}
+          </Animated.View>
 
-      {/* Search Results Header */}
-      <Animated.View
-        style={{
-          opacity: searchAnim,
-          transform: [
-            {
-              translateY: searchAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [8, 0],
-              }),
-            },
-          ],
-        }}
-      >
-        {isSearching && (
-          <>
-            <Height size={5} />
-            <TextElement variant="subtitle" style={{ fontWeight: '600' }}>
-              Search Results
-            </TextElement>
-          </>
-        )}
-      </Animated.View>
+          {/* Search Results Header */}
+          <Animated.View
+            style={{
+              opacity: searchAnim,
+              transform: [
+                {
+                  translateY: searchAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [8, 0],
+                  }),
+                },
+              ],
+            }}
+          >
+            {isSearching && (
+              <>
+                <Height size={5} />
+                <TextElement variant="subtitle" style={{ fontWeight: '600' }}>
+                  Search Results
+                </TextElement>
+              </>
+            )}
+          </Animated.View>
+        </View>
 
-      <FriendList type={activeTab} searchQuery={searchQuery} />
+        <FriendList type={activeTab} searchQuery={searchQuery} />
+      </View>
     </Layout>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  headerBlock: {
+    paddingHorizontal: spacing.lg,
+  },
+});

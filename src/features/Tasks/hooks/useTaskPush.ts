@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TaskPush } from '../types/tasks';
-import { buildQueryKey } from '@shared/constants/queryKeys';
+import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
 import { getTaskPushes, toggleTaskPush } from '../api/taskPush.api';
 import { useAuth } from '@features/Auth/AuthProvider';
+import type { HomeSummaryResponse } from '@features/Home/types/home';
 
 // ✅ Fetch pushes for a task
 export function useTaskPushes(taskId: string) {
@@ -11,6 +12,10 @@ export function useTaskPushes(taskId: string) {
     queryKey: buildQueryKey.pushesForTask(taskId ?? ''),
     queryFn: () => getTaskPushes(taskId!),
     enabled: !!taskId && isAuthenticated,
+    // Avoid a network refetch every time a feed card remounts while scrolling.
+    // The toggle mutation invalidates this key explicitly, so pushed/unpushed
+    // state still updates correctly despite the longer staleTime.
+    staleTime: 60_000,
   });
 }
 
@@ -40,13 +45,44 @@ export function useToggleTaskPush(taskId: string) {
         });
       }
 
-      return { previous };
+      const nextHasPushed = previous ? !previous.hasPushed : true;
+      const compactStatusDelta = nextHasPushed ? 1 : -1;
+      const previousHomeSummaries = queryClient.getQueriesData<HomeSummaryResponse>({
+        queryKey: [QueryKeys.HomeSummary],
+      });
+
+      queryClient.setQueriesData<HomeSummaryResponse>(
+        { queryKey: [QueryKeys.HomeSummary] },
+        old => {
+          if (!old?.compactStatus) return old;
+
+          const pushedTodayCount = Math.max(
+            0,
+            old.compactStatus.pushedTodayCount + compactStatusDelta,
+          );
+
+          return {
+            ...old,
+            compactStatus: {
+              ...old.compactStatus,
+              pushedTodayCount,
+              streakDay: pushedTodayCount > 0 ? Math.max(old.compactStatus.streakDay, 1) : 0,
+            },
+          };
+        },
+      );
+
+      return { previous, previousHomeSummaries };
     },
 
     onError: (_err, _vars, context) => {
       if (context?.previous) {
         queryClient.setQueryData(queryKey, context.previous);
       }
+
+      context?.previousHomeSummaries?.forEach(([homeSummaryQueryKey, homeSummaryData]) => {
+        queryClient.setQueryData(homeSummaryQueryKey, homeSummaryData);
+      });
     },
 
     onSettled: () => {
@@ -55,11 +91,14 @@ export function useToggleTaskPush(taskId: string) {
         queryKey: buildQueryKey.taskById(taskId),
       });
       queryClient.invalidateQueries({
-        queryKey: buildQueryKey.tasks(),
+        queryKey: [QueryKeys.HomeSummary],
       });
-      queryClient.invalidateQueries({
-        queryKey: buildQueryKey.homeSummary(),
-      });
+      // NOTE: we intentionally do NOT invalidate the feed list (buildQueryKey.tasks())
+      // here. On the "Needs a push" feed the server drops a task once it has been
+      // pushed, so refetching immediately would yank the card out from under the
+      // user the instant they tap Push. Instead the card stays put (showing
+      // "Pushed ✓") and only leaves on the next feed reload — pull-to-refresh,
+      // tab switch (focus refetch), or feed-sort change.
     },
   });
 }

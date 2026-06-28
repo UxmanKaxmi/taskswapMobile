@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useTheme } from '@shared/theme/useTheme';
+import { platformShadow } from '@shared/theme';
 import TextElement from '../TextElement/TextElement';
 import { ms, vs } from 'react-native-size-matters';
 import { isAndroid } from '@shared/utils/constants';
@@ -23,6 +24,9 @@ export interface AnimatedBottomButtonWithHeaderProps {
 
   /** Background color of the button */
   buttonColor?: string;
+
+  /** Text/spinner color of the button (defaults to onPrimary/white) */
+  textColor?: string;
 
   /** Background color of the bottom sheet */
   containerColor?: string;
@@ -49,6 +53,7 @@ export default function AnimatedBottomButtonWithHeader({
   isLoading = false,
   onToggleComplete,
   buttonColor,
+  textColor,
   containerColor,
   style,
   buttonHeader,
@@ -56,6 +61,7 @@ export default function AnimatedBottomButtonWithHeader({
   showButton = true,
 }: AnimatedBottomButtonWithHeaderProps) {
   const { colors } = useTheme();
+  const resolvedTextColor = textColor ?? colors.onPrimary;
   const hasButton = showButton !== false && !!title && !!onPress;
   const sheetMinHeight = hasButton
     ? buttonHeader
@@ -124,9 +130,9 @@ export default function AnimatedBottomButtonWithHeader({
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color={colors.onPrimary} />
+              <ActivityIndicator color={resolvedTextColor} />
             ) : (
-              <TextElement color="onPrimary" weight="600">
+              <TextElement weight="600" style={{ color: resolvedTextColor }}>
                 {title}
               </TextElement>
             )}
@@ -158,10 +164,12 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
 
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: -4 },
-    elevation: 14,
+    ...platformShadow({
+      color: '#000',
+      opacity: 0.15,
+      radius: 12,
+      offset: { width: 0, height: -4 },
+    }),
   },
 
   buttonHeader: {
@@ -177,7 +185,7 @@ const styles = StyleSheet.create({
 
   button: {
     height: vs(48),
-    width: '95%',
+    width: '90%',
     alignSelf: 'center',
     borderRadius: 14,
     justifyContent: 'center',

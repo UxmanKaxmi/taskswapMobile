@@ -25,7 +25,7 @@ export default function Search({
 
   return (
     <View style={styles.container}>
-      <Icon set="ion" name={'search'} color={colors.muted} size={ms(15)} />
+      <Icon set="ion" name={'search'} color={colors.muted} size={ms(16)} />
       <TextInput
         style={resolvedInputStyle}
         placeholder={placeholder}
@@ -47,19 +47,19 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.adviceBg,
-    borderRadius: 12,
+    backgroundColor: colors.onboardingLine,
+    borderRadius: 14,
     paddingHorizontal: spacing.md,
-    minHeight: vs(40),
+    minHeight: vs(35),
     // paddingVertical: vs(10),
     marginTop: spacing.md,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   input: {
     flex: 1,
-    fontSize: 16,
-    color: colors.text,
-    marginLeft: spacing.md,
+    fontSize: ms(15),
+    color: colors.onboardingInk,
+    marginLeft: spacing.sm,
   },
   clearButton: {
     marginLeft: spacing.xs,

@@ -1,3 +1,42 @@
+import type { FeelingValue } from '@shared/utils/feelings';
+
+export type AvatarUser = {
+  id: string;
+  name?: string;
+  photo?: string | null;
+  avatar?: string | null;
+};
+
+export type CheerPreset = {
+  key: string;
+  text: string;
+};
+
+export type BeatCheerState = {
+  beatId: string;
+  isLatest: boolean;
+  isCheeringOpen: boolean;
+  cheerCount: number;
+  distinctCheererCount?: number;
+  sampleCheerers: AvatarUser[];
+  callerHasCheered: boolean;
+  callerCheer?: {
+    presetKey: string;
+    presetText: string;
+    createdAt: string;
+  };
+  isMostCheered: boolean;
+};
+
+export type TaskBeat = BeatCheerState & {
+  id?: string;
+  taskId?: string;
+  type: 'post' | 'update';
+  updateId?: string | null;
+  text?: string | null;
+  createdAt: string;
+};
+
 // ✅ Define all possible task types
 export type TaskType = 'reminder' | 'decision' | 'motivation' | 'advice';
 
@@ -21,9 +60,9 @@ export type Task = {
   remindAt?: string; // for reminder tasks
   options?: string[]; // for decision tasks
   deliverAt?: string; // for motivation tasks
-  visibility?: 'friends' | 'public' | 'private';
   avatar?: string;
   name?: string;
+  feeling?: FeelingValue;
   hasAdvised?: boolean;
   hasVoted?: boolean;
   voteCount?: number;
@@ -31,6 +70,11 @@ export type Task = {
     string | { id: string; name?: string; photo?: string | null; avatar?: string | null }
   >;
   progressUpdates?: ProgressUpdate[];
+  beats?: TaskBeat[];
+  cheerTotal?: number;
+  distinctCheererCount?: number;
+  sampleCheerers?: AvatarUser[];
+  mostCheeredBeatId?: string | null;
   pushCount?: number;
   hasPushed?: boolean;
   viewCount?: number;
@@ -56,6 +100,7 @@ export type ProgressUpdate = {
 export interface TaskPayload {
   text: string;
   type: TaskType;
+  feeling?: FeelingValue;
   remindAt?: string;
   options?: string[];
   deliverAt?: string;

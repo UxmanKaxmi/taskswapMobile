@@ -21,7 +21,6 @@ import TagHelperCard from '../components/TagHelperCard';
 import { HelperUser } from '@features/Home/types/home';
 import SelectHelpersModal from '../components/SelectHelpersModal';
 import { CreateTaskPayload } from '../types/addTask.types';
-import VisibilitySelector from '../components/VisibilitySelector';
 import { useCreateTask } from '../hooks/useCreateTask';
 import { resetToHomeRoot } from '@navigation/types/navigationUtils';
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
@@ -38,15 +37,13 @@ type Props = NativeStackScreenProps<AddTaskStackParamList, 'AddDecision'>;
 export default function AddDecisionScreen({ navigation, route }: Props) {
   const { user } = useAuth();
   const [text, setText] = useState('');
-  const [visibility, setVisibility] = useState<'friends' | 'public' | 'private'>('public');
 
   const [helpers, setHelpers] = useState<HelperUser[]>([]);
   const helperIds = helpers.map(h => h.id);
   const canSubmit = text.trim().length > 0;
 
-  const [showHelper, setShowHelper] = useState(visibility !== 'private');
-  const helperOpacity = useState(new Animated.Value(showHelper ? 1 : 0))[0];
-  const helperTranslateY = useState(new Animated.Value(showHelper ? 0 : -12))[0];
+  const helperOpacity = useState(new Animated.Value(1))[0];
+  const helperTranslateY = useState(new Animated.Value(0))[0];
   const [showHelperModal, setShowHelperModal] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
 
@@ -74,7 +71,6 @@ export default function AddDecisionScreen({ navigation, route }: Props) {
     if (!draft || draft.type !== TaskTypeEnum.Decision) return;
 
     setText(draft.text ?? '');
-    setVisibility(draft.visibility ?? 'public');
     setOptions(draft.options?.length ? [...draft.options] : ['', '']);
   }, [route.params?.draft]);
 
@@ -125,14 +121,10 @@ export default function AddDecisionScreen({ navigation, route }: Props) {
   function onSubmit() {
     if (!canSubmitDecision) return;
 
-    const effectiveVisibility = user ? visibility : 'private';
-    const effectiveHelpers = user && effectiveVisibility !== 'private' ? helperIds : [];
-
     const payload: CreateTaskPayload = {
       type: TaskTypeEnum.Decision,
       text: text.trim(),
-      visibility: effectiveVisibility,
-      helpers: effectiveHelpers,
+      helpers: helperIds,
       options: options.map(o => o.trim()),
     };
 
@@ -162,40 +154,6 @@ export default function AddDecisionScreen({ navigation, route }: Props) {
       },
     });
   }
-
-  useEffect(() => {
-    if (visibility !== 'private') {
-      setShowHelper(true);
-
-      Animated.parallel([
-        Animated.timing(helperOpacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(helperTranslateY, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(helperOpacity, {
-          toValue: 0,
-          duration: 160,
-          useNativeDriver: true,
-        }),
-        Animated.timing(helperTranslateY, {
-          toValue: -12,
-          duration: 160,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setShowHelper(false);
-      });
-    }
-  }, [visibility]);
 
   return (
     <Layout
@@ -242,14 +200,6 @@ export default function AddDecisionScreen({ navigation, route }: Props) {
         <DecisionChoicesInput choices={options} onChange={setOptions} />
 
         {user ? (
-          <VisibilitySelector
-            taskType={TaskTypeEnum.Decision}
-            value={visibility}
-            onChange={setVisibility}
-          />
-        ) : null}
-
-        {user && showHelper ? (
           <Animated.View
             style={{
               opacity: helperOpacity,
@@ -274,7 +224,6 @@ export default function AddDecisionScreen({ navigation, route }: Props) {
               const selectedHelpers = friends.filter((f: { id: string }) => ids.includes(f.id));
               setHelpers(selectedHelpers);
             }}
-            confirmButtonColor={colors.decisionBgHardest}
           />
         ) : null}
       </Animated.View>

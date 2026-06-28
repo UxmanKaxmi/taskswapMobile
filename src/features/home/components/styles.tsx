@@ -21,9 +21,8 @@ export const cardStyles = StyleSheet.create({
     color: colors.text,
   },
   card: {
-    marginHorizontal: spacing.md,
-
-    marginVertical: vs(8),
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
     borderRadius: spacing.md,
   },
   touchable: {

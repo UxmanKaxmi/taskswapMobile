@@ -84,6 +84,8 @@ export type AppStackParamList = {
         openUpdateComposer?: boolean;
         pushId?: string;
         progressUpdateId?: string;
+        beatId?: string;
+        highlightBeatId?: string;
       }
     | undefined;
 
@@ -100,6 +102,7 @@ export type AppStackParamList = {
 
   // profile
   MyProfileMainScreen: undefined;
+  SendFeedbackScreen: undefined;
 
   // debug
   MainDebugScreen: undefined;

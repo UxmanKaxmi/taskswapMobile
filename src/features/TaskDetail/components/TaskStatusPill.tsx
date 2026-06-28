@@ -25,7 +25,7 @@ export default function TaskStatusPill({ status }: Props) {
         <Icon set="ion" name="checkmark-circle" size={14} color={tone.icon} />
       )}
 
-      <TextElement style={[styles.label, { color: tone.text }]}>
+      <TextElement variant="title" weight="700" style={[styles.label, { color: tone.text }]}>
         {isActive ? 'Active' : 'Completed'}
       </TextElement>
     </View>
@@ -34,43 +34,43 @@ export default function TaskStatusPill({ status }: Props) {
 
 const activeTone = {
   pill: {
-    backgroundColor: hexToRgba(colors.motivationBgHardest, 0.1),
-    borderColor: hexToRgba(colors.motivationBgHardest, 0.24),
+    backgroundColor: hexToRgba(colors.tactileMomentumPrimary, 0.2),
+    borderColor: hexToRgba(colors.tactileMomentumPrimary, 0.3),
   },
-  text: colors.motivationBgHardest,
-  icon: colors.motivationBgHardest,
+  text: colors.tactileMomentumSecondary,
+  icon: colors.tactileMomentumSecondary,
 };
 
 const completedTone = {
   pill: {
-    backgroundColor: hexToRgba(colors.motivationBgHardest, 0.08),
-    borderColor: hexToRgba(colors.motivationBgHardest, 0.12),
+    backgroundColor: colors.onboardingInk,
+    borderColor: colors.onboardingInk,
   },
-  text: '#7B8A84',
-  icon: colors.motivationBgHardest,
+  text: colors.onboardingCard,
+  icon: colors.onboardingPush,
 };
 
 const styles = StyleSheet.create({
   pill: {
-    minHeight: 28,
-    paddingHorizontal: 10,
+    minHeight: ms(30),
+    paddingHorizontal: ms(12),
     borderRadius: 999,
     borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: ms(6),
   },
 
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.motivationBgHardest,
+    width: ms(6),
+    height: ms(6),
+    borderRadius: ms(3),
+    backgroundColor: colors.onboardingPushDeep,
   },
 
   label: {
-    fontSize: ms(11),
-    fontWeight: '500',
+    fontSize: ms(12),
+    fontWeight: '700',
   },
 });

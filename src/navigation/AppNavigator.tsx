@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Screens that open ABOVE the tabs
 import MainDebugScreen from '@features/Debug/MainDebugScreen';
-import AddTaskScreen from '@features/Tasks/screens/AddTaskScreen';
 import FindFriendsScreen from '@features/Friends/screens/FindFriendsScreen';
 import InviteFriendsScreen from '@features/Invite/screens/InviteFriendsScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
@@ -15,6 +14,7 @@ import BottomTabsIOS from './BottomTabsIOS';
 import BottomTabsAndroid from './BottomTabsAndroid';
 import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
 import TaskDetailScreen from '@features/TaskDetail/screens/TaskDetailScreen';
+import SendFeedbackScreen from '@features/MyProfile/screens/SendFeedbackScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -38,7 +38,7 @@ export default function AppNavigator() {
       <Stack.Screen
         name="FindFriendsScreen"
         component={FindFriendsScreen}
-        options={({ route }) => ({
+        options={({ route: _route }) => ({
           // // presentation: route.params?.openedFromHome ? 'modal' : 'card',
           // animation: route.params?.openedFromHome ? 'slide_from_bottom' : 'default',
           // animationDuration: route.params?.openedFromHome ? 300 : undefined,
@@ -51,6 +51,7 @@ export default function AppNavigator() {
       <Stack.Screen name="MainDebugScreen" component={MainDebugScreen} />
 
       <Stack.Screen name="FriendsProfileScreen" component={FriendsProfileScreen} />
+      <Stack.Screen name="SendFeedbackScreen" component={SendFeedbackScreen} />
     </Stack.Navigator>
   );
 }

@@ -7,8 +7,7 @@ import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
 import { getTypeColor, typeIcons } from '@shared/utils/typeVisuals';
 import { notificationStyles } from '../styles/notification.styles';
-import { ms } from 'react-native-size-matters';
-import { Icon } from '@shared/components/Icons';
+import NotificationIconBadge from './NotificationIconBadge';
 
 type Props = {
   item: NotificationDTO;
@@ -51,14 +50,7 @@ export default function TaskAdviceNotification({ item, onPress }: Props) {
         </TextElement>
       </View>
 
-      <Icon
-        set="fa6"
-        name={iconName}
-        size={ms(20)}
-        color={typeColor}
-        iconStyle="solid"
-        style={styles.icon}
-      />
+      <NotificationIconBadge iconName={iconName} />
     </TouchableOpacity>
   );
 }
@@ -66,8 +58,5 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     marginLeft: spacing.md,
-  },
-  icon: {
-    marginRight: ms(5),
   },
 });

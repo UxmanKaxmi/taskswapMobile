@@ -1,33 +1,52 @@
 // src/features/debug/NotificationTester.tsx
 import React from 'react';
-import { View, Button } from 'react-native';
-import notifee, { AndroidImportance } from '@notifee/react-native';
+import { Alert, View } from 'react-native';
+import notifee, { AuthorizationStatus } from '@notifee/react-native';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
+import { colors } from '@shared/theme';
+import { DEFAULT_TEST_NOTIFICATION_TEXT } from '@lib/notifications/notificationTextCatalog';
 
 export default function NotificationTester() {
   async function onDisplayNotification() {
-    // Request permissions (required for iOS)
-    await notifee.requestPermission();
+    try {
+      const settings = await notifee.requestPermission();
+      if (
+        settings.authorizationStatus !== AuthorizationStatus.AUTHORIZED &&
+        settings.authorizationStatus !== AuthorizationStatus.PROVISIONAL
+      ) {
+        Alert.alert('Notifications are disabled', 'Enable notification permissions to test local alerts.');
+        return;
+      }
 
-    // Create a channel (required for Android)
-    const channelId = await notifee.createChannel({
-      id: 'default',
-      name: 'Default Channel',
-    });
+      const channelId = await notifee.createChannel({
+        id: 'default',
+        name: 'Default Channel',
+      });
 
-    // Display a notification
-    await notifee.displayNotification({
-      title: 'Notification Title',
-      body: 'Main body content of the notification',
-      android: {
-        channelId,
-        smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
-        // pressAction is needed if you want the notification to open the app when pressed
-        pressAction: {
-          id: 'default',
+      await notifee.displayNotification({
+        title: DEFAULT_TEST_NOTIFICATION_TEXT.title,
+        body: DEFAULT_TEST_NOTIFICATION_TEXT.body,
+        android: {
+          channelId,
+          smallIcon: 'ic_notification',
+          largeIcon: require('@assets/images/logo.png'),
+          color: colors.onboardingPush,
+          pressAction: {
+            id: 'default',
+          },
         },
-      },
-    });
+        ios: {
+          foregroundPresentationOptions: {
+            alert: true,
+            badge: true,
+            sound: true,
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Failed to display local notification', error);
+      Alert.alert('❌ Failed to display local notification');
+    }
   }
 
   return (

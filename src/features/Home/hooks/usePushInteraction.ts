@@ -1,6 +1,7 @@
 import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 import { haptics } from '@shared/utils/haptics';
 import { useMemo, useCallback } from 'react';
+import { showPushToast } from '@shared/utils/toast';
 
 type UsePushInteractionParams = {
   hasPushed: boolean;
@@ -8,6 +9,10 @@ type UsePushInteractionParams = {
   onPush: () => void;
   onUnpush?: () => void;
   isPushing?: boolean;
+  pushToast?: {
+    pusherName: string;
+    message?: string;
+  };
 };
 
 export function usePushInteraction({
@@ -16,6 +21,7 @@ export function usePushInteraction({
   onPush,
   onUnpush,
   isPushing = false,
+  pushToast,
 }: UsePushInteractionParams) {
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
 
@@ -40,8 +46,11 @@ export function usePushInteraction({
     if (!checkAuthThenNavigate(undefined, undefined, { authContext: 'Push' })) return;
 
     haptics.success();
+    if (pushToast) {
+      showPushToast(pushToast);
+    }
     onPush();
-  }, [isPushing, hasPushed, onPush, checkAuthThenNavigate]);
+  }, [isPushing, hasPushed, onPush, checkAuthThenNavigate, pushToast]);
 
   const handleUnpush = useCallback(() => {
     if (!onUnpush) return;

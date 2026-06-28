@@ -1,6 +1,7 @@
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 import { handleNotificationRoute } from './notificationNavigation';
+import { colors } from '@shared/theme';
 
 export async function requestUserPermission() {
   const authStatus = await messaging().requestPermission();
@@ -45,6 +46,9 @@ export function onForegroundNotification() {
       body: remoteMessage.notification?.body || '',
       android: {
         channelId: 'default',
+        smallIcon: 'ic_notification',
+        largeIcon: require('@assets/images/logo.png'),
+        color: colors.onboardingPush,
         pressAction: {
           id: 'default',
         },

@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Pressable,
+  PressableProps,
   View,
   StyleSheet,
   GestureResponderEvent,
@@ -17,6 +18,7 @@ type Props = {
   borderless?: boolean;
   radius?: number;
   disabled?: boolean;
+  hitSlop?: PressableProps['hitSlop'];
 };
 
 export default function Ripple({
@@ -27,11 +29,13 @@ export default function Ripple({
   borderless = false,
   radius,
   disabled = false,
+  hitSlop,
 }: Props) {
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
+      hitSlop={hitSlop}
       android_ripple={{
         color: rippleColor,
         borderless,

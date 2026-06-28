@@ -30,7 +30,6 @@ import TagHelperCard from '../components/TagHelperCard';
 import { HelperUser } from '@features/Home/types/home';
 import SelectHelpersModal from '../components/SelectHelpersModal';
 import { CreateTaskPayload } from '../types/addTask.types';
-import VisibilitySelector from '../components/VisibilitySelector';
 import { useCreateTask } from '../hooks/useCreateTask';
 import { resetToHomeRoot } from '@navigation/types/navigationUtils';
 import { useFollowers } from '@features/User/hooks/useFollowers';
@@ -46,15 +45,12 @@ type Props = NativeStackScreenProps<AddTaskStackParamList, 'AddAdvice'>;
 export default function AddAdviceScreen({ navigation, route }: Props) {
   const { user } = useAuth();
   const [text, setText] = useState('');
-  const [visibility, setVisibility] = useState<'friends' | 'public' | 'private'>('public');
   const [helpers, setHelpers] = useState<HelperUser[]>([]);
   const helperIds = helpers.map(h => h.id);
   const canSubmit = text.trim().length > 0;
   const [showSubmit, setShowSubmit] = useState(false);
-  const [showHelper, setShowHelper] = useState(visibility !== 'private');
-
-  const helperOpacity = useState(new Animated.Value(showHelper ? 1 : 0))[0];
-  const helperTranslateY = useState(new Animated.Value(showHelper ? 0 : -12))[0];
+  const helperOpacity = useState(new Animated.Value(1))[0];
+  const helperTranslateY = useState(new Animated.Value(0))[0];
   const [showHelperModal, setShowHelperModal] = useState(false);
 
   const [success, setSuccess] = useState(false);
@@ -79,7 +75,6 @@ export default function AddAdviceScreen({ navigation, route }: Props) {
     if (!draft || draft.type !== TaskTypeEnum.Advice) return;
 
     setText(draft.text ?? '');
-    setVisibility(draft.visibility ?? 'public');
   }, [route.params?.draft]);
 
   const hasAutoSubmittedRef = React.useRef(false);
@@ -117,14 +112,10 @@ export default function AddAdviceScreen({ navigation, route }: Props) {
       return;
     }
 
-    const effectiveVisibility = user ? visibility : 'private';
-    const effectiveHelpers = user && effectiveVisibility !== 'private' ? helperIds : [];
-
     const payload: CreateTaskPayload = {
       type: TaskTypeEnum.Advice,
       text: text.trim(),
-      visibility: effectiveVisibility,
-      helpers: effectiveHelpers,
+      helpers: helperIds,
     };
 
     if (!user) {
@@ -155,40 +146,6 @@ export default function AddAdviceScreen({ navigation, route }: Props) {
       },
     });
   }
-
-  useEffect(() => {
-    if (visibility !== 'private') {
-      setShowHelper(true);
-
-      Animated.parallel([
-        Animated.timing(helperOpacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(helperTranslateY, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(helperOpacity, {
-          toValue: 0,
-          duration: 160,
-          useNativeDriver: true,
-        }),
-        Animated.timing(helperTranslateY, {
-          toValue: -12,
-          duration: 160,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setShowHelper(false);
-      });
-    }
-  }, [visibility]);
 
   function resetSuccessState() {
     setSuccess(false);
@@ -261,16 +218,8 @@ export default function AddAdviceScreen({ navigation, route }: Props) {
           </View>
         </Shadow>
 
-        {/* Visibility */}
-        {user ? (
-          <VisibilitySelector
-            taskType={TaskTypeEnum.Advice}
-            value={visibility}
-            onChange={setVisibility}
-          />
-        ) : null}
         {/* Helpers */}
-        {user && showHelper ? (
+        {user ? (
           <Animated.View
             style={{
               opacity: helperOpacity,
@@ -294,7 +243,6 @@ export default function AddAdviceScreen({ navigation, route }: Props) {
               const selectedHelpers = friends.filter((f: { id: string }) => ids.includes(f.id));
               setHelpers(selectedHelpers);
             }}
-            confirmButtonColor={colors.adviceBgHardest}
           />
         ) : null}
       </Animated.View>

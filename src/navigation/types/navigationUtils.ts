@@ -184,12 +184,14 @@ export function useCheckAuthThenNavigate() {
     options?: AuthIntroOptions,
   ): boolean {
     if (!user) {
-      console.log('screen', screen);
-      console.log('route.name', route.name);
+      // When no explicit screen is passed, we re-open the *current* screen
+      // after login — so carry its params (e.g. TaskDetail's taskId) through,
+      // otherwise the screen reopens with no params and can't load its data.
+      const resolvedParams = params ?? (screen ? undefined : (route.params as any));
 
       (navigation.navigate as any)('AuthIntro', {
         redirectTo: (screen ?? route.name) as keyof AppStackParamList,
-        params,
+        params: resolvedParams,
         authContext: options?.authContext,
         authCopy: options?.authCopy,
       });

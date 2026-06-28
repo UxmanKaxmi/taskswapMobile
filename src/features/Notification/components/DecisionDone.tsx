@@ -6,9 +6,8 @@ import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
 import { getTypeColor } from '@shared/utils/typeVisuals';
-import { Icon } from '@shared/components/Icons';
-import { ms } from 'react-native-size-matters';
 import { notificationStyles } from '../styles/notification.styles';
+import NotificationIconBadge from './NotificationIconBadge';
 
 interface Props {
   item: NotificationDTO;
@@ -50,14 +49,7 @@ export default function DecisionDone({ item, onPress }: Props) {
         </TextElement>
       </View>
 
-      <Icon
-        set="fa6"
-        name="circle-check"
-        size={ms(20)}
-        color={typeColor}
-        iconStyle="solid"
-        style={styles.icon}
-      />
+      <NotificationIconBadge iconName="circle-check" />
     </TouchableOpacity>
   );
 }
@@ -66,8 +58,5 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     marginLeft: spacing.md,
-  },
-  icon: {
-    marginRight: ms(5),
   },
 });

@@ -19,7 +19,13 @@ export enum QueryKeys {
 }
 
 export const buildQueryKey = {
-  tasks: (userId?: string) => [QueryKeys.Tasks, userId],
+  tasks: (userId?: string, feedSort?: string) => {
+    if (userId || feedSort) {
+      return [QueryKeys.Tasks, userId ?? 'anonymous', feedSort ?? 'needs_push'];
+    }
+
+    return [QueryKeys.Tasks];
+  },
   taskById: (taskId: string) => [QueryKeys.Task, taskId],
   remindersForTask: (taskId: string) => [QueryKeys.ReminderNotes, taskId],
   user: () => [QueryKeys.User],

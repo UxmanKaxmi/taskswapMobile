@@ -1,24 +1,34 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { ms, vs } from 'react-native-size-matters';
+import { Image, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
+import { ms } from 'react-native-size-matters';
+
 import TextElement from '../TextElement/TextElement';
 import { colors } from '@shared/theme';
 
-type AppLogoProps = {
+const LOGO = require('@assets/images/logo.png');
+
+export type AppLogoProps = {
   size?: 'sm' | 'md' | 'lg';
   align?: 'left' | 'center';
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 };
 
-const AppLogo = ({ size = 'md', align = 'center' }: AppLogoProps) => {
+const AppLogo = ({ size = 'md', align = 'center', style, textStyle }: AppLogoProps) => {
   return (
-    <View style={[styles.container, align === 'left' && styles.alignLeft]}>
+    <View style={[styles.container, align === 'left' && styles.alignLeft, style]}>
       <View style={styles.wordmark}>
-        <View style={[styles.logoTicks, tickSizes[size]]} accessibilityElementsHidden>
-          <View style={[styles.logoTick, tickHeights[size]]} />
-          <View style={[styles.logoTick, styles.logoTickAccent, tickHeights[size]]} />
-          <View style={[styles.logoTick, tickHeights[size]]} />
-        </View>
-        <TextElement variant="body" weight="800" style={[styles.title, titleSizes[size]]}>
+        <Image
+          source={LOGO}
+          resizeMode="contain"
+          accessible={false}
+          style={[styles.logoImage, logoSizes[size]]}
+        />
+        <TextElement
+          variant="subtitle"
+          weight="900"
+          style={[styles.title, titleSizes[size], textStyle]}
+        >
           PushMeUp
         </TextElement>
       </View>
@@ -27,6 +37,7 @@ const AppLogo = ({ size = 'md', align = 'center' }: AppLogoProps) => {
 };
 
 export default AppLogo;
+
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
@@ -39,24 +50,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  logoTicks: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoTick: {
-    borderRadius: 1,
-    backgroundColor: colors.onboardingInk,
-    transform: [{ skewX: '-18deg' }],
-  },
-  logoTickAccent: {
-    backgroundColor: colors.onboardingPush,
+  logoImage: {
+    tintColor: undefined,
   },
   title: {
-    fontWeight: '700',
-    letterSpacing: -0.4,
+    fontWeight: '900',
+    letterSpacing: 0,
     color: colors.onboardingInk,
-    marginLeft: ms(7),
+    marginLeft: ms(4),
   },
 });
 
@@ -72,29 +73,17 @@ const titleSizes = {
   },
 };
 
-const tickSizes = {
+const logoSizes = {
   sm: {
-    gap: ms(3),
+    width: ms(18),
+    height: ms(18),
   },
   md: {
-    gap: ms(3),
+    width: ms(30),
+    height: ms(30),
   },
   lg: {
-    gap: ms(4),
-  },
-} as const;
-
-const tickHeights = {
-  sm: {
-    width: ms(4),
-    height: vs(14),
-  },
-  md: {
-    width: ms(4),
-    height: vs(16),
-  },
-  lg: {
-    width: ms(5),
-    height: vs(20),
+    width: ms(36),
+    height: ms(36),
   },
 } as const;

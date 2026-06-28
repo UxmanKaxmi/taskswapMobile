@@ -7,16 +7,12 @@ import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Height } from '@shared/components/Spacing';
 import Icon from '@shared/components/Icons/Icon';
-import { colors, spacing } from '@shared/theme';
-import {
-  getTypeColor,
-  typeBackgrounds,
-  typeBackgroundsHard,
-  typeIcons,
-} from '@shared/utils/typeVisuals';
+import { colors, platformShadow, spacing } from '@shared/theme';
+import { typeBackgroundsHard, typeIcons } from '@shared/utils/typeVisuals';
 import {
   PROGRESS_UPDATE_COOLDOWN_LABEL,
   SHARE_UPDATE_CHARACTER_LIMIT,
+  SHARE_UPDATE_MIN_CHARACTER_LIMIT,
 } from '@shared/utils/constants';
 import { ms, vs } from 'react-native-size-matters';
 import type { ShareUpdateModalPayload } from '../modalTypes';
@@ -36,10 +32,14 @@ export default function ShareUpdateModalContent({ payload, closeModal }: Props) 
   }, [payload]);
 
   const trimmed = message.trim();
-  const isValid = useMemo(() => !!trimmed, [trimmed]);
+  const belowMin = trimmed.length > 0 && trimmed.length < SHARE_UPDATE_MIN_CHARACTER_LIMIT;
+  const isValid = useMemo(
+    () =>
+      trimmed.length >= SHARE_UPDATE_MIN_CHARACTER_LIMIT &&
+      message.length <= SHARE_UPDATE_CHARACTER_LIMIT,
+    [trimmed, message],
+  );
   const iconName = typeIcons[payload.type];
-  const typeColor = getTypeColor(payload.type);
-  const bubbleColor = typeBackgrounds[payload.type];
   const shadowColor = typeBackgroundsHard[payload.type];
 
   const handleShare = async () => {
@@ -63,12 +63,23 @@ export default function ShareUpdateModalContent({ payload, closeModal }: Props) 
           style={[
             styles.iconBubble,
             {
-              backgroundColor: bubbleColor,
-              shadowColor,
+              backgroundColor: colors.tactileMomentumPrimary,
             },
+            platformShadow({
+              color: shadowColor,
+              opacity: 0.22,
+              radius: 12,
+              offset: { width: 0, height: 6 },
+            }),
           ]}
         >
-          <Icon set="fa6" name={iconName} iconStyle="solid" size={ms(35)} color={typeColor} />
+          <Icon
+            set="fa6"
+            name={iconName}
+            iconStyle="solid"
+            size={ms(35)}
+            color={colors.tactileMomentumSecondary}
+          />
         </View>
       </View>
 
@@ -90,7 +101,6 @@ export default function ShareUpdateModalContent({ payload, closeModal }: Props) 
         onChangeText={setMessage}
         multiline
         numberOfLines={3}
-        autoFocus
         useBottomSheetTextInput
         showCharCount={false}
         charLimit={SHARE_UPDATE_CHARACTER_LIMIT}
@@ -99,14 +109,22 @@ export default function ShareUpdateModalContent({ payload, closeModal }: Props) 
         containerStyle={{ width: '100%' }}
       />
 
-      <Row justify="flex-end" style={styles.countRow}>
+      <Row justify="space-between" align="center" style={styles.countRow}>
+        <TextElement
+          variant="tiny"
+          style={[styles.hint, { color: belowMin ? colors.error : colors.placeHolder }]}
+        >
+          {belowMin ? `Write at least ${SHARE_UPDATE_MIN_CHARACTER_LIMIT} characters` : ''}
+        </TextElement>
         <TextElement
           variant="tiny"
           style={[
             styles.charCount,
             {
               color:
-                message.length >= SHARE_UPDATE_CHARACTER_LIMIT ? colors.error : colors.placeHolder,
+                message.length >= SHARE_UPDATE_CHARACTER_LIMIT || belowMin
+                  ? colors.error
+                  : colors.placeHolder,
             },
           ]}
         >
@@ -121,8 +139,10 @@ export default function ShareUpdateModalContent({ payload, closeModal }: Props) 
         isLoading={isSubmitting}
         style={{
           ...styles.button,
-          backgroundColor: !isValid || isSubmitting ? colors.disabled : typeColor,
+          backgroundColor:
+            !isValid || isSubmitting ? colors.disabled : colors.tactileMomentumPrimary,
         }}
+        textStyle={[{ opacity: !isValid || isSubmitting ? 0.4 : 1 }, styles.primaryText]}
       />
     </View>
   );
@@ -143,10 +163,6 @@ const styles = StyleSheet.create({
     borderRadius: ms(40),
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOpacity: 0.22,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 5,
   },
   title: {
     textAlign: 'center',
@@ -171,7 +187,12 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     marginTop: vs(5),
   },
+  hint: {
+    flexShrink: 1,
+    fontSize: ms(11),
+  },
   charCount: {
+    flexShrink: 0,
     fontSize: ms(11),
   },
   button: {
@@ -179,5 +200,8 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     marginHorizontal: 0,
     borderRadius: 18,
+  },
+  primaryText: {
+    color: colors.tactileMomentumSecondary,
   },
 });

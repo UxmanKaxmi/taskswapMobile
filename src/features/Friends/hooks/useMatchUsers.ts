@@ -10,6 +10,7 @@ import { useAuth } from '@features/Auth/AuthProvider'; // Adjust path as needed
 export interface MatchedUser {
   id: string;
   name: string;
+  username?: string | null;
   email: string;
   photo?: string;
   isFollowing: boolean;

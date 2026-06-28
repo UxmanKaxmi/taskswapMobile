@@ -1,14 +1,12 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { ms } from 'react-native-size-matters';
-
-import { Icon } from '@shared/components/Icons';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import { notificationStyles } from '../styles/notification.styles';
 import type { NotificationDTO } from '../types/notification.types';
 import { typeIcons } from '@shared/utils/typeVisuals';
+import NotificationIconBadge from './NotificationIconBadge';
 
 type Props = {
   item: NotificationDTO;
@@ -32,15 +30,7 @@ export default function MotivationSystemNotification({ item, onPress }: Props) {
         item.read ? notificationStyles.readCard : notificationStyles.unreadCard,
       ]}
     >
-      <View style={styles.iconBubble}>
-        <Icon
-          set="fa6"
-          name={iconName}
-          iconStyle="solid"
-          size={ms(18)}
-          color={colors.motivationBgHardest}
-        />
-      </View>
+      <NotificationIconBadge iconName={iconName} />
 
       <View style={styles.textContainer}>
         <TextElement variant="caption" weight="bold" style={notificationStyles.nameText}>
@@ -60,14 +50,6 @@ export default function MotivationSystemNotification({ item, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  iconBubble: {
-    width: ms(36),
-    height: ms(36),
-    borderRadius: ms(12),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.motivationIconBackground,
-  },
   textContainer: {
     flex: 1,
     marginLeft: spacing.md,

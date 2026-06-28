@@ -118,7 +118,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     const savedUser = await AsyncStorage.getItem(STORAGE_USER);
     const currentUser = user ?? (savedUser ? (JSON.parse(savedUser) as User) : null);
 
-    if (!currentUser?.id || !currentUser.email) return null;
+    const userId = currentUser?.id?.trim();
+    const name = currentUser?.name?.trim();
+    const email = currentUser?.email?.trim();
+
+    if (!userId || !name || !email) return null;
 
     await AsyncStorage.removeItem(STORAGE_TOKEN);
     delete api.defaults.headers.common['Authorization'];
@@ -131,9 +135,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     const response = await api.post(
       buildRoute.syncUserToDb(),
       {
-        id: currentUser.id,
-        name: currentUser.name ?? '',
-        email: currentUser.email,
+        id: userId,
+        name,
+        email,
         photo: currentUser.photo ?? '',
         fcmToken: fcmToken ?? '',
       },

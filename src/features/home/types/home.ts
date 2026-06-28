@@ -1,3 +1,6 @@
+import type { FeelingValue } from '@shared/utils/feelings';
+import type { AvatarUser, TaskBeat } from '@features/Tasks/types/tasks';
+
 // ---------------------------------------------
 // ✅ Define all task types strictly
 // ---------------------------------------------
@@ -49,6 +52,7 @@ export type BaseTask = {
   userId: string;
   avatar?: string;
   name: string;
+  feeling?: FeelingValue;
 
   helpers: HelperUser[];
 
@@ -62,6 +66,11 @@ export type BaseTask = {
   hasPushed: boolean;
   hasAdvised?: boolean;
   progressUpdates?: ProgressUpdate[];
+  beats?: TaskBeat[];
+  cheerTotal?: number;
+  distinctCheererCount?: number;
+  sampleCheerers?: AvatarUser[];
+  mostCheeredBeatId?: string | null;
   pushHistory?: TaskPushEvent[];
 
   // 🔥 Extra state
@@ -146,6 +155,11 @@ export type HomeSummaryCounts = {
   replyWaitingCount: number;
 };
 
+export type HomeCompactStatus = {
+  streakDay: number;
+  pushedTodayCount: number;
+};
+
 export type HomeHeroModuleEntity = {
   type: 'task';
   taskId: string;
@@ -184,8 +198,18 @@ export type HomeFeaturedStory = {
   completedAt: string | null;
 };
 
+export type HomeYourGoal = {
+  taskId: string;
+  text: string;
+  pushCount: number;
+  createdAt: string;
+  progressCount: number;
+};
+
 export type HomeSummaryResponse = {
+  yourGoal: HomeYourGoal | null;
   summaryCounts: HomeSummaryCounts;
+  compactStatus: HomeCompactStatus;
   modules?: HomeSummaryModules | null;
   successStory: HomeSuccessStory | null;
   heroModule: HomeHeroModule | null;

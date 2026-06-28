@@ -4,7 +4,7 @@ import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Icon } from '@shared/components/Icons';
 import { colors, spacing } from '@shared/theme';
-import { timeAgo } from '@shared/utils/helperFunctions';
+import { getFirstName, timeAgo } from '@shared/utils/helperFunctions';
 import HelperAvatarStack from '@features/Home/components/HelperAvatarStack';
 import { ms, vs } from 'react-native-size-matters';
 
@@ -24,8 +24,17 @@ type Props = {
   isOwner: boolean;
   currentUserId?: string;
   didUserPush: boolean; // 🔒 explicit signal only
+  /** Authoritative total push count (may exceed the pusher list we have, e.g. for guests) */
+  pushCount?: number;
   emptyStateTitle?: string;
   emptyStateDescription?: ReactNode;
+  cheerSummary?: {
+    ownerName: string;
+    beatType: 'post' | 'update';
+    cheerCount: number;
+    distinctCheererCount: number;
+    viewerHasCheered?: boolean;
+  };
 };
 
 export default function PushSupportCard({
@@ -33,8 +42,10 @@ export default function PushSupportCard({
   isOwner,
   currentUserId,
   didUserPush,
+  pushCount,
   emptyStateTitle,
   emptyStateDescription,
+  cheerSummary,
 }: Props) {
   /* --------------------------------------------------
      0️⃣ Normalize users (presence only, NOT intent)
@@ -60,7 +71,15 @@ export default function PushSupportCard({
   );
 
   const otherPushCount = otherUsers.length;
-  const isEmptyState = !didUserPush && otherPushCount === 0;
+  // The known pushers we have details for (others + self if pushed).
+  const knownTotal = otherPushCount + (didUserPush ? 1 : 0);
+  // Authoritative count — the server count can be higher than the list we got
+  // (e.g. a signed-out viewer receives the count but not the pusher details).
+  const resolvedCount = Math.max(pushCount ?? 0, knownTotal);
+  // Genuinely empty only when there are zero pushes at all.
+  const isEmptyState = resolvedCount === 0;
+  // We have a count but no pusher details to render avatars/names for.
+  const hasCountOnly = resolvedCount > knownTotal;
 
   /* --------------------------------------------------
      2️⃣ Latest push time (recency wins)
@@ -77,7 +96,7 @@ export default function PushSupportCard({
   /* --------------------------------------------------
      3️⃣ Names display logic
   -------------------------------------------------- */
-  const MAX_VISIBLE = 3;
+  const MAX_VISIBLE = 2;
   const visibleNames = otherUsers.slice(0, MAX_VISIBLE).map(u => u.name);
   const remainingCount = Math.max(otherPushCount - MAX_VISIBLE, 0);
 
@@ -146,13 +165,23 @@ export default function PushSupportCard({
         <View style={styles.pushTogetherRow}>
           <View style={styles.dot} />
           <TextElement style={styles.pushTogetherText}>
-            You and{' '}
+            <TextElement style={styles.namesStrong}>You</TextElement> and{' '}
             <TextElement style={styles.namesStrong}>
               {otherPushCount} other{otherPushCount > 1 ? 's' : ''}
             </TextElement>{' '}
             pushed this.
           </TextElement>
         </View>
+      );
+    }
+
+    // NON-OWNER — count only (we have a count but no pusher details, e.g. guest)
+    if (visibleNames.length === 0) {
+      return (
+        <>
+          <TextElement style={styles.namesStrong}>{resolvedCount}</TextElement>{' '}
+          {resolvedCount === 1 ? 'person' : 'people'} pushed this.
+        </>
       );
     }
 
@@ -177,6 +206,7 @@ export default function PushSupportCard({
     otherPushCount,
     visibleNames,
     remainingCount,
+    resolvedCount,
     isEmptyState,
     emptyStateDescription,
   ]);
@@ -194,9 +224,12 @@ export default function PushSupportCard({
     return [me, ...otherUsers];
   }, [didUserPush, users, otherUsers, currentUserId]);
 
-  const showSelfPushOnlyFooter = didUserPush && otherPushCount === 0 && !isEmptyState;
-  const iconName = 'lightbulb';
-  const shouldShowDescription = displayUsers.length > 0;
+  const showSelfPushOnlyFooter =
+    didUserPush && otherPushCount === 0 && !hasCountOnly && !isEmptyState;
+  const showPushTogetherFooter = didUserPush && otherPushCount > 0;
+  const iconName = 'bolt';
+  const shouldShowDescription = !isEmptyState;
+  const cheerSummaryParts = useMemo(() => buildCheerSummaryParts(cheerSummary), [cheerSummary]);
 
   /* --------------------------------------------------
      6️⃣ Render
@@ -207,7 +240,13 @@ export default function PushSupportCard({
         <View style={styles.emptyCard}>
           <View style={styles.emptyLeft}>
             <View style={styles.emptyIconCircle}>
-              <Icon name={iconName} set="fa6" size={14} color={colors.motivationBgHardest} />
+              <Icon
+                name={iconName}
+                set="fa6"
+                iconStyle="solid"
+                size={15}
+                color={colors.onboardingInk}
+              />
             </View>
 
             <View style={styles.emptyTextWrap}>
@@ -227,25 +266,24 @@ export default function PushSupportCard({
         </View>
       ) : (
         <>
-          <View
-            style={[
-              styles.header,
-              {
-                marginBottom: displayUsers.length > 0 ? spacing.md : 0,
-              },
-            ]}
-          >
+          <View style={[styles.header, { marginBottom: spacing.md }]}>
             <View style={styles.iconWrap}>
-              <Icon name={iconName} set="fa6" size={14} color={colors.motivationBgHardest} />
+              <Icon
+                name={iconName}
+                set="fa6"
+                iconStyle="solid"
+                size={15}
+                color={colors.onboardingInk}
+              />
             </View>
             <TextElement
               variant="title"
               style={[
                 styles.title,
                 {
-                  fontWeight: displayUsers.length > 0 ? '600' : '500',
-                  fontSize: displayUsers.length > 0 ? ms(18) : ms(15),
-                  color: colors.text,
+                  fontWeight: '700',
+                  fontSize: ms(18),
+                  color: colors.onboardingInk,
                 },
               ]}
             >
@@ -253,11 +291,20 @@ export default function PushSupportCard({
             </TextElement>
           </View>
 
-          {/* Avatars (others only) */}
           {displayUsers.length > 0 && (
-            <View style={styles.avatars}>
-              <HelperAvatarStack helpers={displayUsers} size={40} maxVisible={3} />
-            </View>
+            <>
+              <View style={styles.avatars}>
+                <HelperAvatarStack
+                  helpers={displayUsers}
+                  size={40}
+                  maxVisible={3}
+                  moreStyle={styles.supportCountBubble}
+                  moreTextStyle={styles.supportCountText}
+                />
+              </View>
+
+              {/* <View style={styles.summaryDivider} /> */}
+            </>
           )}
 
           {/* Description */}
@@ -267,9 +314,36 @@ export default function PushSupportCard({
                 <View style={styles.dot} />
                 <TextElement style={styles.description}>{description}</TextElement>
               </View>
+            ) : showPushTogetherFooter ? (
+              <TextElement style={styles.description}>{description}</TextElement>
             ) : (
               <TextElement style={styles.description}>{description}</TextElement>
             ))}
+
+          {cheerSummaryParts && (
+            <View style={styles.cheerSummaryRow}>
+              <Icon set="ion" name="sparkles" size={ms(10)} color={colors.onboardingPushDeep} />
+              <TextElement style={styles.cheerSummaryText}>
+                <TextElement style={styles.cheerSummaryStrong}>
+                  {cheerSummaryParts.people}
+                </TextElement>
+                <TextElement style={styles.description}> cheered </TextElement>
+                <TextElement style={styles.cheerSummaryStrong}>
+                  {cheerSummaryParts.ownerPossessive}
+                </TextElement>{' '}
+                <TextElement style={styles.description}>{cheerSummaryParts.subject}</TextElement>
+                {cheerSummaryParts.extraCheers && (
+                  <>
+                    {' · '}
+                    <TextElement style={styles.cheerSummaryStrong}>
+                      {cheerSummaryParts.extraCheers}
+                    </TextElement>
+                  </>
+                )}
+                .
+              </TextElement>
+            </View>
+          )}
 
           {/* Time */}
           {displayUsers.length > 0 && (
@@ -285,12 +359,40 @@ export default function PushSupportCard({
   );
 }
 
+function buildCheerSummaryParts(cheerSummary?: Props['cheerSummary']) {
+  if (!cheerSummary || cheerSummary.cheerCount <= 0 || cheerSummary.distinctCheererCount <= 0) {
+    return null;
+  }
+
+  const peopleCount = cheerSummary.distinctCheererCount;
+  const ownerName = getFirstName(cheerSummary.ownerName);
+  const subject = cheerSummary.beatType === 'post' ? 'task' : 'latest update';
+  const otherCheererCount = Math.max(peopleCount - 1, 0);
+  const peopleLabel = peopleCount === 1 ? 'person' : 'people';
+  const peopleText = cheerSummary.viewerHasCheered
+    ? otherCheererCount > 0
+      ? `You and ${otherCheererCount} other${otherCheererCount === 1 ? '' : 's'}`
+      : 'You'
+    : `${peopleCount} ${peopleLabel}`;
+  const extraCheersText =
+    cheerSummary.cheerCount > peopleCount
+      ? `${cheerSummary.cheerCount} ${cheerSummary.cheerCount === 1 ? 'cheer' : 'cheers'}`
+      : null;
+
+  return {
+    people: peopleText,
+    ownerPossessive: `${ownerName}'s`,
+    subject,
+    extraCheers: extraCheersText,
+  };
+}
+
 /* --------------------------------------------------
    Styles
 -------------------------------------------------- */
 const styles = StyleSheet.create({
   emptyShadow: {
-    borderRadius: 16,
+    borderRadius: 24,
   },
 
   emptyCard: {
@@ -298,7 +400,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.card,
-    borderRadius: 16,
+    borderRadius: 24,
     padding: spacing.md,
     paddingVertical: vs(10),
   },
@@ -313,10 +415,10 @@ const styles = StyleSheet.create({
   emptyIconCircle: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.motivationIconBackground,
+    backgroundColor: colors.onboardingPush,
   },
 
   emptyTextWrap: {
@@ -334,42 +436,73 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: colors.onPrimary,
-    borderRadius: 28,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    backgroundColor: colors.onboardingCard,
+    borderRadius: 24,
+    paddingHorizontal: ms(18),
+    paddingVertical: vs(16),
     // alignItems: 'flex-start',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: vs(22),
   },
   iconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.motivationIconBackground,
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    backgroundColor: colors.onboardingPush,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.sm,
   },
   title: {
+    flex: 1,
     fontSize: ms(20),
     fontWeight: '700',
-    color: colors.text,
+    color: colors.onboardingInk,
   },
   avatars: {
-    marginBottom: spacing.md,
+    marginBottom: vs(16),
+  },
+  summaryDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.onboardingLine,
+    marginBottom: vs(14),
+  },
+  supportCountBubble: {
+    backgroundColor: colors.tactileMomentumPrimary,
+    borderColor: colors.tactileMomentumPrimary,
+  },
+  supportCountText: {
+    color: colors.onboardingInk,
   },
   description: {
     fontSize: ms(12),
-    color: colors.placeHolder,
+    color: colors.muted,
   },
   selfPushFooterRow: {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
+  },
+  cheerSummaryRow: {
+    marginTop: vs(4),
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: ms(5),
+  },
+  cheerSummaryText: {
+    flex: 1,
+    fontSize: ms(12),
+    fontWeight: '700',
+    color: colors.muted,
+  },
+  cheerSummaryStrong: {
+    fontSize: ms(12),
+    lineHeight: ms(16),
+    fontWeight: '800',
+    color: colors.onboardingInk,
   },
   pushTogetherRow: {
     flexDirection: 'row',
@@ -378,13 +511,13 @@ const styles = StyleSheet.create({
   },
   pushTogetherText: {
     fontSize: ms(12),
-    color: colors.placeHolder,
+    color: colors.muted,
     flex: 1,
   },
   namesStrong: {
     fontSize: ms(12),
-    fontWeight: '600',
-    color: colors.text,
+    fontWeight: '700',
+    color: colors.onboardingInk,
   },
   namesMuted: {
     fontSize: ms(12),
@@ -393,18 +526,19 @@ const styles = StyleSheet.create({
   timeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    top: vs(4),
+    marginTop: vs(14),
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.motivationBgHardest,
-    marginRight: 12,
+    width: ms(6),
+    height: ms(6),
+    borderRadius: ms(3),
+    backgroundColor: colors.onboardingPushDeep,
+    marginRight: ms(10),
+    marginLeft: ms(2),
   },
   time: {
-    fontSize: 13,
+    fontSize: ms(13),
     color: colors.muted,
-    fontWeight: '400',
+    fontWeight: '700',
   },
 });

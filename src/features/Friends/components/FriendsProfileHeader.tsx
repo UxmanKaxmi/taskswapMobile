@@ -3,57 +3,65 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Avatar from '@shared/components/Avatar/Avatar';
+import { getAvatarColor } from '@shared/utils/avatarColor';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
-import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import Row from '@shared/components/Layout/Row';
-import { spacing, colors, typography } from '@shared/theme';
+import { spacing, colors } from '@shared/theme';
 import Column from '@shared/components/Layout/Column';
-import { moderateScale, ms, verticalScale, vs } from 'react-native-size-matters';
-import { Height, Width } from '@shared/components/Spacing';
+import { ms, vs } from 'react-native-size-matters';
+import { Width } from '@shared/components/Spacing';
 
 type Props = {
-  avatarUri?: string;
+  userId?: string | null;
+  avatarUri?: string | null;
   name: string;
-  username: string;
+  username?: string | null;
   following: number;
   followers: number;
   heFollowsYou: boolean;
   youFollowHim: boolean;
-  email: string;
   onPressToggleFollow: () => void;
 };
 
 export default function FriendsProfileHeader({
+  userId,
   avatarUri,
   name,
   username,
   following,
   followers,
-  email,
-  heFollowsYou,
   youFollowHim,
-  // tasksDone,
-  // taskSuccessRate,
-  // dayStreak,
   onPressToggleFollow,
 }: Props) {
-  return (
-    <Row fullWidth style={{}}>
-      <View style={styles.card}>
-        {/* <Avatar uri={avatarUri} size={100} /> */}
-        <Row style={{}} align="flex-start" justify="flex-start">
-          <Avatar uri={avatarUri} size={vs(80)} />
+  const avatarColor = getAvatarColor(userId || name);
+  const handle = username?.trim() ? `@${username.trim()}` : null;
+  const followTitle = youFollowHim ? 'Following' : 'Follow';
 
-          <Column style={{ marginLeft: spacing.md }}>
+  return (
+    <Row fullWidth>
+      <View style={styles.card}>
+        <Row align="center" justify="flex-start" style={styles.profileRow}>
+          <Avatar
+            uri={avatarUri}
+            fallback={name}
+            size={ms(74)}
+            borderColor="transparent"
+            fallbackStyle={{ ...styles.avatarFallback, backgroundColor: avatarColor }}
+            textStyle={styles.avatarText}
+          />
+
+          <Column style={styles.infoColumn}>
             <Row style={styles.topRow}>
               <View style={styles.nameContainer}>
-                <TextElement variant="title" weight="600" style={styles.name}>
+                <TextElement weight="800" style={styles.name} numberOfLines={1}>
                   {name}
                 </TextElement>
-                <TextElement variant="subtitle" color="muted" style={styles.username}>
-                  {email}
-                </TextElement>
+                {handle ? (
+                  <TextElement color="muted" style={styles.username} numberOfLines={1}>
+                    {handle}
+                  </TextElement>
+                ) : null}
               </View>
             </Row>
 
@@ -62,44 +70,31 @@ export default function FriendsProfileHeader({
                 <TextElement style={styles.followingHeading} weight="600">
                   {following}
                 </TextElement>
-                <TextElement style={styles.followingValue} variant="caption" color="muted">
-                  Following
+                <TextElement style={styles.followingValue} color="muted">
+                  FOLLOWING
                 </TextElement>
               </View>
-              <Width size={15} />
+              <Width size={ms(22)} />
               <View style={styles.stat}>
-                <TextElement style={styles.followingHeading} variant="body" weight="600">
+                <TextElement style={styles.followingHeading} weight="600">
                   {followers >= 1000 ? `${Math.floor(followers / 100) / 10}k` : followers}
                 </TextElement>
-                <TextElement style={styles.followingValue} variant="caption" color="muted">
-                  Followers
+                <TextElement style={styles.followingValue} color="muted">
+                  FOLLOWERS
                 </TextElement>
               </View>
             </Row>
           </Column>
         </Row>
-        {/* {youFollowHim && <TextElement>You are following this user</TextElement>}
-        {heFollowsYou && <TextElement>This user follows you</TextElement>} */}
-        {/* <Height size={20} /> */}
-        {/* {youFollowHim && heFollowsYou && (
-          <TextElement variant="caption">You both follow each other ✅</TextElement>
-        )} */}
-        <Row justify="flex-start" style={styles.buttonsRow}>
-          {youFollowHim ? (
-            <PrimaryButton
-              textStyle={styles.buttonText}
-              title={'Following'}
-              onPress={() => onPressToggleFollow()}
-              style={styles.editBtn}
-            />
-          ) : (
-            <OutlineButton
-              textStyle={styles.buttonText}
-              title={'Follow'}
-              onPress={() => onPressToggleFollow()}
-              style={styles.editBtn}
-            />
-          )}
+        <Row justify="flex-start">
+          <PrimaryButton
+            backgroundColor={youFollowHim ? colors.onboardingPush : colors.onboardingInk}
+            textColor={youFollowHim ? colors.tactileMomentumSecondary : colors.onboardingCard}
+            textStyle={styles.buttonText}
+            title={followTitle}
+            onPress={() => onPressToggleFollow()}
+            style={styles.followButton}
+          />
         </Row>
       </View>
     </Row>
@@ -108,59 +103,73 @@ export default function FriendsProfileHeader({
 
 const styles = StyleSheet.create({
   buttonText: {
-    fontSize: moderateScale(12),
+    fontSize: ms(16),
+    lineHeight: ms(20),
+    fontWeight: '800',
   },
   followingValue: {
-    fontSize: moderateScale(14),
+    fontSize: ms(10),
+    letterSpacing: 0.5,
+    lineHeight: ms(14),
   },
   followingHeading: {
-    fontSize: moderateScale(16),
+    color: colors.onboardingInk,
+    fontSize: ms(16),
+    lineHeight: ms(20),
   },
   card: {
     flex: 1,
-    borderRadius: spacing.sm,
+    borderRadius: 0,
     paddingBottom: 0,
     paddingTop: 0,
     alignItems: 'flex-start',
-    // elevation: 2,
-    // shadowColor: '#000',
-    // shadowOpacity: 0.05,
-    // shadowRadius: 6,
     width: '100%',
+  },
+  profileRow: {
+    minHeight: vs(88),
+  },
+  avatarFallback: {
+    borderWidth: 0,
+  },
+  avatarText: {
+    color: colors.onboardingInk,
+    fontSize: ms(34),
+    lineHeight: ms(42),
+    fontWeight: '800',
+  },
+  infoColumn: {
+    flex: 1,
+    marginLeft: spacing.md,
   },
   topRow: {
     alignSelf: 'flex-start',
   },
   nameContainer: {
-    // marginLeft: spacing.md,
+    maxWidth: '100%',
   },
-  name: {},
+  name: {
+    color: colors.onboardingInk,
+    fontSize: ms(21),
+    lineHeight: ms(26),
+    letterSpacing: 0,
+  },
   username: {
-    fontSize: ms(14),
+    color: colors.onboardingMuted,
+    lineHeight: ms(16),
+    fontSize: ms(12),
   },
   statsRow: {
-    // alignSelf: 'flex-start',
-    // marginBottom: spacing.md,
+    marginTop: vs(8),
   },
   stat: {
     alignItems: 'flex-start',
   },
-  buttonsRow: {},
-  editBtn: {
-    // height: verticalScale(30),
+  followButton: {
     flex: 1,
-    // marginRight: spacing.sm,
-    borderRadius: spacing.sm,
-    paddingVertical: spacing.md,
-  },
-  shareBtn: {
-    height: verticalScale(30),
-    flex: 1 / 2,
-    borderRadius: spacing.sm,
-    // marginRight: spacing.sm,
-    paddingVertical: spacing.sm,
-  },
-  shareText: {
-    color: colors.text,
+    marginHorizontal: 0,
+    marginTop: vs(20),
+    marginBottom: vs(18),
+    borderRadius: ms(24),
+    paddingVertical: vs(15),
   },
 });

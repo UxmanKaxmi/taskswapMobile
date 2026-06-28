@@ -9,11 +9,6 @@ export interface SearchResultFriend {
   isFollowing: boolean;
 }
 
-type Props = {
-  type: 'followers' | 'following';
-  searchQuery?: string;
-};
-
 export interface FriendTask {
   id: string;
   text: string;
@@ -34,10 +29,11 @@ export interface FriendSummary {
 export interface FriendProfile {
   tasksDone: number;
   dayStreak: number;
+  pushesGiven?: number;
   taskSuccessRate: number;
   id: string;
   name: string;
-  email: string;
+  username?: string | null;
   photo?: string;
   bio: string | null;
   followersCount: number;

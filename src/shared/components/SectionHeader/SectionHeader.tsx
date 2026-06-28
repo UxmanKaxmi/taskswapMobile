@@ -12,6 +12,18 @@ type Props = {
   /** Left icon */
   icon?: string;
 
+  /** Icon set for the left icon (defaults to Ionicons) */
+  iconSet?: 'ion' | 'fa6';
+
+  /** FontAwesome glyph style when iconSet is 'fa6' */
+  iconStyle?: 'solid' | 'regular' | 'brand';
+
+  /** Override the left icon color (defaults to muted) */
+  iconColor?: string;
+
+  /** Override the label color (defaults to muted) */
+  labelColor?: string;
+
   /** Optional right icon */
   rightIcon?: string;
 
@@ -25,6 +37,10 @@ type Props = {
 export default function SectionHeader({
   label,
   icon = 'eye',
+  iconSet = 'ion',
+  iconStyle = 'solid',
+  iconColor = colors.onboardingInk,
+  labelColor,
   rightIcon,
   rightLabel,
   onPressRightIcon,
@@ -34,8 +50,11 @@ export default function SectionHeader({
   return (
     <View style={styles.container}>
       <View style={styles.left}>
-        <Icon set="ion" name={icon} size={ms(12)} color={colors.muted} />
-        <TextElement variant="caption" style={styles.label}>
+        <Icon set={iconSet} name={icon} iconStyle={iconStyle} size={ms(12)} color={iconColor} />
+        <TextElement
+          variant="caption"
+          style={[styles.label, labelColor ? { color: labelColor } : null]}
+        >
           {label}
         </TextElement>
       </View>
@@ -69,7 +88,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   label: {
-    color: colors.muted,
+    color: colors.tactileMomentumSecondary,
     letterSpacing: 0.9,
     fontSize: ms(12),
     fontWeight: '600',

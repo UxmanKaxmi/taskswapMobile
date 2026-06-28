@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { ms } from 'react-native-size-matters';
 
+import Avatar from '@shared/components/Avatar/Avatar';
+import { getAvatarColor } from '@shared/utils/avatarColor';
 import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import HelperAvatarGroup from '@features/Home/components/HelperAvatarGroup';
@@ -59,16 +61,13 @@ export function TaskDetailHeader({ task }: Props) {
       {/* Avatar + helpers */}
       <View style={[styles.avatarWrapper, { width: avatarSize, height: avatarSize }]}>
         <Ripple onPress={() => openFriendsProfile(navigation, task?.userId || '', user?.id)}>
-          <Image
-            source={{ uri: task.avatar }}
-            style={[
-              styles.avatar,
-              {
-                width: avatarSize,
-                height: avatarSize,
-                borderRadius: avatarSize / 2,
-              },
-            ]}
+          <Avatar
+            uri={task.avatar}
+            fallback={task.name}
+            size={avatarSize}
+            borderColor="transparent"
+            fallbackStyle={{ backgroundColor: getAvatarColor(task.userId || task.name) }}
+            textStyle={styles.avatarText}
           />
 
           {!!task.helpers?.length && (
@@ -91,20 +90,14 @@ export function TaskDetailHeader({ task }: Props) {
 
         {/* 🔥 Meta row (inline) */}
         <Row gap={1} justify="flex-start" align="center" style={styles.metaRow}>
-          <Icon
+          {/* <Icon
             set="fa6"
             name={iconName}
             size={ms(10)}
             color={getTypeColor(task.type)}
             iconStyle="solid"
             style={styles.metaIcon}
-          />
-
-          <TextElement style={[styles.metaText, { color: getTypeColor(task.type) }]}>
-            {task.type}
-          </TextElement>
-
-          <TextElement style={styles.dot}>•</TextElement>
+          /> */}
 
           <TextElement numberOfLines={1} ellipsizeMode="tail" style={styles.timeText}>
             {timeAgo(task.createdAt)}
@@ -122,8 +115,9 @@ const styles = StyleSheet.create({
     marginRight: ms(5),
   },
 
-  avatar: {
-    backgroundColor: colors.muted,
+  avatarText: {
+    color: colors.onboardingInk,
+    fontWeight: '800',
   },
 
   helperOverlay: {

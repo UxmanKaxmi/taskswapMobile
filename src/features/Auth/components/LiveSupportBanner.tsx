@@ -3,7 +3,7 @@ import { Animated, Image, StyleSheet, View } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors } from '@shared/theme';
+import { colors, platformShadow } from '@shared/theme';
 
 type SupportAvatar = {
   id: string;
@@ -226,11 +226,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: ms(12),
-    shadowColor: colors.onboardingInk,
-    shadowOpacity: 0.04,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
+    ...platformShadow({
+      color: colors.onboardingInk,
+      opacity: 0.04,
+      radius: 18,
+      offset: { width: 0, height: 6 },
+    }),
   },
   avatarGroup: {
     flexDirection: 'row',

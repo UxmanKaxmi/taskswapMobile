@@ -140,14 +140,13 @@ export default function Avatar({
 
 const styles = StyleSheet.create({
   image: {
-    borderWidth: 2,
+    // borderWidth: 2,
     resizeMode: 'cover',
   },
   fallback: {
     backgroundColor: colors.info,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
     overflow: 'hidden',
   },
   fallbackText: {

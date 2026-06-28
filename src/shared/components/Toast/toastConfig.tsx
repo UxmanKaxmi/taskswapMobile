@@ -2,11 +2,7 @@
 import React from 'react';
 import TaskSwapToast from './TaskSwapToast';
 import { ToastConfigParams } from 'react-native-toast-message';
-
-interface ToastProps {
-  text1: string;
-  text2: string;
-}
+import PushToast, { PushToastProps } from './PushToast';
 
 export const toastConfig = {
   success: ({ text1, text2 }: ToastConfigParams<any>) => (
@@ -17,5 +13,8 @@ export const toastConfig = {
   ),
   info: ({ text1, text2 }: ToastConfigParams<any>) => (
     <TaskSwapToast type="info" text1={text1 || ''} text2={text2} />
+  ),
+  push: ({ props }: ToastConfigParams<PushToastProps>) => (
+    <PushToast pusherName={props?.pusherName ?? ''} message={props?.message} />
   ),
 };

@@ -1,17 +1,16 @@
 // src/features/tasks/hooks/useTasksQuery.ts
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { getTasksPage, TaskPage } from '../api/taskApi';
-import { Task } from '../types/tasks';
+import { FeedSortKey, getTasksPage, TaskPage } from '../api/taskApi';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import { useAuth } from '@features/Auth/AuthProvider';
 
-export function useTasksQuery() {
+export function useTasksQuery(sort: FeedSortKey = 'needs_push') {
   const { user, loading: authLoading } = useAuth();
 
   return useInfiniteQuery<TaskPage>({
-    queryKey: buildQueryKey.tasks(user?.id),
+    queryKey: buildQueryKey.tasks(user?.id, sort),
     initialPageParam: null as string | null,
-    queryFn: ({ pageParam }) => getTasksPage((pageParam as string | null) ?? null),
+    queryFn: ({ pageParam }) => getTasksPage((pageParam as string | null) ?? null, undefined, sort),
     getNextPageParam: lastPage => (lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined),
     refetchOnMount: true,
     refetchOnReconnect: true,

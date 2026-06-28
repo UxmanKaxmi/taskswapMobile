@@ -6,6 +6,7 @@ export interface UserProfile {
   createdAt: string;
   followersCount: number;
   followingCount: number;
+  pushesGiven?: number;
   taskSuccessRate: number; // 0–100 percentage
   tasksDone: number;
   dayStreak: number;

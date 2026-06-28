@@ -1,5 +1,6 @@
 // src/shared/utils/toast.ts
 import Toast from 'react-native-toast-message';
+import type { PushToastProps } from '@shared/components/Toast/PushToast';
 
 type ToastType = 'success' | 'error' | 'info';
 
@@ -31,5 +32,18 @@ export const showToast = ({ type, title, message }: ShowToastOptions) => {
     text2: message,
     position: 'bottom',
     visibilityTime: 3000,
+  });
+};
+
+export const showPushToast = ({ pusherName, message }: PushToastProps) => {
+  Toast.show({
+    type: 'push' as any,
+    props: {
+      pusherName,
+      message,
+    },
+    position: 'bottom',
+    bottomOffset: 110,
+    visibilityTime: 2600,
   });
 };

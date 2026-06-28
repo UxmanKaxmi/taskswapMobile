@@ -61,6 +61,18 @@ export default function FriendsProfileScreen() {
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
 
   const handleToggleFollow = (userId: string) => {
+    if (
+      !checkAuthThenNavigate(
+        'FriendsProfileScreen',
+        { id: userId },
+        {
+          authContext: 'Follow',
+        },
+      )
+    ) {
+      return;
+    }
+
     toggleFollow(userId);
   };
 
@@ -122,9 +134,10 @@ export default function FriendsProfileScreen() {
   );
 
   return (
-    <Layout>
-      <AppHeader />
-      <Height size={vs(10)} />
+    <Layout allowPaddingHorizontal={false} backgroundColor={colors.onboardingPaper}>
+      <View style={styles.headerWrap}>
+        <AppHeader showTitle={false} />
+      </View>
 
       {isLoading && <AppLoader visible />}
 
@@ -136,35 +149,41 @@ export default function FriendsProfileScreen() {
         <ListView
           style={{ flex: 1 }}
           scrollViewProps={{
-            contentContainerStyle: { width: '100%' },
+            contentContainerStyle: {
+              width: '100%',
+              paddingHorizontal: spacing.lg,
+              paddingBottom: vs(40),
+            },
           }}
         >
           <FriendsProfileHeader
+            userId={profile.id}
             avatarUri={profile.photo}
             name={profile?.name || 'No Name'}
-            username={profile?.name || 'no username'}
+            username={profile?.username}
             following={profile?.followingCount ?? 0}
             followers={profile?.followersCount ?? 0}
-            email={profile.email}
             heFollowsYou={profile.isFollowedBy}
             youFollowHim={profile.isFollowing}
             onPressToggleFollow={() => handleToggleFollow(profile.id)}
           />
 
           <FriendsStatsAchievements
+            pushesGiven={profile?.pushesGiven ?? profile?.taskSuccessRate ?? 0}
             tasksDone={profile?.tasksDone ?? 0}
             dayStreak={profile?.dayStreak ?? 0}
-            taskSuccessRate={profile?.taskSuccessRate ?? 0}
           />
-          <Height size={20} />
+          <Height size={vs(5)} />
 
-          {profile.recentTasks.length !== 0 && <SectionHeader label="Recent Tasks" icon="today" />}
+          {profile.recentTasks.length !== 0 && (
+            <SectionHeader label="Recent tasks" icon="calendar-outline" />
+          )}
           {/* 
           <TextElement variant="subtitle" style={{ marginTop: spacing.xs, fontWeight: '600' }}>
             Recent Tasks
           </TextElement> */}
 
-          <View style={{ gap: spacing.sm, marginHorizontal: -spacing.md, marginBottom: vs(40) }}>
+          <View style={styles.recentTasks}>
             {profile.recentTasks.length === 0 ? (
               <TextElement
                 variant="caption"
@@ -186,6 +205,14 @@ export default function FriendsProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerWrap: {
+    paddingHorizontal: spacing.lg,
+  },
+  recentTasks: {
+    gap: spacing.sm,
+    marginHorizontal: -spacing.lg,
+    marginBottom: vs(40),
+  },
   errorText: {
     textAlign: 'center',
     marginTop: spacing.xl,

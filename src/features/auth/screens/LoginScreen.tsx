@@ -1,10 +1,9 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions, Alert } from 'react-native';
+import { View, StyleSheet, Alert, Pressable, Text, ActivityIndicator } from 'react-native';
 import { useAuth } from '../AuthProvider';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
-import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import Column from '@shared/components/Layout/Column';
 import { Height } from '@shared/components/Spacing';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
@@ -18,9 +17,34 @@ import {
 } from '@navigation/types/navigation';
 import { TAB_SCREENS } from '@shared/utils/helperFunctions';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
+
+function GoogleLogo({ size = 22 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 18 18">
+      <Path
+        fill="#4285F4"
+        d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62Z"
+      />
+      <Path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.91-2.26c-.81.54-1.84.86-3.05.86-2.34 0-4.33-1.58-5.04-3.71H.96v2.33A9 9 0 0 0 9 18Z"
+      />
+      <Path
+        fill="#FBBC05"
+        d="M3.96 10.71A5.41 5.41 0 0 1 3.68 9c0-.59.1-1.17.28-1.71V4.96H.96A9 9 0 0 0 0 9c0 1.45.35 2.82.96 4.04l3-2.33Z"
+      />
+      <Path
+        fill="#EA4335"
+        d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3 2.33C4.67 5.16 6.66 3.58 9 3.58Z"
+      />
+    </Svg>
+  );
+}
 
 export default function LoginScreen() {
   const { signIn, loading } = useAuth();
+  const [isSigningIn, setIsSigningIn] = React.useState(false);
 
   const route = useRoute<RouteProp<AuthStackParamList, 'Login'>>();
   const navigation = useNavigation();
@@ -55,8 +79,13 @@ export default function LoginScreen() {
     );
   };
 
+  const loginLoading = loading || isSigningIn;
+
   const handleLogin = async () => {
+    if (loginLoading) return;
+
     try {
+      setIsSigningIn(true);
       await signIn();
 
       const isTab = TAB_SCREENS.includes(redirectTo as any);
@@ -92,76 +121,129 @@ export default function LoginScreen() {
       });
     } catch (e) {
       Alert.alert('Login failed', e instanceof Error ? e.message : 'Something went wrong.');
+    } finally {
+      setIsSigningIn(false);
     }
   };
 
+  const handleAppleLogin = () => {
+    Alert.alert('Apple Sign-In', 'Apple Sign-In is not configured yet.');
+  };
+
   return (
-    <Layout backgroundColor="onAccent">
+    <Layout backgroundColor={colors.onboardingPaper}>
       <AppHeader showNavigation />
 
-      <Column flex>
-        {/* Login Title */}
+      <Column flex fullWidth style={styles.content}>
         <Animated.View entering={FadeIn.duration(220)}>
-          <TextElement variant="title" style={styles.title}>
-            Unlock Your Full Experience
-          </TextElement>
+          <View style={styles.titleBlock}>
+            <View style={styles.titleLine}>
+              <TextElement variant="title" weight="800" style={styles.titleText}>
+                Unlock your
+              </TextElement>
+              <View style={styles.highlightedWord}>
+                <View style={styles.titleUnderline} />
+                <TextElement variant="title" weight="800" style={styles.titleText}>
+                  full
+                </TextElement>
+              </View>
+            </View>
+            <TextElement variant="title" weight="800" style={styles.titleText}>
+              experience
+            </TextElement>
+          </View>
         </Animated.View>
 
-        {/* Motivational Tagline */}
         <TextElement variant="caption" style={styles.tagline}>
-          Create an account to save your progress, support others, and that helps you stay
-          consistent.
+          Create an account to keep your momentum, push others forward, and stay consistent.
         </TextElement>
 
-        <Height size={20} />
-
-        {/* Feature Highlights */}
         <View style={styles.featuresContainer}>
           <AnimatedFeatureRow delay={0}>
             <View style={styles.featureItem}>
-              <Icon
-                set="fa6"
-                name="chart-line"
-                iconStyle="solid"
-                size={20}
-                color={colors.primary}
-              />
+              <View style={styles.featureIcon}>
+                <Icon
+                  set="fa6"
+                  name="chart-line"
+                  iconStyle="solid"
+                  size={18}
+                  color={colors.onboardingInk}
+                />
+              </View>
               <TextElement variant="subtitle" style={styles.featureText}>
-                Track your progress and daily streaks
+                Track your momentum and streaks
               </TextElement>
             </View>
           </AnimatedFeatureRow>
 
           <AnimatedFeatureRow delay={90}>
             <View style={styles.featureItem}>
-              <Icon set="fa6" name="user" size={20} color={colors.primary} />
+              <View style={styles.featureIcon}>
+                <Icon
+                  set="fa6"
+                  name="user-group"
+                  iconStyle="solid"
+                  size={18}
+                  color={colors.onboardingInk}
+                />
+              </View>
               <TextElement variant="subtitle" style={styles.featureText}>
-                Support friends and share updates
+                Push friends forward and share your wins
               </TextElement>
             </View>
           </AnimatedFeatureRow>
 
           <AnimatedFeatureRow delay={180}>
             <View style={styles.featureItem}>
-              <Icon set="fa6" name="bell" size={20} color={colors.primary} />
+              <View style={styles.featureIcon}>
+                <Icon set="fa6" name="bell" size={18} color={colors.onboardingInk} />
+              </View>
               <TextElement variant="subtitle" style={styles.featureText}>
-                Get gentle, personalized reminders
+                Know the moment a push lands
               </TextElement>
             </View>
           </AnimatedFeatureRow>
         </View>
       </Column>
 
-      <Height size={40} />
-
-      {/* Login Button */}
       <View style={styles.buttonContainer}>
-        <PrimaryButton isLoading={loading} title="Continue with Google" onPress={handleLogin} />
-        <TextElement
-          variant="caption"
-          color="muted"
-          style={{ textAlign: 'center', fontSize: moderateScale(12) }}
+        <Pressable
+          accessibilityRole="button"
+          disabled={loginLoading}
+          onPress={handleLogin}
+          style={({ pressed }) => [
+            styles.socialButton,
+            styles.googleButton,
+            pressed && !loginLoading && styles.buttonPressed,
+          ]}
         >
+          {loginLoading ? (
+            <>
+              <ActivityIndicator size="small" color={colors.onboardingInk} />
+              <Text style={styles.googleButtonText}>Signing in...</Text>
+            </>
+          ) : (
+            <>
+              <GoogleLogo size={moderateScale(18)} />
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
+            </>
+          )}
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={handleAppleLogin}
+          style={({ pressed }) => [
+            styles.socialButton,
+            styles.appleButton,
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <Icon set="fa6" name="apple" iconStyle="brand" size={20} color={colors.onPrimary} />
+          <Text style={styles.appleButtonText}>Continue with Apple</Text>
+        </Pressable>
+
+        <TextElement variant="caption" color="muted" style={styles.permissionText}>
           We&apos;ll never post without your permission.
         </TextElement>
       </View>
@@ -172,33 +254,107 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  tagline: {
-    fontSize: moderateScale(16),
-    color: colors.muted,
-    marginBottom: 10,
+  content: {
+    paddingTop: verticalScale(18),
   },
-  title: {
+  tagline: {
+    fontSize: moderateScale(17),
+    lineHeight: moderateScale(24),
+    color: colors.muted,
+    marginBottom: 0,
+  },
+  titleBlock: {
+    marginBottom: verticalScale(5),
+  },
+  titleLine: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: moderateScale(8),
+  },
+  titleText: {
     textAlign: 'left',
-    fontWeight: '700',
-    fontSize: moderateScale(28),
-    marginBottom: moderateScale(8),
-    marginTop: verticalScale(28),
+    fontWeight: '800',
+    fontSize: moderateScale(35),
+    lineHeight: moderateScale(38),
+    color: colors.onboardingInk,
+  },
+  highlightedWord: {
+    position: 'relative',
+  },
+  titleUnderline: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: moderateScale(2),
+    height: moderateScale(15),
+    backgroundColor: colors.onboardingPush,
   },
   featuresContainer: {
-    marginTop: 0,
-    gap: 16,
+    marginTop: verticalScale(20),
+    gap: verticalScale(20),
+    width: '100%',
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: moderateScale(18),
+  },
+  featureIcon: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(14),
+    backgroundColor: colors.tactileMomentumPrimary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   featureText: {
-    color: colors.muted,
+    color: colors.onboardingInk,
     fontSize: moderateScale(18),
-    marginLeft: moderateScale(5),
+    lineHeight: moderateScale(24),
+    fontWeight: '600',
+    flex: 1,
+    flexShrink: 1,
   },
   buttonContainer: {
     width: '100%',
+    paddingHorizontal: moderateScale(12),
+  },
+  socialButton: {
+    minHeight: verticalScale(45),
+    borderRadius: moderateScale(18),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: moderateScale(12),
+  },
+  googleButton: {
+    backgroundColor: colors.onPrimary,
+    borderWidth: 1,
+    borderColor: colors.onboardingLine,
+    marginBottom: verticalScale(12),
+  },
+  buttonPressed: {
+    opacity: 0.82,
+  },
+  googleButtonText: {
+    color: colors.onboardingInk,
+    fontSize: moderateScale(16),
+    lineHeight: moderateScale(22),
+    fontWeight: '700',
+  },
+  appleButton: {
+    backgroundColor: colors.onboardingInk,
+  },
+  appleButtonText: {
+    color: colors.onPrimary,
+    fontSize: moderateScale(16),
+    lineHeight: moderateScale(22),
+    fontWeight: '700',
+  },
+  permissionText: {
+    textAlign: 'center',
+    fontSize: moderateScale(12),
+    lineHeight: moderateScale(18),
+    marginTop: verticalScale(10),
   },
 });

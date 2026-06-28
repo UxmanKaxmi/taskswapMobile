@@ -5,6 +5,8 @@ import { CreateTaskPayload } from '@features/AddTask';
 
 export const TASK_PAGE_LIMIT = 20;
 
+export type FeedSortKey = 'all' | 'needs_push' | 'new' | 'almost_there';
+
 export type TaskPage = {
   data: Task[];
   meta: {
@@ -25,11 +27,13 @@ export type CreateProgressUpdateResponse = {
 export async function getTasksPage(
   cursor?: string | null,
   limit = TASK_PAGE_LIMIT,
+  sort: FeedSortKey = 'needs_push',
 ): Promise<TaskPage> {
   const response = await api.get<TaskPage>(ApiRoute.TASKS, {
     params: {
       cursor: cursor ?? undefined,
       limit,
+      sort,
     },
   });
   return response.data;

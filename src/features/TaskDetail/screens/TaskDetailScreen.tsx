@@ -1,6 +1,6 @@
 // src/features/tasks/screens/TaskDetailScreen.tsx
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, findNodeHandle, StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { Layout } from '@shared/components/Layout';
@@ -10,6 +10,7 @@ import AppLoader from '@shared/components/Loader/Loader';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getTaskByIdAPI } from '@features/Home/api/api';
 import { TaskDetailHeader } from '../components/TaskDetailHeader';
+import MotivationStatsHeader from '../components/MotivationStatsHeader';
 import TaskBackground from '@features/AddTask/components/TaskBackground';
 import {
   getTaskBackgroundVisual,
@@ -27,7 +28,7 @@ import { TaskThemeContainer } from '../components/TaskThemeContainer';
 import TaskDetailBody from '../components/TaskDetailBody';
 import TaskDetailCaption from '../components/TaskDetailCaption';
 import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
-import { colors } from '@shared/theme';
+import { colors, spacing } from '@shared/theme';
 import {
   isAndroid,
   PROGRESS_UPDATE_COOLDOWN_LABEL,
@@ -42,8 +43,13 @@ import ViewHelpersModal from '../components/ViewHelpersModal';
 import SelectHelpersModal from '@features/AddTask/components/SelectHelpersModal';
 import { usePushInteraction } from '@features/Home/hooks/usePushInteraction';
 import { useTaskPushes, useToggleTaskPush } from '@features/Tasks/hooks/useTaskPush';
-import { formatViewCount, getFirstName } from '@shared/utils/helperFunctions';
-import { ProgressUpdate, TaskTypeEnum } from '@features/Tasks/types/tasks';
+import {
+  formatViewCount,
+  getFirstName,
+  stripOuterQuotes,
+  toShortName,
+} from '@shared/utils/helperFunctions';
+import { ProgressUpdate, TaskBeat, TaskTypeEnum } from '@features/Tasks/types/tasks';
 import AnimatedBottomButtonWithHeader, {
   BOTTOM_BUTTON_HEIGHT,
 } from '@shared/components/Buttons/AnimatedBottomButtonWithHeader';
@@ -75,6 +81,7 @@ import { useCreateTaskProgressUpdate } from '@features/Tasks/hooks/useTaskProgre
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import EmptyState from '@features/Empty/EmptyState';
 import CompletionBurst from '../components/CompletionBurst';
+import { useSendCheer } from '@features/Tasks/hooks/useTaskCheer';
 
 export default function TaskDetailScreen({
   route,
@@ -87,6 +94,8 @@ export default function TaskDetailScreen({
     scrollTo,
     openUpdateComposer,
     progressUpdateId,
+    beatId,
+    highlightBeatId,
   } = route.params ?? {};
   const resolvedTaskId = taskId ?? initialTask?.id;
   const openAdviceComposer =
@@ -113,11 +122,19 @@ export default function TaskDetailScreen({
     handledProgressComposerRef.current = false;
     handledAdviceScrollRef.current = false;
     setProgressSectionHighlighted(false);
-  }, [resolvedTaskId, scrollTo, openUpdateComposer, progressUpdateId, highlightCommentId]);
+  }, [
+    resolvedTaskId,
+    scrollTo,
+    openUpdateComposer,
+    progressUpdateId,
+    beatId,
+    highlightBeatId,
+    highlightCommentId,
+  ]);
 
   const { user } = useAuth();
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
-  const { openModal, openReminderMessageSheet, openShareUpdateSheet } = useModal();
+  const { openModal, openReminderMessageSheet, openShareUpdateSheet, openCheerSheet } = useModal();
 
   const { data: friends = [] } = useFollowers();
 
@@ -125,6 +142,7 @@ export default function TaskDetailScreen({
   const { data: pushData } = useTaskPushes(resolvedTaskId ?? '');
   const addComment = useAddComment(resolvedTaskId ?? '');
   const shareProgressUpdate = useCreateTaskProgressUpdate(resolvedTaskId ?? '');
+  const sendCheer = useSendCheer(resolvedTaskId ?? '');
   const { mutate: togglePush, isPending } = useToggleTaskPush(resolvedTaskId ?? '');
   const qc = useQueryClient();
 
@@ -155,7 +173,7 @@ export default function TaskDetailScreen({
       typeof helper === 'string' ? helper : helper.id,
     ) ?? [];
 
-  const hasPushed = pushData?.hasPushed || false;
+  const hasPushed = pushData?.hasPushed ?? task?.hasPushed ?? false;
   const pushCount = pushData?.pushCount || 0;
   const supporterCount = pushData?.pushCount ?? task?.pushCount ?? 0;
   const helperCount = task?.helpers?.length ?? 0;
@@ -168,6 +186,8 @@ export default function TaskDetailScreen({
   const canShareProgressUpdate = hasShareUpdateRecipients && !isShareUpdateCoolingDown;
   const hasVoted = task?.hasVoted;
   const hasReminded = task?.hasReminded;
+  const canViewerCheer = Boolean(hasPushed && !isOwner && !isCompleted);
+  const resolvedHighlightBeatId = highlightBeatId ?? beatId ?? progressUpdateId;
 
   const { emoji } = getTypeVisual(task?.type ?? TaskTypeEnum.Advice);
 
@@ -198,6 +218,12 @@ export default function TaskDetailScreen({
   const handleCloseShare = useCallback(() => {
     setShareVisible(false);
   }, []);
+
+  // Owner shares a progress update — reuses the task share module.
+  const handleShareUpdate = useCallback(() => {
+    if (!task) return;
+    handleShareTask(task as ShareTask);
+  }, [handleShareTask, task]);
 
   const handleMarkCompletePress = useCallback(() => {
     if (!task?.id) return;
@@ -240,7 +266,7 @@ export default function TaskDetailScreen({
 
         showToast({
           type: 'success',
-          title: 'Helpers updated',
+          title: 'Friends added.',
           message: 'Your task has been updated.',
         });
       } catch (error) {
@@ -248,7 +274,7 @@ export default function TaskDetailScreen({
         showToast({
           type: 'error',
           title: 'Error',
-          message: 'Could not update helpers. Try again.',
+          message: 'Could not update friends. Try again.',
         });
       }
     },
@@ -378,7 +404,45 @@ export default function TaskDetailScreen({
           });
         }),
     });
-  }, [latestProgressUpdate, openShareUpdateSheet, shareProgressUpdate, task]);
+  }, [isCompleted, latestProgressUpdate, openShareUpdateSheet, shareProgressUpdate, task]);
+
+  const handleCheerPress = React.useCallback(
+    (beat: TaskBeat) => {
+      if (!task || !beat.beatId) return;
+
+      if (!checkAuthThenNavigate(undefined, undefined, { authContext: 'Cheer' })) return;
+
+      openCheerSheet({
+        ownerName: getFirstName(task.name || 'them'),
+        taskText: stripOuterQuotes(beat.text || task.text),
+        beatType: beat.type,
+        onSelectPreset: presetKey =>
+          new Promise<void>((resolve, reject) => {
+            sendCheer.mutate(
+              {
+                beatId: beat.beatId,
+                presetKey,
+              },
+              {
+                onSuccess: () => {
+                  resolve();
+                },
+                onError: (err: any) => {
+                  const apiMessage = err?.response?.data?.message || err?.response?.data?.error;
+                  showToast({
+                    type: 'error',
+                    title: 'Cheer not sent',
+                    message: apiMessage || 'Could not send your cheer. Try again.',
+                  });
+                  reject(err);
+                },
+              },
+            );
+          }),
+      });
+    },
+    [checkAuthThenNavigate, openCheerSheet, sendCheer, task],
+  );
 
   useEffect(() => {
     if (handledProgressComposerRef.current) return;
@@ -408,15 +472,15 @@ export default function TaskDetailScreen({
       if (cancelled) return;
 
       const sectionRef = progressSectionRef.current;
-      const scrollHandle = findNodeHandle(scrollViewRef.current);
+      const scrollNode = scrollViewRef.current?.getNativeScrollRef?.() ?? scrollViewRef.current;
 
-      if (!sectionRef || !scrollHandle) {
+      if (!sectionRef || !scrollNode || typeof sectionRef.measureLayout !== 'function') {
         globalThis.requestAnimationFrame(measureAndScroll);
         return;
       }
 
       sectionRef.measureLayout(
-        scrollHandle,
+        scrollNode,
         (_x, y) => {
           if (cancelled) return;
           handledProgressScrollRef.current = true;
@@ -462,15 +526,15 @@ export default function TaskDetailScreen({
       if (cancelled) return;
 
       const sectionRef = adviceSectionRef.current;
-      const scrollHandle = findNodeHandle(scrollViewRef.current);
+      const scrollNode = scrollViewRef.current?.getNativeScrollRef?.() ?? scrollViewRef.current;
 
-      if (!sectionRef || !scrollHandle) {
+      if (!sectionRef || !scrollNode || typeof sectionRef.measureLayout !== 'function') {
         globalThis.requestAnimationFrame(measureAndScroll);
         return;
       }
 
       sectionRef.measureLayout(
-        scrollHandle,
+        scrollNode,
         (_x, y) => {
           if (cancelled) return;
           handledAdviceScrollRef.current = true;
@@ -507,6 +571,13 @@ export default function TaskDetailScreen({
       togglePush();
     },
     isPushing: isPending,
+    pushToast:
+      task?.type === TaskTypeEnum.Motivation
+        ? {
+            pusherName: 'You',
+            message: `just pushed ${toShortName(task.name)} forward`,
+          }
+        : undefined,
   });
 
   //ADVICE
@@ -656,8 +727,9 @@ export default function TaskDetailScreen({
               : () => handleShareTask(task as ShareTask)
           }
           isLoading={canShareProgressUpdate ? shareProgressUpdate.isPending : false}
-          buttonColor={colors.motivationBgHardest}
-          containerColor={colors.onPrimary}
+          buttonColor={colors.onboardingPush}
+          textColor={colors.onboardingInk}
+          containerColor={colors.onboardingCard}
           buttonHeader={
             canShareProgressUpdate
               ? 'Keep everyone supporting you in the loop.'
@@ -675,11 +747,12 @@ export default function TaskDetailScreen({
       return (
         <AnimatedBottomButtonWithHeader
           visible
-          title={emoji + `Push ${getFirstName(task.name)}`}
+          title={`Push ${getFirstName(task.name)}`}
           onPress={push.handlePush}
           isLoading={isPending}
-          buttonColor={colors.motivationBgHardest}
-          containerColor={colors.onPrimary}
+          buttonColor={colors.onboardingPush}
+          textColor={colors.onboardingInk}
+          containerColor={colors.onboardingCard}
           buttonHeader="A small push can make a big difference."
         />
       );
@@ -821,7 +894,9 @@ export default function TaskDetailScreen({
 
         <TaskDetailCaption task={task} />
 
-        <Height size={vs(14)} />
+        <MotivationStatsHeader createdAt={task.createdAt} pushCount={supporterCount} />
+
+        <Height size={vs(18)} />
 
         <TaskDetailBody
           task={task}
@@ -829,7 +904,12 @@ export default function TaskDetailScreen({
           progressSectionRef={progressSectionRef}
           highlightProgressSection={progressSectionHighlighted}
           highlightProgressUpdateId={progressUpdateId}
+          highlightBeatId={resolvedHighlightBeatId}
           highlightCommentId={highlightCommentId}
+          canViewerCheer={canViewerCheer}
+          onCheerPress={handleCheerPress}
+          onShareUpdate={handleShareUpdate}
+          isSendingCheer={sendCheer.isPending}
         />
 
         {!isCompleted && (isOwner || hasHelpers) && (
@@ -840,6 +920,7 @@ export default function TaskDetailScreen({
               taskType={task.type}
               isOwner={isOwner}
               completed={isCompleted}
+              ownerName={task.name}
               onPress={openHelpersSheet}
               onAddPress={openAddHelperSheet}
             />
@@ -865,7 +946,13 @@ export default function TaskDetailScreen({
     openAddHelperSheet,
     progressSectionHighlighted,
     progressUpdateId,
+    resolvedHighlightBeatId,
+    canViewerCheer,
+    handleCheerPress,
+    handleShareUpdate,
+    sendCheer.isPending,
     isCompleted,
+    supporterCount,
   ]);
 
   const renderDecision = React.useCallback(() => {
@@ -1004,17 +1091,25 @@ export default function TaskDetailScreen({
   }
 
   const bg = getTaskBackgroundVisual(task.type);
+  const isMotivation = task.type === TaskTypeEnum.Motivation;
   const edges: Array<'top' | 'bottom' | 'left' | 'right'> = isAndroid
     ? ['left', 'right', 'bottom']
     : ['top', 'left', 'right', 'bottom'];
   const showOwnerMenu = isOwner && !!task?.id;
   return (
     <View style={{ flex: 1 }}>
-      {/* 🔥 Full-screen gradient */}
-      <TaskThemeContainer type={task.type} />
+      {isMotivation ? (
+        // New PushMeUp theme: flat cream background, no gradient/watermark.
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.onboardingPaper }]} />
+      ) : (
+        <>
+          {/* 🔥 Full-screen gradient */}
+          <TaskThemeContainer type={task.type} />
 
-      {/* 🔥 Background watermark */}
-      <TaskBackground icon={bg.icon} color={bg.color} iconOpacity={0.1} />
+          {/* 🔥 Background watermark */}
+          <TaskBackground icon={bg.icon} color={bg.color} iconOpacity={0.1} />
+        </>
+      )}
 
       {/* 🔥 Foreground content */}
       <Layout
@@ -1025,7 +1120,10 @@ export default function TaskDetailScreen({
         footerHeight={BOTTOM_BUTTON_HEIGHT}
         edgesProp={edges}
         allowPaddingVertical
-        allowPaddingHorizontal
+        allowPaddingHorizontal={false}
+        // Match the Home screen's horizontal padding (spacing.lg) instead of the
+        // Layout default (spacing.md).
+        scrollViewProps={{ contentContainerStyle: { paddingHorizontal: spacing.lg } }}
         backgroundColor="transparent"
       >
         <AppHeader
@@ -1035,7 +1133,12 @@ export default function TaskDetailScreen({
                 style={styles.headerAction}
                 onPress={() => handleShareTask(task as ShareTask)}
               >
-                <Icon set="ion" name="share-social-outline" size={ms(18)} color={colors.muted} />
+                <Icon
+                  set="ion"
+                  name="share-social-outline"
+                  size={ms(18)}
+                  color={colors.onboardingInk}
+                />
               </Ripple>
               {showOwnerMenu && (
                 <Ripple
@@ -1043,7 +1146,12 @@ export default function TaskDetailScreen({
                   onPress={handleOpenTaskMenu}
                   disabled={isDeleting}
                 >
-                  <Icon set="ion" name="ellipsis-vertical" size={ms(18)} color={colors.muted} />
+                  <Icon
+                    set="ion"
+                    name="ellipsis-vertical"
+                    size={ms(18)}
+                    color={colors.onboardingInk}
+                  />
                 </Ripple>
               )}
             </View>
@@ -1065,11 +1173,15 @@ export default function TaskDetailScreen({
         friends={friends}
         onConfirm={handleHelpersConfirmed}
         onClose={() => setShowAddHelperModal(false)}
-        confirmButtonColor={typeBackgroundsHardest[task.type]}
       />
 
       {shareTask && (
-        <ShareModal visible={shareVisible} task={shareTask} onClose={handleCloseShare} />
+        <ShareModal
+          visible={shareVisible}
+          task={shareTask}
+          isOwner={isOwner}
+          onClose={handleCloseShare}
+        />
       )}
 
       <CompletionBurst playKey={completionBurstKey} />

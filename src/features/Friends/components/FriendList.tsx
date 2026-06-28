@@ -13,15 +13,16 @@ import { useDebounce } from 'use-debounce';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { openFriendsProfile } from '@navigation/types/navigationUtils';
-import Column from '@shared/components/Layout/Column';
 import { haptics } from '@shared/utils/haptics';
 import { useAuth } from '@features/Auth/AuthProvider';
+import { spacing } from '@shared/theme';
 
 type Friend = {
   id: string;
   photo: string;
   name: string;
-  email: string;
+  username?: string | null;
+  email?: string;
   isFollowing: boolean;
 };
 
@@ -36,23 +37,11 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const { user } = useAuth();
 
-  const {
-    data: searchData = [],
-    isLoading: isSearching,
-    isError: isSearchError,
-  } = useSearchFriends(debouncedQuery, true);
+  const { data: searchData = [], isLoading: isSearching } = useSearchFriends(debouncedQuery, true);
 
-  const {
-    data: followers = [],
-    isLoading: loadingFollowers,
-    isError: errorFollowers,
-  } = useFollowers();
+  const { data: followers = [], isLoading: loadingFollowers } = useFollowers();
 
-  const {
-    data: following = [],
-    isLoading: loadingFollowing,
-    isError: errorFollowing,
-  } = useFollowing();
+  const { data: following = [], isLoading: loadingFollowing } = useFollowing();
 
   const { mutate: toggleFollow, isPending, variables } = useToggleFollow(debouncedQuery);
 
@@ -82,6 +71,7 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
         contentContainerStyle: {
           flexGrow: 1,
           maxWidth: '100%',
+          paddingHorizontal: spacing.lg,
         },
       }}
       emptyComponent={
@@ -105,9 +95,10 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
         <FriendFollowRow
           onPressRow={() => openFriendsProfile(navigation, item.id, user?.id)}
           isLoading={isPending && variables === item.id}
+          userId={item.id}
           photo={item.photo}
           name={item.name}
-          email={item.email}
+          username={item.username}
           isFollowing={item.isFollowing}
           onToggleFollow={() => {
             haptics.success();

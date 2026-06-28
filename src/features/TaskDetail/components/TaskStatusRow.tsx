@@ -33,10 +33,10 @@ export default function TaskStatusRow({
       <View style={styles.left}>
         {/* <View style={styles.dot} /> */}
 
-        <View style={styles.views}>
+        {/* <View style={styles.views}>
           <Icon set="ion" name="eye-sharp" size={14} color={colors.placeHolder} />
           <TextElement style={styles.viewsText}>{formatViewCount(viewsCount)} views</TextElement>
-        </View>
+        </View> */}
       </View>
 
       {/* RIGHT */}

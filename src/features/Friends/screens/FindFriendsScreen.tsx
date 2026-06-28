@@ -16,7 +16,7 @@ import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { Layout } from '@shared/components/Layout';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
-import { vs } from 'react-native-size-matters';
+import { ms, vs } from 'react-native-size-matters';
 import { useToggleFollow } from '@features/User/hooks/useToggleFollow';
 import { queryClient } from '@lib/react-query/client';
 import { buildQueryKey } from '@shared/constants/queryKeys';
@@ -29,7 +29,7 @@ export default function FindFriendsScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const route = useRoute<RouteProp<AppStackParamList, 'FindFriendsScreen'>>();
   const openedFromHome = route.params?.openedFromHome;
-  const { spacing } = useTheme();
+  const { spacing, colors } = useTheme();
   const { data: matches = [], isLoading, isError, refetch } = useMatchUsers();
   const { setHasSeenFindFriendsScreen, user } = useAuth();
   const { mutate: toggleFollow, isPending, variables, error } = useToggleFollow();
@@ -120,14 +120,17 @@ export default function FindFriendsScreen() {
 
   return (
     <Layout
+      backgroundColor={colors.onboardingPaper}
       footerContent={
         <AnimatedBottomButton
           style={{
-            marginBottom: isIOS ? vs(12) : vs(-12),
+            marginBottom: isIOS ? vs(12) : vs(5),
           }}
           visible={showCta}
           title={ctaTitle}
           onPress={goHome}
+          buttonColor={colors.onboardingPush}
+          textColor={colors.onboardingInk}
         />
       }
     >
@@ -138,7 +141,16 @@ export default function FindFriendsScreen() {
         sections={sections}
         keyExtractor={item => item.id}
         renderSectionHeader={({ section }) => (
-          <TextElement variant="subtitle" style={{ marginTop: spacing.md, fontWeight: '600' }}>
+          <TextElement
+            variant="subtitle"
+            style={{
+              marginTop: spacing.md,
+              marginBottom: spacing.xs,
+              fontWeight: '800',
+              fontSize: ms(18),
+              color: colors.onboardingInk,
+            }}
+          >
             {section.title}
           </TextElement>
         )}
@@ -147,9 +159,10 @@ export default function FindFriendsScreen() {
             <FriendFollowRow
               onPressRow={() => {}}
               isLoading={isPending && variables === item.id}
+              userId={item.id}
               photo={item.photo}
               name={item.name}
-              email={item.email}
+              username={item.username}
               isFollowing={item.isFollowing}
               onToggleFollow={() => handleToggleFollow(item.id)}
             />
@@ -166,12 +179,24 @@ export default function FindFriendsScreen() {
         ItemSeparatorComponent={AppBorder}
         ListHeaderComponent={() => (
           <View style={{ marginVertical: spacing.sm }}>
-            <TextElement variant="title" style={{ fontWeight: '700' }}>
+            <TextElement
+              style={{
+                fontWeight: '800',
+                fontSize: ms(28),
+                lineHeight: ms(34),
+                letterSpacing: -0.5,
+                color: colors.onboardingInk,
+              }}
+            >
               {openedFromHome ? 'Find your people ' : 'Find your people'}{' '}
-              <TextElement style={{ fontSize: 20 }}>👋</TextElement>
+              <TextElement style={{ fontSize: ms(26) }}>👋</TextElement>
             </TextElement>
 
-            <TextElement variant="body" color="muted" style={{ marginTop: spacing.xs }}>
+            <TextElement
+              variant="body"
+              color="muted"
+              style={{ marginTop: spacing.sm, fontSize: ms(15), lineHeight: ms(21) }}
+            >
               {openedFromHome
                 ? `Follow a few friends to make accountability feel lighter`
                 : `Add friends so ${APP_NAME} feels a little more familiar.`}

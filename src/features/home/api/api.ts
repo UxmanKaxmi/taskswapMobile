@@ -1,6 +1,7 @@
 import { api } from '@shared/api/axios';
 import type { CustomAxiosRequestConfig } from '@shared/api/axios';
 import {
+  HomeCompactStatus,
   HomeSummaryApiResponse,
   HomeSummaryCounts,
   HomeSummaryResponse,
@@ -26,6 +27,10 @@ export function normalizeHomeSummaryResponse(
       response.summaryCounts?.peopleNeedYourPushToday ?? response.peopleNeedYourPushToday ?? 0,
     replyWaitingCount: response.summaryCounts?.replyWaitingCount ?? response.replyWaitingCount ?? 0,
   };
+  const compactStatus: HomeCompactStatus = {
+    streakDay: response.compactStatus?.streakDay ?? 0,
+    pushedTodayCount: response.compactStatus?.pushedTodayCount ?? 0,
+  };
   const successStory =
     response.successStory ??
     response.modules?.successStory ??
@@ -33,7 +38,9 @@ export function normalizeHomeSummaryResponse(
   const heroModule = response.heroModule ?? successStory ?? null;
 
   return {
+    yourGoal: response.yourGoal ?? null,
     summaryCounts,
+    compactStatus,
     modules: response.modules ?? null,
     successStory,
     heroModule,

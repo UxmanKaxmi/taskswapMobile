@@ -18,6 +18,7 @@ type Props = {
   error?: string;
   taskType: TaskType;
   charLimit?: number;
+  minLength?: number;
   footerText?: string;
   footerTextColor?: keyof typeof colors;
   dividerColor?: string;
@@ -32,6 +33,7 @@ export default function TaskDescriptionInput({
   error,
   taskType,
   charLimit = 80,
+  minLength,
   footerText,
   footerTextColor = 'muted',
   dividerColor = colors.border,
@@ -40,6 +42,9 @@ export default function TaskDescriptionInput({
 }: Props) {
   const [charCount, setCharCount] = useState(0);
   const resolvedFooterText = footerText ?? getTaskHints(taskType);
+  // Red when at/over the max, or once typing has started but is still under the min.
+  const belowMin = minLength != null && charCount > 0 && charCount < minLength;
+  const countIsError = charCount >= charLimit || belowMin;
 
   useEffect(() => {
     setCharCount(value.length);
@@ -56,22 +61,24 @@ export default function TaskDescriptionInput({
         inputStyle={[styles.input, inputStyle]}
         containerStyle={styles.inputContainer}
         error={!!error}
-        errorText={error}
         wrapperStyle={[styles.wrapperStyle, inputWrapperStyle]}
         charLimit={charLimit}
         onCharCountChange={count => setCharCount(count)}
         numberOfLines={4}
       />
       <AppBorder color={dividerColor} />
-      {/* FOOTER */}
+      {/* FOOTER — shows the error in place of the hint when present */}
       <View style={styles.footer}>
-        <TextElement style={styles.footerText} color={footerTextColor}>
-          {resolvedFooterText}
+        <TextElement
+          style={styles.footerText}
+          color={error ? 'error' : footerTextColor}
+        >
+          {error ?? resolvedFooterText}
         </TextElement>
 
         <TextElement
           style={styles.charCount}
-          color={charCount >= charLimit ? 'error' : footerTextColor}
+          color={countIsError ? 'error' : footerTextColor}
         >
           {charCount}/{charLimit}
         </TextElement>
@@ -84,11 +91,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
     fontSize: ms(12),
     alignSelf: 'flex-end',
+    flexShrink: 0,
+    marginLeft: spacing.sm,
   },
   footerText: {
     letterSpacing: 0.2,
     fontSize: ms(12),
     fontWeight: '500',
+    flex: 1,
   },
   wrapperStyle: {
     borderWidth: 0,

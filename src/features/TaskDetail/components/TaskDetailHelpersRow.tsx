@@ -6,12 +6,15 @@ import Avatar from '@shared/components/Avatar/Avatar';
 import { colors, spacing } from '@shared/theme';
 import { ms } from 'react-native-size-matters';
 import { HelperUser } from '@features/Home/types/home';
+import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 
 type Props = {
   helpers: HelperUser[];
   onPress: () => void;
   taskType: string;
   isOwner: boolean;
+  /** Task owner's name — used to build viewer-aware support copy. */
+  ownerName?: string;
 };
 
 function formatNames(helpers: HelperUser[]) {
@@ -21,36 +24,51 @@ function formatNames(helpers: HelperUser[]) {
   return `${helpers[0].name}, ${helpers[1].name} +${helpers.length - 2}`;
 }
 
-export default function TaskDetailHelpersRow({ helpers, onPress, taskType, isOwner }: Props) {
+export default function TaskDetailHelpersRow({
+  helpers,
+  onPress,
+  taskType,
+  isOwner,
+  ownerName,
+}: Props) {
   if (!helpers || helpers.length === 0) return null;
 
   const visible = helpers.slice(0, 3);
+  const isMotivation = taskType === TaskTypeEnum.Motivation;
+
+  const iconBg = isMotivation
+    ? colors.onboardingPush
+    : colors[`${taskType}IconBackground` as keyof typeof colors];
+  const accentColor = isMotivation
+    ? colors.onboardingInk
+    : (colors[`${taskType}BgHardest` as keyof typeof colors] as string);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
       {/* Left icon */}
-      <View
-        style={[
-          styles.iconWrap,
-          { backgroundColor: colors[`${taskType}IconBackground` as keyof typeof colors] },
-        ]}
-      >
-        <Icon
-          set="ion"
-          name="people"
-          size={22}
-          color={colors[`${taskType}BgHardest` as keyof typeof colors]}
-        />
+      <View style={[styles.iconWrap, { backgroundColor: iconBg }]}>
+        <Icon set="ion" name="people" size={ms(15)} color={accentColor} />
       </View>
 
       {/* Text */}
       <View style={{ flex: 1 }}>
-        <TextElement variant="caption" color="muted" style={styles.subTextHeading}>
-          {isOwner ? 'Tagged Helpers' : 'Tagged Helpers'}
-        </TextElement>
-        <TextElement color={`${taskType}BgHardest` as keyof typeof colors} style={styles.subText}>
-          {formatNames(helpers)}
-        </TextElement>
+        {isMotivation ? (
+          <>
+            <TextElement variant="caption" color="muted" style={styles.subTextHeading}>
+              Asked to help
+            </TextElement>
+            <TextElement style={styles.nameTitle}>{formatNames(helpers)}</TextElement>
+          </>
+        ) : (
+          <>
+            <TextElement variant="caption" color="muted" style={styles.subTextHeading}>
+              Tagged Helpers
+            </TextElement>
+            <TextElement style={[styles.subText, { color: accentColor }]}>
+              {formatNames(helpers)}
+            </TextElement>
+          </>
+        )}
       </View>
 
       {/* Avatars */}
@@ -84,6 +102,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: spacing.sm,
+  },
+  nameTitle: {
+    fontSize: ms(13),
+    fontWeight: '700',
+    color: colors.onboardingInk,
   },
   subTextHeading: {
     fontSize: ms(12),

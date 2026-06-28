@@ -21,16 +21,16 @@ export default function TabButton({ title, isActive, onPress }: Props) {
 
 const styles = StyleSheet.create({
   text: {
-    paddingBottom: vs(6),
-    fontWeight: '400',
-    fontSize: ms(18),
-    paddingHorizontal: ms(5),
+    paddingBottom: vs(8),
+    fontWeight: '600',
+    fontSize: ms(17),
+    paddingHorizontal: ms(2),
     color: colors.muted,
   },
   active: {
-    fontWeight: '700',
+    fontWeight: '800',
     borderBottomWidth: 2,
-    borderColor: colors.text,
-    color: colors.text,
+    borderColor: colors.onboardingInk,
+    color: colors.onboardingInk,
   },
 });

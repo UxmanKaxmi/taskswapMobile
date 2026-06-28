@@ -4,11 +4,11 @@ import { StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
 import AppModal from '@shared/components/AppModal/AppModal';
-import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import Icon from '@shared/components/Icons/Icon';
+import PushButton from '@shared/components/PushButton/PushButton';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { colors, platformShadow, spacing } from '@shared/theme';
 
 type Props = {
   visible: boolean;
@@ -26,41 +26,51 @@ export default function NotificationPermissionModal({
   return (
     <AppModal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose}>
       <LinearGradient
-        colors={[colors.motivationIconBackground, colors.motivationBg, '#F7FFF9']}
+        colors={['#F8F5EC', '#FCF9F2', '#F6F2E6']}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.backdrop}
       >
         <TouchableWithoutFeedback onPress={onNotNow}>
-          <View style={styles.backdrop} />
+          <View style={styles.backdropTouchLayer} />
         </TouchableWithoutFeedback>
 
         <View style={styles.container}>
+          <View pointerEvents="none" style={styles.glow} />
+
           <View style={styles.card}>
             <View style={styles.badgeWrap}>
               <View style={styles.badge}>
-                <Icon
-                  set="ion"
-                  name="notifications"
-                  size={ms(24)}
-                  color={colors.motivationBgHardest}
-                />
+                <Icon set="ion" name="notifications" size={ms(38)} color={colors.onboardingInk} />
+              </View>
+
+              <View style={styles.tagPill}>
+                <TextElement style={styles.tagText}>PUSH</TextElement>
               </View>
             </View>
 
-            <TextElement style={styles.title}>Want to know when someone pushes you?</TextElement>
-
-            <TextElement style={styles.body} color="muted">
-              Turn on notifications so you don&apos;t miss support.
+            <TextElement variant="title" style={styles.title}>
+              Turn on push notifications?
             </TextElement>
 
+            <TextElement style={styles.body}>
+              We&apos;ll only notify you when someone pushes you, when your task needs attention, or
+              when it&apos;s time to come back and finish.
+            </TextElement>
+
+            <TextElement style={styles.note}>NO NOISE. JUST PUSHES.</TextElement>
+
             <View style={styles.actions}>
-              <PrimaryButton
-                title="Turn on notifications"
+              <PushButton
+                size="lg"
+                label="Turn on notifications"
                 onPress={onTurnOnNotifications}
-                backgroundColor={colors.motivationBgHardest}
-                style={styles.primaryButton}
+                backgroundColor={colors.onboardingPush}
+                textColor={colors.onboardingInk}
+                style={styles.ctaButton}
+                textStyle={styles.ctaText}
               />
+
               <OutlineButton
                 title="Not now"
                 onPress={onNotNow}
@@ -79,83 +89,131 @@ const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
   },
+  backdropTouchLayer: {
+    ...StyleSheet.absoluteFillObject,
+  },
   container: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: vs(24),
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
+    paddingTop: vs(40),
+    paddingBottom: vs(28),
+  },
+  glow: {
+    position: 'absolute',
+    width: ms(220),
+    height: ms(220),
+    borderRadius: ms(220),
+    backgroundColor: 'rgba(255, 210, 63, 0.12)',
+    top: '32%',
   },
   card: {
     width: '100%',
-    backgroundColor: colors.card,
-    borderRadius: ms(26),
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.lg,
-    paddingHorizontal: spacing.lg,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 12,
-    marginTop: vs(62),
-    borderWidth: 1,
-    borderColor: '#D6F8E6',
+    maxWidth: ms(320),
+    backgroundColor: colors.onboardingCard,
+    borderRadius: ms(34),
+    paddingHorizontal: ms(28),
+    paddingTop: vs(58),
+    paddingBottom: vs(22),
+    ...platformShadow({
+      color: '#000',
+      opacity: 0.16,
+      radius: 24,
+      offset: { width: 0, height: 14 },
+    }),
   },
   badgeWrap: {
     position: 'absolute',
-    top: -vs(24),
-    left: 0,
-    right: 0,
+    top: -vs(30),
+    alignSelf: 'center',
     alignItems: 'center',
   },
   badge: {
-    width: ms(52),
-    height: ms(52),
-    borderRadius: ms(16),
-    backgroundColor: colors.motivationIconBackground,
+    width: ms(98),
+    height: ms(98),
+    borderRadius: ms(28),
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 10,
-    borderWidth: 1,
-    borderColor: '#F2F2F7',
+    ...platformShadow({
+      color: '#000',
+      opacity: 0.12,
+      radius: 16,
+      offset: { width: 0, height: 10 },
+    }),
+  },
+  tagPill: {
+    position: 'absolute',
+    top: vs(4),
+    right: -ms(50),
+    backgroundColor: colors.onboardingPush,
+    borderRadius: ms(18),
+    paddingHorizontal: ms(16),
+    paddingVertical: vs(6),
+    transform: [{ rotate: '8deg' }],
+    ...platformShadow({
+      color: 'rgba(0,0,0,0.12)',
+      opacity: 0.16,
+      radius: 10,
+      offset: { width: 0, height: 6 },
+    }),
+  },
+  tagText: {
+    color: colors.onboardingInk,
+    fontSize: ms(14),
+    fontWeight: '900',
+    letterSpacing: 1,
   },
   title: {
-    fontSize: ms(21),
-    lineHeight: ms(28),
+    color: colors.onboardingInk,
     textAlign: 'center',
-    color: colors.text,
-    marginTop: vs(16),
-    fontWeight: '800',
+    fontSize: ms(24),
+    lineHeight: ms(32),
+    fontWeight: '900',
+    marginTop: vs(20),
   },
   body: {
-    fontSize: ms(13),
-    lineHeight: ms(19),
     textAlign: 'center',
+    fontSize: ms(15),
+    lineHeight: ms(20),
+    color: colors.onboardingMuted,
     marginTop: vs(10),
+    paddingHorizontal: ms(4),
+  },
+  note: {
+    textAlign: 'center',
+    marginTop: vs(15),
+    color: colors.onboardingPushDeep,
+    fontSize: ms(12),
+    fontWeight: '900',
+    letterSpacing: 1.4,
   },
   actions: {
-    marginTop: vs(18),
-    // gap: vs(8),
+    marginTop: vs(16),
   },
-  primaryButton: {
-    alignSelf: 'stretch',
-    borderRadius: 18,
-    marginBottom: 0,
+  ctaButton: {
+    marginTop: vs(2),
+    borderRadius: ms(26),
+    ...platformShadow({
+      color: 'rgba(15, 23, 42, 0.18)',
+      opacity: 0.18,
+      radius: 18,
+      offset: { width: 0, height: 10 },
+    }),
+  },
+  ctaText: {
+    fontSize: ms(17),
+    fontWeight: '800',
   },
   secondaryButton: {
     borderWidth: 0,
     alignSelf: 'stretch',
+    marginTop: vs(-4),
   },
   secondaryText: {
     textAlign: 'center',
-    color: colors.motivationBgHardest,
+    color: colors.onboardingInk,
+    fontWeight: '800',
   },
 });

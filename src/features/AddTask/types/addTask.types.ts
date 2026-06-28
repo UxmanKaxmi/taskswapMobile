@@ -1,3 +1,4 @@
+import type { FeelingValue } from '@shared/utils/feelings';
 import { TaskType } from '@features/Tasks/types/tasks';
 
 /**
@@ -6,9 +7,9 @@ import { TaskType } from '@features/Tasks/types/tasks';
 export interface CreateTaskPayload {
   text: string;
   type: TaskType;
+  feeling?: FeelingValue;
   remindAt?: string; // For reminder tasks
   options?: string[]; // For decision tasks
   deliverAt?: string | null; // For motivation tasks
   helpers?: string[]; // IDs of users to assign as helpers
-  visibility?: 'friends' | 'public' | 'private'; // Task visibility
 }

@@ -5,7 +5,7 @@ import { ms, vs } from 'react-native-size-matters';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { colors, platformShadow, spacing } from '@shared/theme';
 import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 import type { ComingSoonModalPayload } from '../modalTypes';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
@@ -69,7 +69,16 @@ export default function ComingSoonModalContent({ payload, closeModal }: Props) {
     <View style={[styles.container, { minHeight: minContentHeight }]}>
       <View style={styles.content}>
         <View
-          style={[styles.iconBubble, { backgroundColor: copy.bubble, shadowColor: copy.bubble }]}
+          style={[
+            styles.iconBubble,
+            { backgroundColor: copy.bubble },
+            platformShadow({
+              color: copy.bubble,
+              opacity: 0.7,
+              radius: 8,
+              offset: { width: 0, height: 4 },
+            }),
+          ]}
         >
           <Icon set="fa6" name={iconName} iconStyle="solid" size={34} color={copy.accent} />
         </View>
@@ -120,11 +129,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: vs(10),
-    shadowColor: colors.text,
-    shadowOpacity: 0.7,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
   },
   title: {
     marginTop: vs(28),

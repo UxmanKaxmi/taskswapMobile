@@ -1,6 +1,7 @@
 import React from 'react';
 import BetaModal from './modals/BetaModal';
 import AddFriendsModal from './modals/AddFriendsModal';
+import FeedbackModal from './modals/FeedbackModal';
 
 export type LaunchModalScreen = 'HOME' | 'ANY';
 
@@ -39,5 +40,14 @@ export const launchModalRegistry: LaunchModalConfig[] = [
     priority: 2,
     when: ctx => !!ctx.isLoggedIn,
     component: AddFriendsModal,
+  },
+  // Fallback: only surfaces once every higher-priority launch modal has been
+  // seen/skipped — i.e. when nothing else is queued for this launch.
+  {
+    id: 'feedback_v1',
+    screen: 'HOME',
+    priority: 99,
+    when: () => true,
+    component: FeedbackModal,
   },
 ];

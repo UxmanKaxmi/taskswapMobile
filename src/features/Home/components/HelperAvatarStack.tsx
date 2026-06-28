@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { ms } from 'react-native-size-matters';
 import { colors } from '@shared/theme';
 import { Shadow } from '@shared/components/Shadow';
 import Avatar from '@shared/components/Avatar/Avatar';
+import { getAvatarColor } from '@shared/utils/avatarColor';
 
 type Helper = {
   id: string;
@@ -16,9 +17,19 @@ type Props = {
   helpers: Helper[];
   size?: number;
   maxVisible?: number;
+  moreStyle?: StyleProp<ViewStyle>;
+  moreTextStyle?: StyleProp<TextStyle>;
+  marginLeft?: number;
 };
 
-export default function HelperAvatarStack({ helpers, size = ms(40), maxVisible = 3 }: Props) {
+export default function HelperAvatarStack({
+  helpers,
+  size = ms(40),
+  maxVisible = 3,
+  moreStyle,
+  moreTextStyle,
+  marginLeft = 0.35,
+}: Props) {
   if (!helpers.length) return null;
 
   const visible = helpers.slice(0, maxVisible);
@@ -34,7 +45,7 @@ export default function HelperAvatarStack({ helpers, size = ms(40), maxVisible =
             styles.avatarWrap,
 
             {
-              marginLeft: index === 0 ? 0 : -size * 0.35,
+              marginLeft: index === 0 ? 0 : -size * marginLeft,
               width: size,
               height: size,
               borderRadius: size / 2,
@@ -46,7 +57,9 @@ export default function HelperAvatarStack({ helpers, size = ms(40), maxVisible =
             uri={helper.avatar}
             fallback={helper.name}
             size={size}
-            borderColor={colors.border}
+            // borderColor={'transarent'}
+            fallbackStyle={{ backgroundColor: getAvatarColor(helper.id || helper.name) }}
+            textStyle={styles.avatarText}
             style={styles.avatar}
           />
         </Shadow>
@@ -59,16 +72,14 @@ export default function HelperAvatarStack({ helpers, size = ms(40), maxVisible =
 
             {
               width: size,
-
               height: size,
-
               borderRadius: size / 2,
-
-              marginLeft: -size * 0.2,
+              marginLeft: -size * marginLeft,
             },
+            moreStyle,
           ]}
         >
-          <TextElement style={styles.moreText}>+{remaining}</TextElement>
+          <TextElement style={[styles.moreText, moreTextStyle]}>+{remaining}</TextElement>
         </View>
       )}
     </View>
@@ -81,8 +92,8 @@ const styles = StyleSheet.create({
   },
 
   avatarWrap: {
-    borderWidth: 1,
-    borderColor: colors.card,
+    // borderWidth: 1,
+    // borderColor: colors.card,
     backgroundColor: colors.card,
   },
 
@@ -90,14 +101,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.motivationIconBackground,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.motivationIconBackground,
+    // borderWidth: 1,
+    // borderColor: colors.motivationIconBackground,
   },
 
   moreText: {
     fontSize: ms(12),
     fontWeight: '700',
     color: colors.motivationBgHardest,
+  },
+  avatarText: {
+    color: colors.onboardingInk,
+    fontWeight: '800',
   },
   avatar: {},
 });

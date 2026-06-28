@@ -12,6 +12,7 @@ export const AnimatedBootSplash = ({ onAnimationEnd }: Props) => {
   const [logoOpacity] = useState(() => new Animated.Value(1));
   const [logoScale] = useState(() => new Animated.Value(1));
   const isAndroid = Platform.OS === 'android';
+  const nativeLogoSize = isAndroid ? 288 : 400;
 
   const { container, logo } = BootSplash.useHideAnimation({
     manifest: require('../../../assets/bootsplash/manifest.json'),
@@ -48,9 +49,9 @@ export const AnimatedBootSplash = ({ onAnimationEnd }: Props) => {
         {...logo}
         style={[
           logo.style,
-          !isAndroid && {
-            width: 400,
-            height: 400,
+          {
+            width: nativeLogoSize,
+            height: nativeLogoSize,
           },
           {
             opacity: logoOpacity,

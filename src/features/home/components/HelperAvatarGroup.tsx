@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Image, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { TaskHelper } from '../types/home';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { ms } from 'react-native-size-matters';
 import { colors } from '@shared/theme';
 import { Shadow } from '@shared/components/Shadow';
+import Avatar from '@shared/components/Avatar/Avatar';
+import { getAvatarColor } from '@shared/utils/avatarColor';
 
 type Props = {
   helpers: TaskHelper[];
@@ -27,16 +29,13 @@ export default function HelperAvatarGroup({ helpers, avatarSize = ms(38), contai
         size="tint"
         style={[styles.container, containerStyle, { width: avatarSize, height: avatarSize }]}
       >
-        <Image
-          source={helper.photo ? { uri: helper.photo } : require('@assets/images/emptyFriend.png')}
-          style={[
-            styles.avatar,
-            {
-              width: avatarSize,
-              height: avatarSize,
-              borderRadius: avatarSize / 2,
-            },
-          ]}
+        <Avatar
+          uri={helper.photo}
+          fallback={helper.name}
+          size={avatarSize}
+          borderColor={colors.card}
+          fallbackStyle={{ backgroundColor: getAvatarColor(helper.id || helper.name) }}
+          textStyle={styles.avatarText}
         />
       </Shadow>
     );
@@ -79,24 +78,22 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
 
-  avatar: {
-    borderWidth: 0.4,
-    borderColor: colors.card,
-    backgroundColor: colors.muted,
-    opacity: 0.9,
+  avatarText: {
+    color: colors.onboardingInk,
+    fontWeight: '800',
   },
 
   more: {
-    backgroundColor: colors.onAccent,
+    backgroundColor: colors.tactileMomentumPrimary,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.tactileMomentumPrimary,
   },
 
   moreText: {
-    color: colors.muted,
-    fontSize: ms(10),
-    fontWeight: '500',
+    color: colors.tactileMomentumSecondary,
+    fontSize: ms(9),
+    fontWeight: '700',
   },
 });

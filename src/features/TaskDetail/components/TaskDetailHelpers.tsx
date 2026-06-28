@@ -23,6 +23,8 @@ type Props = {
   completed?: boolean;
   onPress?: () => void;
   onAddPress?: () => void;
+  /** Task owner's name — used for viewer-aware support copy. */
+  ownerName?: string;
 };
 
 export default function TaskDetailHelpers({
@@ -32,8 +34,10 @@ export default function TaskDetailHelpers({
   completed = false,
   onPress,
   onAddPress,
+  ownerName,
 }: Props) {
   const hasHelpers = helpers.length > 0;
+  const isMotivation = taskType === TaskTypeEnum.Motivation;
 
   if (completed) return null;
 
@@ -49,7 +53,12 @@ export default function TaskDetailHelpers({
 
   return (
     <View style={styles.wrapper}>
-      <SectionHeader label="HELPERS" icon="people" />
+      <SectionHeader
+        label="Tag a friend"
+        icon="people"
+        iconColor={isMotivation ? colors.onboardingInk : undefined}
+        labelColor={isMotivation ? colors.onboardingInk : undefined}
+      />
 
       <Shadow size="tint">
         {/* ───────────── STATE 2: No helpers + NOT OWNER ───────────── */}
@@ -80,6 +89,7 @@ export default function TaskDetailHelpers({
               isOwner={isOwner}
               helpers={helpers}
               taskType={taskType}
+              ownerName={ownerName}
               onPress={onPress ?? (() => {})}
             />
           </View>
@@ -92,6 +102,7 @@ export default function TaskDetailHelpers({
               isOwner={isOwner}
               helpers={helpers}
               taskType={taskType}
+              ownerName={ownerName}
               onPress={onPress ?? (() => {})}
             />
           </View>
@@ -110,7 +121,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.onPrimary,
-    borderRadius: 16,
+    borderRadius: 24,
     padding: spacing.md,
     paddingVertical: vs(10),
   },

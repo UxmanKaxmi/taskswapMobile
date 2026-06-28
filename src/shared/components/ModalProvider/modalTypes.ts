@@ -20,6 +20,13 @@ export type ShareUpdateModalPayload = {
   initialMessage?: string;
 };
 
+export type CheerModalPayload = {
+  ownerName: string;
+  taskText?: string;
+  beatType: 'post' | 'update';
+  onSelectPreset: (presetKey: string) => void | Promise<void>;
+};
+
 export type MotivationSuccessModalPayload = {
   type: TaskType;
   requestText?: string;
@@ -43,6 +50,7 @@ export type ModalPayloadMap = {
   info: InfoModalPayload;
   reminderMessage: ReminderMessageModalPayload;
   shareUpdate: ShareUpdateModalPayload;
+  cheer: CheerModalPayload;
   motivationSuccess: MotivationSuccessModalPayload;
   comingSoon: ComingSoonModalPayload;
   completeTaskConfirmation: CompleteTaskConfirmationModalPayload;
@@ -62,6 +70,10 @@ export type ModalState =
   | {
       type: 'shareUpdate';
       payload: ShareUpdateModalPayload;
+    }
+  | {
+      type: 'cheer';
+      payload: CheerModalPayload;
     }
   | {
       type: 'motivationSuccess';

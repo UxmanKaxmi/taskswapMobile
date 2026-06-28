@@ -5,8 +5,8 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
-import { getTypeVisual } from '@shared/utils/typeVisuals';
 import { notificationStyles } from '../styles/notification.styles';
+import NotificationIconBadge from './NotificationIconBadge';
 
 interface Props {
   item: NotificationDTO;
@@ -14,8 +14,6 @@ interface Props {
 }
 
 export default function GenericNotification({ item, onPress }: Props) {
-  const { emoji } = getTypeVisual('reminder');
-
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -40,9 +38,7 @@ export default function GenericNotification({ item, onPress }: Props) {
           {timeAgo(item.createdAt)}
         </TextElement>
       </View>
-      <TextElement variant="title" style={notificationStyles.emojiText}>
-        {emoji}
-      </TextElement>
+      <NotificationIconBadge iconName="bell" />
     </TouchableOpacity>
   );
 }

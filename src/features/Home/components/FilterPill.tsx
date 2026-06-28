@@ -1,11 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Pressable, StyleSheet } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Props = {
   label: string;
@@ -15,32 +12,39 @@ type Props = {
 
 export default function FilterPill({ label, active, onPress }: Props) {
   return (
-    <AnimatedPressable onPress={onPress} style={[styles.pill, active && styles.activePill]}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.pill, active && styles.activePill, pressed && styles.pressed]}
+    >
       <TextElement style={[styles.label, active && styles.activeLabel]}>{label}</TextElement>
-    </AnimatedPressable>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   pill: {
-    paddingHorizontal: ms(18),
-    paddingVertical: vs(3),
-    borderRadius: 100,
+    paddingHorizontal: ms(22),
+    paddingVertical: vs(8),
+    borderRadius: 999,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
   },
   activePill: {
-    backgroundColor: colors.tabActive, // ✅ black
+    backgroundColor: colors.tabActive,
     borderColor: colors.tabActive,
   },
+  pressed: {
+    opacity: 0.82,
+  },
   label: {
-    fontSize: ms(13),
-    color: colors.tabInactive, // ✅ dark grey
-    fontWeight: '400',
+    fontSize: ms(15),
+    lineHeight: ms(18),
+    color: colors.tabInactive,
+    fontWeight: '500',
   },
   activeLabel: {
-    color: colors.onPrimary, // ✅ white
-    fontWeight: '500',
+    color: colors.onPrimary,
+    fontWeight: '700',
   },
 });

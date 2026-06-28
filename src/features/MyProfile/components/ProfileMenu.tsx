@@ -37,25 +37,33 @@ export default function ProfileMenu() {
   const primaryItems = [
     {
       label: 'Find Friends',
-      icon: 'people-sharp',
+      icon: 'people-outline',
       onPress: () => {
         navigation.navigate('FindFriendsScreen');
       },
       iconSet: 'ion',
     },
+    // {
+    //   label: 'Invite Friends',
+    //   icon: 'person-add-outline',
+    //   onPress: () => {
+    //     navigation.navigate('InviteFriendsScreen');
+    //   },
+    //   iconSet: 'ion',
+    // },
     {
-      label: 'Invite Friends',
-      icon: 'person-add-sharp',
+      label: 'Help Center',
+      icon: 'help-circle-outline',
       onPress: () => {
-        navigation.navigate('InviteFriendsScreen');
+        /* go to help  */
       },
       iconSet: 'ion',
     },
     {
-      label: 'Help Center',
-      icon: 'information-circle-sharp',
+      label: 'Send Feedback',
+      icon: 'chatbubble-ellipses-outline',
       onPress: () => {
-        /* go to help  */
+        navigation.navigate('SendFeedbackScreen');
       },
       iconSet: 'ion',
     },
@@ -88,13 +96,18 @@ export default function ProfileMenu() {
             <Row align="center" justify="space-between" style={styles.innerRow}>
               <Row align="center">
                 <View style={styles.iconCircle}>
-                  <Icon set={item.iconSet} name={item.icon} size={20} color={colors.primary} />
+                  <Icon
+                    set={item.iconSet}
+                    name={item.icon}
+                    size={18}
+                    color={colors.onboardingInk}
+                  />
                 </View>
-                <TextElement variant="body" weight="600" style={styles.label}>
+                <TextElement weight="700" style={styles.label}>
                   {item.label}
                 </TextElement>
               </Row>
-              <Icon set="ion" name="chevron-forward" size={20} color={colors.muted} />
+              <Icon set="ion" name="chevron-forward" size={18} color={colors.onboardingMuted} />
             </Row>
           </Ripple>
         ))}
@@ -134,8 +147,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: ms(20),
     overflow: 'hidden',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderWidth: 1,
+    borderColor: colors.onboardingLine,
   },
   cardSpacer: {
     marginTop: spacing.md,
@@ -144,11 +157,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: vs(10),
-    paddingHorizontal: spacing.md,
+    minHeight: vs(62),
+    paddingVertical: vs(8),
+    paddingHorizontal: spacing.lg,
     backgroundColor: colors.surface,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderBottomWidth: 1,
+    borderColor: colors.onboardingLine,
   },
   lastRow: {
     borderBottomWidth: 0,
@@ -162,10 +176,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   iconCircle: {
-    width: ms(44),
-    height: ms(44),
-    borderRadius: ms(22),
-    backgroundColor: colors.adviceBg,
+    width: ms(42),
+    height: ms(42),
+    borderRadius: ms(14),
+    backgroundColor: '#FFF4D1',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
@@ -175,8 +189,9 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: ms(15),
-    color: colors.text,
-    marginLeft: -spacing.sm,
+    lineHeight: ms(20),
+    color: colors.onboardingInk,
+    letterSpacing: 0,
   },
   dangerCard: {
     backgroundColor: '#FFF3F3',

@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   ViewToken,
+  Pressable,
 } from 'react-native';
 import { format, isToday, isYesterday, isThisWeek, isThisYear } from 'date-fns';
 import { useNavigation } from '@react-navigation/native';
@@ -14,6 +15,7 @@ import type { AppStackParamList } from '@navigation/types/navigation';
 import { useDebouncedCallback } from 'use-debounce';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
+import PageHeader from '@shared/components/PageHeader/PageHeader';
 import { spacing, colors } from '@shared/theme';
 import { useNotifications } from '../hooks/useNotifications';
 import { useBatchMarkNotificationsAsRead } from '../hooks/useBatchMarkNotificationsAsRead';
@@ -159,6 +161,22 @@ export default function NotificationMainScreen() {
     return filtered.slice(0, visibleCount);
   }, [notifications, visibleCount]);
   const sections = useMemo(() => groupNotifications(visibleNotifications), [visibleNotifications]);
+  const unreadNotificationIds = notifications
+    .filter(notification => !notification.read)
+    .map(notification => notification.id);
+  const hasUnreadNotifications = unreadNotificationIds.length > 0;
+
+  const handleMarkAllRead = useCallback(() => {
+    if (!hasUnreadNotifications) return;
+
+    queryClient.setQueryData<NotificationDTO[]>(buildQueryKey.notifications(), old => {
+      if (!old) return [];
+
+      return old.map(notification => ({ ...notification, read: true }));
+    });
+
+    markBatch(unreadNotificationIds);
+  }, [hasUnreadNotifications, markBatch, unreadNotificationIds]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
@@ -233,6 +251,14 @@ export default function NotificationMainScreen() {
         case 'task-motivation-push':
           openTaskDetail(item.metadata?.taskId, item.metadata?.commentId);
           return;
+        case 'task-cheer':
+        case 'task-motivation-cheer':
+          openTaskDetail(item.metadata?.taskId, undefined, {
+            scrollTo: 'progress',
+            beatId: item.metadata?.beatId,
+            highlightBeatId: item.metadata?.beatId,
+          });
+          return;
         case 'task-motivation-unfinished-reminder':
           openTaskDetail(item.metadata?.taskId, undefined, {
             scrollTo: 'progress',
@@ -300,73 +326,136 @@ export default function NotificationMainScreen() {
   // }
 
   return (
-    <Layout allowPaddingHorizontal={false} edgesProp={['top']}>
-      {sections.length === 0 ? (
-        <Row align="center" justify="center" flex>
-          <EmptyState title="No notifications" subtitle="You're all caught up!" />
-        </Row>
-      ) : (
-        <SectionList
-          showsVerticalScrollIndicator={false}
-          sections={sections}
-          keyExtractor={item => item.id}
-          contentContainerStyle={{ paddingBottom: spacing.xl }}
-          stickySectionHeadersEnabled
-          initialNumToRender={12}
-          maxToRenderPerBatch={12}
-          windowSize={7}
-          removeClippedSubviews
-          renderSectionHeader={({ section: { title } }) => (
-            <View style={styles.sectionHeaderContainer}>
-              <TextElement variant="subtitle" weight="600" style={styles.sectionHeader}>
-                {title}
-              </TextElement>
-            </View>
-          )}
-          ItemSeparatorComponent={() => <AppBorder style={{ marginHorizontal: spacing.md }} />}
-          renderItem={({ item, index, section }) => {
-            const isFirst = index === 0;
-            const isLast = index === section.data.length - 1;
-
-            return (
-              <View
+    <Layout
+      allowPaddingHorizontal={false}
+      edgesProp={['top']}
+      backgroundColor={colors.onboardingPaper}
+    >
+      <View style={styles.screen}>
+        <PageHeader
+          title="Inbox"
+          style={styles.header}
+          right={
+            <Pressable
+              onPress={handleMarkAllRead}
+              disabled={!hasUnreadNotifications}
+              accessibilityRole="button"
+              accessibilityLabel="Mark all read"
+              style={({ pressed }) => [
+                styles.markAllReadButton,
+                !hasUnreadNotifications && styles.markAllReadButtonDisabled,
+                pressed && hasUnreadNotifications && styles.markAllReadButtonPressed,
+              ]}
+            >
+              <TextElement
+                variant="caption"
+                weight="600"
                 style={[
-                  styles.rowContainer,
-                  isFirst && styles.firstItem,
-                  isLast && styles.lastItem,
+                  styles.markAllReadText,
+                  !hasUnreadNotifications && styles.markAllReadTextDisabled,
                 ]}
               >
-                <NotificationCard item={item} onPress={() => handleNotificationPress(item)} />
-              </View>
-            );
-          }}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.6}
-          ListFooterComponent={
-            visibleCount < notifications.length ? (
-              <View style={styles.listFooter}>
-                <ActivityIndicator size="small" />
-              </View>
-            ) : (
-              <Height size={vs(60)} />
-            )
+                Mark all read
+              </TextElement>
+            </Pressable>
           }
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
-          onViewableItemsChanged={handleViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
         />
-      )}
+
+        {sections.length === 0 ? (
+          <Row align="center" justify="center" flex>
+            <EmptyState title="No notifications" subtitle="You're all caught up!" />
+          </Row>
+        ) : (
+          <SectionList
+            showsVerticalScrollIndicator={false}
+            sections={sections}
+            keyExtractor={item => item.id}
+            contentContainerStyle={{ paddingBottom: spacing.xl }}
+            stickySectionHeadersEnabled
+            initialNumToRender={12}
+            maxToRenderPerBatch={12}
+            windowSize={7}
+            removeClippedSubviews
+            renderSectionHeader={({ section: { title } }) => (
+              <View style={styles.sectionHeaderContainer}>
+                <TextElement variant="subtitle" weight="500" style={styles.sectionHeader}>
+                  {title}
+                </TextElement>
+              </View>
+            )}
+            ItemSeparatorComponent={() => <AppBorder style={{ marginHorizontal: spacing.lg }} />}
+            renderItem={({ item, index, section }) => {
+              const isFirst = index === 0;
+              const isLast = index === section.data.length - 1;
+
+              return (
+                <View
+                  style={[
+                    styles.rowContainer,
+                    isFirst && styles.firstItem,
+                    isLast && styles.lastItem,
+                  ]}
+                >
+                  <NotificationCard item={item} onPress={() => handleNotificationPress(item)} />
+                </View>
+              );
+            }}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.6}
+            ListFooterComponent={
+              visibleCount < notifications.length ? (
+                <View style={styles.listFooter}>
+                  <ActivityIndicator size="small" />
+                </View>
+              ) : (
+                <Height size={vs(60)} />
+              )
+            }
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+            onViewableItemsChanged={handleViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
+          />
+        )}
+      </View>
     </Layout>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    // paddingTop: spacing.sm,
+    // paddingBottom: spacing.md,
+  },
+  markAllReadButton: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: 999,
+  },
+  markAllReadButtonPressed: {
+    opacity: 0.6,
+  },
+  markAllReadButtonDisabled: {
+    opacity: 0.45,
+  },
+  markAllReadText: {
+    color: colors.onboardingMuted,
+    letterSpacing: -0.2,
+    fontSize: ms(12),
+  },
+  markAllReadTextDisabled: {
+    color: colors.muted,
+  },
   sectionHeaderContainer: {
     // paddingVertical: vs(12),
     paddingVertical: spacing.md,
     // marginTop: spacing.lg,
     // paddingHorizontal: spacing.md,
-    backgroundColor: colors.background,
+    backgroundColor: colors.onboardingPaper,
   },
   firstItem: {
     borderTopLeftRadius: 10,
@@ -380,16 +469,16 @@ const styles = StyleSheet.create({
     // marginBottom: spacing.md,
   },
   sectionHeader: {
-    fontSize: ms(18),
+    fontSize: ms(16),
     color: colors.text,
-    marginLeft: spacing.md,
+    marginLeft: spacing.lg,
   },
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     // paddingHorizontal: spacing.md,
     // paddingVertical: spacing.md,
-    marginHorizontal: spacing.md,
+    marginHorizontal: spacing.lg,
     // marginTop: spacing.md,
     // backgroundColor: '#fff',
     backgroundColor: 'transparent',

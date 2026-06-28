@@ -1,19 +1,22 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Platform, Pressable, Share, StyleSheet, View } from 'react-native';
+import { Image, Platform, Pressable, Share, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ms, vs } from 'react-native-size-matters';
 import ViewShot from 'react-native-view-shot';
 
-import { spacing } from '@shared/theme';
+import { colors, spacing } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { showToast } from '@shared/utils/toast';
-import { getFirstName, stripOuterQuotes, toShortName } from '@shared/utils/helperFunctions';
+import {
+  getFirstName,
+  stripOuterQuotes,
+  timeAgo,
+  toShortName,
+} from '@shared/utils/helperFunctions';
 import { Task } from '@features/Home/types/home';
-import TaskHeader from '@features/Home/components/TaskHeader';
-import TaskCardGradient from '@features/Home/components/TaskCardGradient';
-import { TaskType, TaskTypeEnum } from '@features/Tasks/types/tasks';
-import { cardStyles } from '@features/Home/components/styles';
-import { getTypeColor, typeIcons } from '@shared/utils/typeVisuals';
+import { TaskType } from '@features/Tasks/types/tasks';
 import { Icon } from '@shared/components/Icons';
+import AppLogo from '@shared/components/AppLogo';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import AppModal from '@shared/components/AppModal/AppModal';
 import { useAuth } from '@features/Auth/AuthProvider';
@@ -22,6 +25,12 @@ type Props = {
   task: Task;
   visible: boolean;
   onClose: () => void;
+  /**
+   * Whether the current user owns this task. When provided it takes precedence
+   * over deriving ownership from `task.userId`, which can be missing on a
+   * freshly-created task (e.g. the post-create auto-share flow).
+   */
+  isOwner?: boolean;
 };
 
 const TYPE_LABELS: Record<TaskType, string> = {
@@ -32,10 +41,10 @@ const TYPE_LABELS: Record<TaskType, string> = {
 };
 
 const MODAL_SUBTITLES: Record<TaskType, string> = {
-  motivation: 'Share this so friends can push you and keep you accountable.',
-  advice: 'Share this so friends can reply with advice you actually trust.',
-  decision: 'Share this so friends can help you choose with confidence.',
-  reminder: 'Share this so friends can remind you when it matters most.',
+  motivation: 'Share it so friends can push you and keep you honest.',
+  advice: 'Share it so friends can weigh in with advice you trust.',
+  decision: 'Share it so friends can help you decide with confidence.',
+  reminder: 'Share it so friends can keep you on time.',
 };
 
 const POSTER_SUBTITLES: Record<TaskType, string> = {
@@ -46,14 +55,14 @@ const POSTER_SUBTITLES: Record<TaskType, string> = {
 };
 
 const SHARE_BUTTON_LABELS: Record<TaskType, string> = {
-  motivation: 'Share for support',
-  advice: 'Ask for advice',
-  decision: 'Ask for help',
+  motivation: 'Share to get pushes',
+  advice: 'Share to get advice',
+  decision: 'Share to get help',
   reminder: 'Share reminder',
 };
 
 const SHARE_MESSAGE = (text: string, name?: string) =>
-  `"${stripOuterQuotes(text)}" — ${toShortName(name) || 'TaskSwap'}`;
+  `"${stripOuterQuotes(text)}" — ${toShortName(name) || 'PushMeUp'}`;
 
 type ShareCopy = {
   modalTitle: string;
@@ -77,14 +86,15 @@ function buildShareCopy({
   task,
   typeLabel,
   currentUserId,
+  isOwner,
 }: {
   task: Task;
   typeLabel: string;
   currentUserId?: string;
+  isOwner: boolean;
 }): ShareCopy {
   const taskType = task.type as TaskType;
   const ownerFirstName = getFirstName(task.name) || 'Someone';
-  const isOwner = !!currentUserId && task.userId === currentUserId;
   const isCompleted = Boolean(
     ('completed' in task && task.completed) || ('completedAt' in task && task.completedAt),
   );
@@ -106,11 +116,11 @@ function buildShareCopy({
             : 'You followed through.';
 
       return {
-        modalTitle: 'Share Your Win',
+        modalTitle: 'Share your win',
         modalSubtitle:
           supporterCount > 0
-            ? 'Share the completed task and the support behind it.'
-            : 'Share the completed task and mark the follow-through.',
+            ? 'Share the win and the friends who pushed you to it.'
+            : 'Share the win and mark the follow-through.',
         posterTitle: `I completed this ${typeLabel.toLowerCase()}`,
         posterSubtitle: supportLabel,
         buttonLabel: 'Share my win',
@@ -119,8 +129,8 @@ function buildShareCopy({
 
     if (didCurrentUserHelp) {
       return {
-        modalTitle: `Share ${ownerFirstName}'s Win`,
-        modalSubtitle: `You helped ${ownerFirstName} complete this. Share the moment.`,
+        modalTitle: `Share ${ownerFirstName}'s win`,
+        modalSubtitle: `You pushed ${ownerFirstName} to the finish. Share the moment.`,
         posterTitle: `I helped ${ownerFirstName} complete this`,
         posterSubtitle: 'A small push made a difference.',
         buttonLabel: 'Share the win',
@@ -128,8 +138,8 @@ function buildShareCopy({
     }
 
     return {
-      modalTitle: `Share ${ownerFirstName}'s Win`,
-      modalSubtitle: `${ownerFirstName} completed this. Share the result.`,
+      modalTitle: `Share ${ownerFirstName}'s win`,
+      modalSubtitle: `${ownerFirstName} followed through. Share the result.`,
       posterTitle: `${ownerFirstName} completed this`,
       posterSubtitle: 'A task moved from posted to done.',
       buttonLabel: 'Share their win',
@@ -138,8 +148,8 @@ function buildShareCopy({
 
   if (isOwner) {
     return {
-      modalTitle: `Share Your ${typeLabel}`,
-      modalSubtitle: MODAL_SUBTITLES[taskType] ?? 'Share this card with your friends.',
+      modalTitle: 'Share your task',
+      modalSubtitle: MODAL_SUBTITLES[taskType] ?? 'Share it so friends can keep you on track.',
       posterTitle: `My ${typeLabel}`,
       posterSubtitle: POSTER_SUBTITLES[taskType] ?? 'Keep me on track.',
       buttonLabel: SHARE_BUTTON_LABELS[taskType] ?? 'Share',
@@ -147,11 +157,12 @@ function buildShareCopy({
   }
 
   return {
-    modalTitle: `Share ${ownerFirstName}'s ${typeLabel}`,
+    modalTitle:
+      taskType === 'motivation' ? `Help ${ownerFirstName} get pushed` : `Help ${ownerFirstName}`,
     modalSubtitle:
       taskType === 'motivation'
-        ? `Share this so friends can help ${ownerFirstName} follow through.`
-        : `Share this so friends can help ${ownerFirstName}.`,
+        ? `Share this so more people can push ${ownerFirstName} forward.`
+        : `Share this so more people can help ${ownerFirstName}.`,
     posterTitle: `${ownerFirstName}'s ${typeLabel}`,
     posterSubtitle:
       taskType === 'motivation'
@@ -164,23 +175,58 @@ function buildShareCopy({
   };
 }
 
+function pushCountLabel(count: number) {
+  return `${count} ${count === 1 ? 'push' : 'pushes'}`;
+}
+
 // Give RN a beat so the hidden poster has rendered before capture
 const waitForLayout = () => new Promise<void>(r => setTimeout(r, 80));
 
-export default function ShareModal({ task, visible, onClose }: Props) {
+// Reusable preview card shown in the sheet and baked into the shared image
+function SharePreviewCard({ task }: { task: Task }) {
+  const pushCount = task.pushCount ?? 0;
+
+  return (
+    <View style={styles.previewCard}>
+      <View style={styles.previewHeader}>
+        <Image source={{ uri: task.avatar || '' }} style={styles.previewAvatar} />
+        <View style={styles.previewHeaderText}>
+          <TextElement style={styles.previewName}>{toShortName(task.name)}</TextElement>
+          <TextElement style={styles.previewMeta} color="muted">
+            on PushMeUp · {timeAgo(task.createdAt)}
+          </TextElement>
+        </View>
+      </View>
+
+      <TextElement style={styles.previewQuote} numberOfLines={3}>
+        “{stripOuterQuotes(task.text)}”
+      </TextElement>
+
+      <View style={styles.previewFooter}>
+        <AppLogo size="sm" align="left" />
+        <TextElement style={styles.previewPushes} color="muted">
+          {pushCountLabel(pushCount)}
+        </TextElement>
+      </View>
+    </View>
+  );
+}
+
+export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
   const [isSharing, setIsSharing] = useState(false);
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   // ✅ Capture ONLY the hidden share poster (off-screen)
   const posterShotRef = useRef<InstanceType<typeof ViewShot> | null>(null);
 
   const taskType = task.type as TaskType;
-  const iconName = typeIcons[taskType];
-  const typeColor = getTypeColor(taskType);
   const typeLabel = TYPE_LABELS[taskType] ?? 'Task';
+  // Prefer the caller-provided ownership flag; fall back to id comparison.
+  const resolvedIsOwner = isOwner ?? (!!user?.id && task.userId === user.id);
   const shareCopy = useMemo(
-    () => buildShareCopy({ task, typeLabel, currentUserId: user?.id }),
-    [task, typeLabel, user?.id],
+    () => buildShareCopy({ task, typeLabel, currentUserId: user?.id, isOwner: resolvedIsOwner }),
+    [task, typeLabel, user?.id, resolvedIsOwner],
   );
 
   const handleShare = useCallback(async () => {
@@ -204,7 +250,7 @@ export default function ShareModal({ task, visible, onClose }: Props) {
 
       const result = await Share.share({
         url: normalizedUri,
-        title: `${typeLabel} from TaskSwap`,
+        title: `${typeLabel} from PushMeUp`,
         message: SHARE_MESSAGE(task.text, task.name),
       });
 
@@ -212,12 +258,12 @@ export default function ShareModal({ task, visible, onClose }: Props) {
         showToast({
           type: 'success',
           title: 'Shared!',
-          message: 'Your card is heading to socials.',
+          message: 'Your card is heading out to friends.',
         });
         onClose();
       }
     } catch (error) {
-      console.error('Failed to share motivation', error);
+      console.error('Failed to share task', error);
       showToast({
         type: 'error',
         title: 'Share failed',
@@ -226,63 +272,59 @@ export default function ShareModal({ task, visible, onClose }: Props) {
     } finally {
       setIsSharing(false);
     }
-  }, [onClose, task.name, task.text]);
+  }, [onClose, task.name, task.text, typeLabel]);
 
   return (
-    <AppModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <AppModal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       {/* =======================
-          VISIBLE UI (no swapping)
+          VISIBLE UI — full screen
          ======================= */}
-      <TaskCardGradient type={taskType} style={styles.cardGradient}>
-        {/* tap outside */}
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        <View style={styles.sheet}>
-          <View style={styles.badgeWrap}>
-            <View style={styles.badge}>
-              <Icon set="fa6" name={iconName} size={ms(25)} color={typeColor} iconStyle="solid" />
-            </View>
+      <View style={styles.root}>
+        <View style={[styles.topBar, { paddingTop: insets.top + vs(6) }]}>
+          <Pressable
+            onPress={onClose}
+            hitSlop={12}
+            style={styles.closeButton}
+            accessibilityLabel="Close"
+          >
+            <Icon set="ion" name="close" size={ms(22)} color={colors.text} />
+          </Pressable>
+        </View>
+
+        <View style={styles.content}>
+          <View style={styles.iconCircle}>
+            <Icon
+              set="fa6"
+              name="arrow-up-from-bracket"
+              size={ms(28)}
+              color={colors.onboardingInk}
+              iconStyle="solid"
+            />
           </View>
 
           <TextElement style={styles.title}>{shareCopy.modalTitle}</TextElement>
-          <TextElement style={styles.body} color="muted">
+          <TextElement style={styles.subtitle} color="muted">
             {shareCopy.modalSubtitle}
           </TextElement>
 
-          <View style={styles.previewWrap}>
-            <View style={styles.cardShadow}>
-              <TaskCardGradient type={taskType} style={styles.cardGradient}>
-                <View style={styles.cardContent}>
-                  <TaskHeader
-                    avatar={task.avatar || ''}
-                    name={task.name}
-                    createdAt={task.createdAt}
-                    type={taskType as TaskTypeEnum}
-                    helpers={task.helpers ?? []}
-                  />
-                  <View style={cardStyles.messageRow}>
-                    <TextElement variant="title" style={styles.mainText}>
-                      "{stripOuterQuotes(task.text)}"
-                    </TextElement>
-                  </View>
-                </View>
-              </TaskCardGradient>
-            </View>
-          </View>
+          <SharePreviewCard task={task} />
         </View>
 
-        <View style={styles.footer}>
+        <View style={[styles.footer, { paddingBottom: insets.bottom + vs(12) }]}>
           <PrimaryButton
             onPress={handleShare}
             title={shareCopy.buttonLabel}
             isLoading={isSharing}
-            style={[styles.shareButton, { backgroundColor: typeColor }]}
+            style={styles.shareButton}
+            backgroundColor={colors.onboardingPush}
+            textColor={colors.onboardingInk}
             disabled={isSharing}
           />
           <TextElement style={styles.privacy} color="muted">
             Only what you see here will be shared.
           </TextElement>
         </View>
-      </TaskCardGradient>
+      </View>
 
       {/* =======================
           HIDDEN SHARE POSTER (captured)
@@ -295,51 +337,28 @@ export default function ShareModal({ task, visible, onClose }: Props) {
           options={{ format: 'png', quality: 1, result: 'tmpfile' }}
           style={styles.posterRoot}
         >
-          <TaskCardGradient type={taskType} style={styles.cardGradient}>
-            <View style={styles.posterSheet}>
-              <View style={styles.badgeWrapPoster}>
-                <View style={styles.badge}>
-                  <Icon
-                    set="fa6"
-                    name={iconName}
-                    size={ms(25)}
-                    color={typeColor}
-                    iconStyle="solid"
-                  />
-                </View>
-              </View>
-
-              <TextElement style={styles.title}>{shareCopy.posterTitle}</TextElement>
-              <TextElement style={styles.posterSubtitle} color="muted">
-                {shareCopy.posterSubtitle}
-              </TextElement>
-
-              <View style={styles.previewWrap}>
-                <View style={styles.cardShadow}>
-                  <TaskCardGradient type={taskType} style={styles.cardGradient}>
-                    <View style={styles.cardContent}>
-                      <TaskHeader
-                        avatar={task.avatar || ''}
-                        name={task.name}
-                        createdAt={task.createdAt}
-                        type={taskType as TaskTypeEnum}
-                        helpers={task.helpers ?? []}
-                      />
-                      <View style={cardStyles.messageRow}>
-                        <TextElement variant="title" style={styles.mainText}>
-                          "{stripOuterQuotes(task.text)}"
-                        </TextElement>
-                      </View>
-                    </View>
-                  </TaskCardGradient>
-                </View>
-              </View>
-
-              <TextElement style={styles.branding} color="muted">
-                Push Me Up • pushmeup.app
-              </TextElement>
+          <View style={styles.posterSheet}>
+            <View style={styles.iconCircle}>
+              <Icon
+                set="fa6"
+                name="arrow-up-from-bracket"
+                size={ms(28)}
+                color={colors.onboardingInk}
+                iconStyle="solid"
+              />
             </View>
-          </TaskCardGradient>
+
+            <TextElement style={styles.title}>{shareCopy.posterTitle}</TextElement>
+            <TextElement style={styles.subtitle} color="muted">
+              {shareCopy.posterSubtitle}
+            </TextElement>
+
+            <SharePreviewCard task={task} />
+
+            <TextElement style={styles.branding} color="muted">
+              PushMeUp • pushmeup.app
+            </TextElement>
+          </View>
         </ViewShot>
       </View>
 
@@ -350,99 +369,129 @@ export default function ShareModal({ task, visible, onClose }: Props) {
 }
 
 const styles = StyleSheet.create({
-  mainText: {
-    // marginBottom: vs(8),
-    fontSize: ms(21),
-    lineHeight: ms(30),
-    fontWeight: '600',
-  },
-  sheet: {
-    position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
-    top: vs(200),
-    backgroundColor: '#FFF',
-    borderRadius: ms(28),
-    padding: spacing.lg,
-    paddingBottom: spacing.md,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 14,
-  },
-
-  footer: {
+  root: {
     flex: 1,
-    justifyContent: 'flex-end',
+    backgroundColor: colors.surface,
+  },
+
+  topBar: {
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.lg,
+    alignItems: 'flex-end',
   },
 
-  badgeWrap: {
-    position: 'absolute',
-    top: -vs(30),
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-
-  badge: {
-    width: ms(58),
-    height: ms(58),
+  closeButton: {
+    width: ms(36),
+    height: ms(36),
     borderRadius: ms(18),
-    backgroundColor: '#FFF',
+    backgroundColor: colors.inputBackground,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 10,
+  },
+
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+
+  iconCircle: {
+    alignSelf: 'center',
+    width: ms(96),
+    height: ms(96),
+    borderRadius: ms(48),
+    backgroundColor: 'rgba(255, 210, 63, 0.18)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: vs(20),
   },
 
   title: {
-    fontSize: ms(20),
+    fontSize: ms(28),
+    lineHeight: ms(38),
+    fontWeight: '800',
+    textAlign: 'center',
+    color: colors.text,
+    paddingHorizontal: spacing.sm,
+  },
+
+  subtitle: {
+    fontSize: ms(15),
+    lineHeight: ms(22),
+    textAlign: 'center',
+    marginTop: vs(8),
+    marginBottom: vs(24),
+    paddingHorizontal: spacing.md,
+  },
+
+  // ===== Preview card =====
+  previewCard: {
+    backgroundColor: '#EFEFEA',
+    borderRadius: ms(20),
+    padding: spacing.md,
+  },
+
+  previewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  previewAvatar: {
+    width: ms(44),
+    height: ms(44),
+    borderRadius: ms(22),
+    backgroundColor: colors.muted,
+    marginRight: spacing.sm,
+  },
+
+  previewHeaderText: {
+    flex: 1,
+  },
+
+  previewName: {
+    fontSize: ms(16),
     fontWeight: '700',
-    textAlign: 'center',
-    marginTop: vs(10),
+    color: colors.text,
   },
 
-  body: {
+  previewMeta: {
     fontSize: ms(13),
-    lineHeight: ms(18),
-    textAlign: 'center',
-    marginTop: vs(6),
-    marginBottom: vs(14),
+    marginTop: vs(2),
   },
 
-  previewWrap: {
-    borderRadius: ms(24),
-    overflow: 'hidden',
-    marginBottom: spacing.md,
+  previewQuote: {
+    fontSize: ms(16),
+    lineHeight: ms(23),
+    fontWeight: '700',
+    color: colors.text,
+    marginTop: vs(14),
   },
 
-  cardShadow: {
-    borderRadius: ms(24),
-    overflow: 'hidden',
+  previewFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: vs(18),
   },
 
-  cardGradient: {
-    borderRadius: ms(24),
-    overflow: 'hidden',
+  previewPushes: {
+    fontSize: ms(13),
+    fontWeight: '600',
   },
 
-  cardContent: { padding: spacing.md },
-
-  privacy: {
-    fontSize: ms(11),
-    textAlign: 'center',
-    opacity: 0.9,
-    marginTop: -spacing.xs,
+  // ===== Footer =====
+  footer: {
+    paddingHorizontal: spacing.lg,
   },
 
   shareButton: {
-    marginTop: spacing.xs,
+    borderRadius: ms(28),
+  },
+
+  privacy: {
+    fontSize: ms(12),
+    textAlign: 'center',
+    opacity: 0.9,
+    // marginTop: vs(12),
   },
 
   // ===== Hidden poster capture =====
@@ -453,48 +502,23 @@ const styles = StyleSheet.create({
     opacity: 0,
   },
 
-  // Give poster a deterministic size (helps ViewShot output)
   posterRoot: {
     width: 390, // iPhone-ish width
     height: 844, // iPhone-ish height
+    backgroundColor: colors.surface,
   },
 
   posterSheet: {
-    position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
-    top: vs(200),
-    backgroundColor: '#FFF',
-    borderRadius: ms(28),
-    padding: spacing.lg,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 14,
-  },
-
-  badgeWrapPoster: {
-    position: 'absolute',
-    top: -vs(30),
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-
-  posterSubtitle: {
-    fontSize: ms(13),
-    textAlign: 'center',
-    marginTop: vs(6),
-    marginBottom: vs(14),
-    opacity: 0.8,
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
   },
 
   branding: {
-    fontSize: ms(11),
+    fontSize: ms(12),
     textAlign: 'center',
     opacity: 0.6,
-    marginTop: vs(0),
+    marginTop: vs(24),
   },
 
   blocker: {

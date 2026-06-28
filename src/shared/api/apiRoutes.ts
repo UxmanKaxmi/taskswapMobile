@@ -10,6 +10,8 @@ export enum ApiRoute {
   COMMENTS = '/comments',
   REFERRALS = '/referrals',
   FEATURE_FLAGS = '/features',
+  FEEDBACK = '/feedback',
+  BEATS = '/beats',
 }
 
 // ✅ Builder functions for dynamic API routes
@@ -20,10 +22,11 @@ export const buildRoute = {
   completeTask: (id: string) => `${ApiRoute.TASKS}/${id}/complete`,
   uncompleteTask: (id: string) => `${ApiRoute.TASKS}/${id}/incomplete`,
   featureFlags: () => `${ApiRoute.FEATURE_FLAGS}`,
+  submitFeedback: () => `${ApiRoute.FEEDBACK}`,
 
   // 📌 User Routes
   user: (id: string) => `${ApiRoute.USERS}/${id}`,
-  syncUserToDb: () => `${ApiRoute.USERS}/google-sync`,
+  syncUserToDb: () => `${ApiRoute.USERS}`,
   matchUsers: () => `${ApiRoute.USERS}/match`,
   me: () => `${ApiRoute.USERS}/me`,
   homeSummary: () => `${ApiRoute.USERS}/me/home-summary`,
@@ -68,4 +71,7 @@ export const buildRoute = {
   // ✅ Push (Encouragement)
   toggleTaskPush: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/push`,
   getTaskPushes: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/pushes`,
+
+  // ✅ Cheer
+  cheerBeat: (beatId: string) => `${ApiRoute.BEATS}/${beatId}/cheer`,
 };

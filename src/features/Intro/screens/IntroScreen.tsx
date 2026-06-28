@@ -16,14 +16,27 @@ import PushButton from '@shared/components/PushButton';
 import PushTicks from '@shared/components/PushTicks/PushTicks';
 import TextElement from '@shared/components/TextElement/TextElement';
 import LiveSupportBanner from '@features/Auth/components/LiveSupportBanner';
-import { colors } from '@shared/theme';
+import { colors, platformShadow, spacing } from '@shared/theme';
 import { isPROD } from '@shared/utils/constants';
 import { ms, vs } from 'react-native-size-matters';
+import HomeHeader from '@features/Home/components/HomeHeader';
 
 const { width, height } = Dimensions.get('window');
 const SCREEN_HORIZONTAL_PADDING = ms(28);
 const SLIDE_WIDTH = width;
 const HERO_HEIGHT = Math.min(330, height * 0.25);
+const demoCardShadow = platformShadow({
+  color: colors.onboardingInk,
+  opacity: 0.06,
+  radius: 24,
+  offset: { width: 0, height: 8 },
+});
+const nextTaskCardShadow = platformShadow({
+  color: colors.onboardingInk,
+  opacity: 0.03,
+  radius: 10,
+  offset: { width: 0, height: 3 },
+});
 
 type IntroContent = {
   heading: string;
@@ -173,6 +186,7 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
                     variant="push"
                     style={styles.pushButton}
                     active={isActive}
+                    textStyle={{ fontSize: ms(16) }}
                   />
 
                   {/* <PushButton
@@ -222,6 +236,7 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
                     size="sm"
                     variant="push"
                     style={styles.miniPushButton}
+                    textStyle={{ fontSize: ms(16) }}
                   />
                 </View>
               </View>
@@ -278,28 +293,22 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
   return (
     <Layout
       allowPaddingHorizontal={false}
+      allowPaddingVertical={false}
+      useSafeArea={false}
       style={styles.layout}
       backgroundColor={colors.onboardingPaper}
-      edgesProp={['top', 'left', 'right']}
     >
       <View style={styles.screen}>
-        <View style={styles.topRow}>
-          <View style={styles.wordmark}>
-            <View style={styles.logoTicks} accessibilityElementsHidden>
-              <View style={styles.logoTick} />
-              <View style={[styles.logoTick, styles.logoTickAccent]} />
-              <View style={styles.logoTick} />
-            </View>
-            <TextElement variant="body" weight="800" style={styles.wordmarkText}>
-              PushMeUp
-            </TextElement>
-          </View>
-
-          <Pressable hitSlop={12} onPress={() => void handleSkip()} style={styles.skipButton}>
-            <TextElement variant="label" weight="600" style={styles.skipText}>
-              Skip
-            </TextElement>
-          </Pressable>
+        <View style={styles.homeHeaderWrap}>
+          <HomeHeader
+            rightAccessory={
+              <Pressable hitSlop={12} onPress={() => void handleSkip()} style={styles.skipButton}>
+                <TextElement variant="label" weight="600" style={styles.skipText}>
+                  Skip
+                </TextElement>
+              </Pressable>
+            }
+          />
         </View>
 
         <Animated.ScrollView
@@ -342,6 +351,7 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
               size="sm"
               variant="push"
               style={styles.nextButton}
+              textStyle={{ fontSize: ms(16) }}
             />
           </View>
 
@@ -360,38 +370,12 @@ const styles = StyleSheet.create({
   },
   screen: {
     flex: 1,
-    paddingTop: vs(18),
     paddingBottom: vs(34),
   },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: vs(22),
-    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
-  },
-  wordmark: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(8),
-  },
-  logoTicks: {
-    flexDirection: 'row',
-    gap: ms(3),
-  },
-  logoTick: {
-    width: ms(4),
-    height: vs(16),
-    borderRadius: 1,
-    backgroundColor: colors.onboardingInk,
-    transform: [{ skewX: '-18deg' }],
-  },
-  logoTickAccent: {
-    backgroundColor: colors.onboardingPush,
-  },
-  wordmarkText: {
-    color: colors.onboardingInk,
-    letterSpacing: -0.4,
+  homeHeaderWrap: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
   },
   skipButton: {
     width: ms(56),
@@ -399,6 +383,7 @@ const styles = StyleSheet.create({
   },
   skipText: {
     color: colors.onboardingMuted,
+    fontSize: ms(16),
   },
   slideWindow: {
     flex: 1,
@@ -433,11 +418,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingHorizontal: ms(16),
     paddingVertical: vs(16),
-    shadowColor: colors.onboardingInk,
-    shadowOpacity: 0.06,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    ...demoCardShadow,
   },
   sayCard: {
     width: '100%',
@@ -563,11 +544,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAF7',
     borderWidth: 1,
     borderColor: '#E9E6DB',
-    shadowColor: colors.onboardingInk,
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 1,
+    ...nextTaskCardShadow,
     transform: [{ translateX: ms(10) }, { rotate: '1deg' }],
   },
   nextTaskCopy: {

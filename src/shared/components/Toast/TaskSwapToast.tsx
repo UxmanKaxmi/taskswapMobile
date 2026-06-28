@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import Icon from '@react-native-vector-icons/fontawesome6';
 import { resolveAppTextStyle } from '@shared/theme/fonts';
+import { platformShadow } from '@shared/theme';
 
 type Props = {
   text1: string;
@@ -47,11 +48,12 @@ const styles = StyleSheet.create({
     width: width * 0.9,
     alignSelf: 'center',
     marginBottom: 30,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    ...platformShadow({
+      color: '#000',
+      opacity: 0.1,
+      radius: 6,
+      offset: { width: 0, height: 2 },
+    }),
     alignItems: 'center',
   },
   icon: {

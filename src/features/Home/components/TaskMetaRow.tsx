@@ -7,10 +7,9 @@ import { ms } from 'react-native-size-matters';
 import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
-import { spacing, colors } from '@shared/theme';
+import { colors } from '@shared/theme';
 import { TaskType } from '@features/Tasks/types/tasks';
 import { getTypeColor, typeIcons } from '@shared/utils/typeVisuals';
-import MotivationOpeningQuote from './MotivationOpeningQuote';
 
 type Props = {
   type: TaskType;

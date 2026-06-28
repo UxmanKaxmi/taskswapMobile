@@ -5,7 +5,7 @@ import { ms, vs } from 'react-native-size-matters';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { colors, platformShadow, spacing } from '@shared/theme';
 import { getTypeColor, typeBackgrounds, typeBackgroundsHard } from '@shared/utils/typeVisuals';
 import type { CompleteTaskConfirmationModalPayload } from '../modalTypes';
 
@@ -63,12 +63,23 @@ export default function CompleteTaskConfirmationModalContent({ payload, closeMod
           style={[
             styles.iconBubble,
             {
-              backgroundColor: bubbleColor,
-              shadowColor,
+              backgroundColor: colors.tactileMomentumPrimary,
             },
+            platformShadow({
+              color: shadowColor,
+              opacity: 0.18,
+              radius: 10,
+              offset: { width: 0, height: 5 },
+            }),
           ]}
         >
-          <Icon set="fa6" name="circle-check" iconStyle="solid" size={30} color={typeColor} />
+          <Icon
+            set="fa6"
+            name="circle-check"
+            iconStyle="solid"
+            size={30}
+            color={colors.tactileMomentumSecondary}
+          />
         </View>
       </View>
 
@@ -84,7 +95,7 @@ export default function CompleteTaskConfirmationModalContent({ payload, closeMod
         <PrimaryButton
           title={copy.confirmLabel}
           onPress={handleConfirm}
-          backgroundColor={typeColor}
+          backgroundColor={colors.tactileMomentumPrimary}
           style={styles.primaryButton}
           textStyle={styles.primaryText}
         />
@@ -115,10 +126,6 @@ const styles = StyleSheet.create({
     borderRadius: ms(19),
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOpacity: 0.18,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 3,
   },
   title: {
     textAlign: 'center',
@@ -143,11 +150,14 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     minHeight: 58,
   },
-  primaryText: {},
+  primaryText: {
+    color: colors.tactileMomentumSecondary,
+  },
   cancelButton: {
     alignSelf: 'center',
     marginTop: vs(14),
     // paddingVertical: vs(4),
+    color: colors.tactileMomentumSecondary,
   },
   cancelText: {
     color: colors.text,

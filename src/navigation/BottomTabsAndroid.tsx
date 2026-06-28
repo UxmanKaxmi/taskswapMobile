@@ -5,7 +5,7 @@ import Icon from '@shared/components/Icons/Icon'; // ✅ your custom Icon compon
 import HomeScreen from '@features/Home/screens/HomeScreen';
 import AddTaskScreen from '@features/Tasks/screens/AddTaskScreen';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
-import { colors } from '@shared/theme';
+import { colors, platformShadow } from '@shared/theme';
 import AnimatedTabIcon from '@shared/components/AnimatedTabBarIcon/AnimatedTabBarIcon';
 import { ms, vs } from 'react-native-size-matters';
 import FindFriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
@@ -83,7 +83,7 @@ export default function BottomTabsAndroid({ route }: any) {
             },
             shouldHideTabBar ? { display: 'none' } : undefined,
           ],
-          tabBarActiveTintColor: colors.primary, // ✅ your brand's active color
+          tabBarActiveTintColor: colors.tactileMomentumPrimary,
           tabBarInactiveTintColor: colors.tabInactive,
           tabBarLabelStyle: {
             // paddingTop: vs(2),
@@ -157,7 +157,13 @@ export default function BottomTabsAndroid({ route }: any) {
                 activeOpacity={0.9}
               >
                 <View style={styles.addButton}>
-                  <Icon set="fa6" name="plus" color="#fff" size={24} iconStyle="solid" />
+                  <Icon
+                    set="fa6"
+                    name="plus"
+                    color={colors.tactileMomentumSecondary}
+                    size={24}
+                    iconStyle="solid"
+                  />
                 </View>
               </TouchableOpacity>
             ),
@@ -214,23 +220,24 @@ const styles = StyleSheet.create({
     top: -40, // raise the button
     justifyContent: 'center',
     alignItems: 'center',
-    // shadowColor: colors.primary,
+    // shadowColor: colors.tactileMomentumPrimary,
   },
   addButton: {
     width: 70,
     height: 70,
-    borderWidth: 4,
+    // borderWidth: 1,
     borderRadius: 100,
-    borderColor: colors.background,
-    backgroundColor: colors.primary,
+    // borderColor: colors.background,
+    backgroundColor: colors.tactileMomentumPrimary,
     justifyContent: 'center',
     alignItems: 'center',
-    boxShadow: '0px 6px 20px rgba(92, 103, 192, 0.35)',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    // boxShadow: '0px 6px 20px rgba(255, 210, 63, 0.35)',
+    ...platformShadow({
+      color: colors.tactileMomentumPrimary,
+      opacity: 0.3,
+      radius: 4,
+      offset: { width: 0, height: 4 },
+    }),
   },
   badge: {
     position: 'absolute',

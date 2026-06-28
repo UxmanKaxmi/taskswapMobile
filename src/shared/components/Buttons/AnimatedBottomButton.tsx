@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useTheme } from '@shared/theme/useTheme';
+import { platformShadow } from '@shared/theme';
 import TextElement from '../TextElement/TextElement';
 import { vs } from 'react-native-size-matters';
 
@@ -23,6 +24,9 @@ export interface AnimatedBottomButtonProps {
 
   /** Background color of the button */
   buttonColor?: string;
+
+  /** Text/spinner color of the button (defaults to onPrimary/white) */
+  textColor?: string;
 
   /** Background color of the bottom sheet */
   containerColor?: string;
@@ -40,11 +44,13 @@ export default function AnimatedBottomButton({
   isLoading = false,
   onToggleComplete,
   buttonColor,
+  textColor,
   containerColor,
   style,
   buttonStyle,
 }: AnimatedBottomButtonProps) {
   const { colors } = useTheme();
+  const resolvedTextColor = textColor ?? colors.onPrimary;
 
   const translateY = useRef(new Animated.Value(visible ? 0 : BOTTOM_BUTTON_HEIGHT)).current;
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
@@ -91,13 +97,12 @@ export default function AnimatedBottomButton({
           disabled={isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator color={colors.onPrimary} />
+            <ActivityIndicator color={resolvedTextColor} />
           ) : (
             <TextElement
-              color="onPrimary"
               variant="body"
               weight="600"
-              style={{ textAlign: 'center' }}
+              style={{ textAlign: 'center', color: resolvedTextColor }}
             >
               {title}
             </TextElement>
@@ -123,20 +128,19 @@ const styles = StyleSheet.create({
     borderTopEndRadius: 40,
     borderTopStartRadius: 40,
 
-    // iOS shadow
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: -4 },
+    ...platformShadow({
+      color: '#000',
+      opacity: 0.15,
+      radius: 12,
+      offset: { width: 0, height: -4 },
+    }),
 
-    // Android shadow
     height: BOTTOM_BUTTON_HEIGHT,
-
-    elevation: 14,
   },
 
   button: {
     height: vs(45),
-    width: '100%',
+    width: '95%',
     alignSelf: 'center',
     borderRadius: 14,
     justifyContent: 'center',

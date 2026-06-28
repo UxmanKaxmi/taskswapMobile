@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
-  Animated,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -8,19 +7,19 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors, spacing } from '@shared/theme';
 import { getFirstName, stripOuterQuotes } from '@shared/utils/helperFunctions';
-import { impactTypeVisuals } from '@shared/utils/typeVisuals';
 import { haptics } from '@shared/utils/haptics';
 import { useAuth } from '@features/Auth/AuthProvider';
 
 import { AppStackParamList } from '@navigation/types/navigation';
 import { HomeSummaryResponse, Task } from '../types/home';
 import { ms, vs } from 'react-native-size-matters';
+import { differenceInCalendarDays, isValid, parseISO } from 'date-fns';
+import { WINDOW_WIDTH } from '@gorhom/bottom-sheet';
 
 type Props = {
   summary?: HomeSummaryResponse | null;
@@ -32,19 +31,29 @@ type Props = {
   onRetry?: () => void;
   onPressTask?: (task: Task) => void;
   onHasVisibleCardsChange?: (hasVisibleCards: boolean) => void;
+  includeCardKeys?: readonly HomeSummaryCardKey[];
+  /** Testing: render every card type (with fallback copy) and ignore dismiss state. */
+  previewAllCards?: boolean;
 };
 
 type CardTone = {
   background: string;
   titleColor: string;
+  bodyColor?: string;
+  eyebrowColor?: string;
   iconColor: string;
   leadingBg: string;
 };
 
 type CardConfig = {
   key: string;
+  eyebrow: string;
   title: string;
   body: string;
+  /** Trailing count block (e.g. "15 pushes"), hero-card style. */
+  metric?: { value: string; label: string } | null;
+  /** Trailing icon on the right (used when there's no metric). */
+  trailingIcon?: { set: 'fa6' | 'ion'; name: string; iconStyle?: 'solid' | 'regular' } | null;
   tone: CardTone;
   leadingIcon: { set: 'fa6' | 'ion'; name: string; iconStyle?: 'solid' | 'regular' };
   fingerprint: string;
@@ -52,62 +61,43 @@ type CardConfig = {
   onPress?: () => void;
 };
 
-type HomeSummaryCardKey = 'success-story' | 'needs-push' | 'update-progress' | 'advice-request';
-type HomeSummaryCardState = 'unseen' | 'seen' | 'acted_on' | 'dismissed' | 'expired';
-type PersistedHomeSummaryCard = {
-  state: HomeSummaryCardState;
-  fingerprint: string;
-  updatedAt: number;
-};
-type PersistedHomeSummaryCardMap = Partial<Record<HomeSummaryCardKey, PersistedHomeSummaryCard>>;
-type DismissAnimation = {
-  opacity: Animated.Value;
-  translateY: Animated.Value;
-  scale: Animated.Value;
-};
-type DismissAnimationMap = Record<string, DismissAnimation>;
+export type HomeSummaryCardKey =
+  | 'create-first-push'
+  | 'your-goal'
+  | 'success-story'
+  | 'needs-push'
+  | 'update-progress';
 
-const CARD_GAP = ms(14);
-const CARD_WIDTH = ms(310);
-const CARD_STATE_STORAGE_PREFIX = 'home-summary-card-state:v1';
+const CARD_GAP = ms(20);
+const CARD_WIDTH = WINDOW_WIDTH - spacing.lg * 2;
+const CARD_WIDTH_SINGLE = WINDOW_WIDTH - spacing.lg * 2;
+
+const CARD_HEIGHT = ms(86);
 const HOME_SUMMARY_CARD_KEYS: HomeSummaryCardKey[] = [
+  'create-first-push',
+  'your-goal',
   'success-story',
   'needs-push',
   'update-progress',
-  'advice-request',
 ];
 
+// Single dark tone shared by every summary card, mirroring HomeHeroCard:
+// ink background, white title, muted-white body, yellow icon chip.
+const DARK_TONE: CardTone = {
+  background: colors.onboardingInk,
+  titleColor: colors.onPrimary,
+  bodyColor: 'rgba(255,255,255,0.76)',
+  eyebrowColor: colors.onboardingPush,
+  iconColor: colors.onboardingInk,
+  leadingBg: colors.onboardingPush,
+};
+
 const TONES = {
-  success: {
-    background: colors.primary,
-    titleColor: colors.onPrimary,
-    iconColor: colors.primary,
-    leadingBg: colors.card,
-  },
-  push: {
-    background: colors.motivationBgDark,
-    titleColor: colors.onPrimary,
-    iconColor: colors.motivationBgDark,
-    leadingBg: colors.card,
-  },
-  progress: {
-    background: colors.motivationBgHardest,
-    titleColor: colors.onPrimary,
-    iconColor: colors.motivationBgHardest,
-    leadingBg: colors.card,
-  },
-  advice: {
-    background: colors.adviceBg,
-    titleColor: colors.adviceBgHardest,
-    iconColor: colors.adviceBgHardest,
-    leadingBg: colors.card,
-  },
-  firstTask: {
-    background: colors.primary,
-    titleColor: colors.onPrimary,
-    iconColor: colors.primary,
-    leadingBg: colors.card,
-  },
+  success: DARK_TONE,
+  push: DARK_TONE,
+  progress: DARK_TONE,
+  advice: DARK_TONE,
+  firstTask: DARK_TONE,
 } satisfies Record<string, CardTone>;
 
 export default function HomeSummarySection({
@@ -120,6 +110,8 @@ export default function HomeSummarySection({
   onRetry: _onRetry,
   onPressTask,
   onHasVisibleCardsChange,
+  includeCardKeys = HOME_SUMMARY_CARD_KEYS,
+  previewAllCards = false,
 }: Props) {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const cardWidth = CARD_WIDTH;
@@ -128,8 +120,6 @@ export default function HomeSummarySection({
   const currentIndexRef = useRef(0);
   const isDraggingRef = useRef(false);
   const autoScrollTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
-  const dismissAnimationRefs = useRef<DismissAnimationMap>({});
-  const [dismissingKeys, setDismissingKeys] = React.useState<string[]>([]);
   const { user } = useAuth();
   const handleCreateFirstPushPress = useCallback(() => {
     if (!user) {
@@ -148,195 +138,45 @@ export default function HomeSummarySection({
 
     haptics.selection();
   }, [navigation, user]);
-  const cards = useMemo(
-    () =>
-      isGuestMode
-        ? buildGuestCards(navigation)
-        : buildCards({
-            summary,
-            tasks: tasks ?? [],
-            currentUserId,
-            onPressTask,
-            onCreateFirstPushPress: handleCreateFirstPushPress,
-          }),
-    [
-      currentUserId,
-      handleCreateFirstPushPress,
-      isGuestMode,
-      navigation,
-      onPressTask,
-      summary,
-      tasks,
-    ],
-  );
-  const [persistedCards, setPersistedCards] = React.useState<PersistedHomeSummaryCardMap | null>(
-    null,
-  );
-  const revealedFingerprintsRef = useRef<Record<string, string>>({});
+  const cards = useMemo(() => {
+    const nextCards = isGuestMode
+      ? buildGuestCards(navigation)
+      : buildCards({
+          summary,
+          tasks: tasks ?? [],
+          currentUserId,
+          onPressTask,
+          onCreateFirstPushPress: handleCreateFirstPushPress,
+          previewAllCards,
+        });
+
+    return nextCards.filter(card => includeCardKeys.includes(card.key as HomeSummaryCardKey));
+  }, [
+    currentUserId,
+    handleCreateFirstPushPress,
+    includeCardKeys,
+    isGuestMode,
+    navigation,
+    onPressTask,
+    previewAllCards,
+    summary,
+    tasks,
+  ]);
   const cardStride = cardWidth + CARD_GAP;
 
-  useEffect(() => {
-    let cancelled = false;
-
-    setPersistedCards(null);
-
-    if (!currentUserId?.trim() || isGuestMode) {
-      setPersistedCards({});
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    const userScope = currentUserId.trim();
-
-    void (async () => {
-      const entries = await Promise.all(
-        HOME_SUMMARY_CARD_KEYS.map(async cardKey => {
-          const stored = await readCardState(userScope, cardKey);
-          return [cardKey, stored] as const;
-        }),
-      );
-
-      if (cancelled) return;
-
-      setPersistedCards(prev => ({
-        ...Object.fromEntries(entries),
-        ...(prev ?? {}),
-      }));
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [currentUserId, isGuestMode]);
-
-  const visibleCards = useMemo(() => {
-    if (!isGuestMode && persistedCards === null) {
-      return [];
-    }
-
-    return cards.filter(card => {
-      const stored = persistedCards?.[card.key as HomeSummaryCardKey];
-
-      if (!stored) return true;
-      if (stored.fingerprint !== card.fingerprint) return true;
-
-      return stored.state === 'unseen';
-    });
-  }, [cards, persistedCards]);
+  // Always show the built cards — tapping a card no longer dismisses it, so the
+  // carousel is never empty as long as there's a card to build.
+  const visibleCards = cards;
 
   useEffect(() => {
     onHasVisibleCardsChange?.(visibleCards.length > 0);
   }, [onHasVisibleCardsChange, visibleCards.length]);
 
-  useEffect(() => {
-    visibleCards.forEach(card => {
-      if (dismissingKeys.includes(card.key)) {
-        return;
-      }
-
-      const alreadyRevealedFingerprint = revealedFingerprintsRef.current[card.key];
-      if (alreadyRevealedFingerprint === card.fingerprint) {
-        return;
-      }
-
-      const anim = getDismissAnimationValues(dismissAnimationRefs, card.key);
-
-      if (card.key === 'create-first-push') {
-        anim.opacity.setValue(1);
-        anim.translateY.setValue(0);
-        anim.scale.setValue(1);
-        revealedFingerprintsRef.current[card.key] = card.fingerprint;
-        return;
-      }
-
-      anim.opacity.setValue(0);
-      anim.translateY.setValue(10);
-      anim.scale.setValue(0.98);
-
-      revealedFingerprintsRef.current[card.key] = card.fingerprint;
-
-      Animated.parallel([
-        Animated.timing(anim.opacity, {
-          toValue: 1,
-          duration: 240,
-          useNativeDriver: true,
-        }),
-        Animated.timing(anim.translateY, {
-          toValue: 0,
-          duration: 240,
-          useNativeDriver: true,
-        }),
-        Animated.timing(anim.scale, {
-          toValue: 1,
-          duration: 240,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    });
-  }, [dismissingKeys, visibleCards]);
-
-  const handleCardPress = useCallback(
-    (card: CardConfig) => {
-      if (card.key === 'create-first-push') {
-        card.onPress?.();
-        return;
-      }
-
-      const nextState: PersistedHomeSummaryCard = {
-        state: 'dismissed',
-        fingerprint: card.fingerprint,
-        updatedAt: Date.now(),
-      };
-
-      const isGuestCard = card.key.startsWith('guest_');
-
-      if (isGuestCard) {
-        card.onPress?.();
-        return;
-      }
-
-      if (dismissingKeys.includes(card.key)) {
-        return;
-      }
-
-      const anim = getDismissAnimationValues(dismissAnimationRefs, card.key);
-      setDismissingKeys(prev => (prev.includes(card.key) ? prev : [...prev, card.key]));
-
-      Animated.parallel([
-        Animated.timing(anim.opacity, {
-          toValue: 0,
-          duration: 180,
-          useNativeDriver: true,
-        }),
-        Animated.timing(anim.translateY, {
-          toValue: -6,
-          duration: 180,
-          useNativeDriver: true,
-        }),
-        Animated.timing(anim.scale, {
-          toValue: 0.96,
-          duration: 180,
-          useNativeDriver: true,
-        }),
-      ]).start(({ finished }) => {
-        if (!finished) return;
-
-        setPersistedCards(prev => ({
-          ...(prev ?? {}),
-          [card.key as HomeSummaryCardKey]: nextState,
-        }));
-
-        if (currentUserId?.trim()) {
-          void saveCardState(currentUserId.trim(), card.key as HomeSummaryCardKey, nextState);
-        }
-
-        setDismissingKeys(prev => prev.filter(key => key !== card.key));
-        card.onPress?.();
-      });
-    },
-    [currentUserId, dismissingKeys],
-  );
+  // Tapping a card just triggers its action; cards are no longer dismissed so
+  // there's always a summary card present.
+  const handleCardPress = useCallback((card: CardConfig) => {
+    card.onPress?.();
+  }, []);
 
   const scheduleNextSlide = useCallback(
     function scheduleNextSlide() {
@@ -418,7 +258,7 @@ export default function HomeSummarySection({
         horizontal
         showsHorizontalScrollIndicator={false}
         decelerationRate="fast"
-        snapToInterval={cardWidth + CARD_GAP}
+        snapToInterval={isGuestMode ? CARD_WIDTH_SINGLE + CARD_GAP : CARD_WIDTH + CARD_GAP}
         snapToAlignment="start"
         disableIntervalMomentum
         contentContainerStyle={styles.carouselContent}
@@ -426,32 +266,34 @@ export default function HomeSummarySection({
         onScrollBeginDrag={handleScrollBeginDrag}
         onMomentumScrollEnd={handleMomentumScrollEnd}
         scrollEventThrottle={16}
+        bounces={false}
+        scrollEnabled={visibleCards.length > 1}
       >
-        {visibleCards.map((card, index) => (
-          <Animated.View
+        {visibleCards.map(card => (
+          <View
             key={card.key}
             style={[
               styles.cardShell,
               {
-                width: cardWidth,
-                minWidth: cardWidth,
-                maxWidth: cardWidth,
+                width: isGuestMode ? CARD_WIDTH_SINGLE : CARD_WIDTH,
+                minWidth: isGuestMode ? CARD_WIDTH_SINGLE : CARD_WIDTH,
+                maxWidth: isGuestMode ? CARD_WIDTH_SINGLE : CARD_WIDTH,
                 flexGrow: 0,
                 flexShrink: 0,
               },
-              index === visibleCards.length - 1 && styles.lastCardShell,
-              getDismissAnimationStyle(dismissAnimationRefs, card.key) as any,
             ]}
           >
             <MinimalCard
-              width={cardWidth}
+              width={isGuestMode ? CARD_WIDTH_SINGLE : CARD_WIDTH}
+              eyebrow={card.eyebrow}
               title={card.title}
               body={card.body}
+              metric={card.metric}
+              trailingIcon={card.trailingIcon}
               tone={card.tone}
-              leadingIcon={card.leadingIcon}
               onPress={() => handleCardPress(card)}
             />
-          </Animated.View>
+          </View>
         ))}
       </ScrollView>
     </View>
@@ -464,12 +306,14 @@ function buildCards({
   currentUserId,
   onPressTask,
   onCreateFirstPushPress,
+  previewAllCards = false,
 }: {
   summary?: HomeSummaryResponse | null;
   tasks: Task[];
   currentUserId: string | null;
   onPressTask?: (task: Task) => void;
   onCreateFirstPushPress: () => void;
+  previewAllCards?: boolean;
 }): CardConfig[] {
   const trimmedCurrentUserId = currentUserId?.trim() ?? '';
   const hasCreatedAnyTask = tasks.some(task => task.userId === trimmedCurrentUserId);
@@ -485,29 +329,108 @@ function buildCards({
       summary?.featuredStory?.taskId ??
       null,
   );
+  const goalTask = selectGoalTask(tasks, currentUserId);
   const pushTask = selectMotivationTask(tasks, currentUserId);
   const progressTask = selectProgressTask(tasks, currentUserId);
-  const adviceTask = selectAdviceTask(tasks, currentUserId);
 
-  const successCard = successStoryKey
-    ? ({
-        key: 'success-story',
-        title: buildSuccessStoryTitle(summary),
-        body: buildSuccessStoryBody(summary),
-        tone: TONES.success,
-        leadingIcon: { set: 'fa6', name: 'circle-check', iconStyle: 'solid' },
-        fingerprint: buildSuccessStoryFingerprint(summary),
-        task: successTask,
-        onPress: successTask ? () => onPressTask?.(successTask) : undefined,
-      } satisfies CardConfig)
-    : null;
+  // Prefer the server-authoritative goal from the summary (always up to date
+  // after posting); fall back to the feed-derived own task.
+  const summaryGoal = summary?.yourGoal ?? null;
+  const goalText = summaryGoal
+    ? stripOuterQuotes(summaryGoal.text)
+    : goalTask
+      ? stripOuterQuotes(goalTask.text)
+      : 'Your goal shows up here';
+  const goalPushCount = summaryGoal?.pushCount ?? goalTask?.pushCount ?? 0;
+  const goalDay = summaryGoal
+    ? getGoalDayNumber(summaryGoal.createdAt, summaryGoal.progressCount)
+    : getTaskDayNumber(goalTask);
+  const goalForPress: Task | null =
+    goalTask ??
+    (summaryGoal
+      ? ({ id: summaryGoal.taskId, type: 'motivation', text: summaryGoal.text } as unknown as Task)
+      : null);
+  const goalFingerprint = summaryGoal
+    ? `your-goal:${summaryGoal.taskId}:${summaryGoal.pushCount}:${summaryGoal.progressCount}`
+    : goalTask
+      ? buildTaskFingerprint(goalTask)
+      : 'your-goal:placeholder';
 
+  const goalCard =
+    summaryGoal || goalTask || previewAllCards
+      ? ({
+          key: 'your-goal',
+          eyebrow: `YOUR GOAL · DAY ${goalDay}`,
+          title: goalText,
+          body: '',
+          metric: buildPushMetric(goalPushCount),
+          tone: TONES.success,
+          leadingIcon: { set: 'fa6', name: 'flag-checkered', iconStyle: 'solid' },
+          fingerprint: goalFingerprint,
+          task: goalForPress,
+          onPress: goalForPress ? () => onPressTask?.(goalForPress) : undefined,
+        } satisfies CardConfig)
+      : null;
+
+  const successCard =
+    successStoryKey || previewAllCards
+      ? ({
+          key: 'success-story',
+          eyebrow: 'SUCCESS STORY',
+          title: buildSuccessStoryTitle(summary),
+          body: '',
+          trailingIcon: { set: 'fa6', name: 'trophy', iconStyle: 'solid' },
+          tone: TONES.success,
+          leadingIcon: { set: 'fa6', name: 'circle-check', iconStyle: 'solid' },
+          fingerprint: buildSuccessStoryFingerprint(summary),
+          task: successTask,
+          onPress: successTask ? () => onPressTask?.(successTask) : undefined,
+        } satisfies CardConfig)
+      : null;
+
+  // Data-driven cards — only present when there's something real to show.
+  const dataCards = [
+    goalCard,
+    successCard,
+    pushTask || previewAllCards
+      ? ({
+          key: 'needs-push',
+          eyebrow: `NEEDS A PUSH${pushTask ? ` · ${getFirstName(pushTask.name)}` : ''}`,
+          title: buildPushBody(pushTask),
+          body: '',
+          metric: buildPushMetric(pushTask?.pushCount ?? 0),
+          tone: TONES.push,
+          leadingIcon: { set: 'fa6', name: 'person-running', iconStyle: 'solid' },
+          fingerprint: buildTaskFingerprint(pushTask),
+          task: pushTask,
+          onPress: pushTask ? () => onPressTask?.(pushTask) : undefined,
+        } satisfies CardConfig)
+      : null,
+    progressTask || previewAllCards
+      ? ({
+          key: 'update-progress',
+          eyebrow: `YOUR PROGRESS · DAY ${getTaskDayNumber(progressTask)}`,
+          title: progressTask ? stripOuterQuotes(progressTask.text) : 'Update your progress',
+          body: '',
+          metric: buildPushMetric(progressTask?.pushCount ?? 0),
+          tone: TONES.progress,
+          leadingIcon: { set: 'fa6', name: 'bullseye', iconStyle: 'solid' },
+          fingerprint: buildTaskFingerprint(progressTask),
+          task: progressTask,
+          onPress: progressTask ? () => onPressTask?.(progressTask) : undefined,
+        } satisfies CardConfig)
+      : null,
+  ].filter(Boolean) as CardConfig[];
+
+  // CTA only for brand-new users who haven't created anything yet.
   const firstTaskCard =
-    trimmedCurrentUserId && !hasCreatedAnyTask
+    (trimmedCurrentUserId && !hasCreatedAnyTask) || previewAllCards
       ? ({
           key: 'create-first-push',
-          title: 'Create your first push',
-          body: 'Share a goal and let friends back you up.',
+          eyebrow: 'GET STARTED',
+          title: 'Share what you’re trying to finish and get pushed forward.',
+          body: '',
+          trailingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
           tone: TONES.firstTask,
           leadingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
           fingerprint: 'create-first-push:v1',
@@ -515,175 +438,43 @@ function buildCards({
         } satisfies CardConfig)
       : null;
 
-  return [
-    firstTaskCard,
-    successCard,
-    pushTask
-      ? {
-          key: 'needs-push',
-          title: buildPushTitle(pushTask),
-          body: buildPushBody(pushTask),
-          tone: TONES.push,
-          leadingIcon: { set: 'fa6', name: 'person-running', iconStyle: 'solid' },
-          fingerprint: buildTaskFingerprint(pushTask),
-          task: pushTask,
-          onPress: () => onPressTask?.(pushTask),
-        }
-      : null,
-    progressTask
-      ? {
-          key: 'update-progress',
-          title: buildProgressTitle(progressTask),
-          body: buildProgressBody(progressTask),
-          tone: TONES.progress,
-          leadingIcon: { set: 'fa6', name: 'bullseye', iconStyle: 'solid' },
-          fingerprint: buildTaskFingerprint(progressTask),
-          task: progressTask,
-          onPress: () => onPressTask?.(progressTask),
-        }
-      : null,
-    adviceTask
-      ? {
-          key: 'advice-request',
-          title: buildAdviceTitle(adviceTask),
-          body: buildAdviceBody(adviceTask),
-          tone: TONES.advice,
-          leadingIcon: impactTypeVisuals.advice.icon,
-          fingerprint: buildTaskFingerprint(adviceTask),
-          task: adviceTask,
-          onPress: () => onPressTask?.(adviceTask),
-        }
-      : null,
-  ].filter(Boolean) as CardConfig[];
+  return [firstTaskCard, ...dataCards].filter(Boolean) as CardConfig[];
 }
 
 function buildGuestCards(navigation: NavigationProp<AppStackParamList>): CardConfig[] {
-  const guestCards = [
+  // Guests see the same "create your first push" CTA; tapping it routes to login.
+  return [
     {
-      key: 'guest_motivation',
-      title: 'Need a boost to move forward?',
-      body: 'Share a goal and let friends back you up.',
-      tone: {
-        background: colors.motivationBg,
-        titleColor: colors.motivationBgHardest,
-        iconColor: colors.motivationBgHardest,
-        leadingBg: colors.card,
-      },
-      leadingIcon: { set: 'fa6', name: 'person-running', iconStyle: 'solid' },
-      authCopy: {
-        title: 'Log in to send a push',
-        subtitle: 'Invite friends to back your goal and keep you moving.',
-        cta: 'Log In to Push',
-      },
-    },
-    {
-      key: 'guest_advice',
-      title: 'Stuck on something?',
-      body: 'Ask people you trust for a fresh perspective.',
-      tone: {
-        background: colors.adviceBg,
-        titleColor: colors.adviceBgHardest,
-        iconColor: colors.adviceBgHardest,
-        leadingBg: colors.card,
-      },
-      leadingIcon: impactTypeVisuals.advice.icon,
-      authCopy: {
-        title: 'Log in to ask for advice',
-        subtitle: 'Get a thoughtful response when you are stuck.',
-        cta: 'Log In to Ask',
+      key: 'create-first-push',
+      eyebrow: 'GET STARTED',
+      title: 'Share what you’re trying to finish and get pushed forward.',
+      body: '',
+      trailingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
+      tone: TONES.firstTask,
+      leadingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
+      fingerprint: 'create-first-push:guest',
+      onPress: () => {
+        navigation.navigate('AuthIntro', {
+          redirectTo: 'AddTask',
+          authContext: 'AddTask',
+        });
       },
     },
-    {
-      key: 'guest_accountability',
-      title: 'Keep momentum with support',
-      body: 'Check in and let friends keep you on track.',
-      tone: {
-        background: colors.decisionBg,
-        titleColor: colors.decisionBgHardest,
-        iconColor: colors.decisionBgHardest,
-        leadingBg: colors.card,
-      },
-      leadingIcon: { set: 'fa6', name: 'arrow-trend-up', iconStyle: 'solid' },
-      authCopy: {
-        title: 'Keep momentum with support',
-        subtitle: 'Share updates and keep your momentum visible.',
-        cta: 'Log In to Stay Accountable',
-      },
-    },
-  ] as const;
-
-  return guestCards.map(card => ({
-    key: card.key,
-    title: card.title,
-    body: card.body,
-    tone: card.tone,
-    leadingIcon: card.leadingIcon,
-    fingerprint: card.key,
-    onPress: () => {
-      navigation.navigate('AuthIntro', {
-        authContext: card.key,
-        authCopy: card.authCopy,
-      });
-    },
-  }));
-}
-
-function getDismissAnimationValues(refs: React.MutableRefObject<DismissAnimationMap>, key: string) {
-  if (!refs.current[key]) {
-    refs.current[key] = {
-      opacity: new Animated.Value(0),
-      translateY: new Animated.Value(10),
-      scale: new Animated.Value(0.98),
-    };
-  }
-
-  return refs.current[key];
-}
-
-function getDismissAnimationStyle(refs: React.MutableRefObject<DismissAnimationMap>, key: string) {
-  const anim = getDismissAnimationValues(refs, key);
-  return {
-    opacity: anim.opacity,
-    transform: [{ translateY: anim.translateY }, { scale: anim.scale }],
-  };
+  ];
 }
 
 function buildSuccessStoryTitle(summary?: HomeSummaryResponse | null) {
-  if (summary?.successStory) {
-    return summary.successStory.title;
+  const ownerName =
+    summary?.successStory?.entity.ownerName ??
+    summary?.heroModule?.entity.ownerName ??
+    summary?.featuredStory?.ownerName ??
+    null;
+
+  if (ownerName) {
+    return `Your push helped ${ownerName} finish what they started.`;
   }
 
-  if (summary?.heroModule) {
-    return summary.heroModule.title;
-  }
-
-  if (summary?.featuredStory) {
-    const firstName = getFirstName(summary.featuredStory.ownerName);
-    return `Your push helped ${firstName} go to the gym`;
-  }
-
-  return 'No success story yet';
-}
-
-function buildSuccessStoryBody(summary?: HomeSummaryResponse | null) {
-  if (summary?.successStory) {
-    return summary.successStory.body;
-  }
-
-  if (summary?.heroModule) {
-    return summary.heroModule.body;
-  }
-
-  if (summary?.featuredStory) {
-    return `You pushed ${getFirstName(summary.featuredStory.ownerName)} last week`;
-  }
-
-  return 'We will surface a success story here when there is one to show.';
-}
-
-function buildPushTitle(task: Task | null) {
-  if (!task) return 'Needs your push today';
-  return `${getFirstName(task.name)} needs a push today`;
+  return 'Your push helped someone finish what they started.';
 }
 
 function buildPushBody(task: Task | null) {
@@ -691,34 +482,40 @@ function buildPushBody(task: Task | null) {
   return stripOuterQuotes(task.text);
 }
 
-function buildProgressTitle(task: Extract<Task, { type: 'motivation' }> | null) {
-  if (!task) return 'Update your progress';
-  return 'Update your progress';
+function buildPushMetric(count: number) {
+  return { value: String(count), label: count === 1 ? 'push' : 'pushes' };
 }
 
-function buildProgressBody(task: Extract<Task, { type: 'motivation' }> | null) {
-  if (!task) return 'Keep your goal moving.';
-  const count = task.pushCount ?? 0;
+function selectGoalTask(tasks: Task[], currentUserId: string | null) {
+  const ownActiveGoals = tasks.filter(
+    (task): task is Extract<Task, { type: 'motivation' }> =>
+      task.type === 'motivation' &&
+      task.userId === currentUserId &&
+      !task.completed &&
+      !task.completedAt,
+  );
 
-  if (count <= 0) {
-    return 'No one has pushed you yet.';
+  if (!ownActiveGoals.length) return null;
+
+  return [...ownActiveGoals].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  )[0];
+}
+
+function getTaskDayNumber(task: Extract<Task, { type: 'motivation' }> | null) {
+  if (!task) return 1;
+  return getGoalDayNumber(task.createdAt, task.progressUpdates?.length ?? 0);
+}
+
+function getGoalDayNumber(createdAt: string, progressCount: number) {
+  if (progressCount > 0) return progressCount + 1;
+
+  const parsed = parseISO(createdAt);
+  if (isValid(parsed)) {
+    return Math.max(1, differenceInCalendarDays(new Date(), parsed) + 1);
   }
 
-  if (count === 1) {
-    return '1 friend pushed you.';
-  }
-
-  return `${count} friends pushed you.`;
-}
-
-function buildAdviceTitle(task: Task | null) {
-  if (!task) return 'Advice request waiting on you';
-  return 'Advice request waiting on you';
-}
-
-function buildAdviceBody(task: Task | null) {
-  if (!task) return 'A thoughtful request will show up here.';
-  return 'Tap to read and respond.';
+  return 1;
 }
 
 function selectMotivationTask(tasks: Task[], currentUserId: string | null) {
@@ -731,7 +528,9 @@ function selectMotivationTask(tasks: Task[], currentUserId: string | null) {
 
   if (!otherUserTasks.length) return null;
 
-  return otherUserTasks.find(task => !task.hasPushed) ?? null;
+  // Prefer someone you haven't pushed yet, but always fall back to any active
+  // goal from another user so a "needs your push" card is always available.
+  return otherUserTasks.find(task => !task.hasPushed) ?? otherUserTasks[0];
 }
 
 function selectProgressTask(tasks: Task[], currentUserId: string | null) {
@@ -745,16 +544,6 @@ function selectProgressTask(tasks: Task[], currentUserId: string | null) {
   if (!ownTasks.length) return null;
 
   return ownTasks.find(task => (task.pushCount ?? 0) > 0) ?? null;
-}
-
-function selectAdviceTask(tasks: Task[], currentUserId: string | null) {
-  const adviceTasks = tasks.filter(
-    (task): task is Extract<Task, { type: 'advice' }> => task.type === 'advice',
-  );
-
-  if (!adviceTasks.length) return null;
-
-  return adviceTasks.find(task => task.userId !== currentUserId && !task.hasAdvised) ?? null;
 }
 
 function findTaskById(tasks: Task[], taskId: string | null): Task | null {
@@ -823,71 +612,76 @@ function buildTaskFingerprint(task: Task | null) {
   ].join('|');
 }
 
-async function readCardState(userId: string, cardKey: HomeSummaryCardKey) {
-  const raw = await AsyncStorage.getItem(getCardStateStorageKey(userId, cardKey));
-  if (!raw) return null;
-
-  try {
-    return JSON.parse(raw) as PersistedHomeSummaryCard;
-  } catch {
-    return null;
-  }
-}
-
-async function saveCardState(
-  userId: string,
-  cardKey: HomeSummaryCardKey,
-  state: PersistedHomeSummaryCard,
-) {
-  await AsyncStorage.setItem(getCardStateStorageKey(userId, cardKey), JSON.stringify(state));
-}
-
-function getCardStateStorageKey(userId: string, cardKey: HomeSummaryCardKey) {
-  return `${CARD_STATE_STORAGE_PREFIX}:${userId}:${cardKey}`;
-}
-
 function MinimalCard({
   width,
+  eyebrow,
   title,
   body,
+  metric,
+  trailingIcon,
   tone,
-  leadingIcon,
   onPress,
 }: {
   width: number;
+  eyebrow?: string;
   title: string;
   body: string;
+  metric?: { value: string; label: string } | null;
+  trailingIcon?: { set: 'fa6' | 'ion'; name: string; iconStyle?: 'solid' | 'regular' } | null;
   tone: CardTone;
-  leadingIcon: { set: 'ion' | 'fa6'; name: string; iconStyle?: 'solid' | 'regular' };
   onPress?: () => void;
 }) {
   const content = (
     <View style={[styles.card, { width, backgroundColor: tone.background }]}>
-      <View style={[styles.iconCircle, { backgroundColor: tone.leadingBg }]}>
-        <Icon
-          set={leadingIcon.set}
-          name={leadingIcon.name as any}
-          iconStyle={leadingIcon.iconStyle}
-          size={18}
-          color={tone.iconColor}
-        />
-      </View>
+      {eyebrow ? (
+        <TextElement style={[styles.eyebrow, { color: tone.eyebrowColor ?? tone.titleColor }]}>
+          {eyebrow}
+        </TextElement>
+      ) : null}
 
-      <View style={styles.textBlock}>
-        <TextElement
-          variant="headline"
-          weight="700"
-          style={[styles.title, { color: tone.titleColor }]}
-        >
-          {title}
-        </TextElement>
-        <TextElement
-          variant="bodySmall"
-          numberOfLines={2}
-          style={[styles.body, { color: tone.titleColor }]}
-        >
-          {body}
-        </TextElement>
+      <View style={styles.bodyRow}>
+        <View style={styles.textBlock}>
+          <TextElement
+            variant="headline"
+            weight="700"
+            numberOfLines={2}
+            style={[styles.title, { color: tone.titleColor }]}
+          >
+            {title}
+          </TextElement>
+          {body ? (
+            <TextElement
+              variant="bodySmall"
+              numberOfLines={2}
+              style={[styles.body, { color: tone.bodyColor ?? tone.titleColor }]}
+            >
+              {body}
+            </TextElement>
+          ) : null}
+        </View>
+
+        {metric ? (
+          <View style={styles.metricBlock}>
+            <TextElement
+              style={[styles.metricValue, { color: tone.eyebrowColor ?? tone.titleColor }]}
+            >
+              {metric.value}
+            </TextElement>
+            <TextElement style={[styles.metricLabel, { color: tone.bodyColor ?? tone.titleColor }]}>
+              {metric.label}
+            </TextElement>
+          </View>
+        ) : trailingIcon ? (
+          <View style={styles.trailingIconBlock}>
+            <Icon
+              set={trailingIcon.set}
+              name={trailingIcon.name as any}
+              iconStyle={trailingIcon.iconStyle}
+              size={26}
+              color={tone.eyebrowColor ?? tone.titleColor}
+            />
+          </View>
+        ) : null}
       </View>
     </View>
   );
@@ -913,13 +707,17 @@ function MinimalCard({
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: -spacing.md,
-    paddingHorizontal: spacing.md,
+    // Cancel the parent header's horizontal padding so the slider is full-bleed.
+    marginHorizontal: -spacing.lg,
+    paddingHorizontal: 0,
     marginTop: spacing.sm,
     marginBottom: spacing.sm,
   },
   carouselContent: {
-    paddingHorizontal: spacing.md,
+    // Symmetric leading/trailing inset so the first and last cards both
+    // sit clear of the screen edges.
+    paddingLeft: ms(22),
+    paddingRight: ms(28),
     gap: CARD_GAP,
   },
   cardShell: {
@@ -927,47 +725,71 @@ const styles = StyleSheet.create({
     flexGrow: 0,
     flexShrink: 0,
   },
-  lastCardShell: {
-    marginEnd: spacing.lg,
-  },
   card: {
-    minHeight: vs(58),
-    borderRadius: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    height: CARD_HEIGHT,
+    paddingVertical: ms(12),
+    paddingHorizontal: ms(18),
+    borderRadius: ms(20),
+    flexDirection: 'column',
+    justifyContent: 'center',
     overflow: 'hidden',
-    width: '100%',
+    width: ms(200),
     flexGrow: 0,
     flexShrink: 0,
   },
-  iconCircle: {
-    width: 45,
-    height: 45,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.55)',
-    flexShrink: 0,
-    marginLeft: spacing.md,
+  eyebrow: {
+    fontSize: ms(10),
+    lineHeight: ms(12),
+    fontWeight: '800',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
-  title: {
-    marginHorizontal: spacing.md,
-    fontSize: ms(14),
-    textAlign: 'left',
-    lineHeight: ms(22),
+  bodyRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    marginTop: vs(6),
   },
   textBlock: {
     flex: 1,
     minWidth: 0,
     justifyContent: 'center',
   },
-  body: {
-    marginHorizontal: spacing.md,
-    fontSize: ms(11),
+  title: {
+    fontSize: ms(15),
+    lineHeight: ms(19),
+    fontWeight: '800',
+    letterSpacing: -0.3,
     textAlign: 'left',
+  },
+  body: {
+    fontSize: ms(12),
     lineHeight: ms(16),
-    paddingBottom: vs(2),
+    textAlign: 'left',
+    marginTop: vs(4),
+  },
+  metricBlock: {
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+    minWidth: ms(54),
+  },
+  trailingIconBlock: {
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+    minWidth: ms(30),
+    paddingTop: vs(2),
+  },
+  metricValue: {
+    fontSize: ms(24),
+    lineHeight: ms(24),
+    fontWeight: '900',
+    letterSpacing: -0.8,
+  },
+  metricLabel: {
+    fontSize: ms(10),
+    lineHeight: ms(12),
+    // marginTop: vs(2),
+    fontWeight: '500',
   },
 });

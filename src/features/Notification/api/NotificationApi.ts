@@ -1,6 +1,7 @@
 import { api } from '@shared/api/axios';
-import { ApiRoute, buildRoute } from '@shared/api/apiRoutes';
+import { buildRoute } from '@shared/api/apiRoutes';
 import { NotificationDTO } from '../types/notification.types';
+import { DEFAULT_TEST_NOTIFICATION_TEXT } from '@lib/notifications/notificationTextCatalog';
 
 // ✅ Get all notifications for the user
 export async function getAllNotifications(): Promise<NotificationDTO[]> {
@@ -25,8 +26,8 @@ export type NotificationTestPayload = {
 export async function sendTestNotificationAPI(userId: string, payload?: NotificationTestPayload) {
   return api.post('/notification/test', {
     userId,
-    title: payload?.title ?? '🔔 Debug Test',
-    body: payload?.body ?? 'This is a test push notification!',
+    title: payload?.title ?? DEFAULT_TEST_NOTIFICATION_TEXT.title,
+    body: payload?.body ?? DEFAULT_TEST_NOTIFICATION_TEXT.body,
     ...(payload?.data ? { data: payload.data } : {}),
   });
 }

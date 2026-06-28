@@ -5,15 +5,14 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
-import { getTypeVisual } from '@shared/utils/typeVisuals';
 import { notificationStyles } from '../styles/notification.styles';
+import NotificationIconBadge from './NotificationIconBadge';
 interface Props {
   item: NotificationDTO;
   onPress: () => void;
 }
 
 export default function TaskNotification({ item, onPress }: Props) {
-  const { emoji } = getTypeVisual(item.type);
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -28,15 +27,13 @@ export default function TaskNotification({ item, onPress }: Props) {
           <TextElement weight="bold" style={notificationStyles.bodyText}>
             {item.metadata?.senderName || 'Someone'}
           </TextElement>{' '}
-          shared a task {emoji}
+          shared a task
         </TextElement>
         <TextElement variant="caption" style={notificationStyles.bodyMetaText} color="muted">
           {timeAgo(item.createdAt)}
         </TextElement>
       </View>
-      <TextElement variant="title" style={notificationStyles.emojiText}>
-        {emoji}
-      </TextElement>
+      <NotificationIconBadge iconName="clipboard-list" />
     </TouchableOpacity>
   );
 }

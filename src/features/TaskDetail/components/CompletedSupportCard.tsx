@@ -6,9 +6,8 @@ import SectionHeader from '@shared/components/SectionHeader/SectionHeader';
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Icon } from '@shared/components/Icons';
-import { colors, spacing } from '@shared/theme';
+import { colors, platformShadow, spacing } from '@shared/theme';
 import { getFirstName } from '@shared/utils/helperFunctions';
-import Height from '@shared/components/Spacing/Height';
 import HelperAvatarStack from '@features/Home/components/HelperAvatarStack';
 
 type PushEvent = {
@@ -108,7 +107,7 @@ export default function CompletedSupportCard({
   const showAvatarStack = displayUsers.length > 0;
   return (
     <View>
-      <Height size={vs(20)} />
+      {/* <Height size={vs(20)} /> */}
 
       <SectionHeader label="Result" icon="checkmark-circle-outline" />
 
@@ -116,7 +115,12 @@ export default function CompletedSupportCard({
         <View style={styles.card}>
           <View style={styles.headerRow}>
             <View style={styles.iconWrap}>
-              <Icon set="ion" name="checkmark" size={ms(16)} color={colors.motivationBgHardest} />
+              <Icon
+                set="ion"
+                name="checkmark"
+                size={ms(16)}
+                color={colors.tactileMomentumSecondary}
+              />
             </View>
 
             <TextElement variant="title" style={styles.title}>
@@ -130,7 +134,13 @@ export default function CompletedSupportCard({
 
           {showAvatarStack ? (
             <View style={styles.avatars}>
-              <HelperAvatarStack helpers={displayUsers} size={40} maxVisible={3} />
+              <HelperAvatarStack
+                helpers={displayUsers}
+                size={40}
+                maxVisible={3}
+                moreStyle={styles.supportCountBubble}
+                moreTextStyle={styles.supportCountText}
+              />
             </View>
           ) : null}
 
@@ -166,19 +176,20 @@ function formatDuration(createdAt: string, completedAt?: string | null) {
 
 const styles = StyleSheet.create({
   shadow: {
-    borderRadius: 28,
+    borderRadius: 24,
   },
   card: {
     backgroundColor: colors.onPrimary,
-    borderRadius: 28,
+    borderRadius: 24,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     paddingRight: spacing.lg,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 8,
+    ...platformShadow({
+      color: '#000',
+      opacity: 0.08,
+      radius: 16,
+      offset: { width: 0, height: 10 },
+    }),
     borderWidth: 1,
     borderColor: '#E6EFE8',
   },
@@ -191,7 +202,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.motivationIconBackground,
+    backgroundColor: colors.tactileMomentumPrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -221,6 +232,13 @@ const styles = StyleSheet.create({
   avatars: {
     marginTop: spacing.md,
     marginBottom: spacing.sm,
+  },
+  supportCountBubble: {
+    backgroundColor: colors.tactileMomentumPrimary,
+    borderColor: colors.tactileMomentumPrimary,
+  },
+  supportCountText: {
+    color: colors.tactileMomentumSecondary,
   },
   time: {
     marginTop: vs(2),

@@ -4,6 +4,7 @@ import type { BottomSheetModalProps } from '@gorhom/bottom-sheet';
 import InfoModalContent from './modals/InfoModalContent';
 import ReminderMessageModalContent from './modals/ReminderMessageModalContent';
 import ShareUpdateModalContent from './modals/ShareUpdateModalContent';
+import CheerModalContent from './modals/CheerModalContent';
 import MotivationSuccessModalContent from './modals/MotivationSuccessModalContent';
 import ComingSoonModalContent from './modals/ComingSoonModalContent';
 import CompleteTaskConfirmationModalContent from './modals/CompleteTaskConfirmationModalContent';
@@ -43,13 +44,24 @@ export const modalRegistry: { [K in ModalType]: ModalDefinition<K> } = {
     ),
   },
   shareUpdate: {
-    snapPoints: [560],
+    snapPoints: ['62%'],
     scrollable: true,
     bottomSheetProps: {
       keyboardBehavior: 'extend',
+      enableDynamicSizing: true,
     },
     render: (payload, { closeModal }) => (
       <ShareUpdateModalContent payload={payload} closeModal={closeModal} />
+    ),
+  },
+  cheer: {
+    snapPoints: ['80%'],
+    scrollable: true,
+    bottomSheetProps: {
+      enableDynamicSizing: false,
+    },
+    render: (payload, { closeModal }) => (
+      <CheerModalContent payload={payload} closeModal={closeModal} />
     ),
   },
   motivationSuccess: {

@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ms, vs } from 'react-native-size-matters';
 
 import { AddTaskStackParamList } from '../navigation/AddTaskNavigator';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import OnboardingHeader from '@shared/components/OnboardingHeader';
+import { colors, platformShadow, spacing } from '@shared/theme';
 import TaskDescriptionInput from '../components/TaskDescriptionInput';
 import { CreateTaskPayload } from '../types/addTask.types';
 import { useCreateTask } from '../hooks/useCreateTask';
@@ -25,18 +26,13 @@ import SelectHelpersModal from '../components/SelectHelpersModal';
 import { HelperUser } from '@features/Home/types/home';
 import { useFollowers } from '@features/User/hooks/useFollowers';
 import { useFollowing } from '@features/User/hooks/useFollowing';
+import { FEELING_OPTIONS, FeelingValue, normalizeFeelingValue } from '@shared/utils/feelings';
+import Icon from '@shared/components/Icons/Icon';
 
 type Props = NativeStackScreenProps<AddTaskStackParamList, 'AddMotivation'>;
 
-const FEELINGS = [
-  'Stuck',
-  'Nervous',
-  'Tired',
-  'Avoiding it',
-  'Overwhelmed',
-  'Almost there',
-] as const;
-type Feeling = (typeof FEELINGS)[number];
+// Minimum characters required before a goal can be posted.
+const MIN_TASK_LENGTH = 50;
 
 export default function AddMotivationScreen({ navigation, route }: Props) {
   const { user } = useAuth();
@@ -47,7 +43,8 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
   );
 
   const [text, setText] = useState('');
-  const [selectedFeeling, setSelectedFeeling] = useState<Feeling>('Nervous');
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [selectedFeeling, setSelectedFeeling] = useState<FeelingValue>('nervous');
   const [helpers, setHelpers] = useState<HelperUser[]>([]);
   const [showHelperModal, setShowHelperModal] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -68,10 +65,32 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
     if (!draft || draft.type !== TaskTypeEnum.Motivation) return;
 
     setText(draft.text ?? '');
+    setSelectedFeeling(normalizeFeelingValue(draft.feeling) ?? 'nervous');
   }, [route.params?.draft]);
 
   const hasAutoSubmittedRef = React.useRef(false);
   const canSubmit = text.trim().length > 0;
+
+  const handleClose = React.useCallback(() => {
+    const parent = (navigation as any).getParent?.();
+    if (parent?.canGoBack?.()) {
+      parent.goBack();
+      return;
+    }
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+    resetToHomeRoot(rootNavigation ?? navigation);
+  }, [navigation, rootNavigation]);
+
+  const handleChangeText = React.useCallback(
+    (next: string) => {
+      setText(next);
+      if (error) setError(undefined);
+    },
+    [error],
+  );
 
   const handleTaskCreated = React.useCallback(
     (task: Task) => {
@@ -135,10 +154,16 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
   function onSubmit() {
     if (!canSubmit) return;
 
+    const trimmed = text.trim();
+    if (trimmed.length < MIN_TASK_LENGTH) {
+      setError(`Write at least ${MIN_TASK_LENGTH} characters so people can support you.`);
+      return;
+    }
+
     const payload: CreateTaskPayload = {
       type: TaskTypeEnum.Motivation,
       text: text.trim(),
-      visibility: 'public',
+      feeling: selectedFeeling,
       helpers: helpers.map(helper => helper.id),
     };
 
@@ -171,11 +196,12 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
           visible={canSubmit && !success}
           isLoading={isPending}
           onPress={onSubmit}
-          buttonColor={colors.onboardingInk}
+          buttonColor={colors.tactileMomentumPrimary}
           containerColor={colors.onboardingPaper}
+          textColor={colors.tactileMomentumSecondary}
           // buttonStyle={styles.postButton}
-          buttonHeader="Your goal is visible to the community. "
-          style={{ bottom: isAndroid ? vs(-20) : vs(-10) }}
+          buttonHeader="Once posted, people here can push you forward."
+          style={{ bottom: isAndroid ? vs(-20) : vs(0) }}
         />
       }
       scrollable
@@ -185,6 +211,16 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
       style={styles.container}
     >
       <View style={styles.screen}>
+        <Pressable
+          onPress={handleClose}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          style={({ pressed }) => [styles.closeButton, pressed && styles.closeButtonPressed]}
+        >
+          <Icon set="ion" name="close" size={ms(20)} color={colors.onboardingInk} />
+        </Pressable>
+
         <View style={styles.headerBlock}>
           <View style={styles.titleWrap}>
             <TextElement variant="headline" weight="900" style={styles.titleLine}>
@@ -204,17 +240,19 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
           </View>
 
           <TextElement variant="body" style={styles.subtitle} color="muted">
-            Put it out there. People here will push you forward — no judgment, just momentum.
+            Say it out loud. People here will push you forward. No judgment, just momentum.
           </TextElement>
         </View>
 
         <View style={styles.inputCard}>
           <TaskDescriptionInput
             value={text}
-            onChange={setText}
+            onChange={handleChangeText}
+            error={error}
             placeholder={'e.g. "I want to work out, but I keep putting it off."'}
             taskType={TaskTypeEnum.Motivation}
             charLimit={120}
+            minLength={MIN_TASK_LENGTH}
             footerText="No pressure. Say it as it is."
             footerTextColor="onboardingMuted"
             dividerColor={colors.onboardingLine}
@@ -229,16 +267,16 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
           </TextElement>
 
           <View style={styles.tagWrap}>
-            {FEELINGS.map(feeling => {
-              const selected = selectedFeeling === feeling;
+            {FEELING_OPTIONS.map(feeling => {
+              const selected = selectedFeeling === feeling.value;
 
               return (
                 <Tag
-                  key={feeling}
-                  label={feeling}
+                  key={feeling.value}
+                  label={feeling.label}
                   selectOnly
                   selected={selected}
-                  onPress={() => setSelectedFeeling(feeling)}
+                  onPress={() => setSelectedFeeling(feeling.value)}
                   fillColor={selected ? colors.onboardingInk : colors.onboardingCard}
                   borderColor={selected ? colors.onboardingInk : colors.onboardingLine}
                   labelColor={selected ? 'onPrimary' : 'onboardingInk'}
@@ -286,74 +324,30 @@ const styles = StyleSheet.create({
     backgroundColor: colors.onboardingPaper,
   },
   screen: {
-    paddingTop: vs(18),
-    paddingBottom: vs(34),
+    paddingTop: isAndroid ? vs(18) : 0,
     // paddingHorizontal: ms(28),
   },
-  topRow: {
-    flexDirection: 'row',
+  closeButton: {
+    alignSelf: 'flex-end',
+    width: ms(35),
+    height: ms(35),
+    borderRadius: ms(35 / 2),
+    backgroundColor: colors.onboardingLine,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: vs(14),
+    justifyContent: 'center',
+    marginBottom: vs(-5),
+    marginEnd: ms(5),
   },
-  wordmark: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(8),
+  closeButtonPressed: {
+    opacity: 0.7,
   },
-  logoTicks: {
-    flexDirection: 'row',
-    gap: ms(3),
-  },
-  logoTick: {
-    width: ms(4),
-    height: vs(16),
-    borderRadius: 1,
-    backgroundColor: colors.onboardingInk,
-    transform: [{ skewX: '-18deg' }],
-  },
-  logoTickAccent: {
-    backgroundColor: colors.onboardingPush,
-  },
-  wordmarkText: {
-    color: colors.onboardingInk,
-    letterSpacing: -0.4,
-  },
-  streakPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(6),
-    paddingHorizontal: ms(14),
-    paddingVertical: vs(8),
-    borderRadius: 999,
-    backgroundColor: colors.onboardingInk,
-  },
-  streakTicks: {
-    flexDirection: 'row',
-    gap: ms(2),
-  },
-  streakTick: {
-    width: ms(3),
-    height: vs(12),
-    borderRadius: 1,
-    backgroundColor: colors.onboardingPush,
-    transform: [{ skewX: '-18deg' }],
-  },
-  streakTickAccent: {
-    opacity: 0.75,
-  },
-  streakText: {
-    color: colors.onboardingPush,
-    letterSpacing: -0.2,
-  },
-  kicker: {
-    color: colors.onboardingMuted,
-    marginBottom: vs(18),
-    fontSize: ms(14),
-    lineHeight: ms(20),
+  header: {
+    marginBottom: vs(16),
+    paddingHorizontal: 0,
   },
   headerBlock: {
-    marginTop: vs(8),
+    // marginTop: vs(8),
+    // marginEnd: vs(16),
   },
   titleWrap: {},
   titleLine: {
@@ -399,11 +393,12 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     padding: spacing.md,
     marginTop: vs(16),
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 3,
+    ...platformShadow({
+      color: '#000',
+      opacity: 0.06,
+      radius: 18,
+      offset: { width: 0, height: 8 },
+    }),
   },
   inputWrapper: {
     height: vs(70),
@@ -439,13 +434,5 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
-  },
-  footerCopy: {
-    marginTop: vs(24),
-    marginBottom: vs(8),
-  },
-  footerText: {
-    fontSize: ms(14),
-    lineHeight: ms(20),
   },
 });

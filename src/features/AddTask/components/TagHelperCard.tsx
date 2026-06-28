@@ -113,7 +113,7 @@ export default function TagHelperCard({
 
   return (
     <View style={styles.wrapper}>
-      <SectionHeader label="Ask someone you trust" icon="person-add" />
+      <SectionHeader label="Tag a friend" icon="people" />
 
       <Shadow size="tint">
         <Pressable style={styles.card} onPress={onPress}>
@@ -121,17 +121,19 @@ export default function TagHelperCard({
             {!hasHelpers ? (
               <>
                 <View
-                  style={[
-                    styles.iconCircle,
-                    { backgroundColor: colors[`${taskType}IconBackground`] },
-                  ]}
+                  style={[styles.iconCircle, { backgroundColor: colors.tactileMomentumPrimary }]}
                 >
-                  <Icon set="ion" name="add" size={ms(16)} color={colors[`${taskType}BgHardest`]} />
+                  <Icon
+                    set="ion"
+                    name="add"
+                    size={ms(16)}
+                    color={colors.tactileMomentumSecondary}
+                  />
                 </View>
 
                 <Column flex={1} gap={1}>
                   <TextElement variant="caption" style={styles.subTextHeading}>
-                    Tag a helper
+                    Choose someone to help.
                   </TextElement>
 
                   <TextElement variant="caption" color="muted" style={styles.subText}>
@@ -144,7 +146,7 @@ export default function TagHelperCard({
             )}
           </View>
 
-          <Icon set="ion" name="chevron-forward" size={ms(18)} color={colors.muted} />
+          {/* <Icon set="ion" name="chevron-forward" size={ms(18)} color={colors.muted} /> */}
         </Pressable>
       </Shadow>
     </View>
@@ -218,7 +220,7 @@ const styles = StyleSheet.create({
     lineHeight: ms(12),
   },
   wrapper: {
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
   },
 
   card: {
@@ -226,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.card,
-    borderRadius: 16,
+    borderRadius: 24,
     padding: spacing.md,
     paddingVertical: vs(10),
   },
@@ -239,8 +241,8 @@ const styles = StyleSheet.create({
   },
 
   iconCircle: {
-    width: 44,
-    height: 44,
+    width: ms(35),
+    height: ms(35),
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',

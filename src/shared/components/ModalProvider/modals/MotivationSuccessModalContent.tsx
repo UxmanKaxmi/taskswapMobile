@@ -5,7 +5,7 @@ import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import PushButton from '@shared/components/PushButton';
-import { colors, spacing } from '@shared/theme';
+import { colors, platformShadow, spacing } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 import type { MotivationSuccessModalPayload } from '../modalTypes';
 
@@ -53,8 +53,13 @@ export default function MotivationSuccessModalContent({
             styles.iconBubble,
             {
               backgroundColor: bubbleColor,
-              shadowColor: shadowColor,
             },
+            platformShadow({
+              color: shadowColor,
+              opacity: 0.08,
+              radius: 10,
+              offset: { width: 0, height: 6 },
+            }),
           ]}
         >
           <Icon
@@ -113,10 +118,6 @@ const styles = StyleSheet.create({
     borderRadius: ms(50),
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
   },
   title: {
     textAlign: 'center',

@@ -32,8 +32,6 @@ import { isIOS } from '@shared/utils/constants';
 import { vs } from 'react-native-size-matters';
 import { useCreateTask } from '@features/AddTask/hooks/useCreateTask';
 import { CreateTaskPayload } from '@features/AddTask';
-import VisibilitySelectorWithModal from '@features/AddTask/components/VisibilitySelectorWithModal';
-import { typeBackgroundsHardest } from '@shared/utils/typeVisuals';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
 
@@ -42,8 +40,6 @@ export default function AddTaskScreen({ route, navigation }: Props) {
 
   const [type, setType] = useState<TaskType>(existingTask?.type ?? 'motivation');
   const [description, setDescription] = useState(existingTask?.text ?? '');
-  const [visibility, setVisibility] = useState('public');
-
   const [remindAt, setRemindAt] = useState<Date>(
     existingTask?.remindAt ? new Date(existingTask.remindAt) : new Date(),
   );
@@ -123,7 +119,6 @@ export default function AddTaskScreen({ route, navigation }: Props) {
       type,
       remindAt: type === 'reminder' ? remindAt.toISOString() : undefined,
       helpers: helperIds,
-      visibility: visibility as 'friends' | 'public' | 'private',
     };
 
     createTask(payload as CreateTaskPayload, {
@@ -189,8 +184,6 @@ export default function AddTaskScreen({ route, navigation }: Props) {
                 onPress={() => setHelperModalVisible(true)}
                 valueType="text"
               />
-              {/* VISIBILITY */}
-              <VisibilitySelectorWithModal selected={visibility} onSelect={setVisibility} />
             </ScrollView>
 
             <SelectHelpersModal
@@ -198,7 +191,6 @@ export default function AddTaskScreen({ route, navigation }: Props) {
               selected={helperIds}
               onClose={() => setHelperModalVisible(false)}
               onConfirm={setHelperIds}
-              confirmButtonColor={typeBackgroundsHardest[type]}
             />
           </Animated.View>
         </KeyboardAvoidingView>

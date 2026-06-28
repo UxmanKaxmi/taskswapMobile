@@ -20,6 +20,7 @@ export type NotificationPayload = {
   notificationId?: string | null;
   pushId?: string | null;
   progressUpdateId?: string | null;
+  beatId?: string | null;
   commentId?: string | null;
   pushCount?: string | null;
   taskCount?: string | null;
@@ -100,6 +101,7 @@ export function normalizeNotificationPayload(data: unknown): NotificationPayload
     taskId: toStringOrUndefined(payload.taskId),
     pushId: toStringOrUndefined(payload.pushId),
     progressUpdateId: toStringOrUndefined(payload.progressUpdateId),
+    beatId: toStringOrUndefined(payload.beatId),
     commentId: toStringOrUndefined(payload.commentId),
     pushCount: toStringOrUndefined(payload.pushCount),
     taskCount: toStringOrUndefined(payload.taskCount),
@@ -117,6 +119,7 @@ function buildTaskDetailRoute(
       taskId: payload.taskId ?? undefined,
       ...(payload.pushId ? { pushId: payload.pushId } : {}),
       ...(payload.progressUpdateId ? { progressUpdateId: payload.progressUpdateId } : {}),
+      ...(payload.beatId ? { beatId: payload.beatId, highlightBeatId: payload.beatId } : {}),
       ...extra,
     },
     authCopy: AUTH_COPY_TASK_DETAIL,
@@ -193,6 +196,13 @@ export function getNotificationRoute(data: unknown): NotificationRoute {
 
     case 'task-motivation-push':
       return buildTaskDetailRouteOrInbox(payload, taskId);
+
+    case 'task-cheer':
+    case 'task-motivation-cheer':
+      return buildTaskDetailRouteOrInbox(payload, taskId, {
+        scrollTo: 'progress',
+        highlightBeatId: payload.beatId ?? undefined,
+      });
 
     case 'task-motivation-milestone':
       return buildTaskDetailRouteOrInbox(payload, taskId, {

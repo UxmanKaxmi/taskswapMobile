@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import RootNavigator from './navigation/RootNavigator';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '@shared/components/Toast/toastConfig';
 import { initializeNotifications } from './lib/notifications/initNotifications';
@@ -19,8 +19,8 @@ import { FeatureFlagsProvider } from '@shared/featureFlags';
 import { navigationRef } from './navigation/navigationRef';
 import NotificationNavigationBridge from './lib/notifications/NotificationNavigationBridge';
 import { setNotificationNavigationReady } from './lib/notifications/notificationNavigation';
+import { queryClient } from './lib/react-query/client';
 
-const queryClient = new QueryClient();
 const loginImage = require('@assets/images/loginImage5.png');
 
 const LightNavTheme = {

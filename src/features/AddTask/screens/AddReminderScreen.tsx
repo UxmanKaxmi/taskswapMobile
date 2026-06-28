@@ -21,7 +21,6 @@ import { Height } from '@shared/components/Spacing';
 
 import TagHelperCard from '../components/TagHelperCard';
 import SelectHelpersModal from '../components/SelectHelpersModal';
-import VisibilitySelector from '../components/VisibilitySelector';
 
 import AnimatedBottomButton, {
   BOTTOM_BUTTON_HEIGHT,
@@ -58,7 +57,6 @@ export default function AddReminderScreen({ navigation, route }: Props) {
 
   const [text, setText] = useState('');
   const [remindAt, setRemindAt] = useState<Date | null>(null);
-  const [visibility, setVisibility] = useState<'friends' | 'public' | 'private'>('public');
   const [helpers, setHelpers] = useState<HelperUser[]>([]);
   const [showHelperModal, setShowHelperModal] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -102,7 +100,6 @@ export default function AddReminderScreen({ navigation, route }: Props) {
     if (!draft || draft.type !== TaskTypeEnum.Reminder) return;
 
     setText(draft.text ?? '');
-    setVisibility(draft.visibility ?? 'public');
 
     if (draft.remindAt) {
       const parsed = new Date(draft.remindAt);
@@ -154,14 +151,10 @@ export default function AddReminderScreen({ navigation, route }: Props) {
       return;
     }
 
-    const effectiveVisibility = user ? visibility : 'private';
-    const effectiveHelpers = user && effectiveVisibility !== 'private' ? helperIds : [];
-
     const payload: CreateTaskPayload = {
       type: TaskTypeEnum.Reminder,
       text: text.trim(),
-      visibility: effectiveVisibility,
-      helpers: effectiveHelpers,
+      helpers: helperIds,
       remindAt: remindAt.toISOString(),
     };
 
@@ -247,15 +240,6 @@ export default function AddReminderScreen({ navigation, route }: Props) {
 
         {/* <Height size={vs(14)} /> */}
 
-        {/* Visibility */}
-        {user ? (
-          <VisibilitySelector
-            taskType={TaskTypeEnum.Reminder}
-            value={visibility}
-            onChange={setVisibility}
-          />
-        ) : null}
-
         {/* Helpers  */}
         {user ? (
           <>
@@ -274,7 +258,6 @@ export default function AddReminderScreen({ navigation, route }: Props) {
                 const selected = friends.filter(f => ids.includes(f.id));
                 setHelpers(selected);
               }}
-              confirmButtonColor={colors.reminderBgHardest}
             />
           </>
         ) : null}

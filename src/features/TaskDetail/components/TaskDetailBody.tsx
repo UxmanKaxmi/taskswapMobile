@@ -1,6 +1,6 @@
 import React, { type RefObject } from 'react';
 
-import { ProgressUpdate, TaskType } from '@features/Tasks/types/tasks';
+import { ProgressUpdate, TaskBeat, TaskType } from '@features/Tasks/types/tasks';
 import AdviceDetail from './AdviceDetail';
 import DecisionDetail from './DecisionDetail';
 import MotivationDetail from './MotivationDetail';
@@ -27,12 +27,26 @@ type Props = {
       };
     }>;
     progressUpdates?: ProgressUpdate[];
+    beats?: TaskBeat[];
+    cheerTotal?: number;
+    distinctCheererCount?: number;
+    sampleCheerers?: Array<{
+      id: string;
+      name?: string;
+      photo?: string | null;
+      avatar?: string | null;
+    }>;
   };
   progressSectionRef?: RefObject<any>;
   adviceSectionRef?: RefObject<any>;
   highlightProgressSection?: boolean;
   highlightProgressUpdateId?: string;
+  highlightBeatId?: string;
   highlightCommentId?: string;
+  canViewerCheer?: boolean;
+  onCheerPress?: (beat: TaskBeat) => void;
+  onShareUpdate?: (beat: TaskBeat) => void;
+  isSendingCheer?: boolean;
 };
 
 export default function TaskDetailBody({
@@ -41,7 +55,12 @@ export default function TaskDetailBody({
   adviceSectionRef,
   highlightProgressSection,
   highlightProgressUpdateId,
+  highlightBeatId,
   highlightCommentId,
+  canViewerCheer,
+  onCheerPress,
+  onShareUpdate,
+  isSendingCheer,
 }: Props) {
   switch (task.type) {
     case 'motivation':
@@ -51,6 +70,11 @@ export default function TaskDetailBody({
           progressSectionRef={progressSectionRef}
           highlightProgressSection={highlightProgressSection}
           highlightProgressUpdateId={highlightProgressUpdateId}
+          highlightBeatId={highlightBeatId}
+          canViewerCheer={canViewerCheer}
+          onCheerPress={onCheerPress}
+          onShareUpdate={onShareUpdate}
+          isSendingCheer={isSendingCheer}
         />
       );
 

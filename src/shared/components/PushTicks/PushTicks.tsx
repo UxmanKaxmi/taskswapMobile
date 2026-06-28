@@ -4,26 +4,32 @@ import { ms, vs } from 'react-native-size-matters';
 
 import { colors } from '@shared/theme';
 import TextElement from '../TextElement/TextElement';
+import TickMark from '../TickMark';
 
 type PushTicksProps = {
   count: number;
   animateNonce?: React.Key;
   isActive?: boolean;
+  replayOnNonceChange?: boolean;
   showCount?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
-type TickMark = 'normal' | 'accent' | 'major';
+type TickMarkType = 'normal' | 'accent' | 'major';
 
 export default function PushTicks({
   count,
   animateNonce,
   isActive = true,
+  replayOnNonceChange = true,
   showCount = false,
   style,
 }: PushTicksProps) {
   const marks = useMemo(() => buildMarks(count), [count]);
   const animatedValues = useRef<Animated.Value[]>([]);
+  const previousLengthRef = useRef(0);
+  const previousNonceRef = useRef<React.Key | undefined>(animateNonce);
+  const hasAnimatedRef = useRef(false);
   const [displayCount, setDisplayCount] = useState(0);
 
   useEffect(() => {
@@ -35,40 +41,82 @@ export default function PushTicks({
   }, [marks.length]);
 
   useEffect(() => {
-    if (!marks.length) return;
-
-    animatedValues.current.forEach(value => {
-      value.stopAnimation();
-      value.setValue(0);
-    });
-
-    setDisplayCount(0);
-
-    if (!isActive) {
+    if (!marks.length) {
+      previousLengthRef.current = 0;
+      previousNonceRef.current = animateNonce;
+      hasAnimatedRef.current = false;
+      setDisplayCount(0);
       return;
     }
 
-    const animations = marks.map((_, index) =>
-      Animated.timing(animatedValues.current[index], {
+    if (!isActive) {
+      animatedValues.current.forEach(value => {
+        value.stopAnimation();
+        value.setValue(0);
+      });
+      previousLengthRef.current = 0;
+      previousNonceRef.current = animateNonce;
+      hasAnimatedRef.current = false;
+      setDisplayCount(0);
+      return;
+    }
+
+    const previousLength = previousLengthRef.current;
+    const nonceChanged = previousNonceRef.current !== animateNonce;
+    const shouldReplayAll =
+      !hasAnimatedRef.current ||
+      (replayOnNonceChange && nonceChanged && previousLength === marks.length);
+
+    if (!shouldReplayAll && marks.length <= previousLength) {
+      animatedValues.current.forEach(value => {
+        value.stopAnimation();
+        value.setValue(1);
+      });
+      previousLengthRef.current = marks.length;
+      previousNonceRef.current = animateNonce;
+      hasAnimatedRef.current = true;
+      setDisplayCount(marks.length);
+      return;
+    }
+
+    const startIndex = shouldReplayAll ? 0 : Math.min(previousLength, marks.length);
+
+    animatedValues.current.forEach((value, index) => {
+      value.stopAnimation();
+      value.setValue(index < startIndex ? 1 : 0);
+    });
+
+    setDisplayCount(startIndex);
+
+    const animations = marks.slice(startIndex).map((_, offset) => {
+      const index = startIndex + offset;
+
+      return Animated.timing(animatedValues.current[index], {
         toValue: 1,
         duration: 320,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: false,
-      }),
-    );
+      });
+    });
 
     Animated.stagger(120, animations).start();
 
-    const timers = marks.map((_, index) =>
-      setTimeout(() => {
+    const timers = marks.slice(startIndex).map((_, offset) => {
+      const index = startIndex + offset;
+
+      return setTimeout(() => {
         setDisplayCount(index + 1);
-      }, index * 120),
-    );
+      }, offset * 120);
+    });
+
+    previousLengthRef.current = marks.length;
+    previousNonceRef.current = animateNonce;
+    hasAnimatedRef.current = true;
 
     return () => {
       timers.forEach(clearTimeout);
     };
-  }, [isActive, animateNonce, marks.length]);
+  }, [isActive, animateNonce, marks.length, replayOnNonceChange]);
 
   if (!marks.length) return null;
 
@@ -81,14 +129,10 @@ export default function PushTicks({
           if (!animatedValue) return null;
 
           return (
-            <View
-              key={`${mark}-${index}`}
-              style={[styles.tickSlot, index !== marks.length - 1 && styles.tickGap]}
-            >
+            <View key={`${mark}-${index}`} style={[styles.tickSlot, index !== marks.length - 1 && styles.tickGap]}>
               <Animated.View
                 style={[
                   styles.tickBase,
-                  getTickStyle(mark),
                   {
                     height: animatedValue.interpolate({
                       inputRange: [0, 1],
@@ -97,7 +141,9 @@ export default function PushTicks({
                     opacity: animatedValue,
                   },
                 ]}
-              />
+              >
+                <TickMark color={getTickColor(mark)} height={getTickHeight(mark)} />
+              </Animated.View>
             </View>
           );
         })}
@@ -115,7 +161,7 @@ export default function PushTicks({
   );
 }
 
-function buildMarks(count: number): TickMark[] {
+function buildMarks(count: number): TickMarkType[] {
   const safeCount = Math.max(0, Math.floor(count));
   const visibleCount = Math.min(safeCount, 24);
 
@@ -129,7 +175,7 @@ function buildMarks(count: number): TickMark[] {
   });
 }
 
-function getTickHeight(mark: TickMark) {
+function getTickHeight(mark: TickMarkType) {
   switch (mark) {
     case 'major':
       return ms(16);
@@ -137,19 +183,18 @@ function getTickHeight(mark: TickMark) {
       return ms(15);
     case 'normal':
     default:
-      return ms(9);
+      return ms(12);
   }
 }
 
-function getTickStyle(mark: TickMark) {
+function getTickColor(mark: TickMarkType) {
   switch (mark) {
     case 'major':
-      return styles.tickMajor;
     case 'accent':
-      return styles.tickAccent;
+      return colors.onboardingPush;
     case 'normal':
     default:
-      return styles.tickNormal;
+      return colors.onboardingInk;
   }
 }
 
@@ -161,32 +206,17 @@ const styles = StyleSheet.create({
   },
 
   tickSlot: {
-    width: ms(4),
+    width: ms(5),
     justifyContent: 'flex-end',
     alignItems: 'center',
   },
 
   tickGap: {
-    marginRight: ms(2.2),
+    marginRight: ms(1.5),
   },
 
   tickBase: {
-    width: ms(3),
-    borderRadius: 1,
-    transform: [{ skewX: '-18deg' }],
     overflow: 'hidden',
-  },
-
-  tickNormal: {
-    backgroundColor: colors.onboardingInk,
-  },
-
-  tickAccent: {
-    backgroundColor: colors.onboardingPush,
-  },
-
-  tickMajor: {
-    backgroundColor: colors.onboardingPush,
   },
 
   pushCount: {

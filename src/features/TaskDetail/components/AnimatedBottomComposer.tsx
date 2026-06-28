@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { vs, ms } from 'react-native-size-matters';
-import { colors, spacing } from '@shared/theme';
+import { colors, platformShadow, spacing } from '@shared/theme';
 import { isAndroid } from '@shared/utils/constants';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import AppTextInput from '@shared/components/Inputs/AppTextInput';
@@ -194,13 +194,12 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
 
-    // iOS shadow
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: -4 },
-
-    // Android
-    elevation: 14,
+    ...platformShadow({
+      color: '#000',
+      opacity: 0.15,
+      radius: 12,
+      offset: { width: 0, height: -4 },
+    }),
   },
 
   input: {

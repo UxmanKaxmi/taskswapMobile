@@ -84,7 +84,6 @@ export function getTaskHints(type: TaskType): string {
       return 'No pressure. Say it as it is.';
   }
 }
-
 export function getHelperHints(type: TaskType): string {
   switch (type) {
     case 'motivation':
@@ -97,7 +96,7 @@ export function getHelperHints(type: TaskType): string {
       return 'Invite someone whose opinion you trust.';
 
     case 'advice':
-      return 'Invite someone you trust to give thoughtful advice.';
+      return 'Invite someone who gives thoughtful advice.';
 
     default:
       return 'Invite someone you trust.';

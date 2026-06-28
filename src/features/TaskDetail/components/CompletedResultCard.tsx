@@ -6,7 +6,7 @@ import SectionHeader from '@shared/components/SectionHeader/SectionHeader';
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
-import { colors, spacing } from '@shared/theme';
+import { colors, platformShadow, spacing } from '@shared/theme';
 import { getFirstName } from '@shared/utils/helperFunctions';
 import Height from '@shared/components/Spacing/Height';
 
@@ -132,11 +132,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     paddingRight: spacing.lg,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 8,
+    ...platformShadow({
+      color: '#000',
+      opacity: 0.08,
+      radius: 16,
+      offset: { width: 0, height: 10 },
+    }),
     borderWidth: 1,
     borderColor: '#E6EFE8',
   },

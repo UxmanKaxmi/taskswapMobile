@@ -1,64 +1,27 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import React, { ReactNode } from 'react';
 import Row from '@shared/components/Layout/Row';
-import Ripple from '@shared/components/Buttons/Ripple';
-import { Icon } from '@shared/components/Icons';
-import { haptics } from '@shared/utils/haptics';
-import { vs } from 'react-native-size-matters';
-import { spacing } from '@shared/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { isPROD } from '@shared/utils/constants';
+import { vs } from 'react-native-size-matters';
 import AppLogo from '@shared/components/AppLogo';
+import { isIOS } from '@shared/utils/constants';
 
 type Props = {
-  onPressSearch: () => void;
-  onPressMore?: () => void;
+  rightAccessory?: ReactNode;
 };
 
-export default function HomeHeader({ onPressSearch, onPressMore }: Props) {
+export default function HomeHeader({ rightAccessory }: Props) {
   //Safe area is needed for here for the animation.
   const insets = useSafeAreaInsets();
 
   return (
     <Row
       justify="space-between"
-      style={[
-        styles.container,
-        {
-          paddingTop: insets.top,
-        },
-      ]}
+      style={{
+        paddingTop: isIOS ? insets.top : insets.top + vs(10),
+      }}
     >
       <AppLogo size="md" align="left" />
-
-      {/* Actions */}
-      <Row gap={20}>
-        {/* <Ripple
-          onPress={() => {
-            haptics.open();
-            onPressSearch();
-          }}
-        >
-          <Icon set="ion" name="search" size={vs(15)} />
-        </Ripple> */}
-
-        {!isPROD && onPressMore && (
-          <Ripple
-            onPress={() => {
-              haptics.open();
-              onPressMore();
-            }}
-          >
-            <Icon set="ion" name="ellipsis-vertical" size={vs(12)} />
-          </Ripple>
-        )}
-      </Row>
+      {rightAccessory}
     </Row>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: spacing.md,
-  },
-});

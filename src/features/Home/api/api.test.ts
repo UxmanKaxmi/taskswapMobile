@@ -24,6 +24,10 @@ describe('home summary api', () => {
         peopleNeedYourPushToday: 4,
         replyWaitingCount: 2,
       },
+      compactStatus: {
+        streakDay: 3,
+        pushedTodayCount: 5,
+      },
       heroModule: {
         type: 'success_story',
         title: 'Big turnaround',
@@ -60,6 +64,10 @@ describe('home summary api', () => {
         peopleNeedYourPushToday: 4,
         replyWaitingCount: 2,
       },
+      compactStatus: {
+        streakDay: 3,
+        pushedTodayCount: 5,
+      },
       heroModule: raw.heroModule,
       modules: null,
       successStory: null,
@@ -80,6 +88,10 @@ describe('home summary api', () => {
     expect(normalized.summaryCounts).toEqual({
       peopleNeedYourPushToday: 6,
       replyWaitingCount: 1,
+    });
+    expect(normalized.compactStatus).toEqual({
+      streakDay: 0,
+      pushedTodayCount: 0,
     });
     expect(normalized.peopleNeedYourPushToday).toBe(6);
     expect(normalized.replyWaitingCount).toBe(1);

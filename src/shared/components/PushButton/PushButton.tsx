@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
-import { colors } from '@shared/theme';
+import { colors, platformShadow } from '@shared/theme';
 import { TaskType } from '@features/Tasks/types/tasks';
 import { haptics } from '@shared/utils/haptics';
 import ButtonBase from '../Buttons/ButtonBase';
@@ -58,7 +58,13 @@ export default function PushButton({
     const resolvedIcon = hideIcon ? null : icon ? (
       icon
     ) : isPushVariant && active ? (
-      <Icon set="ion" name="checkmark" size={15} color={colors.tactileMomentumPrimary} />
+      <Icon
+        set="fa6"
+        name="check"
+        iconStyle="solid"
+        size={15}
+        color={colors.tactileMomentumPrimary}
+      />
     ) : isPushVariant ? (
       <Icon set="ion" name="arrow-forward" size={15} color={colors.tactileMomentumSecondary} />
     ) : null;
@@ -153,9 +159,9 @@ const customSizeStyles = {
 } as const;
 
 const customTextVariants = {
-  sm: 'bodySmall',
-  md: 'body',
-  lg: 'subtitle',
+  sm: 'subtitle',
+  md: 'title',
+  lg: 'title',
 } as const;
 
 const styles = StyleSheet.create({
@@ -201,14 +207,12 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     alignSelf: 'flex-start',
     minHeight: 38,
-    shadowColor: colors.tactileMomentumSecondary,
-    shadowOpacity: 0.16,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowRadius: 0,
-    elevation: 2,
+    ...platformShadow({
+      color: colors.tactileMomentumSecondary,
+      opacity: 0.16,
+      radius: 0,
+      offset: { width: 0, height: 2 },
+    }),
   },
   pushPill: {
     backgroundColor: colors.tactileMomentumPrimary,
@@ -219,22 +223,30 @@ const styles = StyleSheet.create({
     borderColor: colors.tactileMomentumSecondary,
     shadowOpacity: 0,
     shadowRadius: 0,
+    boxShadow: 'none',
     elevation: 0,
   },
   cheerPill: {
     backgroundColor: '#FFFFFF',
     borderColor: colors.border,
-    shadowColor: colors.border,
+    ...platformShadow({
+      color: colors.border,
+      opacity: 0.16,
+      radius: 0,
+      offset: { width: 0, height: 2 },
+    }),
   },
   cheerActive: {
     shadowOpacity: 0,
     shadowRadius: 0,
+    boxShadow: 'none',
     elevation: 0,
   },
   pillPressed: {
     transform: [{ translateY: 2 }],
     shadowOpacity: 0,
     shadowRadius: 0,
+    boxShadow: 'none',
     elevation: 0,
   },
   contentRow: {

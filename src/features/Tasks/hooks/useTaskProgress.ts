@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { buildQueryKey } from '@shared/constants/queryKeys';
+import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
 import { createTaskProgressUpdate } from '../api/taskApi';
 
 export function useCreateTaskProgressUpdate(taskId: string) {
@@ -19,7 +19,9 @@ export function useCreateTaskProgressUpdate(taskId: string) {
 
       queryClient.invalidateQueries({ queryKey: buildQueryKey.taskById(taskId) });
       queryClient.invalidateQueries({ queryKey: buildQueryKey.tasks() });
-      queryClient.invalidateQueries({ queryKey: buildQueryKey.homeSummary() });
+      // Bare prefix — the summary is keyed by utc offset, so homeSummary() (no
+      // offset) would not match and the refetch would never fire.
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.HomeSummary] });
     },
   });
 }
