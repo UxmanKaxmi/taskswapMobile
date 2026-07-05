@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import Icon from '@shared/components/Icons/Icon'; // ✅ your custom Icon component
 import HomeScreen from '@features/Home/screens/HomeScreen';
-import AddTaskScreen from '@features/Tasks/screens/AddTaskScreen';
+import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { colors, platformShadow } from '@shared/theme';
 import AnimatedTabIcon from '@shared/components/AnimatedTabBarIcon/AnimatedTabBarIcon';
@@ -168,7 +168,7 @@ export default function BottomTabsAndroid({ route }: any) {
               </TouchableOpacity>
             ),
           }}
-          component={AddTaskScreen}
+          component={AddTaskNavigator}
         />
         <Tab.Screen
           name="Notification"

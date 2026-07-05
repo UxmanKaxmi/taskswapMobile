@@ -34,6 +34,7 @@ Rules:
 | 2026-07-05 | `src/shared/components/{AnimatedCard,Greeting,HeadingText,TypeTag}/`, `Layout/AnimatedBackground.tsx`, `PushButton/PushButton.types.ts`, `theme/types.ts`, `utils/pingServer.ts` | shared | Unused shared components/utils from the old design; no importers. | — | deleted | |
 | 2026-07-05 | `src/features/{Recommendation,Shadow,NewFeature}/` | feature dir | Empty scaffolded directories, never implemented. | — | deleted | |
 | 2026-07-05 | `src/assets/images/slider{1,2,3}.png` | asset | Old swiper-based intro images; swiper dependency also removed. | Current IntroScreen | deleted | |
+| 2026-07-05 | `src/features/Tasks/screens/AddTaskScreen.tsx` + `components/{ListTaskOptionSelector,TaskTypeSelector}.tsx` | screen/component | Legacy single-screen add-task flow. Only referenced as a never-rendered Android tab placeholder — both platforms already open the multi-screen AddTaskNavigator via `checkAuthThenNavigate('AddTask')`. Its description input was commented out (broken). | `@features/AddTask/navigation/AddTaskNavigator` | deleted | Android tab placeholder now points at AddTaskNavigator, matching iOS. |
 
 ## Removal Checklist
 
