@@ -11,9 +11,6 @@ type Props = PropsWithChildren<{
 
 const GRADIENTS: Record<GoalType, string[]> = {
   motivation: [colors.motivationIconBackground, colors.motivationBg],
-  advice: [colors.adviceIconBackground, colors.adviceBg],
-  decision: [colors.decisionIconBackground, colors.decisionBg],
-  reminder: [colors.reminderIconBackground, colors.reminderBg],
 };
 
 export function GoalThemeContainer({ type, children }: Props) {

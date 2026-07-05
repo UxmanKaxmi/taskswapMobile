@@ -5,7 +5,6 @@ import {
   HomeSummaryApiResponse,
   HomeSummaryCounts,
   HomeSummaryResponse,
-  ReminderNoteDTO,
 } from '../types/home';
 import { buildRoute } from '@shared/api/apiRoutes';
 
@@ -48,19 +47,6 @@ export function normalizeHomeSummaryResponse(
     replyWaitingCount: summaryCounts.replyWaitingCount,
     featuredStory: response.featuredStory ?? null,
   };
-}
-
-export async function sendReminderNoteAPI(taskId: string, message: string) {
-  const res = await api.post<ReminderNoteDTO>(buildRoute.sendReminder(taskId), {
-    message,
-  });
-  return res.data;
-}
-
-export async function getRemindersByGoalAPI(taskId: string) {
-  console.log('[🔄 API CALL] Fetching task by ID:', taskId); // ✅ Add this
-  const res = await api.get<ReminderNoteDTO[]>(buildRoute.getReminders(taskId));
-  return res.data;
 }
 
 export async function getGoalByIdAPI(taskId: string, config?: CustomAxiosRequestConfig) {

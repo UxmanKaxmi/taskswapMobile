@@ -25,7 +25,7 @@ export default function GoalStatusRow({
   taskType,
 }: Props) {
   const ctaColor = getCtaColor(taskType);
-  const ctaLabel = taskType === 'decision' ? "I've decided" : 'Mark complete';
+  const ctaLabel = 'Mark complete';
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -58,18 +58,7 @@ export default function GoalStatusRow({
 }
 
 function getCtaColor(taskType?: GoalType) {
-  switch (taskType) {
-    case 'decision':
-      return colors.decisionBgHardest;
-    case 'reminder':
-      return colors.reminderBgHardest;
-    case 'motivation':
-      return colors.motivationBgHardest;
-    case 'advice':
-      return colors.adviceBgHardest;
-    default:
-      return colors.primary;
-  }
+  return taskType === 'motivation' ? colors.motivationBgHardest : colors.primary;
 }
 const styles = StyleSheet.create({
   container: {

@@ -44,3 +44,4 @@ Rules:
 3. Run `rg` for the old screen/component name and confirm no live references remain.
 4. Run typecheck or the relevant test command.
 5. Mark the entry as `deleted` once the cleanup is complete.
+| 2026-07-06 | Advice/Decision/Reminder goal types (end-to-end) | feature | App is motivation-only. Creation screens were already unreachable; display components, hooks (useVote, useComment, reminder notes), modals, feature flags, and client route/query-key builders removed. 30 files deleted, ~20 edited. | Motivation-only flows | deleted | Server contract untouched (`/tasks`, `task-*` notification types, payload fields). Legacy notifications fall back to GenericNotification; legacy non-motivation goals are skipped in feeds. Server-side cleanup (vote/comment/reminder endpoints, reminder setTimeout scheduling) tracked separately. |

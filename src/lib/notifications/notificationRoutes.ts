@@ -209,11 +209,11 @@ export function getNotificationRoute(data: unknown): NotificationRoute {
         scrollTo: 'progress',
       });
 
+    // Legacy comment notifications still open the goal, minus the removed
+    // comment-highlight behaviour.
     case 'comment':
     case 'commentmention':
-      return buildGoalDetailRouteOrInbox(payload, taskId, {
-        highlightCommentId: payload.commentId ?? undefined,
-      });
+      return buildGoalDetailRouteOrInbox(payload, taskId);
 
     default:
       if (!taskId) {

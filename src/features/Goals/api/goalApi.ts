@@ -44,7 +44,7 @@ export async function getGoalsPage(
  */
 export async function updateGoal(
   id: string,
-  data: Partial<Pick<CreateGoalPayload, 'text' | 'type' | 'remindAt' | 'options' | 'deliverAt'>>,
+  data: Partial<Pick<CreateGoalPayload, 'text' | 'type' | 'deliverAt'>>,
 ): Promise<Goal> {
   const response = await api.patch(buildRoute.task(id), data);
   return response.data;
@@ -65,24 +65,6 @@ export async function createGoalProgressUpdate(
  */
 export async function deleteGoal(id: string): Promise<void> {
   await api.delete(buildRoute.task(id));
-}
-
-/** ---------- Votes ---------- */
-
-export type VotePayload = {
-  nextOption: string;
-  prevOption?: string;
-};
-
-export async function voteOnGoal(taskId: string, payload: VotePayload) {
-  // ✅ sends { nextOption, prevOption }
-  const res = await api.post(buildRoute.castVote(taskId), payload);
-  return res.data;
-}
-
-export async function getVotesForGoal(taskId: string) {
-  const res = await api.get(buildRoute.getVotes(taskId));
-  return res.data as Record<string, number>;
 }
 
 export function increaseGoalViewCount(taskId: string) {

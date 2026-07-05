@@ -1,7 +1,6 @@
 export enum QueryKeys {
   Goals = 'tasks',
   Goal = 'task',
-  ReminderNotes = 'reminders',
   User = 'user',
   Auth = 'auth',
   Followers = 'followers',
@@ -12,8 +11,6 @@ export enum QueryKeys {
   HomeSummary = 'home-summary',
   SearchFriends = 'search-friends',
   FriendProfile = 'friend-profile',
-  Votes = 'votes',
-  Comments = 'comments',
   ReferralLink = 'referral-link',
   Push = 'push',
   BlockedUsers = 'blocked-users',
@@ -28,7 +25,6 @@ export const buildQueryKey = {
     return [QueryKeys.Goals];
   },
   taskById: (taskId: string) => [QueryKeys.Goal, taskId],
-  remindersForGoal: (taskId: string) => [QueryKeys.ReminderNotes, taskId],
   user: () => [QueryKeys.User],
   auth: () => [QueryKeys.Auth],
   followers: () => [QueryKeys.Followers],
@@ -43,8 +39,6 @@ export const buildQueryKey = {
     includeFollowed,
   ],
   friendProfile: (id: string) => [QueryKeys.FriendProfile, id],
-  votesForGoal: (taskId: string) => [QueryKeys.Votes, taskId],
-  commentsForGoal: (taskId: string) => [QueryKeys.Comments, taskId],
   referralLink: () => [QueryKeys.ReferralLink],
   blockedUsers: () => [QueryKeys.BlockedUsers],
 

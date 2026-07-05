@@ -59,18 +59,6 @@ const authCopyMap: Record<
     cta: 'Log In to Support',
   },
 
-  Advice: {
-    title: 'Log In to Suggest Advice',
-    subtitle: 'Log in to share your advice and return right where you left off.',
-    cta: 'Log In to Send',
-  },
-
-  Reminder: {
-    title: 'Log In to Send a Reminder',
-    subtitle: 'Log in to set a reminder and get updates when it’s done.',
-    cta: 'Log In to Remind',
-  },
-
   Push: {
     title: 'Log In to Send a Push',
     subtitle: 'Log in to send a quick push of motivation. It only takes a second.',
@@ -83,22 +71,10 @@ const authCopyMap: Record<
     cta: 'Log In to Push',
   },
 
-  guest_advice: {
-    title: 'Stuck on something?',
-    subtitle: 'Ask people you trust for a fresh perspective.',
-    cta: 'Log In to Ask',
-  },
-
   guest_accountability: {
     title: 'Keep momentum with support',
     subtitle: 'Check in and let friends keep you on track.',
     cta: 'Log In to Stay Accountable',
-  },
-
-  Decision: {
-    title: 'Log In to Help Them Decide',
-    subtitle: 'Log in to vote or share input and help them move forward.',
-    cta: 'Log In to Respond',
   },
 };
 

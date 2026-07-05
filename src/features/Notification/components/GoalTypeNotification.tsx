@@ -41,11 +41,12 @@ const taskTypeCopy: Record<
 };
 
 export default function GoalTypeNotification({ item, onPress }: Props) {
-  const taskType = item.taskType || 'advice';
+  const taskType = item.taskType || 'motivation';
   const isMotivation = taskType === 'motivation';
 
-  const iconName = typeIcons[taskType];
-  const typeColor = getTypeColor(taskType);
+  // Legacy notifications may still carry advice/decision/reminder task types.
+  const iconName = isMotivation ? typeIcons.motivation : 'bell';
+  const typeColor = isMotivation ? getTypeColor('motivation') : colors.muted;
 
   const copy = taskTypeCopy[taskType] ?? {
     verb: 'needs your help',

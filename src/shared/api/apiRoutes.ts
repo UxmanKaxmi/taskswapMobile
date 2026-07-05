@@ -4,12 +4,8 @@
 export enum ApiRoute {
   TASKS = '/tasks',
   USERS = '/users',
-  REMINDER_NOTES = '/reminderNote',
   NOTIFICATION = '/notification',
-  VOTE = '/vote',
-  COMMENTS = '/comments',
   REFERRALS = '/referrals',
-  FEATURE_FLAGS = '/features',
   FEEDBACK = '/feedback',
   BEATS = '/beats',
 }
@@ -22,7 +18,6 @@ export const buildRoute = {
   taskProgress: (id: string) => `${ApiRoute.TASKS}/${id}/progress`,
   completeGoal: (id: string) => `${ApiRoute.TASKS}/${id}/complete`,
   uncompleteGoal: (id: string) => `${ApiRoute.TASKS}/${id}/incomplete`,
-  featureFlags: () => `${ApiRoute.FEATURE_FLAGS}`,
   submitFeedback: () => `${ApiRoute.FEEDBACK}`,
 
   // 📌 User Routes
@@ -39,10 +34,6 @@ export const buildRoute = {
   friendProfile: (id: string) => `${ApiRoute.USERS}/${id}/profile`,
   incrementGoalViews: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/views`,
 
-  // 📌 Reminder Note Routes (via Goal)
-  sendReminder: (taskId: string) => `${ApiRoute.REMINDER_NOTES}/${taskId}/remind`,
-  getReminders: (taskId: string) => `${ApiRoute.REMINDER_NOTES}/${taskId}/reminders`,
-
   // 📌 Follow Routes
   //   follow: () => `${ApiRoute.USERS}/follow`,
   //   unfollow: () => `${ApiRoute.USERS}/unfollow`,
@@ -55,16 +46,6 @@ export const buildRoute = {
   markNotificationAsReadById: (notificationId: string) =>
     `${ApiRoute.NOTIFICATION}/${notificationId}/read`,
   markNotificationBatch: () => `${ApiRoute.NOTIFICATION}/mark-many-read`,
-
-  // 📌 Vote Routes
-  castVote: (taskId: string) => `${ApiRoute.VOTE}/tasks/${taskId}/vote`,
-  getVotes: (taskId: string) => `${ApiRoute.VOTE}/tasks/${taskId}/votes`,
-
-  // 📌 Comment Routes
-  getComments: (taskId: string) => `${ApiRoute.COMMENTS}/${taskId}`,
-  addComment: () => `${ApiRoute.COMMENTS}`,
-  likeComment: (commentId: string) => `${ApiRoute.COMMENTS}/${commentId}/like`,
-  toggleCommentLike: () => `${ApiRoute.COMMENTS}/like`,
 
   // 📌 Referral / Invite Routes
   referralLink: (channel?: 'sms' | 'whatsapp' | 'email') =>

@@ -41,20 +41,7 @@ export function GoalDetailHeader({ task }: Props) {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const { user } = useAuth();
 
-  const getTypeColor = (type: GoalType) => {
-    switch (type) {
-      case 'advice':
-        return colors.adviceBgHardest;
-      case 'reminder':
-        return colors.reminderBgHardest;
-      case 'motivation':
-        return colors.motivationBgHardest;
-      case 'decision':
-        return colors.decisionBgHardest;
-      default:
-        return colors.muted;
-    }
-  };
+  const getTypeColor = (_type: GoalType) => colors.motivationBgHardest;
 
   return (
     <Row align="center" justify="flex-start">

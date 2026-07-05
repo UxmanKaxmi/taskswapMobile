@@ -601,16 +601,11 @@ function buildGoalFingerprint(task: Goal | null) {
     task.name ?? '',
     task.hasPushed ? '1' : '0',
     String(task.pushCount ?? 0),
-    String(task.commentsCount ?? 0),
-    String(task.reminderNoteCount ?? 0),
-    String(task.voteCount ?? 0),
     String(task.viewCount ?? 0),
-    task.hasReminded ? '1' : '0',
     'completedAt' in task
       ? String((task as { completedAt?: string | null }).completedAt ?? '')
       : '',
     'completed' in task ? String((task as { completed?: boolean }).completed ?? '') : '',
-    task.votedOption ? String(task.votedOption) : '',
   ].join('|');
 }
 

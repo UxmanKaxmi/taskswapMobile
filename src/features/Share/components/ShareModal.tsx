@@ -35,30 +35,18 @@ type Props = {
 
 const TYPE_LABELS: Record<GoalType, string> = {
   motivation: 'Motivation',
-  advice: 'Advice',
-  decision: 'Decision',
-  reminder: 'Reminder',
 };
 
 const MODAL_SUBTITLES: Record<GoalType, string> = {
   motivation: 'Share it so friends can push you and keep you honest.',
-  advice: 'Share it so friends can weigh in with advice you trust.',
-  decision: 'Share it so friends can help you decide with confidence.',
-  reminder: 'Share it so friends can keep you on time.',
 };
 
 const POSTER_SUBTITLES: Record<GoalType, string> = {
   motivation: 'Give me a push.',
-  advice: 'What would you do?',
-  decision: 'Help me make a decision?',
-  reminder: 'Remind me when it’s time.',
 };
 
 const SHARE_BUTTON_LABELS: Record<GoalType, string> = {
   motivation: 'Share to get pushes',
-  advice: 'Share to get advice',
-  decision: 'Share to get help',
-  reminder: 'Share reminder',
 };
 
 const SHARE_MESSAGE = (text: string, name?: string) =>

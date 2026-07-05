@@ -77,8 +77,6 @@ export type AppStackParamList = {
     | {
         task?: Goal;
         taskId?: string;
-        highlightCommentId?: string;
-        openAdviceComposer?: boolean;
         openShareModal?: boolean;
         scrollTo?: 'progress';
         openUpdateComposer?: boolean;
