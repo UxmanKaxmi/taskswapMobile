@@ -27,7 +27,7 @@ import { TaskTypeEnum } from '@features/Tasks/types/tasks';
 import { useFollowers } from '@features/User/hooks/useFollowers';
 import { useFollowing } from '@features/User/hooks/useFollowing';
 import { getButtonText, getTaskPlaceholder, getTitle } from '../utils/taskCopy';
-import DecisionChoicesInput from '../components/DecisionChoicesInput.tsx';
+import DecisionChoicesInput from '../components/DecisionChoicesInput';
 import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton.tsx';
 import { isAndroid } from '@shared/utils/constants.ts';
 import { useAuth } from '@features/Auth/AuthProvider';

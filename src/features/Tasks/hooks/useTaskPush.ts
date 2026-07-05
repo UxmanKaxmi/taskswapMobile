@@ -9,7 +9,7 @@ import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
 import { getTaskPushes, toggleTaskPush } from '../api/taskPush.api';
 import { useAuth } from '@features/Auth/AuthProvider';
 import type { HomeSummaryResponse } from '@features/Home/types/home';
-import type { TaskPage } from '@features/tasks/api/taskApi';
+import type { TaskPage } from '@features/Tasks/api/taskApi';
 
 // ✅ Fetch pushes for a task
 export function useTaskPushes(taskId: string) {

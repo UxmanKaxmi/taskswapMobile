@@ -14,9 +14,5 @@
       "@navigation/*": ["navigation/*"]
     }
   },
-  "exclude": [
-    "__tests__",
-    "src/**/*.test.ts",
-    "src/features/TaskDetail/screens/TaskDetailScreenOld.tsx"
-  ]
+  "exclude": ["__tests__", "src/**/*.test.ts"]
 }
