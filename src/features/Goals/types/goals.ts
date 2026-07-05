@@ -37,19 +37,15 @@ export type GoalBeat = BeatCheerState & {
   createdAt: string;
 };
 
-// ✅ Define all possible task types
-export type GoalType = 'reminder' | 'decision' | 'motivation' | 'advice';
+// ✅ The app is motivation-only; the server may still return legacy types.
+export type GoalType = 'motivation';
 
 export enum GoalTypeEnum {
-  Reminder = 'reminder',
-  Decision = 'decision',
-  Advice = 'advice',
   Motivation = 'motivation',
 }
 
 // ✅ Full Goal object (received from API)
 export type Goal = {
-  votedOption?: any;
   completedAt?: string | null;
   completed?: boolean;
   id: string;
@@ -57,15 +53,10 @@ export type Goal = {
   type: GoalType;
   createdAt: string;
   userId: string;
-  remindAt?: string; // for reminder tasks
-  options?: string[]; // for decision tasks
-  deliverAt?: string; // for motivation tasks
+  deliverAt?: string;
   avatar?: string;
   name?: string;
   feeling?: FeelingValue;
-  hasAdvised?: boolean;
-  hasVoted?: boolean;
-  voteCount?: number;
   helpers?: Array<
     string | { id: string; name?: string; photo?: string | null; avatar?: string | null }
   >;
@@ -78,16 +69,7 @@ export type Goal = {
   pushCount?: number;
   hasPushed?: boolean;
   viewCount?: number;
-  commentsCount?: number;
-  reminderNoteCount?: number;
-  hasReminded?: boolean;
   pushHistory?: GoalPushEvent[];
-  votes?: {
-    [option: string]: {
-      count: number;
-      preview: Voter[];
-    };
-  };
 };
 
 export type ProgressUpdate = {
@@ -101,8 +83,6 @@ export interface GoalPayload {
   text: string;
   type: GoalType;
   feeling?: FeelingValue;
-  remindAt?: string;
-  options?: string[];
   deliverAt?: string;
   avatar?: string;
   name?: string;
@@ -115,40 +95,11 @@ export interface UpdateGoalInput {
   data: Partial<{
     text: string;
     type: GoalType;
-    remindAt?: string;
-    options?: string[];
     deliverAt?: string | null;
     avatar?: string;
     name?: string;
     helpers?: string[]; // ✅ unified name with backend
   }>;
-}
-
-export type Voter = {
-  id: string;
-  name: string;
-  photo?: string;
-};
-
-// comment.ts
-export type GoalComment = {
-  id: string;
-  taskId: string;
-  userId: string;
-  text: string;
-  createdAt: string;
-  updatedAt?: string;
-  user: { id: string; name: string; photo?: string };
-
-  // 👍 likes
-  likesCount: number; // total hearts
-  likedByMe: boolean; // current user liked?
-};
-
-// For toggling like
-export interface ToggleCommentLikePayload {
-  commentId: string;
-  like: boolean; // true = like, false = unlike
 }
 
 export type GoalPush = {

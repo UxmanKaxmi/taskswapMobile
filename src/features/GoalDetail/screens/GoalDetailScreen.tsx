@@ -1,6 +1,6 @@
 // src/features/tasks/screens/GoalDetailScreen.tsx
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
@@ -13,23 +13,13 @@ import { getGoalByIdAPI } from '@features/Home/api/api';
 import { GoalDetailHeader } from '../components/GoalDetailHeader';
 import MotivationStatsHeader from '../components/MotivationStatsHeader';
 import GoalBackground from '@features/AddGoal/components/GoalBackground';
-import {
-  getGoalBackgroundVisual,
-  getTypeVisual,
-  getTypeColor,
-  typeBackgroundsHard,
-  typeBackgroundsHardest,
-  typeIcons,
-} from '@shared/utils/typeVisuals';
-import GoalCardGradient from '@features/Home/components/GoalCardGradient';
-import { cardStyles } from '@features/Home/components/styles';
+import { getGoalBackgroundVisual, getTypeVisual } from '@shared/utils/typeVisuals';
 import { Height } from '@shared/components/Spacing';
 import { ms, vs } from 'react-native-size-matters';
 import { GoalThemeContainer } from '../components/GoalThemeContainer';
 import GoalDetailBody from '../components/GoalDetailBody';
 import GoalDetailCaption from '../components/GoalDetailCaption';
-import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
-import { colors, spacing } from '@shared/theme';
+import { colors, platformShadow, spacing } from '@shared/theme';
 import {
   isAndroid,
   PROGRESS_UPDATE_COOLDOWN_LABEL,
@@ -44,12 +34,7 @@ import ViewHelpersModal from '../components/ViewHelpersModal';
 import SelectHelpersModal from '@features/AddGoal/components/SelectHelpersModal';
 import { usePushInteraction } from '@features/Home/hooks/usePushInteraction';
 import { useGoalPushes, useToggleGoalPush } from '@features/Goals/hooks/useGoalPush';
-import {
-  formatViewCount,
-  getFirstName,
-  stripOuterQuotes,
-  toShortName,
-} from '@shared/utils/helperFunctions';
+import { getFirstName, stripOuterQuotes, toShortName } from '@shared/utils/helperFunctions';
 import { ProgressUpdate, GoalBeat, GoalTypeEnum } from '@features/Goals/types/goals';
 import AnimatedBottomButtonWithHeader, {
   BOTTOM_BUTTON_HEIGHT,
@@ -57,23 +42,15 @@ import AnimatedBottomButtonWithHeader, {
 import GoalStatusRow from '../components/GoalStatusRow';
 import { useCompleteGoal } from '@features/Home/hooks/useCompleteGoal';
 import { showToast } from '@shared/utils/toast';
-import { useAddComment } from '@features/Goals/hooks/useComment';
-import Animated, {
-  useSharedValue,
-  withTiming,
-  useAnimatedStyle,
-  interpolate,
-} from 'react-native-reanimated';
-import AnimatedAdviceMorph from '../components/AnimatedAdviceMorph';
+import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { queryClient } from '@lib/react-query/client';
 import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
-import ReminderWhenPicker from '@features/AddGoal/components/ReminderWhenPicker';
-import { useAddReminder } from '@features/Home/hooks/useAddReminder';
 import { useModal } from '@shared/components/ModalProvider';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Ripple from '@shared/components/Buttons/Ripple';
 import Icon from '@shared/components/Icons/Icon';
 import ShareModal from '@features/Share/components/ShareModal';
+import AppModal from '@shared/components/AppModal/AppModal';
 import { deleteGoal } from '@features/Goals/api/goalApi';
 import { api } from '@shared/api/axios';
 import { buildRoute } from '@shared/api/apiRoutes';
@@ -83,6 +60,9 @@ import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import EmptyState from '@features/Empty/EmptyState';
 import CompletionBurst from '../components/CompletionBurst';
 import { useSendCheer } from '@features/Goals/hooks/useGoalCheer';
+import { useBlockUser, useReportTask } from '@features/Reports';
+
+const TASK_MENU_WIDTH = ms(216);
 
 export default function GoalDetailScreen({
   route,
@@ -91,7 +71,6 @@ export default function GoalDetailScreen({
   const {
     task: initialGoal,
     taskId,
-    highlightCommentId,
     scrollTo,
     openUpdateComposer,
     progressUpdateId,
@@ -99,12 +78,8 @@ export default function GoalDetailScreen({
     highlightBeatId,
   } = route.params ?? {};
   const resolvedGoalId = taskId ?? initialGoal?.id;
-  const openAdviceComposer =
-    route.params?.openAdviceComposer || Boolean((route.params?.task as any)?.openAdviceComposer);
   const [showHelperModal, setShowHelperModal] = React.useState(false);
   const [showAddHelperModal, setShowAddHelperModal] = React.useState(false);
-  const [adviceText, setAdviceText] = React.useState('');
-  const [consumedAutoOpen, setConsumedAutoOpen] = React.useState(false);
   const [consumedAutoShare, setConsumedAutoShare] = React.useState(false);
   const [shareGoal, setShareGoal] = useState<ShareGoal | null>(null);
   const [shareVisible, setShareVisible] = useState(false);
@@ -112,38 +87,36 @@ export default function GoalDetailScreen({
   const [progressSectionHighlighted, setProgressSectionHighlighted] = useState(false);
   const [completionBurstKey, setCompletionBurstKey] = useState(0);
   const scrollViewRef = useRef<any>(null);
+  const taskMenuButtonRef = useRef<any>(null);
   const progressSectionRef = useRef<any>(null);
-  const adviceSectionRef = useRef<any>(null);
   const handledProgressScrollRef = useRef(false);
   const handledProgressComposerRef = useRef(false);
-  const handledAdviceScrollRef = useRef(false);
+  const { width: windowWidth } = useWindowDimensions();
+  const [taskMenuVisible, setTaskMenuVisible] = useState(false);
+  const [taskMenuAnchor, setTaskMenuAnchor] = useState({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
 
   useEffect(() => {
     handledProgressScrollRef.current = false;
     handledProgressComposerRef.current = false;
-    handledAdviceScrollRef.current = false;
     setProgressSectionHighlighted(false);
-  }, [
-    resolvedGoalId,
-    scrollTo,
-    openUpdateComposer,
-    progressUpdateId,
-    beatId,
-    highlightBeatId,
-    highlightCommentId,
-  ]);
+  }, [resolvedGoalId, scrollTo, openUpdateComposer, progressUpdateId, beatId, highlightBeatId]);
 
   const { user } = useAuth();
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
-  const { openModal, openReminderMessageSheet, openShareUpdateSheet, openCheerSheet } = useModal();
+  const { openModal, openShareUpdateSheet, openCheerSheet, openReportTaskSheet } = useModal();
 
   const { data: friends = [] } = useFollowers();
 
-  const [showCTA, setShowCTA] = React.useState(false);
   const { data: pushData } = useGoalPushes(resolvedGoalId ?? '');
-  const addComment = useAddComment(resolvedGoalId ?? '');
   const shareProgressUpdate = useCreateGoalProgressUpdate(resolvedGoalId ?? '');
   const sendCheer = useSendCheer(resolvedGoalId ?? '');
+  const reportTask = useReportTask();
+  const blockUser = useBlockUser();
   const { mutate: togglePush, isPending } = useToggleGoalPush(resolvedGoalId ?? '');
   const qc = useQueryClient();
 
@@ -155,8 +128,6 @@ export default function GoalDetailScreen({
       qc.invalidateQueries({ queryKey: buildQueryKey.taskById(resolvedGoalId) });
     }, [qc, resolvedGoalId]),
   );
-
-  const adviceMorph = useSharedValue(0); // 0 = button, 1 = composer
 
   const {
     data: taskData,
@@ -209,17 +180,11 @@ export default function GoalDetailScreen({
   const [, setCooldownTick] = React.useState(0);
   React.useEffect(() => {
     if (!isShareUpdateCoolingDown) return;
-    const interval = setInterval(() => setCooldownTick(t => t + 1), 1000);
-    return () => clearInterval(interval);
+    const interval = globalThis.setInterval(() => setCooldownTick(t => t + 1), 1000);
+    return () => globalThis.clearInterval(interval);
   }, [isShareUpdateCoolingDown, latestProgressUpdate?.createdAt]);
-  const hasVoted = task?.hasVoted;
-  const hasReminded = task?.hasReminded;
   const canViewerCheer = Boolean(hasPushed && !isOwner && !isCompleted);
   const resolvedHighlightBeatId = highlightBeatId ?? beatId ?? progressUpdateId;
-
-  const { emoji } = getTypeVisual(task?.type ?? GoalTypeEnum.Advice);
-
-  const { mutate: addReminder } = useAddReminder(task?.id ?? '');
 
   const { mutate: completeGoal } = useCompleteGoal();
   const openHelpersSheet = useCallback(() => {
@@ -340,56 +305,130 @@ export default function GoalDetailScreen({
     })();
   }, [task?.id, isDeleting, navigation, qc]);
 
-  const handleOpenGoalMenu = useCallback(() => {
-    if (!task?.id) return;
+  const handleReportTask = useCallback(() => {
+    if (!task?.id || !task?.userId) return;
+    if (!checkAuthThenNavigate(undefined, undefined, { authContext: 'Report' })) return;
 
-    Alert.alert('Goal options', '', [
-      {
-        text: 'Delete task',
-        style: 'destructive',
-        onPress: () => {
-          showConfirmAlert({
-            title: 'Delete task?',
-            message: 'This action cannot be undone.',
-            confirmText: 'Delete',
-            destructive: true,
-            onConfirm: handleDeleteGoal,
-          });
-        },
-      },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  }, [handleDeleteGoal, task?.id]);
-
-  const openReminderComposer = React.useCallback(() => {
-    if (!task) return;
-
-    openReminderMessageSheet({
-      taskName: task.name || 'Someone',
-      taskText: task.text,
-      onSend: msg =>
+    openReportTaskSheet({
+      ownerName: task.name,
+      taskText: stripOuterQuotes(task.text),
+      onSubmit: (reason, details) =>
         new Promise<void>((resolve, reject) => {
-          addReminder(msg, {
+          reportTask.mutate(
+            {
+              taskId: task.id,
+              reportedUserId: task.userId,
+              reason,
+              details,
+            },
+            {
+              onSuccess: () => {
+                showToast({
+                  type: 'success',
+                  title: 'Report submitted',
+                  message: 'Thanks. We will review this task.',
+                });
+                resolve();
+                // The task is now hidden for the reporter (cache removed in the
+                // hook); leave the detail screen so they don't sit on hidden content.
+                if (navigation.canGoBack()) navigation.goBack();
+              },
+              onError: (err: any) => {
+                const apiMessage = err?.response?.data?.message || err?.response?.data?.error;
+                showToast({
+                  type: 'error',
+                  title: 'Report not sent',
+                  message: apiMessage || 'Could not submit this report. Try again.',
+                });
+                reject(err);
+              },
+            },
+          );
+        }),
+    });
+  }, [checkAuthThenNavigate, openReportTaskSheet, reportTask, task]);
+
+  const handleBlockUser = useCallback(() => {
+    if (!task?.userId) return;
+    if (!checkAuthThenNavigate(undefined, undefined, { authContext: 'Block' })) return;
+
+    showConfirmAlert({
+      title: `Block ${toShortName(task.name || 'this user')}?`,
+      message: 'You will stop seeing their tasks and profile activity.',
+      confirmText: 'Block',
+      destructive: true,
+      onConfirm: () => {
+        blockUser.mutate(
+          { userId: task.userId },
+          {
             onSuccess: () => {
               showToast({
                 type: 'success',
-                title: 'Sent 🎉',
-                message: 'Your reminder has been sent!',
+                title: 'User blocked',
+                message: 'Their tasks will be hidden from your feed.',
               });
-              resolve();
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              }
             },
             onError: (err: any) => {
+              const apiMessage = err?.response?.data?.message || err?.response?.data?.error;
               showToast({
                 type: 'error',
-                title: 'Error',
-                message: err?.response?.data?.error || 'Failed to send reminder.',
+                title: 'Could not block user',
+                message: apiMessage || 'Please try again in a moment.',
               });
-              reject(err);
             },
-          });
-        }),
+          },
+        );
+      },
     });
-  }, [task, addReminder, openReminderMessageSheet]);
+  }, [blockUser, checkAuthThenNavigate, navigation, task?.name, task?.userId]);
+
+  const closeTaskMenu = useCallback(() => {
+    setTaskMenuVisible(false);
+  }, []);
+
+  const handleOpenGoalMenu = useCallback(() => {
+    if (!task?.id) return;
+
+    const showMenu = (anchor = taskMenuAnchor) => {
+      setTaskMenuAnchor(anchor);
+      setTaskMenuVisible(true);
+    };
+
+    if (!taskMenuButtonRef.current?.measureInWindow) {
+      showMenu();
+      return;
+    }
+
+    taskMenuButtonRef.current.measureInWindow(
+      (x: number, y: number, width: number, height: number) => {
+        showMenu({ x, y, width, height });
+      },
+    );
+  }, [task?.id, taskMenuAnchor]);
+
+  const handleDeleteTaskOption = useCallback(() => {
+    closeTaskMenu();
+    showConfirmAlert({
+      title: 'Delete task?',
+      message: 'This action cannot be undone.',
+      confirmText: 'Delete',
+      destructive: true,
+      onConfirm: handleDeleteGoal,
+    });
+  }, [closeTaskMenu, handleDeleteGoal]);
+
+  const handleReportTaskOption = useCallback(() => {
+    closeTaskMenu();
+    handleReportTask();
+  }, [closeTaskMenu, handleReportTask]);
+
+  const handleBlockUserOption = useCallback(() => {
+    closeTaskMenu();
+    handleBlockUser();
+  }, [closeTaskMenu, handleBlockUser]);
 
   const openShareUpdateComposer = React.useCallback(() => {
     if (!task || isCompleted) return;
@@ -543,49 +582,6 @@ export default function GoalDetailScreen({
     };
   }, [scrollTo, task]);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    if (handledAdviceScrollRef.current) return;
-    if (!highlightCommentId) return;
-    if (!task) return;
-
-    const measureAndScroll = () => {
-      if (cancelled) return;
-
-      const sectionRef = adviceSectionRef.current;
-      const scrollNode = scrollViewRef.current?.getNativeScrollRef?.() ?? scrollViewRef.current;
-
-      if (!sectionRef || !scrollNode || typeof sectionRef.measureLayout !== 'function') {
-        globalThis.requestAnimationFrame(measureAndScroll);
-        return;
-      }
-
-      sectionRef.measureLayout(
-        scrollNode,
-        (_x, y) => {
-          if (cancelled) return;
-          handledAdviceScrollRef.current = true;
-          scrollViewRef.current?.scrollTo?.({ y: Math.max(0, y - 24), animated: true });
-        },
-        () => {
-          globalThis.requestAnimationFrame(measureAndScroll);
-        },
-      );
-    };
-
-    if (task.type !== GoalTypeEnum.Advice) {
-      handledAdviceScrollRef.current = true;
-      return;
-    }
-
-    globalThis.requestAnimationFrame(measureAndScroll);
-
-    return () => {
-      cancelled = true;
-    };
-  }, [highlightCommentId, task]);
-
   const push = usePushInteraction({
     hasPushed,
     pushCount,
@@ -608,141 +604,10 @@ export default function GoalDetailScreen({
         : undefined,
   });
 
-  //ADVICE
-  const isAdviceGoal = task?.type === GoalTypeEnum.Advice || task?.type === GoalTypeEnum.Motivation;
-  const hasAdvised = Boolean(task?.hasAdvised);
-  const canGiveAdvice = isAdviceGoal && !isCompleted && !isOwner && !hasAdvised;
-  const shouldOpenComposerDirectly = openAdviceComposer && canGiveAdvice && !consumedAutoOpen;
-
-  useEffect(() => {
-    if (shouldOpenComposerDirectly) {
-      setShowCTA(true);
-      return;
-    }
-
-    // default: composer closed
-    setShowCTA(false);
-  }, [shouldOpenComposerDirectly]);
-
-  useEffect(() => {
-    adviceMorph.value = withTiming(showCTA ? 1 : 0, {
-      duration: 320,
-    });
-  }, [showCTA]);
-
-  const handleSubmitAdvice = () => {
-    const text = adviceText.trim();
-    if (!text) return;
-
-    addComment.mutate(
-      { text, mentions: [] },
-      {
-        onSuccess: () => {
-          setAdviceText('');
-          setShowCTA(false); // 👈 morph back to button
-
-          setConsumedAutoOpen(true);
-
-          queryClient.setQueryData(buildQueryKey.taskById(resolvedGoalId!), (old: any) => {
-            if (!old) return old;
-            return {
-              ...old,
-              hasAdvised: true, // 🔥 lock advice permanently
-            };
-          });
-
-          showToast({
-            type: 'success',
-            title: 'Advice shared',
-            message: 'Your advice has been posted.',
-          });
-        },
-        onError: () => {
-          showToast({
-            type: 'error',
-            title: 'Failed',
-            message: 'Could not share advice. Try again.',
-          });
-        },
-      },
-    );
-  };
-
   const footerContent = React.useMemo(() => {
     if (!task) return null;
     if (isCompleted) return null;
-    if (task.type === GoalTypeEnum.Reminder) {
-      // OWNER
-      if (isOwner) {
-        // If owner already reminded (or you can decide based on reminderNoteCount)
-        if (task.hasReminded) {
-          return (
-            <AnimatedBottomButtonWithHeader
-              visible
-              title="✅ Reminder sent"
-              onPress={() => {}}
-              isLoading={false}
-              buttonColor={colors.border}
-              containerColor={colors.onPrimary}
-              buttonHeader="You've already sent a reminder."
-              // If your component supports it:
-              // disabled
-            />
-          );
-        }
 
-        // Owner can send reminder to self (if that's your intended behavior)
-        return (
-          <AnimatedBottomButtonWithHeader
-            visible={false}
-            title={`✅ You nudged ${getFirstName(task.name)}`}
-            onPress={() => {}}
-            isLoading={false}
-            buttonColor={colors.border}
-            containerColor={colors.onPrimary}
-            buttonHeader="You’ve already sent a reminder."
-            showButton={false}
-            // disabled
-          />
-        );
-      }
-
-      // NON-OWNER
-      if (task.hasReminded) {
-        return (
-          <AnimatedBottomButtonWithHeader
-            visible
-            title={`✅ You nudged ${getFirstName(task.name)}`}
-            onPress={() => {}}
-            isLoading={false}
-            buttonColor={colors.border}
-            containerColor={colors.onPrimary}
-            buttonHeader="You’ve already sent a reminder."
-            showButton={false}
-
-            // disabled
-          />
-        );
-      }
-
-      // NON-OWNER — can nudge (same as your PushButton logic)
-      return (
-        <AnimatedBottomButtonWithHeader
-          visible
-          title={`${emoji} Send reminder`}
-          onPress={() => {
-            if (!checkAuthThenNavigate(undefined, undefined, { authContext: 'Reminder' })) return;
-            openReminderComposer();
-          }}
-          isLoading={isPending}
-          buttonColor={colors.reminderBgHardest}
-          containerColor={colors.onPrimary}
-          buttonHeader="A small nudge can make a big difference."
-        />
-      );
-    }
-
-    // 🔥 MOTIVATION
     if (task.type === GoalTypeEnum.Motivation && isOwner && !isCompleted) {
       return (
         <AnimatedBottomButtonWithHeader
@@ -786,85 +651,16 @@ export default function GoalDetailScreen({
       );
     }
 
-    if (task.type === GoalTypeEnum.Decision && !hasVoted) {
-      return (
-        <AnimatedBottomButtonWithHeader
-          visible
-          title={emoji + ' Cast your vote'}
-          onPress={push.handlePush}
-          isLoading={isPending}
-          buttonColor={colors.decisionBgHardest}
-          containerColor={colors.onPrimary}
-          buttonHeader={
-            isOwner ? 'Your vote counts too.' : 'Your vote helps shape the final decision.'
-          }
-          showButton={false}
-        />
-      );
-    }
-
-    if (task.type === GoalTypeEnum.Decision && hasVoted) {
-      return (
-        <AnimatedBottomButtonWithHeader
-          visible
-          onPress={() => {}}
-          showButton={false}
-          containerColor={colors.onPrimary}
-          buttonHeader={`You voted for "${task.votedOption}"`}
-        />
-      );
-    }
-
-    // 🔥 ADVICE — STEP 1 (CTA BUTTON)
-    if (task.type === GoalTypeEnum.Advice && !isCompleted && canGiveAdvice && !consumedAutoOpen) {
-      return (
-        <AnimatedAdviceMorph
-          progress={adviceMorph}
-          adviceText={adviceText}
-          onChangeText={setAdviceText}
-          autoFocus={shouldOpenComposerDirectly}
-          onSubmit={handleSubmitAdvice}
-          onOpenComposer={() => {
-            if (!user) {
-              checkAuthThenNavigate(
-                'GoalDetail',
-                {
-                  taskId: resolvedGoalId,
-                  task: task ? { ...task, openAdviceComposer: true } : undefined,
-                  openAdviceComposer: true,
-                  highlightCommentId: route.params?.highlightCommentId,
-                },
-                {
-                  authContext: 'Advice',
-                },
-              );
-              return;
-            }
-            setShowCTA(true);
-          }}
-          isComposerOpen={showCTA}
-        />
-      );
-    }
-
     return null;
   }, [
     task?.type,
-    canGiveAdvice,
-    showCTA,
-    adviceText,
-    shouldOpenComposerDirectly,
     hasPushed,
     hasShareUpdateRecipients,
     isShareUpdateCoolingDown,
     canShareProgressUpdate,
     latestProgressUpdate,
     isOwner,
-    emoji,
     isPending,
-    hasVoted,
-    hasReminded,
-    openReminderComposer,
     openShareUpdateComposer,
     handleShareGoal,
     push.handlePush,
@@ -873,47 +669,6 @@ export default function GoalDetailScreen({
     openHelpersSheet,
     openAddHelperSheet,
   ]);
-
-  const renderAdvice = React.useCallback(() => {
-    return (
-      <>
-        <GoalDetailHeader task={task} />
-
-        <GoalDetailCaption task={task} />
-
-        <GoalStatusRow
-          containerStyle={{ marginTop: vs(-12) }}
-          completed={isCompleted}
-          viewsCount={task.viewCount || 0}
-          isOwner={isOwner}
-          taskType={task.type}
-          onMarkComplete={handleMarkCompletePress}
-        />
-
-        {!isCompleted && (isOwner || hasHelpers) && (
-          <>
-            <Height
-              style={{
-                marginTop: vs(-20),
-              }}
-            />
-            <GoalDetailHelpers
-              helpers={task.helpers}
-              taskType={task.type}
-              isOwner={isOwner}
-              completed={isCompleted}
-              onPress={openHelpersSheet}
-              onAddPress={openAddHelperSheet}
-            />
-          </>
-        )}
-
-        <GoalDetailBody task={task} />
-
-        {showCTA && <Height size={vs(BOTTOM_BUTTON_HEIGHT)} />}
-      </>
-    );
-  }, [task, isOwner, showCTA, hasHelpers, openHelpersSheet, openAddHelperSheet, isCompleted]);
 
   const renderMotivation = React.useCallback(() => {
     return (
@@ -928,12 +683,10 @@ export default function GoalDetailScreen({
 
         <GoalDetailBody
           task={task}
-          adviceSectionRef={adviceSectionRef}
           progressSectionRef={progressSectionRef}
           highlightProgressSection={progressSectionHighlighted}
           highlightProgressUpdateId={progressUpdateId}
           highlightBeatId={resolvedHighlightBeatId}
-          highlightCommentId={highlightCommentId}
           canViewerCheer={canViewerCheer}
           onCheerPress={handleCheerPress}
           onShareUpdate={handleShareUpdate}
@@ -983,108 +736,10 @@ export default function GoalDetailScreen({
     supporterCount,
   ]);
 
-  const renderDecision = React.useCallback(() => {
-    return (
-      <>
-        <GoalDetailHeader task={task} />
-
-        <GoalDetailCaption containerStyle={{ paddingBottom: vs(0) }} task={task} />
-
-        {/* <Height size={vs(14)} /> */}
-
-        <GoalStatusRow
-          // containerStyle={{ paddingBottom: vs() }}
-          completed={isCompleted}
-          viewsCount={task.viewCount || 0}
-          isOwner={isOwner}
-          onMarkComplete={handleMarkCompletePress}
-          taskType={task.type}
-        />
-
-        {!isCompleted && (isOwner || hasHelpers) && (
-          <>
-            <GoalDetailHelpers
-              helpers={task.helpers}
-              taskType={task.type}
-              isOwner={isOwner}
-              completed={isCompleted}
-              onPress={openHelpersSheet}
-              onAddPress={openAddHelperSheet}
-            />
-          </>
-        )}
-        <Height size={vs(14)} />
-
-        <GoalDetailBody task={task} />
-      </>
-    );
-  }, [task, isOwner, hasHelpers, openHelpersSheet, openAddHelperSheet, isCompleted]);
-
-  const renderReminder = React.useCallback(() => {
-    const remindAtDateAndTime = new Date(task?.remindAt);
-    return (
-      <>
-        <GoalDetailHeader task={task} />
-
-        <GoalDetailCaption containerStyle={{ paddingBottom: vs(0) }} task={task} />
-
-        {/* <Height size={vs(14)} /> */}
-
-        <GoalStatusRow
-          // containerStyle={{ paddingBottom: vs(0) }}
-          completed={isCompleted}
-          viewsCount={task.viewCount || 0}
-          isOwner={isOwner}
-          onMarkComplete={handleMarkCompletePress}
-          taskType={task.type}
-        />
-        <Height size={vs(2)} />
-
-        <ReminderWhenPicker
-          date={remindAtDateAndTime}
-          time={remindAtDateAndTime}
-          readOnly
-          removeHeading
-          removeBottomDescription
-        />
-
-        {!isCompleted && (isOwner || hasHelpers) && (
-          <>
-            <GoalDetailHelpers
-              helpers={task.helpers}
-              taskType={task.type}
-              isOwner={isOwner}
-              completed={isCompleted}
-              onPress={openHelpersSheet}
-              onAddPress={openAddHelperSheet}
-            />
-          </>
-        )}
-        <Height size={vs(18)} />
-
-        <GoalDetailBody task={task} />
-      </>
-    );
-  }, [task, isOwner, hasHelpers, openHelpersSheet, openAddHelperSheet]);
-
   const renderContent = React.useMemo(() => {
-    switch (task?.type) {
-      case GoalTypeEnum.Advice:
-        return renderAdvice();
-
-      case GoalTypeEnum.Motivation:
-        return renderMotivation();
-
-      case GoalTypeEnum.Reminder:
-        return renderReminder();
-
-      case GoalTypeEnum.Decision:
-        return renderDecision();
-
-      default:
-        return null;
-    }
-  }, [task?.type, renderAdvice, renderMotivation, renderDecision]);
+    if (!task) return null;
+    return renderMotivation();
+  }, [task, renderMotivation]);
 
   if (isLoading) {
     return <AppLoader visible />;
@@ -1123,7 +778,13 @@ export default function GoalDetailScreen({
   const edges: Array<'top' | 'bottom' | 'left' | 'right'> = isAndroid
     ? ['left', 'right', 'bottom']
     : ['top', 'left', 'right', 'bottom'];
-  const showOwnerMenu = isOwner && !!task?.id;
+  const showTaskMenu = !!task?.id && (isOwner || user?.id !== task.userId);
+  const taskMenuLeft = Math.min(
+    Math.max(spacing.md, taskMenuAnchor.x + taskMenuAnchor.width - TASK_MENU_WIDTH),
+    Math.max(spacing.md, windowWidth - TASK_MENU_WIDTH - spacing.md),
+  );
+  const taskMenuTop = Math.max(spacing.md, taskMenuAnchor.y + taskMenuAnchor.height + vs(8));
+
   return (
     <View style={{ flex: 1 }}>
       {isMotivation ? (
@@ -1168,11 +829,16 @@ export default function GoalDetailScreen({
                   color={colors.onboardingInk}
                 />
               </Ripple>
-              {showOwnerMenu && (
-                <Ripple
-                  style={styles.headerAction}
+              {showTaskMenu && (
+                <Pressable
+                  ref={taskMenuButtonRef}
                   onPress={handleOpenGoalMenu}
-                  disabled={isDeleting}
+                  disabled={isDeleting || blockUser.isPending}
+                  hitSlop={8}
+                  style={({ pressed }) => [
+                    styles.headerAction,
+                    pressed && styles.headerActionPressed,
+                  ]}
                 >
                   <Icon
                     set="ion"
@@ -1180,7 +846,7 @@ export default function GoalDetailScreen({
                     size={ms(18)}
                     color={colors.onboardingInk}
                   />
-                </Ripple>
+                </Pressable>
               )}
             </View>
           }
@@ -1189,6 +855,47 @@ export default function GoalDetailScreen({
 
         {renderContent}
       </Layout>
+      <AppModal
+        visible={taskMenuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={closeTaskMenu}
+      >
+        <Pressable style={styles.popupBackdrop} onPress={closeTaskMenu}>
+          <Pressable
+            style={[
+              styles.taskPopupMenu,
+              {
+                left: taskMenuLeft,
+                top: taskMenuTop,
+              },
+            ]}
+          >
+            {isOwner ? (
+              <TaskPopupMenuItem
+                icon="trash-outline"
+                label="Delete task"
+                destructive
+                onPress={handleDeleteTaskOption}
+              />
+            ) : (
+              <>
+                <TaskPopupMenuItem
+                  icon="flag-outline"
+                  label="Report task"
+                  onPress={handleReportTaskOption}
+                />
+                <TaskPopupMenuItem
+                  icon="ban-outline"
+                  label="Block user"
+                  destructive
+                  onPress={handleBlockUserOption}
+                />
+              </>
+            )}
+          </Pressable>
+        </Pressable>
+      </AppModal>
       <ViewHelpersModal
         visible={showHelperModal}
         helpers={task.helpers ?? []}
@@ -1214,6 +921,29 @@ export default function GoalDetailScreen({
 
       <CompletionBurst playKey={completionBurstKey} />
     </View>
+  );
+}
+
+type TaskPopupMenuItemProps = {
+  icon: string;
+  label: string;
+  destructive?: boolean;
+  onPress: () => void;
+};
+
+function TaskPopupMenuItem({ icon, label, destructive = false, onPress }: TaskPopupMenuItemProps) {
+  const color = destructive ? colors.error : colors.onboardingInk;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.taskPopupItem, pressed && styles.taskPopupItemPressed]}
+    >
+      <Icon set="ion" name={icon} size={ms(17)} color={color} />
+      <TextElement style={[styles.taskPopupItemText, destructive && styles.taskPopupDangerText]}>
+        {label}
+      </TextElement>
+    </Pressable>
   );
 }
 
@@ -1253,7 +983,50 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   headerAction: {
-    paddingHorizontal: ms(5),
+    minWidth: ms(32),
+    minHeight: ms(32),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: ms(16),
+  },
+  headerActionPressed: {
+    opacity: 0.55,
+  },
+  popupBackdrop: {
+    flex: 1,
+  },
+  taskPopupMenu: {
+    position: 'absolute',
+    width: TASK_MENU_WIDTH,
+    borderRadius: ms(14),
+    paddingVertical: vs(6),
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.onboardingLine,
+    ...platformShadow({
+      color: '#000',
+      opacity: 0.16,
+      radius: 18,
+      offset: { width: 0, height: 10 },
+    }),
+  },
+  taskPopupItem: {
+    minHeight: vs(44),
+    paddingHorizontal: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  taskPopupItemPressed: {
+    backgroundColor: colors.onboardingPaper,
+  },
+  taskPopupItemText: {
+    marginLeft: ms(10),
+    fontSize: ms(15),
+    fontWeight: '700',
+    color: colors.onboardingInk,
+  },
+  taskPopupDangerText: {
+    color: colors.error,
   },
   errorState: {
     flex: 1,

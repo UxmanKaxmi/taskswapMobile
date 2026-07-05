@@ -2,10 +2,10 @@ import type { FeelingValue } from '@shared/utils/feelings';
 import type { AvatarUser, GoalBeat } from '@features/Goals/types/goals';
 
 // ---------------------------------------------
-// ✅ Define all task types strictly
+// ✅ The app is motivation-only; legacy types may still exist server-side
 // ---------------------------------------------
-export type GoalType = 'reminder' | 'decision' | 'motivation' | 'advice';
-export type TabKey = 'all' | 'motivation' | 'advice' | 'decision' | 'reminder';
+export type GoalType = 'motivation';
+export type TabKey = 'all' | 'motivation';
 
 export type HelperUser = {
   id: string;
@@ -57,14 +57,10 @@ export type BaseGoal = {
   helpers: HelperUser[];
 
   // 🔥 Backend counts (added in your API)
-  commentsCount: number;
-  reminderNoteCount: number;
-  voteCount: number;
   viewCount: number;
 
   pushCount: number;
   hasPushed: boolean;
-  hasAdvised?: boolean;
   progressUpdates?: ProgressUpdate[];
   beats?: GoalBeat[];
   cheerTotal?: number;
@@ -72,46 +68,11 @@ export type BaseGoal = {
   sampleCheerers?: AvatarUser[];
   mostCheeredBeatId?: string | null;
   pushHistory?: GoalPushEvent[];
-
-  // 🔥 Extra state
-  hasReminded: boolean;
-
-  // Voting info (optional — only decision type truly uses it)
-  votes?: Record<
-    string,
-    {
-      count: number;
-      preview: Voter[];
-    }
-  >;
-
-  votedOption?: string | null;
 };
 
 // ---------------------------------------------
 // ✅ Specific task types
 // ---------------------------------------------
-
-export type ReminderGoal = BaseGoal & {
-  type: 'reminder';
-  remindAt: string;
-  completed: boolean;
-  completedAt?: string | null;
-};
-
-export type DecisionGoal = BaseGoal & {
-  type: 'decision';
-  options: string[];
-  votes: Record<
-    string,
-    {
-      count: number;
-      preview: Voter[];
-    }
-  >;
-  hasVoted?: boolean;
-  votedOption?: string | null;
-};
 
 export type MotivationGoal = BaseGoal & {
   type: 'motivation';
@@ -120,28 +81,10 @@ export type MotivationGoal = BaseGoal & {
   completedAt?: string | null;
 };
 
-export type AdviceGoal = BaseGoal & {
-  type: 'advice';
-};
-
 // ---------------------------------------------
-// ✅ Union of all tasks
+// ✅ Union of all tasks (motivation-only)
 // ---------------------------------------------
-export type Goal = ReminderGoal | DecisionGoal | MotivationGoal | AdviceGoal;
-
-// ---------------------------------------------
-// ✅ Reminder Notes
-// ---------------------------------------------
-export interface ReminderNoteDTO {
-  id: string;
-  taskId: string;
-  senderId: string;
-  isSenderCurrentUser?: boolean;
-  message: string;
-  createdAt: string;
-  senderName: string;
-  senderPhoto?: string | null;
-}
+export type Goal = MotivationGoal;
 
 export type TimeFilter = 'latest' | 'today' | 'thisWeek' | 'thisMonth' | 'allTime';
 
@@ -222,7 +165,6 @@ export type HomeSummaryModules = {
   successStory?: HomeSuccessStory | null;
   needsYourPush?: unknown;
   updateProgress?: unknown;
-  adviceRequestWaitingOnYou?: unknown;
 };
 
 export type HomeSummaryApiResponse = Partial<HomeSummaryResponse> & {

@@ -98,6 +98,14 @@ export default function ProfileMenu() {
         //   iconSet: 'ion',
         // },
         {
+          label: 'Blocked Users',
+          icon: 'ban-outline',
+          onPress: () => {
+            navigation.navigate('BlockedUsersScreen');
+          },
+          iconSet: 'ion',
+        },
+        {
           label: 'Help Center',
           icon: 'help-circle-outline',
           onPress: () => {

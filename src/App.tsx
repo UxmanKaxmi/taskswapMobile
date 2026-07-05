@@ -15,7 +15,6 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ModalProvider } from '@shared/components/ModalProvider';
 import { colors } from '@shared/theme/colors';
 import { incrementAppLaunchCount } from '@features/LaunchModals';
-import { FeatureFlagsProvider } from '@shared/featureFlags';
 import { navigationRef } from './navigation/navigationRef';
 import NotificationNavigationBridge from './lib/notifications/NotificationNavigationBridge';
 import { setNotificationNavigationReady } from './lib/notifications/notificationNavigation';
@@ -80,16 +79,14 @@ export default function App() {
             <NotificationPermissionPrompt />
 
             <AuthProvider>
-              <FeatureFlagsProvider>
-                <NavigationContainer
-                  ref={navigationRef}
-                  theme={LightNavTheme}
-                  onReady={() => setNotificationNavigationReady(true)}
-                >
-                  <NotificationNavigationBridge />
-                  <RootNavigator />
-                </NavigationContainer>
-              </FeatureFlagsProvider>
+              <NavigationContainer
+                ref={navigationRef}
+                theme={LightNavTheme}
+                onReady={() => setNotificationNavigationReady(true)}
+              >
+                <NotificationNavigationBridge />
+                <RootNavigator />
+              </NavigationContainer>
             </AuthProvider>
 
             <Toast config={toastConfig} position="bottom" bottomOffset={60} />

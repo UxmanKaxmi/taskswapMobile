@@ -11,15 +11,12 @@ import ListView from '@shared/components/ListView/ListView';
 import FriendsProfileHeader from '../components/FriendsProfileHeader';
 import { useFriendProfile } from '../hooks/useFriendProfile';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
-import ReminderCard from '@features/Home/components/ReminderCard';
 import { useToggleFollow } from '@features/User/hooks/useToggleFollow';
 import FriendsStatsAchievements from '../components/FriendsStatsAchievements';
 import { Height } from '@shared/components/Spacing';
 import AppLoader from '@shared/components/Loader/Loader';
 import SectionHeader from '@shared/components/SectionHeader/SectionHeader';
-import DecisionCard from '@features/Home/components/DecisionCard';
 import MotivationCard from '@features/Home/components/MotivationCard';
-import AdviceCard from '@features/Home/components/AdviceCard';
 import { Goal } from '@features/Goals/types/goals';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { navigateToGoalDetails, useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
@@ -85,52 +82,20 @@ export default function FriendsProfileScreen() {
 
   const onNoopGoalAction = useCallback((_task: Goal) => {}, []);
 
-  const onSuggestAdvice = useCallback(
-    (task: Goal) => {
-      checkAuthThenNavigate(
-        'GoalDetail',
-        {
-          taskId: task.id,
-          openAdviceComposer: true,
-        },
-        {
-          authContext: 'Advice',
-        },
-      );
-    },
-    [checkAuthThenNavigate],
-  );
-
   const renderGoalNew = useCallback<ListRenderItem<Goal>>(
     ({ item }) => {
-      switch (item.type) {
-        case 'decision':
-          return <DecisionCard task={item as any} onPressCard={onPressGoal as any} />;
-        case 'reminder':
-          return <ReminderCard task={item as any} onPressCard={onPressGoal as any} />;
-        case 'motivation':
-          return (
-            <MotivationCard
-              task={item as any}
-              onPressCard={onPressGoal as any}
-              onPressSuggest={onNoopGoalAction as any}
-              onPressView={onNoopGoalAction as any}
-            />
-          );
-        case 'advice':
-          return (
-            <AdviceCard
-              task={item as any}
-              onPressCard={onPressGoal as any}
-              onPressSuggest={onSuggestAdvice as any}
-              onPressView={onNoopGoalAction as any}
-            />
-          );
-        default:
-          return null;
-      }
+      // Legacy non-motivation goals may still come back from the server; skip them.
+      if (item.type !== 'motivation') return null;
+      return (
+        <MotivationCard
+          task={item as any}
+          onPressCard={onPressGoal as any}
+          onPressSuggest={onNoopGoalAction as any}
+          onPressView={onNoopGoalAction as any}
+        />
+      );
     },
-    [onPressGoal, onNoopGoalAction, onSuggestAdvice],
+    [onPressGoal, onNoopGoalAction],
   );
 
   return (

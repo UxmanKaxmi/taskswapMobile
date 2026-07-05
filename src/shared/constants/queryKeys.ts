@@ -16,6 +16,7 @@ export enum QueryKeys {
   Comments = 'comments',
   ReferralLink = 'referral-link',
   Push = 'push',
+  BlockedUsers = 'blocked-users',
 }
 
 export const buildQueryKey = {
@@ -45,6 +46,7 @@ export const buildQueryKey = {
   votesForGoal: (taskId: string) => [QueryKeys.Votes, taskId],
   commentsForGoal: (taskId: string) => [QueryKeys.Comments, taskId],
   referralLink: () => [QueryKeys.ReferralLink],
+  blockedUsers: () => [QueryKeys.BlockedUsers],
 
   //for Goal Pushes
   pushesForGoal: (taskId: string) => [QueryKeys.Push, taskId],

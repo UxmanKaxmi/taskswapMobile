@@ -10,6 +10,7 @@ import { colors, spacing } from '@shared/theme';
 import { timeAgo, toShortName } from '@shared/utils/helperFunctions';
 import { GoalTypeEnum } from '@features/Goals/types/goals';
 import { HelperUser } from '../types/home';
+import GoalModerationMenu from './GoalModerationMenu';
 
 type Props = {
   avatar: string;
@@ -18,6 +19,10 @@ type Props = {
   type: GoalTypeEnum;
   helpers?: HelperUser[];
   avatarSize?: number;
+  /** When provided, shows a report/block menu (hidden for the owner's own goal). */
+  taskId?: string;
+  ownerUserId?: string;
+  taskText?: string;
 };
 
 export default function GoalHeader({
@@ -27,39 +32,53 @@ export default function GoalHeader({
   type,
   helpers = [],
   avatarSize = ms(36),
+  taskId,
+  ownerUserId,
+  taskText,
 }: Props) {
   return (
-    <Row align="center" justify="flex-start">
-      {/* Avatar + helper overlay */}
-      <View style={[styles.avatarWrapper, { width: avatarSize, height: avatarSize }]}>
-        <Image
-          source={{ uri: avatar }}
-          style={[
-            styles.ownerAvatar,
-            {
-              width: avatarSize,
-              height: avatarSize,
-              borderRadius: avatarSize / 2,
-            },
-          ]}
-        />
-
-        {helpers.length > 0 && (
-          <HelperAvatarGroup
-            helpers={helpers}
-            avatarSize={ms(18)}
-            containerStyle={styles.helperOverlay}
+    <Row align="center" justify="space-between" fullWidth>
+      <Row align="center" justify="flex-start" flex>
+        {/* Avatar + helper overlay */}
+        <View style={[styles.avatarWrapper, { width: avatarSize, height: avatarSize }]}>
+          <Image
+            source={{ uri: avatar }}
+            style={[
+              styles.ownerAvatar,
+              {
+                width: avatarSize,
+                height: avatarSize,
+                borderRadius: avatarSize / 2,
+              },
+            ]}
           />
-        )}
-      </View>
 
-      {/* Name + meta */}
-      <View>
-        <TextElement variant="subtitle" style={styles.name}>
-          {toShortName(name)}
-        </TextElement>
-        <GoalMetaRow type={type} timeAgo={timeAgo(createdAt)} />
-      </View>
+          {helpers.length > 0 && (
+            <HelperAvatarGroup
+              helpers={helpers}
+              avatarSize={ms(18)}
+              containerStyle={styles.helperOverlay}
+            />
+          )}
+        </View>
+
+        {/* Name + meta */}
+        <View>
+          <TextElement variant="subtitle" style={styles.name}>
+            {toShortName(name)}
+          </TextElement>
+          <GoalMetaRow type={type} timeAgo={timeAgo(createdAt)} />
+        </View>
+      </Row>
+
+      {taskId ? (
+        <GoalModerationMenu
+          taskId={taskId}
+          ownerUserId={ownerUserId}
+          ownerName={name}
+          taskText={taskText}
+        />
+      ) : null}
     </Row>
   );
 }

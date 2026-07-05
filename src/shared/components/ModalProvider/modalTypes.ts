@@ -1,15 +1,9 @@
 import type { GoalType } from '@features/Goals/types/goals';
+import type { ReportReason } from '@features/Reports';
 
 export type InfoModalPayload = {
   title: string;
   description?: string;
-};
-
-export type ReminderMessageModalPayload = {
-  taskName: string;
-  taskText: string;
-  onSend: (message: string) => void | Promise<void>;
-  initialMessage?: string;
 };
 
 export type ShareUpdateModalPayload = {
@@ -36,24 +30,24 @@ export type MotivationSuccessModalPayload = {
   onInviteHelper: () => void;
 };
 
-export type ComingSoonModalPayload = {
-  type: GoalType;
-  onCreateMotivation: () => void;
-};
-
 export type CompleteGoalConfirmationModalPayload = {
   type: GoalType;
   onConfirm: () => void | Promise<void>;
 };
 
+export type ReportTaskModalPayload = {
+  ownerName?: string;
+  taskText: string;
+  onSubmit: (reason: ReportReason, details?: string) => void | Promise<void>;
+};
+
 export type ModalPayloadMap = {
   info: InfoModalPayload;
-  reminderMessage: ReminderMessageModalPayload;
   shareUpdate: ShareUpdateModalPayload;
   cheer: CheerModalPayload;
   motivationSuccess: MotivationSuccessModalPayload;
-  comingSoon: ComingSoonModalPayload;
   completeGoalConfirmation: CompleteGoalConfirmationModalPayload;
+  reportTask: ReportTaskModalPayload;
 };
 
 export type ModalType = keyof ModalPayloadMap;
@@ -62,10 +56,6 @@ export type ModalState =
   | {
       type: 'info';
       payload: InfoModalPayload;
-    }
-  | {
-      type: 'reminderMessage';
-      payload: ReminderMessageModalPayload;
     }
   | {
       type: 'shareUpdate';
@@ -80,11 +70,11 @@ export type ModalState =
       payload: MotivationSuccessModalPayload;
     }
   | {
-      type: 'comingSoon';
-      payload: ComingSoonModalPayload;
-    }
-  | {
       type: 'completeGoalConfirmation';
       payload: CompleteGoalConfirmationModalPayload;
+    }
+  | {
+      type: 'reportTask';
+      payload: ReportTaskModalPayload;
     }
   | null;

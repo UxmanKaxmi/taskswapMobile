@@ -34,9 +34,6 @@ import { Goal, GoalTypeEnum } from '@features/Goals/types/goals';
 import { MotivationGoal } from '../types/home';
 import { showToast, showPushToast } from '@shared/utils/toast';
 import MotivationCard from '../components/MotivationCard';
-import DecisionCard from '../components/DecisionCard';
-import ReminderCard from '../components/ReminderCard';
-import AdviceCard from '../components/AdviceCard';
 import HorizontalFilterTabs, { type FeedSortKey } from '../components/HorizontalFilterTabs';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { navigateToGoalDetails, useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
@@ -397,53 +394,21 @@ export default function HomeScreen() {
 
   const handleShareMotivation = useCallback((_task: MotivationGoal) => {}, []);
 
-  const onSuggestAdvice = useCallback(
-    (task: Goal) => {
-      checkAuthThenNavigate(
-        'GoalDetail',
-        {
-          taskId: task.id,
-          openAdviceComposer: true,
-        },
-        {
-          authContext: 'Advice',
-        },
-      );
-    },
-    [checkAuthThenNavigate],
-  );
-
   const renderGoalNew = useCallback<ListRenderItem<Goal>>(
     ({ item }) => {
-      switch (item.type) {
-        case GoalTypeEnum.Decision:
-          return <DecisionCard task={item as any} onPressCard={onPressGoal as any} />;
-        case GoalTypeEnum.Reminder:
-          return <ReminderCard task={item as any} onPressCard={onPressGoal as any} />;
-        case GoalTypeEnum.Motivation:
-          return (
-            <MotivationCard
-              task={item as MotivationGoal}
-              onPressCard={onPressGoal as any}
-              onPressSuggest={onNoopGoalAction as any}
-              onPressView={onNoopGoalAction as any}
-              onPressShare={handleShareMotivation}
-            />
-          );
-        case GoalTypeEnum.Advice:
-          return (
-            <AdviceCard
-              task={item as any}
-              onPressCard={onPressGoal as any}
-              onPressSuggest={onSuggestAdvice as any}
-              onPressView={onNoopGoalAction as any}
-            />
-          );
-        default:
-          return null;
-      }
+      // Legacy non-motivation goals may still come back from the server; skip them.
+      if (item.type !== GoalTypeEnum.Motivation) return null;
+      return (
+        <MotivationCard
+          task={item as MotivationGoal}
+          onPressCard={onPressGoal as any}
+          onPressSuggest={onNoopGoalAction as any}
+          onPressView={onNoopGoalAction as any}
+          onPressShare={handleShareMotivation}
+        />
+      );
     },
-    [handleShareMotivation, onNoopGoalAction, onPressGoal, onSuggestAdvice],
+    [handleShareMotivation, onNoopGoalAction, onPressGoal],
   );
 
   return (
@@ -501,7 +466,7 @@ export default function HomeScreen() {
                       onChange={handleFeedSortChange}
                     />
                   </Animated.View>
-                  {/* {canSeeDevTools && (
+                  {canSeeDevTools && (
                     <Ripple hitSlop={8} onPress={handleOpenDevMenu} style={styles.devDotsButton}>
                       <Icon
                         set="ion"
@@ -510,7 +475,7 @@ export default function HomeScreen() {
                         color={colors.onboardingInk}
                       />
                     </Ripple>
-                  )} */}
+                  )}
                 </View>
               </View>
             }

@@ -18,13 +18,12 @@ import { colors } from '@shared/theme/colors';
 import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
 import {
-  type ComingSoonModalPayload,
   type CheerModalPayload,
   type InfoModalPayload,
   type ModalPayloadMap,
   type ModalState,
   type ModalType,
-  type ReminderMessageModalPayload,
+  type ReportTaskModalPayload,
   type ShareUpdateModalPayload,
 } from './modalTypes';
 import { modalRegistry } from './modalRegistry';
@@ -35,10 +34,9 @@ type ModalContextType = {
   openModal: <K extends ModalType>(type: K, payload: ModalPayloadMap[K]) => void;
   closeModal: () => void;
   openInfo: (payload: InfoModalPayload) => void;
-  openReminderMessageSheet: (payload: ReminderMessageModalPayload) => void;
   openShareUpdateSheet: (payload: ShareUpdateModalPayload) => void;
   openCheerSheet: (payload: CheerModalPayload) => void;
-  openComingSoonSheet: (payload: ComingSoonModalPayload) => void;
+  openReportTaskSheet: (payload: ReportTaskModalPayload) => void;
 };
 
 const ModalContext = createContext<ModalContextType | null>(null);
@@ -71,13 +69,6 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     [openModal],
   );
 
-  const openReminderMessageSheet = useCallback(
-    (payload: ReminderMessageModalPayload) => {
-      openModal('reminderMessage', payload);
-    },
-    [openModal],
-  );
-
   const openShareUpdateSheet = useCallback(
     (payload: ShareUpdateModalPayload) => {
       openModal('shareUpdate', payload);
@@ -92,9 +83,9 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     [openModal],
   );
 
-  const openComingSoonSheet = useCallback(
-    (payload: ComingSoonModalPayload) => {
-      openModal('comingSoon', payload);
+  const openReportTaskSheet = useCallback(
+    (payload: ReportTaskModalPayload) => {
+      openModal('reportTask', payload);
     },
     [openModal],
   );
@@ -150,10 +141,9 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
         openModal,
         closeModal,
         openInfo,
-        openReminderMessageSheet,
         openShareUpdateSheet,
         openCheerSheet,
-        openComingSoonSheet,
+        openReportTaskSheet,
       }}
     >
       {children}
