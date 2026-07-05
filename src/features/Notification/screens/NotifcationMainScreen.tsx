@@ -93,8 +93,10 @@ export default function NotificationMainScreen() {
   }).current;
 
   const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 30,
-    minimumViewTime: 300,
+    // Require the row to be mostly visible for a beat before auto-marking read,
+    // so quick scrolls past a notification don't silently clear the unread badge.
+    itemVisiblePercentThreshold: 60,
+    minimumViewTime: 1500,
   }).current;
 
   useEffect(() => {

@@ -90,7 +90,7 @@ const retrieveAndStoreFcmToken = async () => {
   try {
     await messaging().registerDeviceForRemoteMessages();
     const token = await messaging().getToken();
-    console.log('FCM Token:', token);
+    if (__DEV__) console.log('FCM Token:', token);
     await AsyncStorage.setItem(FCM_TOKEN_KEY, token);
     await syncFcmTokenToBackend(token);
   } catch (error) {
@@ -234,7 +234,7 @@ export default function NotificationPermissionPrompt() {
 
     const unsubscribeTokenRefresh = messaging().onTokenRefresh(async token => {
       await AsyncStorage.setItem(FCM_TOKEN_KEY, token);
-      console.log('FCM Token refreshed:', token);
+      if (__DEV__) console.log('FCM Token refreshed:', token);
       await syncFcmTokenToBackend(token);
     });
 

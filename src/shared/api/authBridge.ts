@@ -1,13 +1,17 @@
 // src/shared/api/authBridge.ts
 
-let signOutFn: (() => Promise<void>) | null = null;
+export type SignOutOptions = {
+  showToast?: boolean;
+};
+
+let signOutFn: ((options?: SignOutOptions) => Promise<void>) | null = null;
 let onLoggedOutNavigate: (() => void) | null = null;
 let refreshBackendSessionFn: (() => Promise<string | null>) | null = null;
 
 /**
  * Register the function that performs the logout.
  */
-export function registerSignOut(fn: () => Promise<void>) {
+export function registerSignOut(fn: (options?: SignOutOptions) => Promise<void>) {
   signOutFn = fn;
 }
 
@@ -36,9 +40,9 @@ export async function refreshBackendSession() {
 /**
  * Run logout logic + navigation.
  */
-export async function triggerLogout() {
+export async function triggerLogout(options?: SignOutOptions) {
   if (signOutFn) {
-    await signOutFn(); // clears auth, async storage, tokens
+    await signOutFn(options); // clears auth, async storage, tokens
   }
 
   if (onLoggedOutNavigate) {

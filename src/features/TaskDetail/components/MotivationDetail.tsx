@@ -132,6 +132,28 @@ export default function MotivationDetail({
     return sampleCount > 0 ? Math.min(sampleCount, latestBeatCheerCount) : latestBeatCheerCount;
   }, [latestBeat, latestBeatCheerCount, task.beats?.length, task.distinctCheererCount]);
 
+  // Aggregate cheers across ALL beats (the task post + every update), not just
+  // the latest one — otherwise a cheer on an earlier beat disappears from the
+  // support card as soon as a newer beat exists. The server already totals
+  // these across beats; fall back to summing beats if the totals are absent.
+  const totalCheerCount = React.useMemo(() => {
+    if (typeof task.cheerTotal === 'number') return task.cheerTotal;
+    return (task.beats ?? []).reduce((sum, beat) => sum + (beat.cheerCount ?? 0), 0);
+  }, [task.cheerTotal, task.beats]);
+
+  const totalDistinctCheererCount = React.useMemo(() => {
+    if (totalCheerCount <= 0) return 0;
+    if (typeof task.distinctCheererCount === 'number') {
+      return Math.min(task.distinctCheererCount, totalCheerCount);
+    }
+    return Math.min(latestBeatDistinctCheererCount || totalCheerCount, totalCheerCount);
+  }, [task.distinctCheererCount, totalCheerCount, latestBeatDistinctCheererCount]);
+
+  const viewerHasCheeredAny = React.useMemo(
+    () => (task.beats ?? []).some(beat => Boolean(beat.callerHasCheered)),
+    [task.beats],
+  );
+
   // Show the section when there are updates, or prompt the owner to add one
   // (only while the task is still active).
   const showProgressSection = hasProgressUpdates || hasBeatData || (isOwner && !isCompleted);
@@ -177,13 +199,15 @@ export default function MotivationDetail({
               )
             }
             cheerSummary={
-              latestBeat && latestBeatCheerCount > 0
+              totalCheerCount > 0
                 ? {
                     ownerName: task.name,
-                    beatType: latestBeat.type,
-                    cheerCount: latestBeatCheerCount,
-                    distinctCheererCount: latestBeatDistinctCheererCount,
-                    viewerHasCheered: Boolean(latestBeat.callerHasCheered),
+                    // 'post' → the summary copy reads "…{owner}'s task", which
+                    // reads correctly as an umbrella over all beats.
+                    beatType: 'post',
+                    cheerCount: totalCheerCount,
+                    distinctCheererCount: totalDistinctCheererCount,
+                    viewerHasCheered: viewerHasCheeredAny,
                   }
                 : undefined
             }

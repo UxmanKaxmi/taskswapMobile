@@ -69,7 +69,6 @@ export async function getTaskByIdAPI(taskId: string, config?: CustomAxiosRequest
 }
 
 export async function getHomeSummaryAPI(utcOffsetMinutes = getLocalUtcOffsetMinutes()) {
-  console.log('[HOME_SUMMARY_API] fetching', { utcOffsetMinutes });
   const res = await api.get<HomeSummaryApiResponse>(buildRoute.homeSummary(), {
     params: {
       utcOffsetMinutes,
@@ -77,14 +76,6 @@ export async function getHomeSummaryAPI(utcOffsetMinutes = getLocalUtcOffsetMinu
   });
 
   const normalized = normalizeHomeSummaryResponse(res.data);
-  console.log('[HOME_SUMMARY_API] success', res.data);
-  console.log('[HOME_SUMMARY_API] normalized', {
-    moduleSuccessStoryTitle: normalized.modules?.successStory?.title ?? null,
-    successStoryTitle: normalized.successStory?.title ?? null,
-    heroModuleTitle: normalized.heroModule?.title ?? null,
-    peopleNeedYourPushToday: normalized.peopleNeedYourPushToday,
-    replyWaitingCount: normalized.replyWaitingCount,
-  });
 
   return normalized;
 }

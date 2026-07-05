@@ -6,7 +6,6 @@ import { DEFAULT_TEST_NOTIFICATION_TEXT } from '@lib/notifications/notificationT
 // ✅ Get all notifications for the user
 export async function getAllNotifications(): Promise<NotificationDTO[]> {
   const res = await api.get(buildRoute.getAllNotifications());
-  console.log(res.data);
   return res.data;
 }
 

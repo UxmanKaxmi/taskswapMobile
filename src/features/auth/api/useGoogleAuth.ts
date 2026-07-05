@@ -5,23 +5,13 @@ import type { CustomAxiosRequestConfig } from '@shared/api/axios';
 import { buildRoute } from '@shared/api/apiRoutes';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import messaging from '@react-native-firebase/messaging';
-
-type GoogleSignInResponse = {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    photo?: string;
-    fcmToken?: string;
-  };
-  token: string;
-};
+import type { AuthResponse } from './types';
 
 export function useGoogleAuth() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (): Promise<GoogleSignInResponse> => {
+    mutationFn: async (): Promise<AuthResponse> => {
       const result = await signInWithGoogle();
       const idToken = result.data?.idToken;
       let fcmToken = '';
@@ -38,6 +28,7 @@ export function useGoogleAuth() {
       }
 
       const userPayload = {
+        provider: 'google',
         id: result.data?.user?.id ?? '',
         name: result.data?.user?.name ?? '',
         email: result.data?.user?.email ?? '',

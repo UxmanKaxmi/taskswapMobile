@@ -51,6 +51,7 @@
   "dependencies": {
     "@bottom-tabs/react-navigation": "^1.1.0",
     "@gorhom/bottom-sheet": "^5",
+    "@invertase/react-native-apple-authentication": "^2.5.1",
     "@mhpdev/react-native-haptics": "^1.0.1",
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^2.1.2",

@@ -14,6 +14,5 @@ export async function searchFriends(
 export async function getFriendProfile(friendId: string): Promise<FriendProfile> {
   const url = buildRoute.friendProfile(friendId);
   const response = await api.get(url);
-  console.log(response.data);
   return response.data;
 }

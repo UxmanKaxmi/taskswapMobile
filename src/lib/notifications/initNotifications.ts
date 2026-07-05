@@ -11,7 +11,7 @@ export async function requestUserPermission() {
 
   if (enabled) {
     const fcmToken = await messaging().getToken();
-    console.log('✅ FCM Token:', fcmToken);
+    if (__DEV__) console.log('✅ FCM Token:', fcmToken);
     // Optionally send to your backend
   }
 }
@@ -39,7 +39,7 @@ function getResponseKey(data?: Record<string, unknown> | null, fallback?: string
 
 export function onForegroundNotification() {
   const unsubscribeMessagingMessage = messaging().onMessage(async remoteMessage => {
-    console.log('📬 Foreground message:', remoteMessage);
+    if (__DEV__) console.log('📬 Foreground message:', remoteMessage);
 
     await notifee.displayNotification({
       title: remoteMessage.notification?.title || 'New Notification',
@@ -104,7 +104,7 @@ export function onForegroundNotification() {
 
 export function registerBackgroundMessageHandler() {
   messaging().setBackgroundMessageHandler(async remoteMessage => {
-    console.log('📥 Background message:', remoteMessage);
+    if (__DEV__) console.log('📥 Background message:', remoteMessage);
     // You can choose to show a Notifee notification here as well if needed
   });
 }

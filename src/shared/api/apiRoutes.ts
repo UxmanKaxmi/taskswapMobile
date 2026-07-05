@@ -29,6 +29,7 @@ export const buildRoute = {
   syncUserToDb: () => `${ApiRoute.USERS}`,
   matchUsers: () => `${ApiRoute.USERS}/match`,
   me: () => `${ApiRoute.USERS}/me`,
+  deleteMe: () => `${ApiRoute.USERS}/me`,
   homeSummary: () => `${ApiRoute.USERS}/me/home-summary`,
   searchFriends: (query: string, includeFollowed: boolean = true) =>
     `${ApiRoute.USERS}/search-friends?query=${encodeURIComponent(query)}&includeFollowed=${includeFollowed}`,

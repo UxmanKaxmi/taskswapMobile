@@ -1,9 +1,15 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  type InfiniteData,
+} from '@tanstack/react-query';
 import { TaskPush } from '../types/tasks';
 import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
 import { getTaskPushes, toggleTaskPush } from '../api/taskPush.api';
 import { useAuth } from '@features/Auth/AuthProvider';
 import type { HomeSummaryResponse } from '@features/Home/types/home';
+import type { TaskPage } from '@features/tasks/api/taskApi';
 
 // ✅ Fetch pushes for a task
 export function useTaskPushes(taskId: string) {
@@ -51,6 +57,36 @@ export function useToggleTaskPush(taskId: string) {
         queryKey: [QueryKeys.HomeSummary],
       });
 
+      // Keep the pushed task's count consistent inside the cached feed pages.
+      // The hero carousel derives its counts from these feed task objects, so
+      // without this patch the hero shows a stale push count on the same screen
+      // (we intentionally do NOT invalidate the feed list — see onSettled).
+      const previousFeeds = queryClient.getQueriesData<InfiniteData<TaskPage>>({
+        queryKey: [QueryKeys.Tasks],
+      });
+
+      queryClient.setQueriesData<InfiniteData<TaskPage>>(
+        { queryKey: [QueryKeys.Tasks] },
+        old => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map(page => ({
+              ...page,
+              data: page.data.map(t =>
+                t.id === taskId
+                  ? {
+                      ...t,
+                      hasPushed: nextHasPushed,
+                      pushCount: Math.max(0, (t.pushCount ?? 0) + compactStatusDelta),
+                    }
+                  : t,
+              ),
+            })),
+          };
+        },
+      );
+
       queryClient.setQueriesData<HomeSummaryResponse>(
         { queryKey: [QueryKeys.HomeSummary] },
         old => {
@@ -72,7 +108,7 @@ export function useToggleTaskPush(taskId: string) {
         },
       );
 
-      return { previous, previousHomeSummaries };
+      return { previous, previousHomeSummaries, previousFeeds };
     },
 
     onError: (_err, _vars, context) => {
@@ -82,6 +118,10 @@ export function useToggleTaskPush(taskId: string) {
 
       context?.previousHomeSummaries?.forEach(([homeSummaryQueryKey, homeSummaryData]) => {
         queryClient.setQueryData(homeSummaryQueryKey, homeSummaryData);
+      });
+
+      context?.previousFeeds?.forEach(([feedQueryKey, feedData]) => {
+        queryClient.setQueryData(feedQueryKey, feedData);
       });
     },
 

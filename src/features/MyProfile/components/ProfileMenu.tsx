@@ -1,7 +1,7 @@
 // src/features/MyProfile/components/ProfileMenu.tsx
 
-import React from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, View, StyleSheet, Alert, Linking } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import Row from '@shared/components/Layout/Row';
@@ -11,12 +11,18 @@ import { useNavigation } from '@react-navigation/native';
 import { AppNavigationProp } from '@navigation/types/navigation';
 import { triggerLogout } from '@shared/api/authBridge';
 import Ripple from '@shared/components/Buttons/Ripple';
+import { deleteMyAccount } from '../api/MyProfileAPI';
+import { showToast } from '@shared/utils/toast';
+import { PRIVACY_POLICY_URL, TERMS_URL, SUPPORT_URL } from '@shared/utils/constants';
 
 export type MenuItem = {
+  id: string;
   label: string;
   icon: React.ComponentProps<typeof Icon>['name'];
   onPress: () => void;
   iconSet: React.ComponentProps<typeof Icon>['set'];
+  disabled?: boolean;
+  loading?: boolean;
 };
 
 /**
@@ -24,7 +30,9 @@ export type MenuItem = {
  */
 export default function ProfileMenu() {
   const navigation = useNavigation<AppNavigationProp>();
-  const handleLogout = async () => {
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
+  const handleLogout = useCallback(async () => {
     Alert.alert('Logout', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -33,56 +41,143 @@ export default function ProfileMenu() {
         onPress: async () => triggerLogout(),
       },
     ]);
-  };
-  const primaryItems = [
-    {
-      label: 'Find Friends',
-      icon: 'people-outline',
-      onPress: () => {
-        navigation.navigate('FindFriendsScreen');
-      },
-      iconSet: 'ion',
-    },
-    // {
-    //   label: 'Invite Friends',
-    //   icon: 'person-add-outline',
-    //   onPress: () => {
-    //     navigation.navigate('InviteFriendsScreen');
-    //   },
-    //   iconSet: 'ion',
-    // },
-    {
-      label: 'Help Center',
-      icon: 'help-circle-outline',
-      onPress: () => {
-        /* go to help  */
-      },
-      iconSet: 'ion',
-    },
-    {
-      label: 'Send Feedback',
-      icon: 'chatbubble-ellipses-outline',
-      onPress: () => {
-        navigation.navigate('SendFeedbackScreen');
-      },
-      iconSet: 'ion',
-    },
-    // {
-    //   label: 'Debug Notification',
-    //   icon: 'terminal',
-    //   onPress: () => navigation.navigate('MainDebugScreen'),
-    //   iconSet: 'ion',
-    // },
-  ] as const; // ← keep the literal types
+  }, []);
 
-  const dangerItems = [
-    {
-      label: 'Log Out',
-      icon: 'log-out',
-      onPress: () => handleLogout(),
-      iconSet: 'ion',
-    },
-  ] as const;
+  const handleDeleteAccount = useCallback(() => {
+    if (isDeletingAccount) return;
+
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your account and remove your profile from PushMeUp. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete Account',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setIsDeletingAccount(true);
+              await deleteMyAccount();
+              await triggerLogout({ showToast: false });
+              showToast({
+                type: 'success',
+                title: 'Account deleted',
+                message: 'Your account has been removed.',
+              });
+            } catch {
+              setIsDeletingAccount(false);
+              showToast({
+                type: 'error',
+                title: 'Could not delete account',
+                message: 'Something went wrong. Please try again.',
+              });
+            }
+          },
+        },
+      ],
+    );
+  }, [isDeletingAccount]);
+
+  const primaryItems = useMemo(
+    () =>
+      [
+        {
+          label: 'Find Friends',
+          icon: 'people-outline',
+          onPress: () => {
+            navigation.navigate('FindFriendsScreen');
+          },
+          iconSet: 'ion',
+        },
+        // {
+        //   label: 'Invite Friends',
+        //   icon: 'person-add-outline',
+        //   onPress: () => {
+        //     navigation.navigate('InviteFriendsScreen');
+        //   },
+        //   iconSet: 'ion',
+        // },
+        {
+          label: 'Help Center',
+          icon: 'help-circle-outline',
+          onPress: () => {
+            Linking.openURL(SUPPORT_URL).catch(() => {
+              showToast({
+                type: 'error',
+                title: 'Could not open link',
+                message: 'Please try again later.',
+              });
+            });
+          },
+          iconSet: 'ion',
+        },
+        {
+          label: 'Send Feedback',
+          icon: 'chatbubble-ellipses-outline',
+          onPress: () => {
+            navigation.navigate('SendFeedbackScreen');
+          },
+          iconSet: 'ion',
+        },
+        {
+          label: 'Privacy Policy',
+          icon: 'shield-checkmark-outline',
+          onPress: () => {
+            Linking.openURL(PRIVACY_POLICY_URL).catch(() => {
+              showToast({
+                type: 'error',
+                title: 'Could not open link',
+                message: 'Please try again later.',
+              });
+            });
+          },
+          iconSet: 'ion',
+        },
+        {
+          label: 'Terms of Service',
+          icon: 'document-text-outline',
+          onPress: () => {
+            Linking.openURL(TERMS_URL).catch(() => {
+              showToast({
+                type: 'error',
+                title: 'Could not open link',
+                message: 'Please try again later.',
+              });
+            });
+          },
+          iconSet: 'ion',
+        },
+        // {
+        //   label: 'Debug Notification',
+        //   icon: 'terminal',
+        //   onPress: () => navigation.navigate('MainDebugScreen'),
+        //   iconSet: 'ion',
+        // },
+      ] as const,
+    [navigation],
+  ); // ← keep the literal types
+
+  const dangerItems = useMemo<MenuItem[]>(
+    () => [
+      {
+        id: 'delete-account',
+        label: isDeletingAccount ? 'Deleting Account...' : 'Delete Account',
+        icon: 'trash-outline',
+        onPress: handleDeleteAccount,
+        iconSet: 'ion',
+        disabled: isDeletingAccount,
+        loading: isDeletingAccount,
+      },
+      {
+        id: 'logout',
+        label: 'Log Out',
+        icon: 'log-out',
+        onPress: () => handleLogout(),
+        iconSet: 'ion',
+      },
+    ],
+    [handleDeleteAccount, handleLogout, isDeletingAccount],
+  );
 
   return (
     <View style={styles.container}>
@@ -114,16 +209,26 @@ export default function ProfileMenu() {
       </View>
 
       <View style={[styles.card, styles.cardSpacer, styles.dangerCard]}>
-        {dangerItems.map(item => (
+        {dangerItems.map((item, idx) => (
           <Ripple
-            key={item.label}
-            style={[styles.row, styles.singleRow, styles.dangerRow]}
+            key={item.id}
+            style={[
+              styles.row,
+              idx === dangerItems.length - 1 && styles.singleRow,
+              styles.dangerRow,
+              item.disabled && styles.disabledRow,
+            ]}
             onPress={item.onPress}
+            disabled={item.disabled}
           >
             <Row align="center" justify="space-between" style={styles.innerRow}>
               <Row align="center">
                 <View style={[styles.iconCircle, styles.iconCircleDanger]}>
-                  <Icon set="ion" name={item.icon} size={20} color={colors.error} />
+                  {item.loading ? (
+                    <ActivityIndicator size="small" color={colors.error} />
+                  ) : (
+                    <Icon set="ion" name={item.icon} size={20} color={colors.error} />
+                  )}
                 </View>
                 <TextElement variant="body" weight="700" style={[styles.label, styles.labelDanger]}>
                   {item.label}
@@ -199,7 +304,10 @@ const styles = StyleSheet.create({
   },
   dangerRow: {
     backgroundColor: 'transparent',
-    borderBottomWidth: 0,
+    borderColor: '#F5D6D6',
+  },
+  disabledRow: {
+    opacity: 0.65,
   },
   labelDanger: {
     color: colors.error,

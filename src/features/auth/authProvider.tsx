@@ -12,9 +12,15 @@ import { getGoogleIdToken, signOutGoogle } from '@shared/utils/googleAuth';
 import { api } from '@shared/api/axios';
 import type { CustomAxiosRequestConfig } from '@shared/api/axios';
 import { useGoogleAuth } from './api/useGoogleAuth';
+import { useAppleAuth } from './api/useAppleAuth';
+import type { AuthProviderName } from './api/types';
 import { showToast } from '@shared/utils/toast';
 import { queryClient } from '@lib/react-query/client';
-import { registerBackendSessionRefresh, registerSignOut } from '@shared/api/authBridge';
+import {
+  registerBackendSessionRefresh,
+  registerSignOut,
+  type SignOutOptions,
+} from '@shared/api/authBridge';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import { buildRoute } from '@shared/api/apiRoutes';
 
@@ -23,11 +29,12 @@ type User = {
   name: string;
   email: string;
   photo?: string;
+  provider?: AuthProviderName;
 };
 
 type AuthContextType = {
   user: User | null;
-  signIn: () => Promise<void>;
+  signIn: (provider?: AuthProviderName) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
   token: string | null;
@@ -41,6 +48,7 @@ type AuthContextType = {
 
 const STORAGE_USER = 'auth:user';
 const STORAGE_TOKEN = 'auth:token';
+const STORAGE_AUTH_PROVIDER = 'auth:provider';
 const STORAGE_HAS_SEEN_FIND_FRIENDS = 'auth:hasSeenFindFriends';
 const STORAGE_FCM_TOKEN = 'fcm_token';
 
@@ -49,11 +57,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [authProvider, setAuthProvider] = useState<AuthProviderName | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasSeenFindFriendsScreen, setHasSeenFindFriendsScreenState] = useState(false);
   const [justLoggedIn, setJustLoggedIn] = useState(false);
 
   const { mutateAsync: googleAuth } = useGoogleAuth();
+  const { mutateAsync: appleAuth } = useAppleAuth();
   const isAuthenticated = !!token && !loading;
   const setHasSeenFindFriendsScreen = async (seen: boolean) => {
     await AsyncStorage.setItem(STORAGE_HAS_SEEN_FIND_FRIENDS, JSON.stringify(seen));
@@ -66,6 +76,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     const loadSession = async () => {
       const savedUser = await AsyncStorage.getItem(STORAGE_USER);
       const savedToken = await AsyncStorage.getItem(STORAGE_TOKEN);
+      const savedAuthProvider = await AsyncStorage.getItem(STORAGE_AUTH_PROVIDER);
       const seenFlag = await AsyncStorage.getItem(STORAGE_HAS_SEEN_FIND_FRIENDS);
 
       if (seenFlag) {
@@ -73,8 +84,15 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       }
 
       if (savedUser && savedToken) {
-        setUser(JSON.parse(savedUser));
+        const parsedUser = JSON.parse(savedUser) as User;
+        const parsedProvider =
+          savedAuthProvider === 'apple' || savedAuthProvider === 'google'
+            ? savedAuthProvider
+            : (parsedUser.provider ?? 'google');
+
+        setUser(parsedUser);
         setToken(savedToken);
+        setAuthProvider(parsedProvider);
         api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
       }
 
@@ -85,26 +103,41 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   /* ----------------------- SIGN IN ----------------------- */
-  const signIn = async () => {
+  const signIn = async (provider: AuthProviderName = 'google') => {
     try {
-      const { user, token } = await googleAuth();
+      const { user, token } = provider === 'apple' ? await appleAuth() : await googleAuth();
+      const nextUser = { ...user, provider };
 
-      setUser(user);
+      setUser(nextUser);
       setToken(token);
+      setAuthProvider(provider);
 
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      await AsyncStorage.setItem(STORAGE_USER, JSON.stringify(user));
-      await AsyncStorage.setItem(STORAGE_TOKEN, token);
+      await AsyncStorage.multiSet([
+        [STORAGE_USER, JSON.stringify(nextUser)],
+        [STORAGE_TOKEN, token],
+        [STORAGE_AUTH_PROVIDER, provider],
+      ]);
 
       setJustLoggedIn(true);
 
       showToast({
         type: 'success',
         title: 'Welcome back!',
-        message: `Hello, ${user.name}`,
+        message: `Hello, ${nextUser.name}`,
       });
     } catch (err: any) {
+      const isAppleCancel =
+        provider === 'apple' &&
+        (err?.code === '1001' ||
+          err?.code === 'ERR_REQUEST_CANCELED' ||
+          err?.message?.toLowerCase?.().includes('canceled'));
+
+      if (isAppleCancel) {
+        throw err;
+      }
+
       showToast({
         type: 'error',
         title: 'Sign-in Failed',
@@ -116,7 +149,15 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   const refreshBackendSession = useCallback(async () => {
     const savedUser = await AsyncStorage.getItem(STORAGE_USER);
+    const savedAuthProvider = await AsyncStorage.getItem(STORAGE_AUTH_PROVIDER);
     const currentUser = user ?? (savedUser ? (JSON.parse(savedUser) as User) : null);
+    const currentProvider =
+      authProvider ??
+      (savedAuthProvider === 'apple' || savedAuthProvider === 'google'
+        ? savedAuthProvider
+        : (currentUser?.provider ?? 'google'));
+
+    if (currentProvider !== 'google') return null;
 
     const userId = currentUser?.id?.trim();
     const name = currentUser?.name?.trim();
@@ -156,24 +197,39 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     setUser(nextUser);
     setToken(nextToken);
+    setAuthProvider('google');
 
     api.defaults.headers.common['Authorization'] = `Bearer ${nextToken}`;
 
     await AsyncStorage.multiSet([
       [STORAGE_USER, JSON.stringify(nextUser)],
       [STORAGE_TOKEN, nextToken],
+      [STORAGE_AUTH_PROVIDER, 'google'],
     ]);
 
     return nextToken;
-  }, [user]);
+  }, [authProvider, user]);
 
   /* ----------------------- SIGN OUT ----------------------- */
-  const signOut = async () => {
-    await signOutGoogle();
-    await AsyncStorage.multiRemove([STORAGE_USER, STORAGE_TOKEN, STORAGE_HAS_SEEN_FIND_FRIENDS]);
+  const signOut = async (options?: SignOutOptions) => {
+    if (!authProvider || authProvider === 'google') {
+      try {
+        await signOutGoogle();
+      } catch (error) {
+        console.warn('Failed to sign out of Google before clearing local session.', error);
+      }
+    }
+
+    await AsyncStorage.multiRemove([
+      STORAGE_USER,
+      STORAGE_TOKEN,
+      STORAGE_AUTH_PROVIDER,
+      STORAGE_HAS_SEEN_FIND_FRIENDS,
+    ]);
 
     setUser(null);
     setToken(null);
+    setAuthProvider(null);
     setJustLoggedIn(false);
 
     // Clear React Query data
@@ -190,11 +246,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     setHasSeenFindFriendsScreenState(false);
 
-    showToast({
-      type: 'info',
-      title: 'Signed out',
-      message: 'See you again soon!',
-    });
+    if (options?.showToast !== false) {
+      showToast({
+        type: 'info',
+        title: 'Signed out',
+        message: 'See you again soon!',
+      });
+    }
   };
 
   // Register logout handler for external callers

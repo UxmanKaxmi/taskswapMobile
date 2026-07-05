@@ -101,8 +101,8 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const currentUserId = user?.id ?? null;
   const isGuestMode = !user;
-  // Dev tools: visible in dev builds, or for the maintainer account in prod.
-  const canSeeDevTools = isDEV || user?.email?.toLowerCase() === 'kazmi58@gmail.com';
+  // Dev tools are only ever available in development builds.
+  const canSeeDevTools = isDEV;
 
   const [refreshing, setRefreshing] = useState(false);
   const [hasSummaryCards, setHasSummaryCards] = useState(true);

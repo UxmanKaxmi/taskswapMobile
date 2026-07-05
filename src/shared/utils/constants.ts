@@ -4,9 +4,15 @@ import Config from 'react-native-config';
 export const isAndroid = Platform.OS === 'android';
 export const isIOS = Platform.OS === 'ios';
 
-export const APP_NAME = 'Push Me Up';
+export const APP_NAME = 'PushMeUp';
 
 export const CONTACTS_SCOPE = 'https://www.googleapis.com/auth/contacts.readonly';
+
+// Legal / support links (required for App Store submission). Update the paths
+// to the real hosted pages before release.
+export const PRIVACY_POLICY_URL = 'https://pushmeup.app/privacy';
+export const TERMS_URL = 'https://pushmeup.app/terms';
+export const SUPPORT_URL = 'https://pushmeup.app/help';
 
 export const DEFAULT_PROFILE_IMAGE_SIZE = 120;
 export const SHARE_UPDATE_CHARACTER_LIMIT = 120;

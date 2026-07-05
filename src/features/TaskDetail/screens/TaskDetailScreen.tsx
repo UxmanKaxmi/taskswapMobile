@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { Layout } from '@shared/components/Layout';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
@@ -146,6 +147,15 @@ export default function TaskDetailScreen({
   const { mutate: togglePush, isPending } = useToggleTaskPush(resolvedTaskId ?? '');
   const qc = useQueryClient();
 
+  // Refetch the task whenever the screen regains focus so support that arrived
+  // while the user was elsewhere (e.g. a cheer) shows up on return.
+  useFocusEffect(
+    useCallback(() => {
+      if (!resolvedTaskId) return;
+      qc.invalidateQueries({ queryKey: buildQueryKey.taskById(resolvedTaskId) });
+    }, [qc, resolvedTaskId]),
+  );
+
   const adviceMorph = useSharedValue(0); // 0 = button, 1 = composer
 
   const {
@@ -161,6 +171,14 @@ export default function TaskDetailScreen({
       }),
     enabled: !!resolvedTaskId, // ✅ IMPORTANT
     initialData: initialTask, // ✅ IMPORTANT
+    // The owner must see support (pushes/cheers) arrive while viewing their own
+    // task. Refetch when the app returns to foreground, and poll lightly while
+    // the owner has the screen open.
+    refetchOnWindowFocus: true,
+    refetchInterval: query => {
+      const data = query.state.data as { userId?: string } | undefined;
+      return data && user?.id && data.userId === user.id ? 15000 : false;
+    },
   });
 
   const task = isTaskQueryError ? null : (taskData ?? initialTask);
@@ -184,6 +202,16 @@ export default function TaskDetailScreen({
   );
   const isShareUpdateCoolingDown = isProgressUpdateCoolingDown(latestProgressUpdate);
   const canShareProgressUpdate = hasShareUpdateRecipients && !isShareUpdateCoolingDown;
+
+  // The cooldown label ("share another update in …") and the disabled state are
+  // derived from Date.now() at render time. Tick once a second while cooling
+  // down so the countdown actually ticks and the CTA re-enables at expiry.
+  const [, setCooldownTick] = React.useState(0);
+  React.useEffect(() => {
+    if (!isShareUpdateCoolingDown) return;
+    const interval = setInterval(() => setCooldownTick(t => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, [isShareUpdateCoolingDown, latestProgressUpdate?.createdAt]);
   const hasVoted = task?.hasVoted;
   const hasReminded = task?.hasReminded;
   const canViewerCheer = Boolean(hasPushed && !isOwner && !isCompleted);

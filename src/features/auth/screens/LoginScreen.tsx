@@ -18,6 +18,8 @@ import {
 import { TAB_SCREENS } from '@shared/utils/helperFunctions';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
+import { isAppleSignInSupported } from '@shared/utils/appleAuth';
+import type { AuthProviderName } from '../api/types';
 
 function GoogleLogo({ size = 22 }: { size?: number }) {
   return (
@@ -44,7 +46,7 @@ function GoogleLogo({ size = 22 }: { size?: number }) {
 
 export default function LoginScreen() {
   const { signIn, loading } = useAuth();
-  const [isSigningIn, setIsSigningIn] = React.useState(false);
+  const [signingInProvider, setSigningInProvider] = React.useState<AuthProviderName | null>(null);
 
   const route = useRoute<RouteProp<AuthStackParamList, 'Login'>>();
   const navigation = useNavigation();
@@ -79,55 +81,66 @@ export default function LoginScreen() {
     );
   };
 
-  const loginLoading = loading || isSigningIn;
+  const loginLoading = loading || !!signingInProvider;
+  const appleSignInSupported = isAppleSignInSupported();
 
-  const handleLogin = async () => {
+  const redirectAfterLogin = () => {
+    const isTab = TAB_SCREENS.includes(redirectTo as any);
+
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: 'App',
+          state: {
+            routes: isTab
+              ? [
+                  {
+                    name: 'Tabs',
+                    state: {
+                      index: 0,
+                      routes: [{ name: redirectTo as keyof BottomTabParamList }],
+                    },
+                  },
+                ]
+              : [
+                  {
+                    name: 'Tabs',
+                  },
+                  {
+                    name: redirectTo as keyof AppStackParamList,
+                    params: route.params?.params,
+                  },
+                ],
+          },
+        },
+      ],
+    });
+  };
+
+  const handleLogin = async (provider: AuthProviderName = 'google') => {
     if (loginLoading) return;
 
     try {
-      setIsSigningIn(true);
-      await signIn();
-
-      const isTab = TAB_SCREENS.includes(redirectTo as any);
-
-      navigation.reset({
-        index: 0,
-        routes: [
-          {
-            name: 'App',
-            state: {
-              routes: isTab
-                ? [
-                    {
-                      name: 'Tabs',
-                      state: {
-                        index: 0,
-                        routes: [{ name: redirectTo as keyof BottomTabParamList }],
-                      },
-                    },
-                  ]
-                : [
-                    {
-                      name: 'Tabs',
-                    },
-                    {
-                      name: redirectTo as keyof AppStackParamList,
-                      params: route.params?.params,
-                    },
-                  ],
-            },
-          },
-        ],
-      });
+      setSigningInProvider(provider);
+      await signIn(provider);
+      redirectAfterLogin();
     } catch (e) {
+      const errorCode = typeof e === 'object' && e && 'code' in e ? String(e.code) : null;
+
+      if (
+        provider === 'apple' &&
+        (errorCode === '1001' ||
+          errorCode === 'ERR_REQUEST_CANCELED' ||
+          (e instanceof Error && e.message.toLowerCase().includes('canceled')))
+      ) {
+        return;
+      }
+
       Alert.alert('Login failed', e instanceof Error ? e.message : 'Something went wrong.');
     } finally {
-      setIsSigningIn(false);
+      setSigningInProvider(null);
     }
-  };
-
-  const handleAppleLogin = () => {
-    Alert.alert('Apple Sign-In', 'Apple Sign-In is not configured yet.');
   };
 
   return (
@@ -210,14 +223,14 @@ export default function LoginScreen() {
         <Pressable
           accessibilityRole="button"
           disabled={loginLoading}
-          onPress={handleLogin}
+          onPress={() => handleLogin('google')}
           style={({ pressed }) => [
             styles.socialButton,
             styles.googleButton,
             pressed && !loginLoading && styles.buttonPressed,
           ]}
         >
-          {loginLoading ? (
+          {signingInProvider === 'google' ? (
             <>
               <ActivityIndicator size="small" color={colors.onboardingInk} />
               <Text style={styles.googleButtonText}>Signing in...</Text>
@@ -230,18 +243,30 @@ export default function LoginScreen() {
           )}
         </Pressable>
 
-        <Pressable
-          accessibilityRole="button"
-          onPress={handleAppleLogin}
-          style={({ pressed }) => [
-            styles.socialButton,
-            styles.appleButton,
-            pressed && styles.buttonPressed,
-          ]}
-        >
-          <Icon set="fa6" name="apple" iconStyle="brand" size={20} color={colors.onPrimary} />
-          <Text style={styles.appleButtonText}>Continue with Apple</Text>
-        </Pressable>
+        {appleSignInSupported ? (
+          <Pressable
+            accessibilityRole="button"
+            disabled={loginLoading}
+            onPress={() => handleLogin('apple')}
+            style={({ pressed }) => [
+              styles.socialButton,
+              styles.appleButton,
+              pressed && !loginLoading && styles.buttonPressed,
+            ]}
+          >
+            {signingInProvider === 'apple' ? (
+              <>
+                <ActivityIndicator size="small" color={colors.onPrimary} />
+                <Text style={styles.appleButtonText}>Signing in...</Text>
+              </>
+            ) : (
+              <>
+                <Icon set="fa6" name="apple" iconStyle="brand" size={20} color={colors.onPrimary} />
+                <Text style={styles.appleButtonText}>Continue with Apple</Text>
+              </>
+            )}
+          </Pressable>
+        ) : null}
 
         <TextElement variant="caption" color="muted" style={styles.permissionText}>
           We&apos;ll never post without your permission.

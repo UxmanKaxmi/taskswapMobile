@@ -9,7 +9,7 @@ import InviteFriendsScreen from '@features/Invite/screens/InviteFriendsScreen';
 import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
 import { AppStackParamList } from './types/navigation';
 import FriendsProfileScreen from '@features/Friends/screens/FriendsProfileScreen';
-import { isAndroid, isIOS } from '@shared/utils/constants';
+import { isAndroid, isIOS, isDEV } from '@shared/utils/constants';
 import BottomTabsIOS from './BottomTabsIOS';
 import BottomTabsAndroid from './BottomTabsAndroid';
 import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
@@ -47,8 +47,8 @@ export default function AppNavigator() {
       <Stack.Screen name="InviteFriendsScreen" component={InviteFriendsScreen} />
       {/* Notifications */}
       <Stack.Screen name="NotificationMainScreen" component={NotificationMainScreen} />
-      {/* Debug (optional) */}
-      <Stack.Screen name="MainDebugScreen" component={MainDebugScreen} />
+      {/* Debug — development builds only */}
+      {isDEV && <Stack.Screen name="MainDebugScreen" component={MainDebugScreen} />}
 
       <Stack.Screen name="FriendsProfileScreen" component={FriendsProfileScreen} />
       <Stack.Screen name="SendFeedbackScreen" component={SendFeedbackScreen} />

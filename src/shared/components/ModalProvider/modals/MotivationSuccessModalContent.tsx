@@ -73,7 +73,7 @@ export default function MotivationSuccessModalContent({
       </View>
 
       <TextElement variant="headline" weight="700" style={styles.title}>
-        Your request is live
+        Your goal is live
       </TextElement>
 
       <TextElement variant="bodySmall" color="muted" style={styles.body}>

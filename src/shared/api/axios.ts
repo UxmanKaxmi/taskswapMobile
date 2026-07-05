@@ -52,12 +52,12 @@ interface CustomAxiosError extends Omit<AxiosError, 'config'> {
   config: CustomAxiosRequestConfig & { headers?: Record<string, string> };
 }
 
-const GOOGLE_SYNC_ROUTES = new Set([buildRoute.syncUserToDb(), '/users']);
+const AUTH_SYNC_ROUTES = new Set([buildRoute.syncUserToDb(), '/users']);
 
-const isGoogleSyncRequest = (config?: AxiosRequestConfig | null) =>
+const isAuthSyncRequest = (config?: AxiosRequestConfig | null) =>
   config?.method?.toLowerCase() === 'post' &&
   typeof config.url === 'string' &&
-  GOOGLE_SYNC_ROUTES.has(config.url);
+  AUTH_SYNC_ROUTES.has(config.url);
 
 const getAuthorizationHeader = (config: InternalAxiosRequestConfig) => {
   const headers: any = config.headers;
@@ -114,18 +114,20 @@ api.interceptors.request.use(
 
     const authorization = getAuthorizationHeader(config);
 
-    if (isGoogleSyncRequest(config) && getJwtAlg(authorization) === 'HS256') {
+    if (isAuthSyncRequest(config) && getJwtAlg(authorization) === 'HS256') {
       return Promise.reject(
-        new Error('Google sync expects a Google ID token, but received the backend app JWT.'),
+        new Error('Auth sync expects a provider identity token, but received the backend app JWT.'),
       );
     }
 
-    console.log(`➡️ [${config.method?.toUpperCase()}] ${config.baseURL}${config.url}`);
-    if (config.data) console.log('Payload:', config.data);
+    if (__DEV__) {
+      console.log(`➡️ [${config.method?.toUpperCase()}] ${config.baseURL}${config.url}`);
+      if (config.data) console.log('Payload:', config.data);
+    }
     return config;
   },
   (error: AxiosError) => {
-    console.error('❌ [Request Error]', error);
+    if (__DEV__) console.error('❌ [Request Error]', error);
     return Promise.reject(error);
   },
 );
@@ -133,7 +135,7 @@ api.interceptors.request.use(
 // ✅ Response Interceptor — hard logout on invalid/expired token
 api.interceptors.response.use(
   response => {
-    console.log(`✅ [Response] ${response.status} ${response.config.url}`);
+    if (__DEV__) console.log(`✅ [Response] ${response.status} ${response.config.url}`);
     return response;
   },
   async (error: CustomAxiosError) => {
@@ -158,7 +160,7 @@ api.interceptors.response.use(
       if (
         !error.config.skipAuthRefresh &&
         !error.config._authRetry &&
-        !isGoogleSyncRequest(error.config)
+        !isAuthSyncRequest(error.config)
       ) {
         try {
           const refreshedToken = await refreshBackendSession();
@@ -189,13 +191,27 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // ⏱️ Rate limited — show a friendly, specific message instead of the generic one
+    if (status === 429) {
+      if (!error.config?.skipToast) {
+        showToast({
+          type: 'info',
+          title: 'Slow down',
+          message: 'You’re doing that a bit too fast. Please try again in a moment.',
+        });
+      }
+      return Promise.reject(error);
+    }
+
     // 🧯 Generic error path
-    console.error('❌ [Response Error]', {
-      message: error.message,
-      url: error.config?.url,
-      status: error.response?.status,
-      data: error.response?.data,
-    });
+    if (__DEV__) {
+      console.error('❌ [Response Error]', {
+        message: error.message,
+        url: error.config?.url,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+    }
 
     const message =
       data?.message || data?.error || error.message || 'Something went wrong. Please try again.';

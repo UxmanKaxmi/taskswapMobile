@@ -15,3 +15,7 @@ export async function getMe(): Promise<UserProfile> {
 export async function submitFeedback(payload: FeedbackPayload): Promise<void> {
   await api.post(buildRoute.submitFeedback(), payload);
 }
+
+export async function deleteMyAccount(): Promise<void> {
+  await api.delete(buildRoute.deleteMe());
+}

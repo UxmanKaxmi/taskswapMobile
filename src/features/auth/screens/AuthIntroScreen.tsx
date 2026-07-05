@@ -115,7 +115,7 @@ export default function AuthIntroScreen() {
   const copy = authCopy ||
     (authContext && authCopyMap[authContext]) ||
     (redirectTo && authCopyMap[redirectTo]) || {
-      title: 'Continue with Push Me Up',
+      title: 'Continue with PushMeUp',
       subtitle: 'Log in to save your progress and stay connected.',
       cta: 'Log In',
     };

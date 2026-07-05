@@ -44,7 +44,7 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
 
   const [text, setText] = useState('');
   const [error, setError] = useState<string | undefined>(undefined);
-  const [selectedFeeling, setSelectedFeeling] = useState<FeelingValue>('nervous');
+  const [selectedFeeling, setSelectedFeeling] = useState<FeelingValue | undefined>(undefined);
   const [helpers, setHelpers] = useState<HelperUser[]>([]);
   const [showHelperModal, setShowHelperModal] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -65,7 +65,7 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
     if (!draft || draft.type !== TaskTypeEnum.Motivation) return;
 
     setText(draft.text ?? '');
-    setSelectedFeeling(normalizeFeelingValue(draft.feeling) ?? 'nervous');
+    setSelectedFeeling(normalizeFeelingValue(draft.feeling) ?? undefined);
   }, [route.params?.draft]);
 
   const hasAutoSubmittedRef = React.useRef(false);

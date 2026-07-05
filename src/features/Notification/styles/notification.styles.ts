@@ -36,9 +36,15 @@ export const notificationStyles = StyleSheet.create({
   },
   unreadCard: {
     backgroundColor: colors.adviceBg,
+    // Clear unread marker: a colored left accent bar. Read rows carry a
+    // transparent border of the same width so there's no horizontal shift.
+    borderLeftWidth: ms(4),
+    borderLeftColor: colors.adviceBgHardest,
   },
   readCard: {
     backgroundColor: colors.onAccent,
+    borderLeftWidth: ms(4),
+    borderLeftColor: 'transparent',
   },
   cardStyles: {
     flexDirection: 'row',

@@ -507,9 +507,11 @@ function getTaskDayNumber(task: Extract<Task, { type: 'motivation' }> | null) {
   return getGoalDayNumber(task.createdAt, task.progressUpdates?.length ?? 0);
 }
 
-function getGoalDayNumber(createdAt: string, progressCount: number) {
-  if (progressCount > 0) return progressCount + 1;
-
+// "DAY N" = calendar days since the goal was created (day 1 = creation day).
+// Always derive it from createdAt so every surface showing the same goal agrees;
+// previously one variant used the progress-update count, which diverged from the
+// calendar-based variant for the same task.
+function getGoalDayNumber(createdAt: string, _progressCount?: number) {
   const parsed = parseISO(createdAt);
   if (isValid(parsed)) {
     return Math.max(1, differenceInCalendarDays(new Date(), parsed) + 1);

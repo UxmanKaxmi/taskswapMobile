@@ -44,6 +44,6 @@ export const showPushToast = ({ pusherName, message }: PushToastProps) => {
     },
     position: 'bottom',
     bottomOffset: 110,
-    visibilityTime: 2600,
+    visibilityTime: 3500,
   });
 };
