@@ -74,6 +74,7 @@ describe('home summary api', () => {
       peopleNeedYourPushToday: 4,
       replyWaitingCount: 2,
       featuredStory: raw.featuredStory,
+      yourGoal: null,
     });
   });
 
