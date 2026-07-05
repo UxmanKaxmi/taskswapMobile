@@ -8,12 +8,12 @@ import React, {
   PropsWithChildren,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TaskTypeEnum } from '@features/Tasks/types/tasks';
+import { GoalTypeEnum } from '@features/Goals/types/goals';
 import { fetchFeatureFlags } from '@shared/api/featureFlags';
 import {
   DEFAULT_FEATURE_FLAGS,
   FeatureFlags,
-  getEnabledTaskTypes,
+  getEnabledGoalTypes,
   normalizeFeatureFlags,
 } from './types';
 import { useAuth } from '@features/Auth/AuthProvider';
@@ -23,7 +23,7 @@ const PUBLIC_STORAGE_KEY = `${STORAGE_KEY}:public`;
 
 type FeatureFlagsContextType = {
   flags: FeatureFlags;
-  enabledTaskTypes: TaskTypeEnum[];
+  enabledGoalTypes: GoalTypeEnum[];
   loading: boolean;
   refresh: () => Promise<void>;
 };
@@ -76,10 +76,10 @@ export function FeatureFlagsProvider({ children }: PropsWithChildren) {
     };
   }, [refresh, storageKey]);
 
-  const enabledTaskTypes = useMemo(() => getEnabledTaskTypes(flags), [flags]);
+  const enabledGoalTypes = useMemo(() => getEnabledGoalTypes(flags), [flags]);
 
   return (
-    <FeatureFlagsContext.Provider value={{ flags, enabledTaskTypes, loading, refresh }}>
+    <FeatureFlagsContext.Provider value={{ flags, enabledGoalTypes, loading, refresh }}>
       {children}
     </FeatureFlagsContext.Provider>
   );

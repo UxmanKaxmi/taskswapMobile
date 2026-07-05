@@ -99,7 +99,7 @@ export default function InviteFriendsScreen() {
             </Ripple>
 
             <TextElement variant="caption" color="muted" style={styles.helperText}>
-              Tap the link to copy. This is a smart link that opens TaskSwap (or the store) and
+              Tap the link to copy. This is a smart link that opens GoalSwap (or the store) and
               keeps your referral attached.
             </TextElement>
 

@@ -1,7 +1,7 @@
-// src/features/Tasks/hooks/useVoteStats.ts
-import { DecisionTask } from '../types/home';
+// src/features/Goals/hooks/useVoteStats.ts
+import { DecisionGoal } from '../types/home';
 
-export function useVoteStats(task?: DecisionTask) {
+export function useVoteStats(task?: DecisionGoal) {
   if (!task || !task.options || task.options.length < 2) {
     return {
       option1: '',

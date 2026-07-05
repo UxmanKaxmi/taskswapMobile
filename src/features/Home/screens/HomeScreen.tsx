@@ -29,9 +29,9 @@ import { colors, platformShadow, spacing } from '@shared/theme';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { QueryKeys } from '@shared/constants/queryKeys';
-import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
-import { Task, TaskTypeEnum } from '@features/Tasks/types/tasks';
-import { MotivationTask } from '../types/home';
+import { useGoalsQuery } from '@features/Goals/hooks/useGoalsQuery';
+import { Goal, GoalTypeEnum } from '@features/Goals/types/goals';
+import { MotivationGoal } from '../types/home';
 import { showToast, showPushToast } from '@shared/utils/toast';
 import MotivationCard from '../components/MotivationCard';
 import DecisionCard from '../components/DecisionCard';
@@ -39,7 +39,7 @@ import ReminderCard from '../components/ReminderCard';
 import AdviceCard from '../components/AdviceCard';
 import HorizontalFilterTabs, { type FeedSortKey } from '../components/HorizontalFilterTabs';
 import { useAuth } from '@features/Auth/AuthProvider';
-import { navigateToTaskDetails, useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
+import { navigateToGoalDetails, useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 import { LaunchModalHost } from '@features/LaunchModals';
 import { haptics } from '@shared/utils/haptics';
 import Ripple from '@shared/components/Buttons/Ripple';
@@ -77,7 +77,7 @@ export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
   const queryClient = useQueryClient();
-  const listRef = useRef<FlatList<Task>>(null);
+  const listRef = useRef<FlatList<Goal>>(null);
   const [feedSort, setFeedSort] = useState<FeedSortKey>('all');
   const secondaryItems = useSecondaryProfileMenuItems();
 
@@ -91,7 +91,7 @@ export default function HomeScreen() {
     hasNextPage,
     isFetching,
     isFetchingNextPage,
-  } = useTasksQuery(feedSort);
+  } = useGoalsQuery(feedSort);
   const {
     data: homeSummary,
     isLoading: isHomeSummaryLoading,
@@ -246,7 +246,7 @@ export default function HomeScreen() {
     opacity: interpolate(scrollY.value, [0, 20], [1, 0], Extrapolation.CLAMP),
   }));
 
-  const flattenedTasks = useMemo(() => {
+  const flattenedGoals = useMemo(() => {
     const all = data?.pages.flatMap(page => page.data) ?? [];
     // Pages can overlap (e.g. a newly created task shifts pagination), producing
     // the same task id twice. Dedupe so the FlatList keys stay unique.
@@ -263,7 +263,7 @@ export default function HomeScreen() {
 
   // Show every task in the feed, including the viewer's own goals. (Your newest
   // goal also appears in the "YOUR GOAL" summary card above the list.)
-  const feedTasks = flattenedTasks;
+  const feedGoals = flattenedGoals;
 
   const showFeedSortLoading =
     isFeedSortChanging && isFetching && !refreshing && !isFetchingNextPage;
@@ -301,7 +301,7 @@ export default function HomeScreen() {
     try {
       haptics.selection();
       setRefreshing(true);
-      // Per-task push state is cached separately (useTaskPushes) and takes
+      // Per-task push state is cached separately (useGoalPushes) and takes
       // precedence over the feed's task.pushCount, so refetching the feed alone
       // leaves stale push counts. Invalidate the push caches too so cards pick up
       // pushes made by other users.
@@ -336,15 +336,15 @@ export default function HomeScreen() {
     console.error('[TASK_FETCH_ERROR]', error);
   }, [error, isError]);
 
-  const onPressTask = useCallback(
-    (task: Task) => {
-      navigateToTaskDetails(navigation, task);
+  const onPressGoal = useCallback(
+    (task: Goal) => {
+      navigateToGoalDetails(navigation, task);
     },
     [navigation],
   );
 
   const onPressAddMotivation = useCallback(() => {
-    if (!checkAuthThenNavigate('AddTask')) return;
+    if (!checkAuthThenNavigate('AddGoal')) return;
     haptics.selection();
   }, [checkAuthThenNavigate]);
 
@@ -391,16 +391,16 @@ export default function HomeScreen() {
     ]);
   }, [navigation, secondaryItems]);
 
-  const keyExtractor = useCallback((item: Task) => item.id, []);
+  const keyExtractor = useCallback((item: Goal) => item.id, []);
 
-  const onNoopTaskAction = useCallback((_task: Task) => {}, []);
+  const onNoopGoalAction = useCallback((_task: Goal) => {}, []);
 
-  const handleShareMotivation = useCallback((_task: MotivationTask) => {}, []);
+  const handleShareMotivation = useCallback((_task: MotivationGoal) => {}, []);
 
   const onSuggestAdvice = useCallback(
-    (task: Task) => {
+    (task: Goal) => {
       checkAuthThenNavigate(
-        'TaskDetail',
+        'GoalDetail',
         {
           taskId: task.id,
           openAdviceComposer: true,
@@ -413,37 +413,37 @@ export default function HomeScreen() {
     [checkAuthThenNavigate],
   );
 
-  const renderTaskNew = useCallback<ListRenderItem<Task>>(
+  const renderGoalNew = useCallback<ListRenderItem<Goal>>(
     ({ item }) => {
       switch (item.type) {
-        case TaskTypeEnum.Decision:
-          return <DecisionCard task={item as any} onPressCard={onPressTask as any} />;
-        case TaskTypeEnum.Reminder:
-          return <ReminderCard task={item as any} onPressCard={onPressTask as any} />;
-        case TaskTypeEnum.Motivation:
+        case GoalTypeEnum.Decision:
+          return <DecisionCard task={item as any} onPressCard={onPressGoal as any} />;
+        case GoalTypeEnum.Reminder:
+          return <ReminderCard task={item as any} onPressCard={onPressGoal as any} />;
+        case GoalTypeEnum.Motivation:
           return (
             <MotivationCard
-              task={item as MotivationTask}
-              onPressCard={onPressTask as any}
-              onPressSuggest={onNoopTaskAction as any}
-              onPressView={onNoopTaskAction as any}
+              task={item as MotivationGoal}
+              onPressCard={onPressGoal as any}
+              onPressSuggest={onNoopGoalAction as any}
+              onPressView={onNoopGoalAction as any}
               onPressShare={handleShareMotivation}
             />
           );
-        case TaskTypeEnum.Advice:
+        case GoalTypeEnum.Advice:
           return (
             <AdviceCard
               task={item as any}
-              onPressCard={onPressTask as any}
+              onPressCard={onPressGoal as any}
               onPressSuggest={onSuggestAdvice as any}
-              onPressView={onNoopTaskAction as any}
+              onPressView={onNoopGoalAction as any}
             />
           );
         default:
           return null;
       }
     },
-    [handleShareMotivation, onNoopTaskAction, onPressTask, onSuggestAdvice],
+    [handleShareMotivation, onNoopGoalAction, onPressGoal, onSuggestAdvice],
   );
 
   return (
@@ -501,7 +501,7 @@ export default function HomeScreen() {
                       onChange={handleFeedSortChange}
                     />
                   </Animated.View>
-                  {canSeeDevTools && (
+                  {/* {canSeeDevTools && (
                     <Ripple hitSlop={8} onPress={handleOpenDevMenu} style={styles.devDotsButton}>
                       <Icon
                         set="ion"
@@ -510,7 +510,7 @@ export default function HomeScreen() {
                         color={colors.onboardingInk}
                       />
                     </Ripple>
-                  )}
+                  )} */}
                 </View>
               </View>
             }
@@ -521,13 +521,13 @@ export default function HomeScreen() {
           <Animated.View onLayout={onCardLayout} style={[styles.cardInner, summaryCardVisualStyle]}>
             <HomeSummarySection
               summary={homeSummary}
-              tasks={flattenedTasks as any}
+              tasks={flattenedGoals as any}
               currentUserId={currentUserId}
               isGuestMode={isGuestMode}
               isLoading={isHomeSummaryLoading}
               isError={isHomeSummaryError}
               onRetry={refetchHomeSummary}
-              onPressTask={onPressTask as any}
+              onPressGoal={onPressGoal as any}
               includeCardKeys={HERO_SUMMARY_CARD_KEYS}
               previewAllCards={PREVIEW_ALL_SUMMARY_CARDS}
               onHasVisibleCardsChange={setHasSummaryCards}
@@ -549,8 +549,8 @@ export default function HomeScreen() {
       <AnimatedFlatList
         ref={listRef as any}
         style={styles.list}
-        data={feedTasks}
-        renderItem={renderTaskNew as any}
+        data={feedGoals}
+        renderItem={renderGoalNew as any}
         keyExtractor={keyExtractor as any}
         onScroll={scrollHandler}
         scrollEventThrottle={16}

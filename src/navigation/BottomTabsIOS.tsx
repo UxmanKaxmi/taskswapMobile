@@ -5,7 +5,7 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 
 import HomeScreen from '@features/Home/screens/HomeScreen';
 import FriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
-import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
+import NotificationMainScreen from '@features/Notification/screens/NotificationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
 
 import { useUnreadNotificationCount } from '@features/Notification/hooks/useUnreadNotificationCount';
@@ -14,7 +14,7 @@ import { useCheckAuthThenNavigate } from './types/navigationUtils';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors } from '@shared/theme';
 import { AppStackParamList } from './types/navigation';
-import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
+import AddGoalNavigator from '@features/AddGoal/navigation/AddGoalNavigator';
 
 const Tab = createNativeBottomTabNavigator();
 
@@ -79,12 +79,12 @@ export default function BottomTabsIOS() {
 
       {/* ADD TASK → FAB BUTTON */}
       <Tab.Screen
-        name="AddTask"
-        component={AddTaskNavigator}
+        name="AddGoal"
+        component={AddGoalNavigator}
         listeners={{
           tabPress: (e: any) => {
             e.preventDefault();
-            checkAuthThenNavigate('AddTask');
+            checkAuthThenNavigate('AddGoal');
           },
         }}
         options={{

@@ -12,7 +12,7 @@ import { resolveAppTextStyle } from '@shared/theme/fonts';
  * - headline: large heading, 32
  *   @example
  *   // 32
- *   <TextElement variant="headline" weight="600">Your Tasks</TextElement>
+ *   <TextElement variant="headline" weight="600">Your Goals</TextElement>
  * - title: section heading, 24
  *   @example
  *   // 24

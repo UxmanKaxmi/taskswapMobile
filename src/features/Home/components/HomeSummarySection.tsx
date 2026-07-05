@@ -16,20 +16,20 @@ import { haptics } from '@shared/utils/haptics';
 import { useAuth } from '@features/Auth/AuthProvider';
 
 import { AppStackParamList } from '@navigation/types/navigation';
-import { HomeSummaryResponse, Task } from '../types/home';
+import { HomeSummaryResponse, Goal } from '../types/home';
 import { ms, vs } from 'react-native-size-matters';
 import { differenceInCalendarDays, isValid, parseISO } from 'date-fns';
 import { WINDOW_WIDTH } from '@gorhom/bottom-sheet';
 
 type Props = {
   summary?: HomeSummaryResponse | null;
-  tasks?: Task[];
+  tasks?: Goal[];
   currentUserId?: string | null;
   isGuestMode?: boolean;
   isLoading?: boolean;
   isError?: boolean;
   onRetry?: () => void;
-  onPressTask?: (task: Task) => void;
+  onPressGoal?: (task: Goal) => void;
   onHasVisibleCardsChange?: (hasVisibleCards: boolean) => void;
   includeCardKeys?: readonly HomeSummaryCardKey[];
   /** Testing: render every card type (with fallback copy) and ignore dismiss state. */
@@ -57,7 +57,7 @@ type CardConfig = {
   tone: CardTone;
   leadingIcon: { set: 'fa6' | 'ion'; name: string; iconStyle?: 'solid' | 'regular' };
   fingerprint: string;
-  task?: Task | null;
+  task?: Goal | null;
   onPress?: () => void;
 };
 
@@ -97,7 +97,7 @@ const TONES = {
   push: DARK_TONE,
   progress: DARK_TONE,
   advice: DARK_TONE,
-  firstTask: DARK_TONE,
+  firstGoal: DARK_TONE,
 } satisfies Record<string, CardTone>;
 
 export default function HomeSummarySection({
@@ -108,7 +108,7 @@ export default function HomeSummarySection({
   isLoading: _isLoading = false,
   isError: _isError = false,
   onRetry: _onRetry,
-  onPressTask,
+  onPressGoal,
   onHasVisibleCardsChange,
   includeCardKeys = HOME_SUMMARY_CARD_KEYS,
   previewAllCards = false,
@@ -124,16 +124,16 @@ export default function HomeSummarySection({
   const handleCreateFirstPushPress = useCallback(() => {
     if (!user) {
       navigation.navigate('AuthIntro', {
-        redirectTo: 'AddTask',
+        redirectTo: 'AddGoal',
       });
       return;
     }
 
     const parentNavigation = navigation.getParent();
     if (parentNavigation) {
-      parentNavigation.navigate('AddTask' as never);
+      parentNavigation.navigate('AddGoal' as never);
     } else {
-      navigation.navigate('AddTask' as never);
+      navigation.navigate('AddGoal' as never);
     }
 
     haptics.selection();
@@ -145,7 +145,7 @@ export default function HomeSummarySection({
           summary,
           tasks: tasks ?? [],
           currentUserId,
-          onPressTask,
+          onPressGoal,
           onCreateFirstPushPress: handleCreateFirstPushPress,
           previewAllCards,
         });
@@ -157,7 +157,7 @@ export default function HomeSummarySection({
     includeCardKeys,
     isGuestMode,
     navigation,
-    onPressTask,
+    onPressGoal,
     previewAllCards,
     summary,
     tasks,
@@ -304,60 +304,60 @@ function buildCards({
   summary,
   tasks,
   currentUserId,
-  onPressTask,
+  onPressGoal,
   onCreateFirstPushPress,
   previewAllCards = false,
 }: {
   summary?: HomeSummaryResponse | null;
-  tasks: Task[];
+  tasks: Goal[];
   currentUserId: string | null;
-  onPressTask?: (task: Task) => void;
+  onPressGoal?: (task: Goal) => void;
   onCreateFirstPushPress: () => void;
   previewAllCards?: boolean;
 }): CardConfig[] {
   const trimmedCurrentUserId = currentUserId?.trim() ?? '';
-  const hasCreatedAnyTask = tasks.some(task => task.userId === trimmedCurrentUserId);
+  const hasCreatedAnyGoal = tasks.some(task => task.userId === trimmedCurrentUserId);
   const successStoryKey =
     summary?.successStory?.id?.trim() ??
     summary?.heroModule?.entity.taskId?.trim() ??
     summary?.featuredStory?.taskId?.trim() ??
     '';
-  const successTask = findTaskById(
+  const successGoal = findGoalById(
     tasks,
     summary?.successStory?.entity.taskId ??
       summary?.heroModule?.entity.taskId ??
       summary?.featuredStory?.taskId ??
       null,
   );
-  const goalTask = selectGoalTask(tasks, currentUserId);
-  const pushTask = selectMotivationTask(tasks, currentUserId);
-  const progressTask = selectProgressTask(tasks, currentUserId);
+  const primaryGoal = selectPrimaryGoal(tasks, currentUserId);
+  const pushGoal = selectMotivationGoal(tasks, currentUserId);
+  const progressGoal = selectProgressGoal(tasks, currentUserId);
 
   // Prefer the server-authoritative goal from the summary (always up to date
   // after posting); fall back to the feed-derived own task.
   const summaryGoal = summary?.yourGoal ?? null;
   const goalText = summaryGoal
     ? stripOuterQuotes(summaryGoal.text)
-    : goalTask
-      ? stripOuterQuotes(goalTask.text)
+    : primaryGoal
+      ? stripOuterQuotes(primaryGoal.text)
       : 'Your goal shows up here';
-  const goalPushCount = summaryGoal?.pushCount ?? goalTask?.pushCount ?? 0;
+  const goalPushCount = summaryGoal?.pushCount ?? primaryGoal?.pushCount ?? 0;
   const goalDay = summaryGoal
     ? getGoalDayNumber(summaryGoal.createdAt, summaryGoal.progressCount)
-    : getTaskDayNumber(goalTask);
-  const goalForPress: Task | null =
-    goalTask ??
+    : getGoalDayNumberFromGoal(primaryGoal);
+  const goalForPress: Goal | null =
+    primaryGoal ??
     (summaryGoal
-      ? ({ id: summaryGoal.taskId, type: 'motivation', text: summaryGoal.text } as unknown as Task)
+      ? ({ id: summaryGoal.taskId, type: 'motivation', text: summaryGoal.text } as unknown as Goal)
       : null);
   const goalFingerprint = summaryGoal
     ? `your-goal:${summaryGoal.taskId}:${summaryGoal.pushCount}:${summaryGoal.progressCount}`
-    : goalTask
-      ? buildTaskFingerprint(goalTask)
+    : primaryGoal
+      ? buildGoalFingerprint(primaryGoal)
       : 'your-goal:placeholder';
 
   const goalCard =
-    summaryGoal || goalTask || previewAllCards
+    summaryGoal || primaryGoal || previewAllCards
       ? ({
           key: 'your-goal',
           eyebrow: `YOUR GOAL · DAY ${goalDay}`,
@@ -368,7 +368,7 @@ function buildCards({
           leadingIcon: { set: 'fa6', name: 'flag-checkered', iconStyle: 'solid' },
           fingerprint: goalFingerprint,
           task: goalForPress,
-          onPress: goalForPress ? () => onPressTask?.(goalForPress) : undefined,
+          onPress: goalForPress ? () => onPressGoal?.(goalForPress) : undefined,
         } satisfies CardConfig)
       : null;
 
@@ -383,8 +383,8 @@ function buildCards({
           tone: TONES.success,
           leadingIcon: { set: 'fa6', name: 'circle-check', iconStyle: 'solid' },
           fingerprint: buildSuccessStoryFingerprint(summary),
-          task: successTask,
-          onPress: successTask ? () => onPressTask?.(successTask) : undefined,
+          task: successGoal,
+          onPress: successGoal ? () => onPressGoal?.(successGoal) : undefined,
         } satisfies CardConfig)
       : null;
 
@@ -392,53 +392,53 @@ function buildCards({
   const dataCards = [
     goalCard,
     successCard,
-    pushTask || previewAllCards
+    pushGoal || previewAllCards
       ? ({
           key: 'needs-push',
-          eyebrow: `NEEDS A PUSH${pushTask ? ` · ${getFirstName(pushTask.name)}` : ''}`,
-          title: buildPushBody(pushTask),
+          eyebrow: `NEEDS A PUSH${pushGoal ? ` · ${getFirstName(pushGoal.name)}` : ''}`,
+          title: buildPushBody(pushGoal),
           body: '',
-          metric: buildPushMetric(pushTask?.pushCount ?? 0),
+          metric: buildPushMetric(pushGoal?.pushCount ?? 0),
           tone: TONES.push,
           leadingIcon: { set: 'fa6', name: 'person-running', iconStyle: 'solid' },
-          fingerprint: buildTaskFingerprint(pushTask),
-          task: pushTask,
-          onPress: pushTask ? () => onPressTask?.(pushTask) : undefined,
+          fingerprint: buildGoalFingerprint(pushGoal),
+          task: pushGoal,
+          onPress: pushGoal ? () => onPressGoal?.(pushGoal) : undefined,
         } satisfies CardConfig)
       : null,
-    progressTask || previewAllCards
+    progressGoal || previewAllCards
       ? ({
           key: 'update-progress',
-          eyebrow: `YOUR PROGRESS · DAY ${getTaskDayNumber(progressTask)}`,
-          title: progressTask ? stripOuterQuotes(progressTask.text) : 'Update your progress',
+          eyebrow: `YOUR PROGRESS · DAY ${getGoalDayNumberFromGoal(progressGoal)}`,
+          title: progressGoal ? stripOuterQuotes(progressGoal.text) : 'Update your progress',
           body: '',
-          metric: buildPushMetric(progressTask?.pushCount ?? 0),
+          metric: buildPushMetric(progressGoal?.pushCount ?? 0),
           tone: TONES.progress,
           leadingIcon: { set: 'fa6', name: 'bullseye', iconStyle: 'solid' },
-          fingerprint: buildTaskFingerprint(progressTask),
-          task: progressTask,
-          onPress: progressTask ? () => onPressTask?.(progressTask) : undefined,
+          fingerprint: buildGoalFingerprint(progressGoal),
+          task: progressGoal,
+          onPress: progressGoal ? () => onPressGoal?.(progressGoal) : undefined,
         } satisfies CardConfig)
       : null,
   ].filter(Boolean) as CardConfig[];
 
   // CTA only for brand-new users who haven't created anything yet.
-  const firstTaskCard =
-    (trimmedCurrentUserId && !hasCreatedAnyTask) || previewAllCards
+  const firstGoalCard =
+    (trimmedCurrentUserId && !hasCreatedAnyGoal) || previewAllCards
       ? ({
           key: 'create-first-push',
           eyebrow: 'GET STARTED',
           title: 'Share what you’re trying to finish and get pushed forward.',
           body: '',
           trailingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
-          tone: TONES.firstTask,
+          tone: TONES.firstGoal,
           leadingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
           fingerprint: 'create-first-push:v1',
           onPress: onCreateFirstPushPress,
         } satisfies CardConfig)
       : null;
 
-  return [firstTaskCard, ...dataCards].filter(Boolean) as CardConfig[];
+  return [firstGoalCard, ...dataCards].filter(Boolean) as CardConfig[];
 }
 
 function buildGuestCards(navigation: NavigationProp<AppStackParamList>): CardConfig[] {
@@ -450,13 +450,13 @@ function buildGuestCards(navigation: NavigationProp<AppStackParamList>): CardCon
       title: 'Share what you’re trying to finish and get pushed forward.',
       body: '',
       trailingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
-      tone: TONES.firstTask,
+      tone: TONES.firstGoal,
       leadingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
       fingerprint: 'create-first-push:guest',
       onPress: () => {
         navigation.navigate('AuthIntro', {
-          redirectTo: 'AddTask',
-          authContext: 'AddTask',
+          redirectTo: 'AddGoal',
+          authContext: 'AddGoal',
         });
       },
     },
@@ -477,7 +477,7 @@ function buildSuccessStoryTitle(summary?: HomeSummaryResponse | null) {
   return 'Your push helped someone finish what they started.';
 }
 
-function buildPushBody(task: Task | null) {
+function buildPushBody(task: Goal | null) {
   if (!task) return 'A new push request will show up here.';
   return stripOuterQuotes(task.text);
 }
@@ -486,9 +486,9 @@ function buildPushMetric(count: number) {
   return { value: String(count), label: count === 1 ? 'push' : 'pushes' };
 }
 
-function selectGoalTask(tasks: Task[], currentUserId: string | null) {
+function selectPrimaryGoal(tasks: Goal[], currentUserId: string | null) {
   const ownActiveGoals = tasks.filter(
-    (task): task is Extract<Task, { type: 'motivation' }> =>
+    (task): task is Extract<Goal, { type: 'motivation' }> =>
       task.type === 'motivation' &&
       task.userId === currentUserId &&
       !task.completed &&
@@ -502,7 +502,7 @@ function selectGoalTask(tasks: Task[], currentUserId: string | null) {
   )[0];
 }
 
-function getTaskDayNumber(task: Extract<Task, { type: 'motivation' }> | null) {
+function getGoalDayNumberFromGoal(task: Extract<Goal, { type: 'motivation' }> | null) {
   if (!task) return 1;
   return getGoalDayNumber(task.createdAt, task.progressUpdates?.length ?? 0);
 }
@@ -520,35 +520,35 @@ function getGoalDayNumber(createdAt: string, _progressCount?: number) {
   return 1;
 }
 
-function selectMotivationTask(tasks: Task[], currentUserId: string | null) {
-  const motivationTasks = tasks.filter(
-    (task): task is Extract<Task, { type: 'motivation' }> =>
+function selectMotivationGoal(tasks: Goal[], currentUserId: string | null) {
+  const motivationGoals = tasks.filter(
+    (task): task is Extract<Goal, { type: 'motivation' }> =>
       task.type === 'motivation' && !task.completed && !task.completedAt,
   );
 
-  const otherUserTasks = motivationTasks.filter(task => task.userId !== currentUserId);
+  const otherUserGoals = motivationGoals.filter(task => task.userId !== currentUserId);
 
-  if (!otherUserTasks.length) return null;
+  if (!otherUserGoals.length) return null;
 
   // Prefer someone you haven't pushed yet, but always fall back to any active
   // goal from another user so a "needs your push" card is always available.
-  return otherUserTasks.find(task => !task.hasPushed) ?? otherUserTasks[0];
+  return otherUserGoals.find(task => !task.hasPushed) ?? otherUserGoals[0];
 }
 
-function selectProgressTask(tasks: Task[], currentUserId: string | null) {
-  const motivationTasks = tasks.filter(
-    (task): task is Extract<Task, { type: 'motivation' }> =>
+function selectProgressGoal(tasks: Goal[], currentUserId: string | null) {
+  const motivationGoals = tasks.filter(
+    (task): task is Extract<Goal, { type: 'motivation' }> =>
       task.type === 'motivation' && !task.completed && !task.completedAt,
   );
 
-  const ownTasks = motivationTasks.filter(task => task.userId === currentUserId);
+  const ownGoals = motivationGoals.filter(task => task.userId === currentUserId);
 
-  if (!ownTasks.length) return null;
+  if (!ownGoals.length) return null;
 
-  return ownTasks.find(task => (task.pushCount ?? 0) > 0) ?? null;
+  return ownGoals.find(task => (task.pushCount ?? 0) > 0) ?? null;
 }
 
-function findTaskById(tasks: Task[], taskId: string | null): Task | null {
+function findGoalById(tasks: Goal[], taskId: string | null): Goal | null {
   if (!taskId) return null;
   return tasks.find(task => task.id === taskId) ?? null;
 }
@@ -589,7 +589,7 @@ function buildSuccessStoryFingerprint(summary?: HomeSummaryResponse | null) {
   return '';
 }
 
-function buildTaskFingerprint(task: Task | null) {
+function buildGoalFingerprint(task: Goal | null) {
   if (!task) return '';
 
   return [

@@ -21,7 +21,7 @@ type ShowToastOptions = {
  * @example
  * showToast({
  *   type: 'success',
- *   title: 'Task Created',
+ *   title: 'Goal Created',
  *   message: 'Your task has been added successfully.',
  * });
  */

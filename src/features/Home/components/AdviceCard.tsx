@@ -6,26 +6,26 @@ import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
 import Row from '@shared/components/Layout/Row';
-import { AdviceTask } from '../types/home';
+import { AdviceGoal } from '../types/home';
 import { stripOuterQuotes, timeAgo, toShortName } from '@shared/utils/helperFunctions';
 import { cardStyles } from './styles';
 import { getTypeVisual, typeIcons } from '@shared/utils/typeVisuals';
-import TaskFooter from './TaskFooter';
+import GoalFooter from './GoalFooter';
 import { Shadow } from '@shared/components/Shadow';
 import { Icon } from '@shared/components/Icons';
-import TaskMetaRow from './TaskMetaRow';
-import TaskCardGradient from './TaskCardGradient';
+import GoalMetaRow from './GoalMetaRow';
+import GoalCardGradient from './GoalCardGradient';
 import { colors, spacing } from '@shared/theme';
 import HelperAvatarGroup from './HelperAvatarGroup';
-import { TaskTypeEnum } from '@features/Tasks/types/tasks';
-import TaskHeader from './TaskHeader';
+import { GoalTypeEnum } from '@features/Goals/types/goals';
+import GoalHeader from './GoalHeader';
 
 type Props = {
-  task: AdviceTask;
-  onPressCard: (task: AdviceTask) => void;
-  onPressSuggest: (task: AdviceTask) => void;
-  onPressView: (task: AdviceTask) => void;
-  onPressShare?: (task: AdviceTask) => void;
+  task: AdviceGoal;
+  onPressCard: (task: AdviceGoal) => void;
+  onPressSuggest: (task: AdviceGoal) => void;
+  onPressView: (task: AdviceGoal) => void;
+  onPressShare?: (task: AdviceGoal) => void;
 };
 
 export default function AdviceCard({ task, onPressCard, onPressShare }: Props) {
@@ -37,7 +37,7 @@ export default function AdviceCard({ task, onPressCard, onPressShare }: Props) {
   const helpersNew = helpers.concat(helpers);
   return (
     <Shadow size="tint" style={cardStyles.card}>
-      <TaskCardGradient style={cardStyles.gradient} type={type}>
+      <GoalCardGradient style={cardStyles.gradient} type={type}>
         {/* Decorative quote */}
         <View style={styles.backgroundShadeView}>
           <Icon
@@ -55,11 +55,11 @@ export default function AdviceCard({ task, onPressCard, onPressShare }: Props) {
           onPress={() => onPressCard(task)}
         >
           {/* Header */}
-          <TaskHeader
+          <GoalHeader
             avatar={avatar || ''}
             name={name}
             createdAt={createdAt}
-            type={TaskTypeEnum.Advice}
+            type={GoalTypeEnum.Advice}
             helpers={helpers}
           />
 
@@ -72,7 +72,7 @@ export default function AdviceCard({ task, onPressCard, onPressShare }: Props) {
 
           {/* Footer */}
           <View style={{ marginTop: spacing.md }}>
-            <TaskFooter
+            <GoalFooter
               commentCount={task.commentsCount ?? 0}
               viewCount={task.viewCount ?? 0}
               shareHandler={() => onPressShare?.(task)}
@@ -83,7 +83,7 @@ export default function AdviceCard({ task, onPressCard, onPressShare }: Props) {
             />
           </View>
         </TouchableOpacity>
-      </TaskCardGradient>
+      </GoalCardGradient>
     </Shadow>
   );
 }

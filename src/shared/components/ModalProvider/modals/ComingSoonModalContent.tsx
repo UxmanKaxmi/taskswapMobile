@@ -6,7 +6,7 @@ import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors, platformShadow, spacing } from '@shared/theme';
-import { TaskTypeEnum } from '@features/Tasks/types/tasks';
+import { GoalTypeEnum } from '@features/Goals/types/goals';
 import type { ComingSoonModalPayload } from '../modalTypes';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import { typeIcons } from '@shared/utils/typeVisuals';
@@ -14,7 +14,7 @@ import { typeIcons } from '@shared/utils/typeVisuals';
 const CLOSE_ANIMATION_DELAY_MS = 280;
 
 const COMING_SOON_COPY = {
-  [TaskTypeEnum.Advice]: {
+  [GoalTypeEnum.Advice]: {
     accent: colors.adviceBgHardest,
     bubble: colors.adviceIconBackground,
     title: 'Advice is coming soon',
@@ -23,7 +23,7 @@ const COMING_SOON_COPY = {
       '\n \n' +
       ' For now, share what you’re struggling with and get a motivational push.',
   },
-  [TaskTypeEnum.Decision]: {
+  [GoalTypeEnum.Decision]: {
     accent: colors.decisionBgHardest,
     bubble: colors.decisionIconBackground,
     title: 'Decisions are coming soon',
@@ -32,7 +32,7 @@ const COMING_SOON_COPY = {
       '\n \n' +
       ' For now, post your situation and let others push you forward.',
   },
-  [TaskTypeEnum.Reminder]: {
+  [GoalTypeEnum.Reminder]: {
     accent: colors.reminderBgHardest,
     bubble: colors.reminderIconBackground,
     title: 'Reminders are coming soon',
@@ -41,7 +41,7 @@ const COMING_SOON_COPY = {
       '\n \n' +
       ' For now, create a motivation and come back with a progress update.',
   },
-  [TaskTypeEnum.Motivation]: {
+  [GoalTypeEnum.Motivation]: {
     accent: colors.motivationBgHardest,
     bubble: colors.motivationIconBackground,
     title: 'Motivation is available',

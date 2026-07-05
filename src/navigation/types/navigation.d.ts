@@ -1,7 +1,7 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Task } from '../../features/Tasks/types/tasks';
-import { AddTaskStackParamList } from '@features/AddTask/navigation/AddTaskNavigator';
+import { Goal } from '../../features/Goals/types/goals';
+import { AddGoalStackParamList } from '@features/AddGoal/navigation/AddGoalNavigator';
 
 declare global {
   namespace ReactNavigation {
@@ -15,7 +15,7 @@ declare global {
 export type BottomTabParamList = {
   Home: undefined;
   Friends: undefined; // Friends tab entry point
-  AddTaskButton: undefined; // fake tab button (opens modal)
+  AddGoalButton: undefined; // fake tab button (opens modal)
   Notification: undefined;
   Profile: undefined;
 };
@@ -43,7 +43,7 @@ export type MainStackParamList = {
       }
     | undefined;
   OnboardingIntro: undefined;
-  AddTaskScreen: NavigatorScreenParams<AddTaskStackParamList>;
+  AddGoalScreen: NavigatorScreenParams<AddGoalStackParamList>;
 };
 
 /* ------------------------------ APP NAVIGATOR ------------------------------ */
@@ -68,14 +68,14 @@ export type AppStackParamList = {
   Profile: undefined;
 
   // STACK ONLY SCREENS (open above tabs)
-  AddTask: NavigatorScreenParams<AddTaskStackParamList> & {
-    task?: Task; // optional: for "Edit Task" later
+  AddGoal: NavigatorScreenParams<AddGoalStackParamList> & {
+    task?: Goal; // optional: for "Edit Goal" later
   };
-  FilterTasksModal: undefined;
+  FilterGoalsModal: undefined;
 
-  TaskDetail:
+  GoalDetail:
     | {
-        task?: Task;
+        task?: Goal;
         taskId?: string;
         highlightCommentId?: string;
         openAdviceComposer?: boolean;

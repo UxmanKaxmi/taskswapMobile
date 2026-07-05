@@ -6,7 +6,7 @@ import Ripple from '@shared/components/Buttons/Ripple';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors, spacing } from '@shared/theme';
-import { CHEER_PRESETS } from '@features/Tasks/constants/cheerPresets';
+import { CHEER_PRESETS } from '@features/Goals/constants/cheerPresets';
 import type { CheerModalPayload } from '../modalTypes';
 
 const ACTIVE_CHEER_PRESET_LIMIT = 6;

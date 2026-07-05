@@ -6,14 +6,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainDebugScreen from '@features/Debug/MainDebugScreen';
 import FindFriendsScreen from '@features/Friends/screens/FindFriendsScreen';
 import InviteFriendsScreen from '@features/Invite/screens/InviteFriendsScreen';
-import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
+import NotificationMainScreen from '@features/Notification/screens/NotificationMainScreen';
 import { AppStackParamList } from './types/navigation';
 import FriendsProfileScreen from '@features/Friends/screens/FriendsProfileScreen';
 import { isAndroid, isIOS, isDEV } from '@shared/utils/constants';
 import BottomTabsIOS from './BottomTabsIOS';
 import BottomTabsAndroid from './BottomTabsAndroid';
-import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
-import TaskDetailScreen from '@features/TaskDetail/screens/TaskDetailScreen';
+import AddGoalNavigator from '@features/AddGoal/navigation/AddGoalNavigator';
+import GoalDetailScreen from '@features/GoalDetail/screens/GoalDetailScreen';
 import SendFeedbackScreen from '@features/MyProfile/screens/SendFeedbackScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -23,11 +23,11 @@ export default function AppNavigator() {
     <Stack.Navigator id={undefined as any} screenOptions={{ headerShown: false }}>
       {/* Main app tabs */}
       <Stack.Screen name="Tabs" component={isIOS ? BottomTabsIOS : BottomTabsAndroid} />
-      <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
-      {/* Add Task Modal */}
+      <Stack.Screen name="GoalDetail" component={GoalDetailScreen} />
+      {/* Add Goal Modal */}
       <Stack.Screen
-        name="AddTask"
-        component={AddTaskNavigator}
+        name="AddGoal"
+        component={AddGoalNavigator}
         options={{
           animation: !isAndroid ? 'slide_from_bottom' : 'fade_from_bottom',
           animationDuration: 300,

@@ -13,7 +13,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import { colors } from '@shared/theme';
 import { Height } from '@shared/components/Spacing';
-import { useTasksQuery } from '@features/Tasks/hooks/useTasksQuery';
+import { useGoalsQuery } from '@features/Goals/hooks/useGoalsQuery';
 import {
   DEFAULT_TEST_NOTIFICATION_TEXT,
   getNotificationTextTemplate,
@@ -38,9 +38,9 @@ function DebugInput({ label, value }: { label: string; value: string }) {
 export default function MainDebugScreen() {
   const { user } = useAuth();
   const [sendingKey, setSendingKey] = useState<string | null>(null);
-  const { data: tasksQuery } = useTasksQuery();
+  const { data: tasksQuery } = useGoalsQuery();
 
-  const latestTaskId = useMemo(() => {
+  const latestGoalId = useMemo(() => {
     const pages = tasksQuery?.pages ?? [];
 
     for (const page of pages) {
@@ -53,9 +53,9 @@ export default function MainDebugScreen() {
 
   const values: DebugValues = useMemo(
     () => ({
-      taskId: latestTaskId,
+      taskId: latestGoalId,
     }),
-    [latestTaskId],
+    [latestGoalId],
   );
   const latestExample = getNotificationTextTemplate('latest-example');
 
@@ -131,10 +131,10 @@ export default function MainDebugScreen() {
       <Height size={20} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <TextElement variant="caption" color="muted" style={styles.subtitle}>
-          Using cached task id: {latestTaskId}
+          Using cached task id: {latestGoalId}
         </TextElement>
 
-        <DebugInput label="Task id" value={values.taskId} />
+        <DebugInput label="Goal id" value={values.taskId} />
 
         <Height size={14} />
 

@@ -3,13 +3,13 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import Icon from '@shared/components/Icons/Icon'; // ✅ your custom Icon component
 import HomeScreen from '@features/Home/screens/HomeScreen';
-import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
+import AddGoalNavigator from '@features/AddGoal/navigation/AddGoalNavigator';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { colors, platformShadow } from '@shared/theme';
 import AnimatedTabIcon from '@shared/components/AnimatedTabBarIcon/AnimatedTabBarIcon';
 import { ms, vs } from 'react-native-size-matters';
 import FindFriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
-import NotificationMainScreen from '@features/Notification/screens/NotifcationMainScreen';
+import NotificationMainScreen from '@features/Notification/screens/NotificationMainScreen';
 import MyProfileMainScreen from '@features/MyProfile/screens/MyProfileMainScreen';
 import { AppStackParamList } from './types/navigation';
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -23,7 +23,7 @@ import { isAndroid } from '@shared/utils/constants';
 type BottomTabParamList = {
   Home: undefined;
   Friends: undefined;
-  AddTask: undefined;
+  AddGoal: undefined;
   Notification: undefined;
   Profile: undefined;
 };
@@ -94,7 +94,7 @@ export default function BottomTabsAndroid({ route }: any) {
             const iconMap: Record<keyof BottomTabParamList, string> = {
               Home: 'house-chimney-medical',
               Friends: 'people-group',
-              AddTask: 'bell-slash',
+              AddGoal: 'bell-slash',
               Notification: 'inbox',
               Profile: 'person',
             };
@@ -109,7 +109,7 @@ export default function BottomTabsAndroid({ route }: any) {
               <View style={{ position: 'relative' }}>
                 <AnimatedTabIcon
                   name={iconName}
-                  size={route.name === 'AddTask' ? 24 : 18}
+                  size={route.name === 'AddGoal' ? 24 : 18}
                   color={color}
                   focused={focused}
                 />
@@ -143,14 +143,14 @@ export default function BottomTabsAndroid({ route }: any) {
           }}
         />
         <Tab.Screen
-          name="AddTask"
+          name="AddGoal"
           options={{
             headerShown: false,
 
             tabBarButton: () => (
               <TouchableOpacity
                 onPress={() => {
-                  if (!checkAuthThenNavigate('AddTask')) return;
+                  if (!checkAuthThenNavigate('AddGoal')) return;
                   haptics.selection();
                 }}
                 style={styles.addButtonContainer}
@@ -168,7 +168,7 @@ export default function BottomTabsAndroid({ route }: any) {
               </TouchableOpacity>
             ),
           }}
-          component={AddTaskNavigator}
+          component={AddGoalNavigator}
         />
         <Tab.Screen
           name="Notification"

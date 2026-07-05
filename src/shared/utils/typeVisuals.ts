@@ -1,9 +1,9 @@
 // src/shared/utils/typeVisuals.ts
 
-import { TaskType, TaskTypeEnum } from '@features/Tasks/types/tasks';
+import { GoalType, GoalTypeEnum } from '@features/Goals/types/goals';
 import { colors } from '@shared/theme';
 
-export type TaskCategoryType =
+export type GoalCategoryType =
   | 'reminder'
   | 'decision'
   | 'decision-done'
@@ -16,7 +16,7 @@ export type TaskCategoryType =
   | 'task-completed';
 
 // -------- EMOJIS ONLY (NO COLORS HERE) --------
-export const typeEmojis: Record<TaskCategoryType, string> = {
+export const typeEmojis: Record<GoalCategoryType, string> = {
   reminder: '🔔',
   decision: '⚖️',
   'decision-done': '✅',
@@ -32,27 +32,27 @@ export const typeEmojis: Record<TaskCategoryType, string> = {
 // Cleaner getVisual function
 export function getTypeVisual(type: string) {
   return {
-    emoji: typeEmojis[type as TaskCategoryType] ?? '🔔',
-    color: typeBackgrounds[type as TaskType] ?? '#9E9E9E',
+    emoji: typeEmojis[type as GoalCategoryType] ?? '🔔',
+    color: typeBackgrounds[type as GoalType] ?? '#9E9E9E',
   };
 }
 
 // -------- SINGLE COLOR SOURCE --------
 // All colors come from your theme system now
-export const typeBackgrounds: Record<TaskType, string> = {
+export const typeBackgrounds: Record<GoalType, string> = {
   reminder: colors.reminderBg,
   decision: colors.decisionBg,
   motivation: colors.motivationBg,
   advice: colors.adviceBg,
 };
 
-export const typeBackgroundsHard: Record<TaskType, string> = {
+export const typeBackgroundsHard: Record<GoalType, string> = {
   reminder: colors.reminderBgHard,
   decision: colors.decisionBgHard,
   motivation: colors.motivationBgHard,
   advice: colors.adviceBgHard,
 };
-export const typeBackgroundsHardest: Record<TaskType, string> = {
+export const typeBackgroundsHardest: Record<GoalType, string> = {
   reminder: colors.reminderBgHardest,
   decision: colors.decisionBgHardest,
   motivation: colors.motivationBgHardest,
@@ -60,14 +60,14 @@ export const typeBackgroundsHardest: Record<TaskType, string> = {
 };
 
 // Icons remain unchanged
-export const typeIcons: Record<TaskType, string> = {
+export const typeIcons: Record<GoalType, string> = {
   reminder: 'bell',
   decision: 'circle-dot',
   motivation: 'lightbulb',
   advice: 'message',
 };
 
-export const getTypeColor = (type: TaskType) => {
+export const getTypeColor = (type: GoalType) => {
   switch (type) {
     case 'advice':
       return colors.adviceBgHardest;
@@ -82,7 +82,7 @@ export const getTypeColor = (type: TaskType) => {
   }
 };
 
-export function getTaskBackgroundVisual(type: TaskType) {
+export function getGoalBackgroundVisual(type: GoalType) {
   return {
     icon: typeIcons[type],
     color: typeBackgroundsHard[type],
@@ -92,7 +92,7 @@ export function getTaskBackgroundVisual(type: TaskType) {
 // ---- IMPACT CREATION VISUALS ----
 
 export const impactTypeVisuals: Record<
-  TaskType,
+  GoalType,
   {
     title: string;
     description: string;
@@ -102,28 +102,28 @@ export const impactTypeVisuals: Record<
   }
 > = {
   motivation: {
-    title: TaskTypeEnum.Motivation,
+    title: GoalTypeEnum.Motivation,
     description: 'Get a boost when you feel stuck.',
     icon: { set: 'fa6', name: typeIcons.motivation },
     color: colors.motivationBgHardest,
     background: colors.motivationBg,
   },
   advice: {
-    title: TaskTypeEnum.Advice,
+    title: GoalTypeEnum.Advice,
     description: 'Get thoughts or guidance from others.',
     icon: { set: 'fa6', name: typeIcons.advice },
     color: colors.adviceBgHardest,
     background: colors.adviceBg,
   },
   decision: {
-    title: TaskTypeEnum.Decision,
+    title: GoalTypeEnum.Decision,
     description: 'Let others help you choose.',
     icon: { set: 'fa6', name: typeIcons.decision },
     color: colors.decisionBgHardest,
     background: colors.decisionBg,
   },
   reminder: {
-    title: TaskTypeEnum.Reminder,
+    title: GoalTypeEnum.Reminder,
     description: 'A gentle nudge so you don’t forget.',
     icon: { set: 'fa6', name: typeIcons.reminder },
     color: colors.reminderBgHardest,

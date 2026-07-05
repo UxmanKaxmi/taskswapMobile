@@ -4,7 +4,7 @@ import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors, spacing } from '@shared/theme';
-import { MotivationTask } from '../types/home';
+import { MotivationGoal } from '../types/home';
 import {
   getFirstName,
   stripOuterQuotes,
@@ -12,9 +12,9 @@ import {
   toShortName,
 } from '@shared/utils/helperFunctions';
 import { Shadow } from '@shared/components/Shadow';
-import { useTaskPushes, useToggleTaskPush } from '@features/Tasks/hooks/useTaskPush';
+import { useGoalPushes, useToggleGoalPush } from '@features/Goals/hooks/useGoalPush';
 import HelperAvatarGroup from './HelperAvatarGroup';
-import { TaskBeat, TaskTypeEnum } from '@features/Tasks/types/tasks';
+import { GoalBeat, GoalTypeEnum } from '@features/Goals/types/goals';
 import Avatar from '@shared/components/Avatar/Avatar';
 import { getAvatarColor } from '@shared/utils/avatarColor';
 import PushTicks from '@shared/components/PushTicks/PushTicks';
@@ -23,27 +23,27 @@ import Ripple from '@shared/components/Buttons/Ripple';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { usePushInteraction } from '../hooks/usePushInteraction';
 import { getFeelingLabel } from '@shared/utils/feelings';
-import { useTaskById } from '../hooks/useTaskById';
+import { useGoalById } from '../hooks/useGoalById';
 import { useModal } from '@shared/components/ModalProvider';
-import { useSendCheer } from '@features/Tasks/hooks/useTaskCheer';
+import { useSendCheer } from '@features/Goals/hooks/useGoalCheer';
 import Icon from '@shared/components/Icons/Icon';
 import { showToast } from '@shared/utils/toast';
-import { CHEER_PRESETS } from '@features/Tasks/constants/cheerPresets';
+import { CHEER_PRESETS } from '@features/Goals/constants/cheerPresets';
 
 type Props = {
-  task: MotivationTask;
-  onPressCard: (task: MotivationTask) => void;
-  onPressSuggest: (task: MotivationTask) => void;
-  onPressView: (task: MotivationTask) => void;
-  onPressShare?: (task: MotivationTask) => void;
+  task: MotivationGoal;
+  onPressCard: (task: MotivationGoal) => void;
+  onPressSuggest: (task: MotivationGoal) => void;
+  onPressView: (task: MotivationGoal) => void;
+  onPressShare?: (task: MotivationGoal) => void;
 };
 
 function MotivationCard({ task, onPressCard }: Props) {
   const { user } = useAuth();
   const { openCheerSheet } = useModal();
   const { avatar, name = 'John Doe', createdAt, text, helpers = [] } = task;
-  const { data: pushData } = useTaskPushes(task.id);
-  const { mutate: togglePush, isPending } = useToggleTaskPush(task.id);
+  const { data: pushData } = useGoalPushes(task.id);
+  const { mutate: togglePush, isPending } = useToggleGoalPush(task.id);
   const sendCheer = useSendCheer(task.id);
   const cardNudgeX = useRef(new Animated.Value(0)).current;
   const actionProgress = useRef(new Animated.Value(task.hasPushed ? 1 : 0)).current;
@@ -67,12 +67,12 @@ function MotivationCard({ task, onPressCard }: Props) {
     task?.progressUpdates
       ?.map(update => stripOuterQuotes(update?.text ?? '').trim())
       .find(Boolean) ?? '';
-  const { data: fullTask } = useTaskById(task.id, !feedProgressText || taskBeats.length === 0);
-  const beats = taskBeats.length > 0 ? taskBeats : (fullTask?.beats ?? []);
+  const { data: fullGoal } = useGoalById(task.id, !feedProgressText || taskBeats.length === 0);
+  const beats = taskBeats.length > 0 ? taskBeats : (fullGoal?.beats ?? []);
   const latestCheerableBeat = useMemo(() => getLatestCheerableBeat(beats), [beats]);
   const progressText =
     feedProgressText ||
-    (fullTask?.progressUpdates
+    (fullGoal?.progressUpdates
       ?.map(update => stripOuterQuotes(update?.text ?? '').trim())
       .find(Boolean) ??
       '');
@@ -134,7 +134,7 @@ function MotivationCard({ task, onPressCard }: Props) {
   });
   const latestBeatCheeringOpen = Boolean(
     latestCheerableBeat?.isCheeringOpen === true ||
-      (latestCheerableBeat?.isLatest && latestCheerableBeat?.isCheeringOpen !== false),
+    (latestCheerableBeat?.isLatest && latestCheerableBeat?.isCheeringOpen !== false),
   );
   const canShowCheer =
     !isOwner &&
@@ -319,7 +319,7 @@ function MotivationCard({ task, onPressCard }: Props) {
                 onPress={handlePush}
                 loading={isPending}
                 active={hasPushed || justPushed}
-                taskType={TaskTypeEnum.Motivation}
+                taskType={GoalTypeEnum.Motivation}
                 variant="push"
                 label="Push"
                 activeLabel="Pushed"
@@ -372,7 +372,7 @@ function MotivationCard({ task, onPressCard }: Props) {
 
 export default React.memo(MotivationCard);
 
-function buildFeelingLabel(task: MotivationTask) {
+function buildFeelingLabel(task: MotivationGoal) {
   const explicit = getFeelingLabel(task.feeling);
   if (explicit) return explicit;
 
@@ -386,7 +386,7 @@ function buildFeelingLabel(task: MotivationTask) {
   return 'Momentum';
 }
 
-function getLatestCheerableBeat(beats?: TaskBeat[]): TaskBeat | null {
+function getLatestCheerableBeat(beats?: GoalBeat[]): GoalBeat | null {
   if (!beats?.length) return null;
 
   return (
@@ -491,18 +491,18 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     flexDirection: 'row',
     alignItems: 'stretch',
-    gap: spacing.sm,
     paddingRight: spacing.sm,
     backgroundColor: colors.background,
     borderRadius: 12,
+    overflow: 'hidden',
   },
   progressAccent: {
-    width: ms(4),
-    borderRadius: 999,
+    width: ms(6),
     backgroundColor: colors.motivationBgHardest,
   },
   progressTextBlock: {
     paddingVertical: vs(6),
+    paddingLeft: spacing.sm,
     flex: 1,
   },
   progressLabel: {

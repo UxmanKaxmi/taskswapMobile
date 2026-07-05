@@ -110,7 +110,7 @@ export async function fetchPhoneContacts(): Promise<ContactEmail[]> {
         PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
         {
           title: 'Contacts Permission',
-          message: 'TaskSwap needs access to your contacts to find friends.',
+          message: 'GoalSwap needs access to your contacts to find friends.',
           buttonPositive: 'Allow',
         },
       );

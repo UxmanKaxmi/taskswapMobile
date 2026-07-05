@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { TaskHelper } from '../types/home';
+import { GoalHelper } from '../types/home';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { ms } from 'react-native-size-matters';
 import { colors } from '@shared/theme';
@@ -9,7 +9,7 @@ import Avatar from '@shared/components/Avatar/Avatar';
 import { getAvatarColor } from '@shared/utils/avatarColor';
 
 type Props = {
-  helpers: TaskHelper[];
+  helpers: GoalHelper[];
   maxVisible?: number;
   avatarSize?: number;
   containerStyle?: any;

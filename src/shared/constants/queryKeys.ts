@@ -1,6 +1,6 @@
 export enum QueryKeys {
-  Tasks = 'tasks',
-  Task = 'task',
+  Goals = 'tasks',
+  Goal = 'task',
   ReminderNotes = 'reminders',
   User = 'user',
   Auth = 'auth',
@@ -21,13 +21,13 @@ export enum QueryKeys {
 export const buildQueryKey = {
   tasks: (userId?: string, feedSort?: string) => {
     if (userId || feedSort) {
-      return [QueryKeys.Tasks, userId ?? 'anonymous', feedSort ?? 'needs_push'];
+      return [QueryKeys.Goals, userId ?? 'anonymous', feedSort ?? 'needs_push'];
     }
 
-    return [QueryKeys.Tasks];
+    return [QueryKeys.Goals];
   },
-  taskById: (taskId: string) => [QueryKeys.Task, taskId],
-  remindersForTask: (taskId: string) => [QueryKeys.ReminderNotes, taskId],
+  taskById: (taskId: string) => [QueryKeys.Goal, taskId],
+  remindersForGoal: (taskId: string) => [QueryKeys.ReminderNotes, taskId],
   user: () => [QueryKeys.User],
   auth: () => [QueryKeys.Auth],
   followers: () => [QueryKeys.Followers],
@@ -42,10 +42,10 @@ export const buildQueryKey = {
     includeFollowed,
   ],
   friendProfile: (id: string) => [QueryKeys.FriendProfile, id],
-  votesForTask: (taskId: string) => [QueryKeys.Votes, taskId],
-  commentsForTask: (taskId: string) => [QueryKeys.Comments, taskId],
+  votesForGoal: (taskId: string) => [QueryKeys.Votes, taskId],
+  commentsForGoal: (taskId: string) => [QueryKeys.Comments, taskId],
   referralLink: () => [QueryKeys.ReferralLink],
 
-  //for Task Pushes
-  pushesForTask: (taskId: string) => [QueryKeys.Push, taskId],
+  //for Goal Pushes
+  pushesForGoal: (taskId: string) => [QueryKeys.Push, taskId],
 };

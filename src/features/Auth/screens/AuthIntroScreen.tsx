@@ -22,8 +22,8 @@ const authCopyMap: Record<
     cta: string;
   }
 > = {
-  AddTask: {
-    title: 'Create Your Task',
+  AddGoal: {
+    title: 'Create Your Goal',
     subtitle: 'Log in to create tasks, involve helpers, and keep everything in one place.',
     cta: 'Log In to Create',
   },

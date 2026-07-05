@@ -31,7 +31,7 @@ const demoCardShadow = platformShadow({
   radius: 24,
   offset: { width: 0, height: 8 },
 });
-const nextTaskCardShadow = platformShadow({
+const nextGoalCardShadow = platformShadow({
   color: colors.onboardingInk,
   opacity: 0.03,
   radius: 10,
@@ -91,7 +91,7 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
       await AsyncStorage.removeItem('hasSeenOnboarding');
     }
 
-    navigation.push('AddTaskScreen', {
+    navigation.push('AddGoalScreen', {
       screen: 'AddMotivation',
     });
   };
@@ -203,7 +203,7 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
             {example.responseMode === 'done' && (
               <View style={styles.doneVisual}>
                 <View style={[styles.demoCard, styles.completedCard]}>
-                  <TextElement variant="bodySmall" weight="700" style={styles.completedTaskText}>
+                  <TextElement variant="bodySmall" weight="700" style={styles.completedGoalText}>
                     {example.prompt}
                   </TextElement>
 
@@ -220,12 +220,12 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
                   </View>
                 </View>
 
-                <View style={[styles.demoCard, styles.nextTaskCard]}>
-                  <View style={styles.nextTaskCopy}>
-                    <TextElement variant="overline" weight="700" style={styles.nextTaskLabel}>
+                <View style={[styles.demoCard, styles.nextGoalCard]}>
+                  <View style={styles.nextGoalCopy}>
+                    <TextElement variant="overline" weight="700" style={styles.nextGoalLabel}>
                       Someone else needs a push
                     </TextElement>
-                    <TextElement variant="caption" weight="700" style={styles.nextTaskText}>
+                    <TextElement variant="caption" weight="700" style={styles.nextGoalText}>
                       Send the email I've been avoiding
                     </TextElement>
                   </View>
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: vs(12),
   },
-  completedTaskText: {
+  completedGoalText: {
     color: colors.onboardingInk,
     fontSize: ms(16),
     lineHeight: ms(22),
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     textAlign: 'right',
   },
-  nextTaskCard: {
+  nextGoalCard: {
     width: '84%',
     alignSelf: 'flex-end',
     flexDirection: 'row',
@@ -544,17 +544,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAF7',
     borderWidth: 1,
     borderColor: '#E9E6DB',
-    ...nextTaskCardShadow,
+    ...nextGoalCardShadow,
     transform: [{ translateX: ms(10) }, { rotate: '1deg' }],
   },
-  nextTaskCopy: {
+  nextGoalCopy: {
     flex: 1,
   },
-  nextTaskLabel: {
+  nextGoalLabel: {
     color: colors.onboardingMuted,
     letterSpacing: 0.5,
   },
-  nextTaskText: {
+  nextGoalText: {
     color: colors.onboardingInkSoft,
     marginTop: vs(3),
     fontSize: ms(12.5),

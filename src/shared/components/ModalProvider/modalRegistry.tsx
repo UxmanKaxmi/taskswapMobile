@@ -7,7 +7,7 @@ import ShareUpdateModalContent from './modals/ShareUpdateModalContent';
 import CheerModalContent from './modals/CheerModalContent';
 import MotivationSuccessModalContent from './modals/MotivationSuccessModalContent';
 import ComingSoonModalContent from './modals/ComingSoonModalContent';
-import CompleteTaskConfirmationModalContent from './modals/CompleteTaskConfirmationModalContent';
+import CompleteGoalConfirmationModalContent from './modals/CompleteGoalConfirmationModalContent';
 import { type ModalPayloadMap, type ModalType } from './modalTypes';
 
 type RenderContext = {
@@ -84,13 +84,13 @@ export const modalRegistry: { [K in ModalType]: ModalDefinition<K> } = {
       <ComingSoonModalContent payload={payload} closeModal={closeModal} />
     ),
   },
-  completeTaskConfirmation: {
+  completeGoalConfirmation: {
     snapPoints: [400],
     bottomSheetProps: {
       enableDynamicSizing: false,
     },
     render: (payload, { closeModal }) => (
-      <CompleteTaskConfirmationModalContent payload={payload} closeModal={closeModal} />
+      <CompleteGoalConfirmationModalContent payload={payload} closeModal={closeModal} />
     ),
   },
 };

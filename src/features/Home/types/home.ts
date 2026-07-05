@@ -1,10 +1,10 @@
 import type { FeelingValue } from '@shared/utils/feelings';
-import type { AvatarUser, TaskBeat } from '@features/Tasks/types/tasks';
+import type { AvatarUser, GoalBeat } from '@features/Goals/types/goals';
 
 // ---------------------------------------------
 // ✅ Define all task types strictly
 // ---------------------------------------------
-export type TaskType = 'reminder' | 'decision' | 'motivation' | 'advice';
+export type GoalType = 'reminder' | 'decision' | 'motivation' | 'advice';
 export type TabKey = 'all' | 'motivation' | 'advice' | 'decision' | 'reminder';
 
 export type HelperUser = {
@@ -13,7 +13,7 @@ export type HelperUser = {
   photo?: string;
 };
 
-export type TaskHelper = HelperUser;
+export type GoalHelper = HelperUser;
 
 export type Voter = {
   id: string;
@@ -27,7 +27,7 @@ export type ProgressUpdate = {
   createdAt: string;
 };
 
-export type TaskPushEvent = {
+export type GoalPushEvent = {
   id?: string;
   createdAt?: string;
   pushedAt?: string;
@@ -43,10 +43,10 @@ export type TaskPushEvent = {
 // ✅ Shared fields for all tasks
 // ---------------------------------------------
 
-export type BaseTask = {
+export type BaseGoal = {
   id: string;
   text: string;
-  type: TaskType;
+  type: GoalType;
   createdAt: string;
 
   userId: string;
@@ -66,12 +66,12 @@ export type BaseTask = {
   hasPushed: boolean;
   hasAdvised?: boolean;
   progressUpdates?: ProgressUpdate[];
-  beats?: TaskBeat[];
+  beats?: GoalBeat[];
   cheerTotal?: number;
   distinctCheererCount?: number;
   sampleCheerers?: AvatarUser[];
   mostCheeredBeatId?: string | null;
-  pushHistory?: TaskPushEvent[];
+  pushHistory?: GoalPushEvent[];
 
   // 🔥 Extra state
   hasReminded: boolean;
@@ -92,14 +92,14 @@ export type BaseTask = {
 // ✅ Specific task types
 // ---------------------------------------------
 
-export type ReminderTask = BaseTask & {
+export type ReminderGoal = BaseGoal & {
   type: 'reminder';
   remindAt: string;
   completed: boolean;
   completedAt?: string | null;
 };
 
-export type DecisionTask = BaseTask & {
+export type DecisionGoal = BaseGoal & {
   type: 'decision';
   options: string[];
   votes: Record<
@@ -113,21 +113,21 @@ export type DecisionTask = BaseTask & {
   votedOption?: string | null;
 };
 
-export type MotivationTask = BaseTask & {
+export type MotivationGoal = BaseGoal & {
   type: 'motivation';
   deliverAt?: string;
   completed?: boolean;
   completedAt?: string | null;
 };
 
-export type AdviceTask = BaseTask & {
+export type AdviceGoal = BaseGoal & {
   type: 'advice';
 };
 
 // ---------------------------------------------
 // ✅ Union of all tasks
 // ---------------------------------------------
-export type Task = ReminderTask | DecisionTask | MotivationTask | AdviceTask;
+export type Goal = ReminderGoal | DecisionGoal | MotivationGoal | AdviceGoal;
 
 // ---------------------------------------------
 // ✅ Reminder Notes
@@ -147,7 +147,7 @@ export type TimeFilter = 'latest' | 'today' | 'thisWeek' | 'thisMonth' | 'allTim
 
 export type FeedFilter = {
   time?: TimeFilter;
-  types: TaskType[];
+  types: GoalType[];
 };
 
 export type HomeSummaryCounts = {

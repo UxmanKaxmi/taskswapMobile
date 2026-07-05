@@ -7,24 +7,24 @@ import { format, isBefore } from 'date-fns';
 
 import TextElement from '@shared/components/TextElement/TextElement';
 import { colors, spacing } from '@shared/theme';
-import { ReminderTask } from '../types/home';
+import { ReminderGoal } from '../types/home';
 import { humanizeReminderDate, stripOuterQuotes } from '@shared/utils/helperFunctions';
 import { cardStyles } from './styles';
-import TaskFooter from './TaskFooter';
+import GoalFooter from './GoalFooter';
 import { Shadow } from '@shared/components/Shadow';
 import { Icon } from '@shared/components/Icons';
-import TaskCardGradient from './TaskCardGradient';
+import GoalCardGradient from './GoalCardGradient';
 import { useModal } from '@shared/components/ModalProvider';
 import { useAuth } from '@features/Auth/AuthProvider';
-import { useAddReminder } from '../hooks/useAddTask';
+import { useAddReminder } from '../hooks/useAddReminder';
 import { showToast } from '@shared/utils/toast';
-import TaskHeader from './TaskHeader';
-import { TaskTypeEnum } from '@features/Tasks/types/tasks';
+import GoalHeader from './GoalHeader';
+import { GoalTypeEnum } from '@features/Goals/types/goals';
 
 type Props = {
-  task: ReminderTask;
-  onPressCard: (task: ReminderTask) => void;
-  onPressShare?: (task: ReminderTask) => void;
+  task: ReminderGoal;
+  onPressCard: (task: ReminderGoal) => void;
+  onPressShare?: (task: ReminderGoal) => void;
 };
 
 export default function ReminderCard({ task, onPressCard, onPressShare }: Props) {
@@ -96,10 +96,10 @@ export default function ReminderCard({ task, onPressCard, onPressShare }: Props)
     return `⏱ Reminder expired`;
   };
 
-  const reminderText = type === TaskTypeEnum.Reminder ? getReminderTimeLabel(task) : null;
+  const reminderText = type === GoalTypeEnum.Reminder ? getReminderTimeLabel(task) : null;
   return (
     <Shadow size="tint" style={cardStyles.card}>
-      <TaskCardGradient style={cardStyles.gradient} type={type}>
+      <GoalCardGradient style={cardStyles.gradient} type={type}>
         {/* Decorative quote (same as Motivation) */}
         <View style={{ position: 'absolute', bottom: vs(0), left: 10 }}>
           <Icon
@@ -116,11 +116,11 @@ export default function ReminderCard({ task, onPressCard, onPressShare }: Props)
           activeOpacity={0.7}
           onPress={() => onPressCard(task)}
         >
-          <TaskHeader
+          <GoalHeader
             avatar={avatar || ''}
             name={name}
             createdAt={createdAt}
-            type={TaskTypeEnum.Reminder}
+            type={GoalTypeEnum.Reminder}
             helpers={helpers}
           />
 
@@ -142,7 +142,7 @@ export default function ReminderCard({ task, onPressCard, onPressShare }: Props)
 
           {/* Footer */}
           <View style={{ marginTop: spacing.md }}>
-            <TaskFooter
+            <GoalFooter
               commentCount={task.commentsCount ?? 0}
               viewCount={task.viewCount ?? 0}
               shareHandler={() => onPressShare?.(task)}
@@ -158,7 +158,7 @@ export default function ReminderCard({ task, onPressCard, onPressShare }: Props)
             />
           </View>
         </TouchableOpacity>
-      </TaskCardGradient>
+      </GoalCardGradient>
     </Shadow>
   );
 }

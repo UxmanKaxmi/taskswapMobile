@@ -31,8 +31,8 @@ export function useReferralLink(channel?: Channel) {
         },
         share: {
           message:
-            data?.share?.message ?? 'Join me on TaskSwap — manage and share your tasks easily!',
-          title: data?.share?.title ?? 'Invite to TaskSwap',
+            data?.share?.message ?? 'Join me on GoalSwap — manage and share your tasks easily!',
+          title: data?.share?.title ?? 'Invite to GoalSwap',
         },
       } as ReferralLinkResponse;
     },
@@ -63,7 +63,7 @@ export function useReferralLink(channel?: Channel) {
     ? {
         message: `${query.data.share?.message ?? ''} ${query.data.link}`.trim(),
         url: query.data.link,
-        title: query.data.share?.title ?? 'Invite to TaskSwap',
+        title: query.data.share?.title ?? 'Invite to GoalSwap',
       }
     : undefined;
 

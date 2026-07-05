@@ -1,4 +1,4 @@
-import { TaskTypeEnum } from '@features/Tasks/types/tasks';
+import { GoalTypeEnum } from '@features/Goals/types/goals';
 
 export type FeatureFlags = {
   motivation: boolean;
@@ -23,23 +23,23 @@ export const normalizeFeatureFlags = (raw?: Partial<FeatureFlags> | null): Featu
   ...(raw ?? {}),
 });
 
-const TASK_TYPE_ORDER: TaskTypeEnum[] = [
-  TaskTypeEnum.Motivation,
-  TaskTypeEnum.Decision,
-  TaskTypeEnum.Reminder,
-  TaskTypeEnum.Advice,
+const TASK_TYPE_ORDER: GoalTypeEnum[] = [
+  GoalTypeEnum.Motivation,
+  GoalTypeEnum.Decision,
+  GoalTypeEnum.Reminder,
+  GoalTypeEnum.Advice,
 ];
 
-export const getEnabledTaskTypes = (flags: FeatureFlags): TaskTypeEnum[] =>
+export const getEnabledGoalTypes = (flags: FeatureFlags): GoalTypeEnum[] =>
   TASK_TYPE_ORDER.filter(type => {
     switch (type) {
-      case TaskTypeEnum.Motivation:
+      case GoalTypeEnum.Motivation:
         return flags.motivation;
-      case TaskTypeEnum.Advice:
+      case GoalTypeEnum.Advice:
         return flags.advice;
-      case TaskTypeEnum.Decision:
+      case GoalTypeEnum.Decision:
         return flags.decision;
-      case TaskTypeEnum.Reminder:
+      case GoalTypeEnum.Reminder:
         return flags.reminder;
       default:
         return false;

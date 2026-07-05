@@ -1,5 +1,5 @@
-import { TaskHelper } from '@features/Home/types/home';
-import { TaskType } from '@features/Tasks/types/tasks';
+import { GoalHelper } from '@features/Home/types/home';
+import { GoalType } from '@features/Goals/types/goals';
 
 export interface SearchResultFriend {
   id: string;
@@ -9,16 +9,16 @@ export interface SearchResultFriend {
   isFollowing: boolean;
 }
 
-export interface FriendTask {
+export interface FriendGoal {
   id: string;
   text: string;
-  type: TaskType;
+  type: GoalType;
   createdAt: string;
   completed: boolean;
   remindAt?: string;
   deliverAt?: string;
   options?: string[];
-  helpers: TaskHelper[];
+  helpers: GoalHelper[];
 }
 
 export interface FriendSummary {
@@ -40,6 +40,6 @@ export interface FriendProfile {
   followingCount: number;
   isFollowing: boolean;
   isFollowedBy: boolean;
-  recentTasks: FriendTask[];
+  recentTasks: FriendGoal[];
   mutualFriends: FriendSummary[];
 }

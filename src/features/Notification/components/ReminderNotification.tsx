@@ -40,7 +40,7 @@ const taskTypeCopy: Record<
   },
 };
 
-export default function TaskTypeNotification({ item, onPress }: Props) {
+export default function GoalTypeNotification({ item, onPress }: Props) {
   const taskType = item.taskType || 'reminder';
   const isMotivation = taskType === 'motivation';
 

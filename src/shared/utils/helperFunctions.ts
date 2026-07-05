@@ -167,7 +167,7 @@ export const TAB_SCREENS: (keyof BottomTabParamList)[] = [
   'Friends',
   'Notification',
   'Profile',
-  'AddTaskButton',
+  'AddGoalButton',
 ];
 
 export function formatViews(num: number): string {

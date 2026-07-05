@@ -13,8 +13,8 @@ import {
   timeAgo,
   toShortName,
 } from '@shared/utils/helperFunctions';
-import { Task } from '@features/Home/types/home';
-import { TaskType } from '@features/Tasks/types/tasks';
+import { Goal } from '@features/Home/types/home';
+import { GoalType } from '@features/Goals/types/goals';
 import { Icon } from '@shared/components/Icons';
 import AppLogo from '@shared/components/AppLogo';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
@@ -22,7 +22,7 @@ import AppModal from '@shared/components/AppModal/AppModal';
 import { useAuth } from '@features/Auth/AuthProvider';
 
 type Props = {
-  task: Task;
+  task: Goal;
   visible: boolean;
   onClose: () => void;
   /**
@@ -33,28 +33,28 @@ type Props = {
   isOwner?: boolean;
 };
 
-const TYPE_LABELS: Record<TaskType, string> = {
+const TYPE_LABELS: Record<GoalType, string> = {
   motivation: 'Motivation',
   advice: 'Advice',
   decision: 'Decision',
   reminder: 'Reminder',
 };
 
-const MODAL_SUBTITLES: Record<TaskType, string> = {
+const MODAL_SUBTITLES: Record<GoalType, string> = {
   motivation: 'Share it so friends can push you and keep you honest.',
   advice: 'Share it so friends can weigh in with advice you trust.',
   decision: 'Share it so friends can help you decide with confidence.',
   reminder: 'Share it so friends can keep you on time.',
 };
 
-const POSTER_SUBTITLES: Record<TaskType, string> = {
+const POSTER_SUBTITLES: Record<GoalType, string> = {
   motivation: 'Give me a push.',
   advice: 'What would you do?',
   decision: 'Help me make a decision?',
   reminder: 'Remind me when it’s time.',
 };
 
-const SHARE_BUTTON_LABELS: Record<TaskType, string> = {
+const SHARE_BUTTON_LABELS: Record<GoalType, string> = {
   motivation: 'Share to get pushes',
   advice: 'Share to get advice',
   decision: 'Share to get help',
@@ -72,7 +72,7 @@ type ShareCopy = {
   buttonLabel: string;
 };
 
-function getSupporterUserIds(task: Task) {
+function getSupporterUserIds(task: Goal) {
   const ids = new Set<string>();
 
   task.pushHistory?.forEach(push => {
@@ -88,12 +88,12 @@ function buildShareCopy({
   currentUserId,
   isOwner,
 }: {
-  task: Task;
+  task: Goal;
   typeLabel: string;
   currentUserId?: string;
   isOwner: boolean;
 }): ShareCopy {
-  const taskType = task.type as TaskType;
+  const taskType = task.type as GoalType;
   const ownerFirstName = getFirstName(task.name) || 'Someone';
   const isCompleted = Boolean(
     ('completed' in task && task.completed) || ('completedAt' in task && task.completedAt),
@@ -183,7 +183,7 @@ function pushCountLabel(count: number) {
 const waitForLayout = () => new Promise<void>(r => setTimeout(r, 80));
 
 // Reusable preview card shown in the sheet and baked into the shared image
-function SharePreviewCard({ task }: { task: Task }) {
+function SharePreviewCard({ task }: { task: Goal }) {
   const pushCount = task.pushCount ?? 0;
 
   return (
@@ -220,8 +220,8 @@ export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
   // ✅ Capture ONLY the hidden share poster (off-screen)
   const posterShotRef = useRef<InstanceType<typeof ViewShot> | null>(null);
 
-  const taskType = task.type as TaskType;
-  const typeLabel = TYPE_LABELS[taskType] ?? 'Task';
+  const taskType = task.type as GoalType;
+  const typeLabel = TYPE_LABELS[taskType] ?? 'Goal';
   // Prefer the caller-provided ownership flag; fall back to id comparison.
   const resolvedIsOwner = isOwner ?? (!!user?.id && task.userId === user.id);
   const shareCopy = useMemo(

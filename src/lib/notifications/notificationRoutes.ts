@@ -29,8 +29,8 @@ export type NotificationPayload = {
 
 export type NotificationRoute =
   | {
-      screen: 'TaskDetail';
-      params: NonNullable<AppStackParamList['TaskDetail']>;
+      screen: 'GoalDetail';
+      params: NonNullable<AppStackParamList['GoalDetail']>;
       authCopy: {
         title: string;
         subtitle: string;
@@ -55,7 +55,7 @@ export type NotificationRoute =
     };
 
 const AUTH_COPY_TASK_DETAIL = {
-  title: 'Open This Task',
+  title: 'Open This Goal',
   subtitle: 'Log in to view the task details, progress updates, and reminders.',
   cta: 'Log In to View',
 };
@@ -78,7 +78,7 @@ function toStringOrUndefined(value: unknown): string | undefined {
   return undefined;
 }
 
-function getTaskIdFromDeeplinkPath(deeplinkPath?: string | null) {
+function getGoalIdFromDeeplinkPath(deeplinkPath?: string | null) {
   if (!deeplinkPath) return undefined;
 
   const match = deeplinkPath.match(/^\/tasks\/([^/?#]+)/i);
@@ -109,12 +109,12 @@ export function normalizeNotificationPayload(data: unknown): NotificationPayload
   };
 }
 
-function buildTaskDetailRoute(
+function buildGoalDetailRoute(
   payload: NotificationPayload,
-  extra: Partial<NonNullable<AppStackParamList['TaskDetail']>> = {},
+  extra: Partial<NonNullable<AppStackParamList['GoalDetail']>> = {},
 ): NotificationRoute {
   return {
-    screen: 'TaskDetail',
+    screen: 'GoalDetail',
     params: {
       taskId: payload.taskId ?? undefined,
       ...(payload.pushId ? { pushId: payload.pushId } : {}),
@@ -126,16 +126,16 @@ function buildTaskDetailRoute(
   };
 }
 
-function buildTaskDetailRouteOrInbox(
+function buildGoalDetailRouteOrInbox(
   payload: NotificationPayload,
   taskId?: string,
-  extra: Partial<NonNullable<AppStackParamList['TaskDetail']>> = {},
+  extra: Partial<NonNullable<AppStackParamList['GoalDetail']>> = {},
 ): NotificationRoute {
   if (!taskId) {
     return buildInboxFallbackRoute();
   }
 
-  return buildTaskDetailRoute({ ...payload, taskId }, extra);
+  return buildGoalDetailRoute({ ...payload, taskId }, extra);
 }
 
 function buildInboxFallbackRoute(): NotificationRoute {
@@ -155,7 +155,7 @@ function buildHomeRoute(): NotificationRoute {
 export function getNotificationRoute(data: unknown): NotificationRoute {
   const payload = normalizeNotificationPayload(data);
   const notificationType = (payload.notificationType ?? payload.type ?? '').toLowerCase();
-  const taskId = payload.taskId ?? getTaskIdFromDeeplinkPath(payload.deeplinkPath);
+  const taskId = payload.taskId ?? getGoalIdFromDeeplinkPath(payload.deeplinkPath);
 
   switch (notificationType) {
     case NOTIFICATION_DEEP_LINK_TYPES.TASK_MOTIVATION_HELP_PUSH_REMINDER:
@@ -165,7 +165,7 @@ export function getNotificationRoute(data: unknown): NotificationRoute {
       if (!taskId) {
         return buildInboxFallbackRoute();
       }
-      return buildTaskDetailRoute(
+      return buildGoalDetailRoute(
         { ...payload, taskId },
         {
           scrollTo: 'progress',
@@ -179,39 +179,39 @@ export function getNotificationRoute(data: unknown): NotificationRoute {
     case 'decision-done':
     case 'reminder':
     case 'task-completed':
-      return buildTaskDetailRouteOrInbox(payload, taskId);
+      return buildGoalDetailRouteOrInbox(payload, taskId);
 
     case NOTIFICATION_DEEP_LINK_TYPES.PROGRESS_UPDATE_CREATED.toLowerCase():
     case 'task-progress-update':
     case 'task-motivation-progress':
-      return buildTaskDetailRouteOrInbox(payload, taskId, {
+      return buildGoalDetailRouteOrInbox(payload, taskId, {
         scrollTo: 'progress',
       });
 
     case NOTIFICATION_DEEP_LINK_TYPES.PROGRESS_REMINDER.toLowerCase():
-      return buildTaskDetailRouteOrInbox(payload, taskId, {
+      return buildGoalDetailRouteOrInbox(payload, taskId, {
         scrollTo: 'progress',
         openUpdateComposer: true,
       });
 
     case 'task-motivation-push':
-      return buildTaskDetailRouteOrInbox(payload, taskId);
+      return buildGoalDetailRouteOrInbox(payload, taskId);
 
     case 'task-cheer':
     case 'task-motivation-cheer':
-      return buildTaskDetailRouteOrInbox(payload, taskId, {
+      return buildGoalDetailRouteOrInbox(payload, taskId, {
         scrollTo: 'progress',
         highlightBeatId: payload.beatId ?? undefined,
       });
 
     case 'task-motivation-milestone':
-      return buildTaskDetailRouteOrInbox(payload, taskId, {
+      return buildGoalDetailRouteOrInbox(payload, taskId, {
         scrollTo: 'progress',
       });
 
     case 'comment':
     case 'commentmention':
-      return buildTaskDetailRouteOrInbox(payload, taskId, {
+      return buildGoalDetailRouteOrInbox(payload, taskId, {
         highlightCommentId: payload.commentId ?? undefined,
       });
 

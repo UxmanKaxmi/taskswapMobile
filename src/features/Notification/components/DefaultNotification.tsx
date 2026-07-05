@@ -2,19 +2,19 @@
 import React from 'react';
 import FollowNotification from './FollowNotification';
 import ReminderNotification from './ReminderNotification';
-import TaskNotification from './TaskNotification';
+import GoalNotification from './GoalNotification';
 
 import type { NotificationDTO } from '../types/notification.types';
 import GenericNotification from './GenericNotification';
 import DecisionDone from './DecisionDone';
 import CommentMention from './CommentMention';
-import TaskTypeNotification from './TaskTypeNotification';
-import TaskAdviceNotification from './TaskAdviceNotification';
-import TaskMotivationNotification from './TaskMotivationNotification';
-import TaskProgressUpdateNotification from './TaskProgressUpdateNotification';
-import TaskCompletedNotification from './TaskCompletedNotification';
+import GoalTypeNotification from './GoalTypeNotification';
+import GoalAdviceNotification from './GoalAdviceNotification';
+import GoalMotivationNotification from './GoalMotivationNotification';
+import GoalProgressUpdateNotification from './GoalProgressUpdateNotification';
+import GoalCompletedNotification from './GoalCompletedNotification';
 import MotivationSystemNotification from './MotivationSystemNotification';
-import TaskCheerNotification from './TaskCheerNotification';
+import GoalCheerNotification from './GoalCheerNotification';
 
 type Props = {
   item: NotificationDTO;
@@ -28,27 +28,27 @@ export default function NotificationCard({ item, onPress }: Props) {
     case 'reminder':
       return <ReminderNotification item={item} onPress={onPress} />;
     case 'task':
-      return <TaskNotification item={item} onPress={onPress} />;
+      return <GoalNotification item={item} onPress={onPress} />;
     case 'task-helper':
-      return <TaskTypeNotification item={item} onPress={onPress} />;
+      return <GoalTypeNotification item={item} onPress={onPress} />;
     case 'decision-done':
       return <DecisionDone item={item} onPress={onPress} />;
     case 'comment':
       return <CommentMention item={item} onPress={onPress} />;
     case 'task-advice':
-      return <TaskAdviceNotification item={item} onPress={onPress} />;
+      return <GoalAdviceNotification item={item} onPress={onPress} />;
     case 'task-motivation-push':
-      return <TaskMotivationNotification item={item} onPress={onPress} />;
+      return <GoalMotivationNotification item={item} onPress={onPress} />;
     case 'task-motivation-milestone':
-      return <TaskMotivationNotification item={item} onPress={onPress} />;
+      return <GoalMotivationNotification item={item} onPress={onPress} />;
     case 'task-completed':
-      return <TaskCompletedNotification item={item} onPress={onPress} />;
+      return <GoalCompletedNotification item={item} onPress={onPress} />;
     case 'task-motivation-progress':
     case 'task-progress-update':
-      return <TaskProgressUpdateNotification item={item} onPress={onPress} />;
+      return <GoalProgressUpdateNotification item={item} onPress={onPress} />;
     case 'task-cheer':
     case 'task-motivation-cheer':
-      return <TaskCheerNotification item={item} onPress={onPress} />;
+      return <GoalCheerNotification item={item} onPress={onPress} />;
     case 'task-motivation-unfinished-reminder':
     case 'task-motivation-help-push-reminder':
       return <MotivationSystemNotification item={item} onPress={onPress} />;

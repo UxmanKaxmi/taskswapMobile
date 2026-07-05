@@ -4,7 +4,7 @@ import { CommonActions, NavigationProp, useNavigation, useRoute } from '@react-n
 import { Linking } from 'react-native';
 
 import { AppStackParamList, BottomTabParamList } from './navigation';
-import { Task } from '@features/Tasks/types/tasks';
+import { Goal } from '@features/Goals/types/goals';
 import { useAuth } from '@features/Auth/AuthProvider';
 
 /* -------------------------------------------------------------------------- */
@@ -15,7 +15,7 @@ import { useAuth } from '@features/Auth/AuthProvider';
  * Typed navigation hook for screens inside AppStack (stack screens).
  * @example
  * const navigation = useAppNavigation();
- * navigation.navigate("TaskDetail", { task });
+ * navigation.navigate("GoalDetail", { task });
  */
 export const useAppNavigation = () => {
   return useNavigation<NavigationProp<AppStackParamList>>();
@@ -36,7 +36,7 @@ export const useTabNavigation = () => {
  * Navigate inside AppStack (stack screens).
  * Supports screen params properly.
  * @example
- * navigateStack(nav, "TaskDetail", { taskId: "123" });
+ * navigateStack(nav, "GoalDetail", { taskId: "123" });
  */
 export function navigateStack<T extends keyof AppStackParamList>(
   navigation: NavigationProp<AppStackParamList>,
@@ -106,21 +106,21 @@ export function openFriendsProfile(
 }
 
 /**
- * Navigate to AddTask modal.
+ * Navigate to AddGoal modal.
  * @example
- * openAddTask(nav);
+ * openAddGoal(nav);
  */
-export function openAddTask(navigation: NavigationProp<AppStackParamList>, task?: Task) {
-  (navigation.navigate as any)('AddTask', { task });
+export function openAddGoal(navigation: NavigationProp<AppStackParamList>, task?: Goal) {
+  (navigation.navigate as any)('AddGoal', { task });
 }
 
 /**
- * Shortcut to navigate to a Task Detail screen.
+ * Shortcut to navigate to a Goal Detail screen.
  * @example
- * navigateToTaskDetails(navigation, task);
+ * navigateToGoalDetails(navigation, task);
  */
-export function navigateToTaskDetails(navigation: NavigationProp<AppStackParamList>, task: Task) {
-  navigation.navigate('TaskDetail', { task });
+export function navigateToGoalDetails(navigation: NavigationProp<AppStackParamList>, task: Goal) {
+  navigation.navigate('GoalDetail', { task });
 }
 
 export function resetToHomeRoot(navigation: any) {
@@ -157,11 +157,11 @@ export function resetToHomeRoot(navigation: any) {
  *
  * @example
  * // Navigate only if authenticated
- * if (!checkAuthThenNavigate('AddTask')) return;
+ * if (!checkAuthThenNavigate('AddGoal')) return;
  *
  * @example
  * // Navigate with params
- * if (!checkAuthThenNavigate('TaskDetail', { taskId })) return;
+ * if (!checkAuthThenNavigate('GoalDetail', { taskId })) return;
  */
 
 type AuthIntroOptions = {
@@ -185,7 +185,7 @@ export function useCheckAuthThenNavigate() {
   ): boolean {
     if (!user) {
       // When no explicit screen is passed, we re-open the *current* screen
-      // after login — so carry its params (e.g. TaskDetail's taskId) through,
+      // after login — so carry its params (e.g. GoalDetail's taskId) through,
       // otherwise the screen reopens with no params and can't load its data.
       const resolvedParams = params ?? (screen ? undefined : (route.params as any));
 

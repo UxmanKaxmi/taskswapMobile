@@ -20,9 +20,9 @@ import SectionHeader from '@shared/components/SectionHeader/SectionHeader';
 import DecisionCard from '@features/Home/components/DecisionCard';
 import MotivationCard from '@features/Home/components/MotivationCard';
 import AdviceCard from '@features/Home/components/AdviceCard';
-import { Task } from '@features/Tasks/types/tasks';
+import { Goal } from '@features/Goals/types/goals';
 import { AppStackParamList } from '@navigation/types/navigation';
-import { navigateToTaskDetails, useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
+import { navigateToGoalDetails, useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 // export const mockProfile = {
 //   avatarUri: 'https://i.pravatar.cc/150?img=47',
 //   name: 'Jane Doe',
@@ -76,19 +76,19 @@ export default function FriendsProfileScreen() {
     toggleFollow(userId);
   };
 
-  const onPressTask = useCallback(
-    (task: Task) => {
-      navigateToTaskDetails(navigation, task);
+  const onPressGoal = useCallback(
+    (task: Goal) => {
+      navigateToGoalDetails(navigation, task);
     },
     [navigation],
   );
 
-  const onNoopTaskAction = useCallback((_task: Task) => {}, []);
+  const onNoopGoalAction = useCallback((_task: Goal) => {}, []);
 
   const onSuggestAdvice = useCallback(
-    (task: Task) => {
+    (task: Goal) => {
       checkAuthThenNavigate(
-        'TaskDetail',
+        'GoalDetail',
         {
           taskId: task.id,
           openAdviceComposer: true,
@@ -101,36 +101,36 @@ export default function FriendsProfileScreen() {
     [checkAuthThenNavigate],
   );
 
-  const renderTaskNew = useCallback<ListRenderItem<Task>>(
+  const renderGoalNew = useCallback<ListRenderItem<Goal>>(
     ({ item }) => {
       switch (item.type) {
         case 'decision':
-          return <DecisionCard task={item as any} onPressCard={onPressTask as any} />;
+          return <DecisionCard task={item as any} onPressCard={onPressGoal as any} />;
         case 'reminder':
-          return <ReminderCard task={item as any} onPressCard={onPressTask as any} />;
+          return <ReminderCard task={item as any} onPressCard={onPressGoal as any} />;
         case 'motivation':
           return (
             <MotivationCard
               task={item as any}
-              onPressCard={onPressTask as any}
-              onPressSuggest={onNoopTaskAction as any}
-              onPressView={onNoopTaskAction as any}
+              onPressCard={onPressGoal as any}
+              onPressSuggest={onNoopGoalAction as any}
+              onPressView={onNoopGoalAction as any}
             />
           );
         case 'advice':
           return (
             <AdviceCard
               task={item as any}
-              onPressCard={onPressTask as any}
+              onPressCard={onPressGoal as any}
               onPressSuggest={onSuggestAdvice as any}
-              onPressView={onNoopTaskAction as any}
+              onPressView={onNoopGoalAction as any}
             />
           );
         default:
           return null;
       }
     },
-    [onPressTask, onNoopTaskAction, onSuggestAdvice],
+    [onPressGoal, onNoopGoalAction, onSuggestAdvice],
   );
 
   return (
@@ -180,7 +180,7 @@ export default function FriendsProfileScreen() {
           )}
           {/* 
           <TextElement variant="subtitle" style={{ marginTop: spacing.xs, fontWeight: '600' }}>
-            Recent Tasks
+            Recent Goals
           </TextElement> */}
 
           <View style={styles.recentTasks}>
@@ -193,7 +193,7 @@ export default function FriendsProfileScreen() {
             ) : (
               profile.recentTasks.map(task => (
                 <React.Fragment key={task.id}>
-                  {renderTaskNew({ item: task as Task } as any)}
+                  {renderGoalNew({ item: task as Goal } as any)}
                 </React.Fragment>
               ))
             )}

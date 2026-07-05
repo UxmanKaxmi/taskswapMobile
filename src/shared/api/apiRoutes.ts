@@ -16,11 +16,11 @@ export enum ApiRoute {
 
 // ✅ Builder functions for dynamic API routes
 export const buildRoute = {
-  // 📌 Task Routes
+  // 📌 Goal Routes
   task: (id: string) => `${ApiRoute.TASKS}/${id}`,
   taskProgress: (id: string) => `${ApiRoute.TASKS}/${id}/progress`,
-  completeTask: (id: string) => `${ApiRoute.TASKS}/${id}/complete`,
-  uncompleteTask: (id: string) => `${ApiRoute.TASKS}/${id}/incomplete`,
+  completeGoal: (id: string) => `${ApiRoute.TASKS}/${id}/complete`,
+  uncompleteGoal: (id: string) => `${ApiRoute.TASKS}/${id}/incomplete`,
   featureFlags: () => `${ApiRoute.FEATURE_FLAGS}`,
   submitFeedback: () => `${ApiRoute.FEEDBACK}`,
 
@@ -34,9 +34,9 @@ export const buildRoute = {
   searchFriends: (query: string, includeFollowed: boolean = true) =>
     `${ApiRoute.USERS}/search-friends?query=${encodeURIComponent(query)}&includeFollowed=${includeFollowed}`,
   friendProfile: (id: string) => `${ApiRoute.USERS}/${id}/profile`,
-  incrementTaskViews: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/views`,
+  incrementGoalViews: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/views`,
 
-  // 📌 Reminder Note Routes (via Task)
+  // 📌 Reminder Note Routes (via Goal)
   sendReminder: (taskId: string) => `${ApiRoute.REMINDER_NOTES}/${taskId}/remind`,
   getReminders: (taskId: string) => `${ApiRoute.REMINDER_NOTES}/${taskId}/reminders`,
 
@@ -47,7 +47,7 @@ export const buildRoute = {
   followers: () => `${ApiRoute.USERS}/followers`,
   following: () => `${ApiRoute.USERS}/following`,
 
-  // 📌 Notifications Routes (via Task)
+  // 📌 Notifications Routes (via Goal)
   getAllNotifications: () => `${ApiRoute.NOTIFICATION}`,
   markNotificationAsReadById: (notificationId: string) =>
     `${ApiRoute.NOTIFICATION}/${notificationId}/read`,
@@ -70,8 +70,8 @@ export const buildRoute = {
   attributeReferral: () => `${ApiRoute.REFERRALS}/attribute`,
 
   // ✅ Push (Encouragement)
-  toggleTaskPush: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/push`,
-  getTaskPushes: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/pushes`,
+  toggleGoalPush: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/push`,
+  getGoalPushes: (taskId: string) => `${ApiRoute.TASKS}/${taskId}/pushes`,
 
   // ✅ Cheer
   cheerBeat: (beatId: string) => `${ApiRoute.BEATS}/${beatId}/cheer`,

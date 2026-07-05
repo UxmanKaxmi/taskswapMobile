@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { registerPostLogoutNavigation } from '@shared/api/authBridge';
-import AddTaskNavigator from '@features/AddTask/navigation/AddTaskNavigator';
+import AddGoalNavigator from '@features/AddGoal/navigation/AddGoalNavigator';
 
 const Stack = createNativeStackNavigator();
 
@@ -81,7 +81,7 @@ export default function RootNavigator() {
       {/* Login Flow */}
       <Stack.Screen name="Auth" component={AuthNavigator} />
 
-      <Stack.Screen name="AddTaskScreen" component={AddTaskNavigator} />
+      <Stack.Screen name="AddGoalScreen" component={AddGoalNavigator} />
     </Stack.Navigator>
   );
 }

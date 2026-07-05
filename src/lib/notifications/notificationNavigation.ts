@@ -72,15 +72,15 @@ function navigateRoute(route: NotificationRoute) {
 
     navigationRef.navigate('AuthIntro', {
       redirectTo,
-      ...(route.screen === 'TaskDetail' ? { params: route.params } : {}),
+      ...(route.screen === 'GoalDetail' ? { params: route.params } : {}),
       authCopy: route.authCopy,
     } as any);
     return;
   }
 
-  if (route.screen === 'TaskDetail') {
+  if (route.screen === 'GoalDetail') {
     navigationRef.navigate('App', {
-      screen: 'TaskDetail',
+      screen: 'GoalDetail',
       params: route.params,
     } as any);
     return;

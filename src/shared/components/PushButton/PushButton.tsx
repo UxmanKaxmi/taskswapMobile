@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 import { colors, platformShadow } from '@shared/theme';
-import { TaskType } from '@features/Tasks/types/tasks';
+import { GoalType } from '@features/Goals/types/goals';
 import { haptics } from '@shared/utils/haptics';
 import ButtonBase from '../Buttons/ButtonBase';
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -13,7 +13,7 @@ interface PushButtonProps {
   label?: string;
   activeLabel?: string;
   size?: 'sm' | 'md' | 'lg';
-  taskType?: TaskType;
+  taskType?: GoalType;
   disabled?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;

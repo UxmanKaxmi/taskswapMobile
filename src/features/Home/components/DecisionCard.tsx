@@ -7,32 +7,32 @@ import Row from '@shared/components/Layout/Row';
 import Column from '@shared/components/Layout/Column';
 import { colors, spacing } from '@shared/theme';
 
-import { DecisionTask } from '../types/home';
+import { DecisionGoal } from '../types/home';
 import { getTypeVisual, typeIcons } from '@shared/utils/typeVisuals';
 
-import { useCastVote } from '@features/Tasks/hooks/useVote';
+import { useCastVote } from '@features/Goals/hooks/useVote';
 import { useVoteStats } from '../hooks/useVoteStats';
 import { useAuth } from '@features/Auth/AuthProvider';
 
-import TaskHeader from './TaskHeader';
-import TaskFooter from './TaskFooter';
+import GoalHeader from './GoalHeader';
+import GoalFooter from './GoalFooter';
 import HelperAvatarGroup from './HelperAvatarGroup';
 import VoteProgressBar from './VoteProgressBar';
-import TaskCardGradient from './TaskCardGradient';
+import GoalCardGradient from './GoalCardGradient';
 
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import Icon from '@shared/components/Icons/Icon';
-import { TaskTypeEnum } from '@features/Tasks/types/tasks';
+import { GoalTypeEnum } from '@features/Goals/types/goals';
 import { cardStyles } from './styles';
-import DecisionChoiceBar from '@features/AddTask/components/DecisionChoiceBar';
+import DecisionChoiceBar from '@features/AddGoal/components/DecisionChoiceBar';
 import { Height } from '@shared/components/Spacing';
 import { showConfirmAlert } from '@shared/utils/confirmAlert';
 import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 
 type Props = {
-  task: DecisionTask;
-  onPressCard: (task: DecisionTask) => void;
-  onPressShare?: (task: DecisionTask) => void;
+  task: DecisionGoal;
+  onPressCard: (task: DecisionGoal) => void;
+  onPressShare?: (task: DecisionGoal) => void;
 };
 
 export default function DecisionCard({ task, onPressCard, onPressShare }: Props) {
@@ -74,7 +74,7 @@ export default function DecisionCard({ task, onPressCard, onPressShare }: Props)
 
   return (
     <Shadow size="tint" style={cardStyles.card}>
-      <TaskCardGradient style={cardStyles.gradient} type={type}>
+      <GoalCardGradient style={cardStyles.gradient} type={type}>
         {/* Decorative background icon */}
         <View style={styles.backgroundShadeView}>
           <Icon
@@ -92,11 +92,11 @@ export default function DecisionCard({ task, onPressCard, onPressShare }: Props)
           onPress={() => onPressCard(task)}
         >
           {/* Header */}
-          <TaskHeader
+          <GoalHeader
             avatar={avatar || ''}
             name={name}
             createdAt={createdAt}
-            type={TaskTypeEnum.Decision}
+            type={GoalTypeEnum.Decision}
             helpers={helpers}
           />
 
@@ -179,7 +179,7 @@ export default function DecisionCard({ task, onPressCard, onPressShare }: Props)
 
           {/* Footer */}
           <View style={{ marginTop: spacing.md }}>
-            <TaskFooter
+            <GoalFooter
               commentCount={task.commentsCount ?? 0}
               viewCount={task.viewCount ?? 0}
               shareHandler={() => onPressShare?.(task)}
@@ -188,7 +188,7 @@ export default function DecisionCard({ task, onPressCard, onPressShare }: Props)
             />
           </View>
         </TouchableOpacity>
-      </TaskCardGradient>
+      </GoalCardGradient>
     </Shadow>
   );
 }
