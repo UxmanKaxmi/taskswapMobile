@@ -58,7 +58,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Native surfaces (iOS tab bar material, alerts, pickers) follow the OS
   // appearance, not our JS palette — override it so they match the picked theme.
   useEffect(() => {
-    Appearance.setColorScheme(preference === 'system' ? null : preference);
+    // RN 0.85: the reset value is 'unspecified' (null crashes Android's
+    // non-null native parameter).
+    Appearance.setColorScheme(preference === 'system' ? 'unspecified' : preference);
   }, [preference]);
 
   const setPreference = useCallback((next: ThemePreference) => {
