@@ -1,6 +1,7 @@
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 import { handleNotificationRoute } from './notificationNavigation';
+import { applyLiveQueryUpdates } from './liveQueryUpdates';
 // Headless module (no React components): system notification accents can't
 // follow the in-app theme, so we use the light palette explicitly.
 import { lightColors } from '@shared/theme';
@@ -43,9 +44,15 @@ export function onForegroundNotification() {
   const unsubscribeMessagingMessage = messaging().onMessage(async remoteMessage => {
     if (__DEV__) console.log('📬 Foreground message:', remoteMessage);
 
+    // Refresh affected query caches so on-screen counts/cards update live.
+    applyLiveQueryUpdates(remoteMessage.data);
+
+    // Data-only messages are silent cache refreshes — no banner to show.
+    if (!remoteMessage.notification) return;
+
     await notifee.displayNotification({
-      title: remoteMessage.notification?.title || 'New Notification',
-      body: remoteMessage.notification?.body || '',
+      title: remoteMessage.notification.title || 'New Notification',
+      body: remoteMessage.notification.body || '',
       android: {
         channelId: 'default',
         smallIcon: 'ic_notification',
