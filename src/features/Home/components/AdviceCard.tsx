@@ -64,6 +64,9 @@ export default function AdviceCard({ task, onPressCard, onPressShare }: Props) {
             createdAt={createdAt}
             type={GoalTypeEnum.Advice}
             helpers={helpers}
+            taskId={task.id}
+            ownerUserId={task.userId}
+            taskText={text}
           />
 
           {/* Message */}

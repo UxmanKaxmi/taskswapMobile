@@ -24,6 +24,10 @@ class MainActivity : ReactActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         RNBootSplash.init(this, R.style.BootTheme) // ⬅️ initialize the splash screen
-        super.onCreate(savedInstanceState) // super.onCreate(null) with react-native-screens
+        // Pass null (not savedInstanceState) so Android does NOT restore stale native
+        // fragment state onto a freshly-built React tree. Required by react-native-screens;
+        // without it, relaunching the activity from a background/killed state — e.g.
+        // tapping a push notification — crashes.
+        super.onCreate(null)
     }
 }

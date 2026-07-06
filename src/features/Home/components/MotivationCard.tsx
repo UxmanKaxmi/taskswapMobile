@@ -29,6 +29,7 @@ import { useSendCheer } from '@features/Goals/hooks/useGoalCheer';
 import Icon from '@shared/components/Icons/Icon';
 import { showToast } from '@shared/utils/toast';
 import { CHEER_PRESETS } from '@features/Goals/constants/cheerPresets';
+import GoalModerationMenu from './GoalModerationMenu';
 
 type Props = {
   task: MotivationGoal;
@@ -265,8 +266,16 @@ function MotivationCard({ task, onPressCard }: Props) {
               </View>
             </View>
 
-            <View style={styles.feelingPill}>
-              <TextElement style={styles.feelingText}>{feelingLabel}</TextElement>
+            <View style={styles.headerRight}>
+              <View style={styles.feelingPill}>
+                <TextElement style={styles.feelingText}>{feelingLabel}</TextElement>
+              </View>
+              <GoalModerationMenu
+                taskId={task.id}
+                ownerUserId={task.userId}
+                ownerName={name}
+                taskText={text}
+              />
             </View>
           </View>
 
@@ -425,6 +434,11 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'flex-start',
       justifyContent: 'space-between',
       gap: spacing.sm,
+    },
+    headerRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
     },
     identityRow: {
       flexDirection: 'row',

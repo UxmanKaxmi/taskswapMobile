@@ -1,11 +1,20 @@
 // src/features/MyProfile/components/ProfileMenu.tsx
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, View, StyleSheet, Alert, Linking } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Animated,
+  Alert,
+  Linking,
+  Pressable,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import Row from '@shared/components/Layout/Row';
-import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
+import { spacing, ThemeColors, ThemePreference, useTheme, useThemedStyles } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigationProp } from '@navigation/types/navigation';
@@ -14,13 +23,44 @@ import Ripple from '@shared/components/Buttons/Ripple';
 import { deleteMyAccount } from '../api/MyProfileAPI';
 import { showToast } from '@shared/utils/toast';
 import { PRIVACY_POLICY_URL, TERMS_URL, SUPPORT_URL } from '@shared/utils/constants';
+import AppModal from '@shared/components/AppModal/AppModal';
+import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
+
+type ThemeOption = {
+  value: ThemePreference;
+  label: string;
+  description: string;
+  icon: React.ComponentProps<typeof Icon>['name'];
+};
+
+const THEME_OPTIONS: ThemeOption[] = [
+  {
+    value: 'light',
+    label: 'Light',
+    description: 'Use the bright PushMeUp look.',
+    icon: 'sunny-outline',
+  },
+  {
+    value: 'dark',
+    label: 'Dark',
+    description: 'Use the darker interface.',
+    icon: 'moon-outline',
+  },
+  {
+    value: 'system',
+    label: 'System',
+    description: 'Match your device appearance.',
+    icon: 'phone-portrait-outline',
+  },
+];
 
 export type MenuItem = {
-  id: string;
+  id?: string;
   label: string;
   icon: React.ComponentProps<typeof Icon>['name'];
   onPress: () => void;
   iconSet: React.ComponentProps<typeof Icon>['set'];
+  valueLabel?: string;
   disabled?: boolean;
   loading?: boolean;
 };
@@ -29,10 +69,34 @@ export type MenuItem = {
  * Profile menu that takes a dynamic list of items with icons and callbacks.
  */
 export default function ProfileMenu() {
-  const { colors } = useTheme();
+  const { colors, preference, setPreference } = useTheme();
   const styles = useThemedStyles(createStyles);
   const navigation = useNavigation<AppNavigationProp>();
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [themeSheetVisible, setThemeSheetVisible] = useState(false);
+  const themeSheetTranslateY = useRef(new Animated.Value(320)).current;
+  const activeThemeOption =
+    THEME_OPTIONS.find(option => option.value === preference) ?? THEME_OPTIONS[2];
+
+  useEffect(() => {
+    Animated.timing(themeSheetTranslateY, {
+      toValue: themeSheetVisible ? 0 : 320,
+      duration: themeSheetVisible ? 220 : 180,
+      useNativeDriver: true,
+    }).start();
+  }, [themeSheetTranslateY, themeSheetVisible]);
+
+  const closeThemeSheet = useCallback(() => {
+    setThemeSheetVisible(false);
+  }, []);
+
+  const handleThemeSelect = useCallback(
+    (nextPreference: ThemePreference) => {
+      setPreference(nextPreference);
+      closeThemeSheet();
+    },
+    [closeThemeSheet, setPreference],
+  );
 
   const handleLogout = useCallback(async () => {
     Alert.alert('Logout', 'Are you sure you want to log out?', [
@@ -80,83 +144,99 @@ export default function ProfileMenu() {
     );
   }, [isDeletingAccount]);
 
-  const primaryItems = useMemo(
-    () =>
-      [
-        {
-          label: 'Find Friends',
-          icon: 'people-outline',
-          onPress: () => {
-            navigation.navigate('FindFriendsScreen');
-          },
-          iconSet: 'ion',
+  const primaryItems = useMemo<MenuItem[]>(
+    () => [
+      {
+        label: 'Appearance',
+        icon: 'color-palette-outline',
+        onPress: () => {
+          setThemeSheetVisible(true);
         },
-        // {
-        //   label: 'Invite Friends',
-        //   icon: 'person-add-outline',
-        //   onPress: () => {
-        //     navigation.navigate('InviteFriendsScreen');
-        //   },
-        //   iconSet: 'ion',
-        // },
-        {
-          label: 'Help Center',
-          icon: 'help-circle-outline',
-          onPress: () => {
-            Linking.openURL(SUPPORT_URL).catch(() => {
-              showToast({
-                type: 'error',
-                title: 'Could not open link',
-                message: 'Please try again later.',
-              });
+        iconSet: 'ion',
+        valueLabel: activeThemeOption.label,
+      },
+      {
+        label: 'Find Friends',
+        icon: 'people-outline',
+        onPress: () => {
+          navigation.navigate('FindFriendsScreen');
+        },
+        iconSet: 'ion',
+      },
+      // {
+      //   label: 'Invite Friends',
+      //   icon: 'person-add-outline',
+      //   onPress: () => {
+      //     navigation.navigate('InviteFriendsScreen');
+      //   },
+      //   iconSet: 'ion',
+      // },
+      {
+        label: 'Blocked Users',
+        icon: 'ban-outline',
+        onPress: () => {
+          navigation.navigate('BlockedUsersScreen');
+        },
+        iconSet: 'ion',
+      },
+      {
+        label: 'Help Center',
+        icon: 'help-circle-outline',
+        onPress: () => {
+          Linking.openURL(SUPPORT_URL).catch(() => {
+            showToast({
+              type: 'error',
+              title: 'Could not open link',
+              message: 'Please try again later.',
             });
-          },
-          iconSet: 'ion',
+          });
         },
-        {
-          label: 'Send Feedback',
-          icon: 'chatbubble-ellipses-outline',
-          onPress: () => {
-            navigation.navigate('SendFeedbackScreen');
-          },
-          iconSet: 'ion',
+        iconSet: 'ion',
+      },
+      {
+        label: 'Send Feedback',
+        icon: 'chatbubble-ellipses-outline',
+        onPress: () => {
+          navigation.navigate('SendFeedbackScreen');
         },
-        {
-          label: 'Privacy Policy',
-          icon: 'shield-checkmark-outline',
-          onPress: () => {
-            Linking.openURL(PRIVACY_POLICY_URL).catch(() => {
-              showToast({
-                type: 'error',
-                title: 'Could not open link',
-                message: 'Please try again later.',
-              });
+        iconSet: 'ion',
+      },
+      {
+        label: 'Privacy Policy',
+        icon: 'shield-checkmark-outline',
+        onPress: () => {
+          Linking.openURL(PRIVACY_POLICY_URL).catch(() => {
+            showToast({
+              type: 'error',
+              title: 'Could not open link',
+              message: 'Please try again later.',
             });
-          },
-          iconSet: 'ion',
+          });
         },
-        {
-          label: 'Terms of Service',
-          icon: 'document-text-outline',
-          onPress: () => {
-            Linking.openURL(TERMS_URL).catch(() => {
-              showToast({
-                type: 'error',
-                title: 'Could not open link',
-                message: 'Please try again later.',
-              });
+        iconSet: 'ion',
+      },
+      {
+        label: 'Terms of Service',
+        icon: 'document-text-outline',
+        onPress: () => {
+          Linking.openURL(TERMS_URL).catch(() => {
+            showToast({
+              type: 'error',
+              title: 'Could not open link',
+              message: 'Please try again later.',
             });
-          },
-          iconSet: 'ion',
+          });
         },
-        // {
-        //   label: 'Debug Notification',
-        //   icon: 'terminal',
-        //   onPress: () => navigation.navigate('MainDebugScreen'),
-        //   iconSet: 'ion',
-        // },
-      ] as const,
-    [navigation],
+        iconSet: 'ion',
+      },
+      // {
+      //   label: 'Debug Notification',
+      //   icon: 'terminal',
+      //   onPress: () => navigation.navigate('MainDebugScreen'),
+      //   iconSet: 'ion',
+      // },
+    ],
+    [activeThemeOption.label, navigation],
   ); // ← keep the literal types
 
   const dangerItems = useMemo<MenuItem[]>(
@@ -186,7 +266,7 @@ export default function ProfileMenu() {
       <View style={styles.card}>
         {primaryItems.map((item, idx) => (
           <Ripple
-            key={item.label}
+            key={item.id ?? item.label}
             style={[styles.row, idx === primaryItems.length - 1 && styles.lastRow]}
             onPress={item.onPress}
           >
@@ -204,7 +284,12 @@ export default function ProfileMenu() {
                   {item.label}
                 </TextElement>
               </Row>
-              <Icon set="ion" name="chevron-forward" size={18} color={colors.onboardingMuted} />
+              <Row align="center" style={styles.rowAccessory}>
+                {!!item.valueLabel && (
+                  <TextElement style={styles.valueLabel}>{item.valueLabel}</TextElement>
+                )}
+                <Icon set="ion" name="chevron-forward" size={18} color={colors.onboardingMuted} />
+              </Row>
             </Row>
           </Ripple>
         ))}
@@ -241,6 +326,69 @@ export default function ProfileMenu() {
           </Ripple>
         ))}
       </View>
+
+      <AppModal
+        visible={themeSheetVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={closeThemeSheet}
+      >
+        <TouchableWithoutFeedback onPress={closeThemeSheet}>
+          <View style={styles.overlay} />
+        </TouchableWithoutFeedback>
+
+        <Animated.View
+          style={[styles.sheet, { transform: [{ translateY: themeSheetTranslateY }] }]}
+        >
+          <View style={styles.sheetHeader}>
+            <TextElement style={styles.sheetTitle}>Choose appearance</TextElement>
+            <Pressable
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={closeThemeSheet}
+              style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
+            >
+              <Icon set="ion" name="close" size={ms(20)} color={colors.onboardingInk} />
+            </Pressable>
+          </View>
+
+          <View style={styles.optionList}>
+            {THEME_OPTIONS.map(option => {
+              const selected = option.value === preference;
+
+              return (
+                <Pressable
+                  key={option.value}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  onPress={() => handleThemeSelect(option.value)}
+                  style={({ pressed }) => [
+                    styles.optionRow,
+                    selected && styles.selectedOptionRow,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <View style={styles.optionIcon}>
+                    <Icon set="ion" name={option.icon} size={ms(17)} color={colors.onboardingInk} />
+                  </View>
+                  <View style={styles.optionTextBlock}>
+                    <TextElement style={styles.optionTitle}>{option.label}</TextElement>
+                    <TextElement style={styles.optionDescription}>{option.description}</TextElement>
+                  </View>
+                  {selected ? (
+                    <Icon
+                      set="ion"
+                      name="checkmark-sharp"
+                      size={ms(22)}
+                      color={colors.onboardingInk}
+                    />
+                  ) : null}
+                </Pressable>
+              );
+            })}
+          </View>
+        </Animated.View>
+      </AppModal>
     </View>
   );
 }
@@ -283,6 +431,9 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
     },
+    rowAccessory: {
+      flexShrink: 0,
+    },
     iconCircle: {
       width: ms(42),
       height: ms(42),
@@ -301,6 +452,13 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.onboardingInk,
       letterSpacing: 0,
     },
+    valueLabel: {
+      color: colors.onboardingMuted,
+      fontSize: ms(13),
+      lineHeight: ms(17),
+      fontWeight: '700',
+      marginRight: ms(6),
+    },
     dangerCard: {
       backgroundColor: colors.dangerSoftBg,
       borderColor: colors.dangerSoftBorder,
@@ -314,5 +472,84 @@ const createStyles = (colors: ThemeColors) =>
     },
     labelDanger: {
       color: colors.error,
+    },
+    pressed: {
+      opacity: 0.78,
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.52)',
+    },
+    sheet: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: colors.onboardingPaper,
+      borderTopLeftRadius: MODAL_TOP_RADIUS,
+      borderTopRightRadius: MODAL_TOP_RADIUS,
+      paddingTop: spacing.md,
+      paddingBottom: vs(34),
+    },
+    sheetHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.lg,
+    },
+    sheetTitle: {
+      color: colors.onboardingInk,
+      fontSize: ms(19),
+      lineHeight: ms(24),
+      fontWeight: '900',
+    },
+    closeButton: {
+      width: ms(34),
+      height: ms(34),
+      borderRadius: ms(17),
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.onboardingLine,
+    },
+    optionList: {
+      marginTop: spacing.xs,
+    },
+    optionRow: {
+      minHeight: vs(58),
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderLeftWidth: 3,
+      borderLeftColor: 'transparent',
+    },
+    selectedOptionRow: {
+      backgroundColor: 'rgba(255, 210, 63, 0.18)',
+      borderLeftColor: colors.onboardingPush,
+    },
+    optionIcon: {
+      width: ms(34),
+      height: ms(34),
+      borderRadius: ms(17),
+      backgroundColor: colors.onboardingPush,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    optionTextBlock: {
+      flex: 1,
+    },
+    optionTitle: {
+      color: colors.onboardingInk,
+      fontSize: ms(15),
+      lineHeight: ms(19),
+      fontWeight: '800',
+    },
+    optionDescription: {
+      marginTop: vs(3),
+      color: colors.onboardingMuted,
+      fontSize: ms(12),
+      lineHeight: ms(15),
+      fontWeight: '600',
     },
   });

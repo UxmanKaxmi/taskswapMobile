@@ -18,6 +18,7 @@ export enum ApiRoute {
 export const buildRoute = {
   // 📌 Goal Routes
   task: (id: string) => `${ApiRoute.TASKS}/${id}`,
+  reportTask: (id: string) => `${ApiRoute.TASKS}/${id}/report`,
   taskProgress: (id: string) => `${ApiRoute.TASKS}/${id}/progress`,
   completeGoal: (id: string) => `${ApiRoute.TASKS}/${id}/complete`,
   uncompleteGoal: (id: string) => `${ApiRoute.TASKS}/${id}/incomplete`,
@@ -30,6 +31,8 @@ export const buildRoute = {
   matchUsers: () => `${ApiRoute.USERS}/match`,
   me: () => `${ApiRoute.USERS}/me`,
   deleteMe: () => `${ApiRoute.USERS}/me`,
+  blockedUsers: () => `${ApiRoute.USERS}/me/blocked-users`,
+  blockUser: (id: string) => `${ApiRoute.USERS}/${id}/block`,
   homeSummary: () => `${ApiRoute.USERS}/me/home-summary`,
   searchFriends: (query: string, includeFollowed: boolean = true) =>
     `${ApiRoute.USERS}/search-friends?query=${encodeURIComponent(query)}&includeFollowed=${includeFollowed}`,

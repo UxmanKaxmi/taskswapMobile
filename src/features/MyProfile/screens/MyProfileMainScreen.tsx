@@ -12,7 +12,6 @@ import { useAuth } from '@features/Auth/AuthProvider';
 import ListView from '@shared/components/ListView/ListView';
 import StatsAchievements from '../components/StatsAchievements';
 import ProfileMenu from '../components/ProfileMenu';
-import ThemeSwitcher from '../components/ThemeSwitcher';
 import { useMyProfileData } from '../hooks/useMyProfileData';
 import { isAndroid } from '@shared/utils/constants';
 
@@ -65,7 +64,6 @@ export default function MyProfileMainScreen() {
             tasksDone={MyProfileData?.tasksDone ?? 0}
             dayStreak={MyProfileData?.dayStreak ?? 0}
           />
-          <ThemeSwitcher />
           <ProfileMenu />
         </ListView>
       </View>

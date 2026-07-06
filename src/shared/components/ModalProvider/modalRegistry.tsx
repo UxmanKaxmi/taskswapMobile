@@ -8,6 +8,7 @@ import CheerModalContent from './modals/CheerModalContent';
 import MotivationSuccessModalContent from './modals/MotivationSuccessModalContent';
 import ComingSoonModalContent from './modals/ComingSoonModalContent';
 import CompleteGoalConfirmationModalContent from './modals/CompleteGoalConfirmationModalContent';
+import ReportTaskModalContent from './modals/ReportTaskModalContent';
 import { type ModalPayloadMap, type ModalType } from './modalTypes';
 
 type RenderContext = {
@@ -91,6 +92,17 @@ export const modalRegistry: { [K in ModalType]: ModalDefinition<K> } = {
     },
     render: (payload, { closeModal }) => (
       <CompleteGoalConfirmationModalContent payload={payload} closeModal={closeModal} />
+    ),
+  },
+  reportTask: {
+    snapPoints: ['62%'],
+    scrollable: true,
+    bottomSheetProps: {
+      keyboardBehavior: 'extend',
+      enableDynamicSizing: true,
+    },
+    render: (payload, { closeModal }) => (
+      <ReportTaskModalContent payload={payload} closeModal={closeModal} />
     ),
   },
 };

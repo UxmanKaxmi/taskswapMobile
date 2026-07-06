@@ -1,4 +1,5 @@
 import type { GoalType } from '@features/Goals/types/goals';
+import type { ReportReason } from '@features/Reports';
 
 export type InfoModalPayload = {
   title: string;
@@ -46,6 +47,12 @@ export type CompleteGoalConfirmationModalPayload = {
   onConfirm: () => void | Promise<void>;
 };
 
+export type ReportTaskModalPayload = {
+  ownerName?: string;
+  taskText: string;
+  onSubmit: (reason: ReportReason, details?: string) => void | Promise<void>;
+};
+
 export type ModalPayloadMap = {
   info: InfoModalPayload;
   reminderMessage: ReminderMessageModalPayload;
@@ -54,6 +61,7 @@ export type ModalPayloadMap = {
   motivationSuccess: MotivationSuccessModalPayload;
   comingSoon: ComingSoonModalPayload;
   completeGoalConfirmation: CompleteGoalConfirmationModalPayload;
+  reportTask: ReportTaskModalPayload;
 };
 
 export type ModalType = keyof ModalPayloadMap;
@@ -86,5 +94,9 @@ export type ModalState =
   | {
       type: 'completeGoalConfirmation';
       payload: CompleteGoalConfirmationModalPayload;
+    }
+  | {
+      type: 'reportTask';
+      payload: ReportTaskModalPayload;
     }
   | null;

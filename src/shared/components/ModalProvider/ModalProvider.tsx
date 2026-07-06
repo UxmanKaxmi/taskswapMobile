@@ -24,6 +24,7 @@ import {
   type ModalState,
   type ModalType,
   type ReminderMessageModalPayload,
+  type ReportTaskModalPayload,
   type ShareUpdateModalPayload,
 } from './modalTypes';
 import { modalRegistry } from './modalRegistry';
@@ -38,6 +39,7 @@ type ModalContextType = {
   openShareUpdateSheet: (payload: ShareUpdateModalPayload) => void;
   openCheerSheet: (payload: CheerModalPayload) => void;
   openComingSoonSheet: (payload: ComingSoonModalPayload) => void;
+  openReportTaskSheet: (payload: ReportTaskModalPayload) => void;
 };
 
 const ModalContext = createContext<ModalContextType | null>(null);
@@ -99,6 +101,13 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     [openModal],
   );
 
+  const openReportTaskSheet = useCallback(
+    (payload: ReportTaskModalPayload) => {
+      openModal('reportTask', payload);
+    },
+    [openModal],
+  );
+
   const onSheetDismiss = useCallback(() => {
     const closedModal = activeModalRef.current;
     const closeAction = nextCloseActionRef.current;
@@ -154,6 +163,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
         openShareUpdateSheet,
         openCheerSheet,
         openComingSoonSheet,
+        openReportTaskSheet,
       }}
     >
       {children}

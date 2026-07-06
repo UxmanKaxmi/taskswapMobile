@@ -103,6 +103,7 @@ export type AppStackParamList = {
   // profile
   MyProfileMainScreen: undefined;
   SendFeedbackScreen: undefined;
+  BlockedUsersScreen: undefined;
 
   // debug
   MainDebugScreen: undefined;

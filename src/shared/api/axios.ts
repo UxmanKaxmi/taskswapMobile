@@ -44,6 +44,7 @@ console.log('API base URL:', BASE_URL);
 
 export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   skipToast?: boolean;
+  skipErrorLog?: boolean;
   skipAuthLogout?: boolean;
   skipAuthRefresh?: boolean;
   _authRetry?: boolean;
@@ -204,7 +205,7 @@ api.interceptors.response.use(
     }
 
     // 🧯 Generic error path
-    if (__DEV__) {
+    if (__DEV__ && !error.config?.skipErrorLog) {
       console.error('❌ [Response Error]', {
         message: error.message,
         url: error.config?.url,

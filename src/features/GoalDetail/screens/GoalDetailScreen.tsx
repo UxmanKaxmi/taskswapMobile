@@ -6,6 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { Layout } from '@shared/components/Layout';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
+import GoalModerationMenu from '@features/Home/components/GoalModerationMenu';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import AppLoader from '@shared/components/Loader/Loader';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -332,6 +333,12 @@ export default function GoalDetailScreen({
       }
     })();
   }, [task?.id, isDeleting, navigation, qc]);
+
+  // H1: after reporting/blocking the goal is hidden for this user — leave the
+  // detail screen so they don't sit on hidden content.
+  const leaveAfterModeration = useCallback(() => {
+    if (navigation.canGoBack()) navigation.goBack();
+  }, [navigation]);
 
   const handleOpenGoalMenu = useCallback(() => {
     if (!task?.id) return;
@@ -1162,6 +1169,16 @@ export default function GoalDetailScreen({
                   color={colors.onboardingInk}
                 />
               </Ripple>
+              {task?.id ? (
+                <GoalModerationMenu
+                  taskId={task.id}
+                  ownerUserId={task.userId}
+                  ownerName={task.name}
+                  taskText={task.text}
+                  onReported={leaveAfterModeration}
+                  onBlocked={leaveAfterModeration}
+                />
+              ) : null}
               {showOwnerMenu && (
                 <Ripple
                   style={styles.headerAction}
