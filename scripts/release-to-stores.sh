@@ -401,8 +401,6 @@ build_ios() {
       -allowProvisioningUpdates \
       DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
       CODE_SIGN_STYLE=Automatic \
-      CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
-      "CODE_SIGN_IDENTITY[sdk=iphoneos*]=$IOS_CODE_SIGN_IDENTITY" \
       ${IOS_AUTH_ARGS[@]+"${IOS_AUTH_ARGS[@]}"} \
       archive
   )

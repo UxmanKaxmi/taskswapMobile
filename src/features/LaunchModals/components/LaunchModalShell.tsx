@@ -45,6 +45,11 @@ export default function LaunchModalShell({
 }: LaunchModalShellProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const backdropColors = [
+    colors.onboardingBackdropStart,
+    colors.onboardingBackdropMid,
+    colors.onboardingBackdropEnd,
+  ];
 
   return (
     <AppModal
@@ -55,7 +60,7 @@ export default function LaunchModalShell({
       onDismiss={onHidden}
     >
       <LinearGradient
-        colors={['#F8F5EC', '#FCF9F2', '#F6F2E6']}
+        colors={backdropColors}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.backdrop}
