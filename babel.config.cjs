@@ -18,8 +18,8 @@ module.exports = function (api) {
         },
       ],
 
-      // 👇 MUST BE LAST
-      'react-native-reanimated/plugin',
+      // 👇 MUST BE LAST (reanimated 4 moved the babel plugin into react-native-worklets)
+      'react-native-worklets/plugin',
     ],
   };
 };

@@ -10,7 +10,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 project.ext.react = [
-    nodeExecutableAndArgs: ["/Users/usman.kazmi/.nvm/versions/node/v20.19.6/bin/node"]
+    nodeExecutableAndArgs: ["/Users/usman.kazmi/.nvm/versions/node/v22.23.1/bin/node"]
 ]
 
 project.ext.envConfigFiles = [
@@ -137,8 +137,6 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
     implementation 'com.google.firebase:firebase-messaging'
-    implementation project(':react-native-contacts')
-
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

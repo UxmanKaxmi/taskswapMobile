@@ -94,7 +94,7 @@ const createStyles = (colors: ThemeColors) =>
       flex: 1,
     },
     backdropTouchLayer: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
     },
     container: {
       flex: 1,

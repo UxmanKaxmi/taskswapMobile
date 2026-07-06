@@ -313,7 +313,7 @@ export default function HomeScreen() {
     } finally {
       const elapsed = Date.now() - startedAt;
       if (elapsed < MIN_REFRESH_LOADER_MS) {
-        await new Promise(resolve => setTimeout(resolve, MIN_REFRESH_LOADER_MS - elapsed));
+        await new Promise<void>(resolve => setTimeout(resolve, MIN_REFRESH_LOADER_MS - elapsed));
       }
       setRefreshing(false);
     }

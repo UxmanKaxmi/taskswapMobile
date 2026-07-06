@@ -25,7 +25,7 @@ export async function resetAllLaunchModalsSeen(): Promise<void> {
   const keys = await AsyncStorage.getAllKeys();
   const modalKeys = keys.filter(key => key.startsWith(KEY_PREFIX));
   if (modalKeys.length > 0) {
-    await AsyncStorage.multiRemove(modalKeys);
+    await AsyncStorage.removeMany(modalKeys);
   }
 }
 

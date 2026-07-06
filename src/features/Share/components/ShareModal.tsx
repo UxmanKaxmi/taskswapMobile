@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Image, Platform, Pressable, Share, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ms, vs } from 'react-native-size-matters';
-import ViewShot from 'react-native-view-shot';
+import ViewShot, { ViewShotRef } from 'react-native-view-shot';
 
 import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -221,7 +221,7 @@ export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
   const insets = useSafeAreaInsets();
 
   // ✅ Capture ONLY the hidden share poster (off-screen)
-  const posterShotRef = useRef<InstanceType<typeof ViewShot> | null>(null);
+  const posterShotRef = useRef<ViewShotRef | null>(null);
 
   const taskType = task.type as GoalType;
   const typeLabel = TYPE_LABELS[taskType] ?? 'Goal';
@@ -526,7 +526,7 @@ const createStyles = (colors: ThemeColors) =>
     },
 
     blocker: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       backgroundColor: 'rgba(255,255,255,0.01)',
     },
   });

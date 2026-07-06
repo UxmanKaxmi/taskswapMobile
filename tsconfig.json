@@ -1,5 +1,5 @@
 {
-  "extends": "@react-native/typescript-config/tsconfig.json",
+  "extends": "@react-native/typescript-config",
   "compilerOptions": {
     "baseUrl": "./src",
     "ignoreDeprecations": "5.0",
@@ -11,7 +11,8 @@
       "@shared/*": ["shared/*"],
       "@assets/*": ["assets/*"],
       "@lib/*": ["lib/*"],
-      "@navigation/*": ["navigation/*"]
+      "@navigation/*": ["navigation/*"],
+      "react-native-view-shot": ["../node_modules/react-native-view-shot/lib/index.d.ts"]
     }
   },
   "exclude": ["__tests__", "src/**/*.test.ts"]

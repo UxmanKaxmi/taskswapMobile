@@ -114,11 +114,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      await AsyncStorage.multiSet([
-        [STORAGE_USER, JSON.stringify(nextUser)],
-        [STORAGE_TOKEN, token],
-        [STORAGE_AUTH_PROVIDER, provider],
-      ]);
+      await AsyncStorage.setMany({
+        [STORAGE_USER]: JSON.stringify(nextUser),
+        [STORAGE_TOKEN]: token,
+        [STORAGE_AUTH_PROVIDER]: provider,
+      });
 
       setJustLoggedIn(true);
 
@@ -201,11 +201,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     api.defaults.headers.common['Authorization'] = `Bearer ${nextToken}`;
 
-    await AsyncStorage.multiSet([
-      [STORAGE_USER, JSON.stringify(nextUser)],
-      [STORAGE_TOKEN, nextToken],
-      [STORAGE_AUTH_PROVIDER, 'google'],
-    ]);
+    await AsyncStorage.setMany({
+      [STORAGE_USER]: JSON.stringify(nextUser),
+      [STORAGE_TOKEN]: nextToken,
+      [STORAGE_AUTH_PROVIDER]: 'google',
+    });
 
     return nextToken;
   }, [authProvider, user]);
@@ -220,7 +220,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       }
     }
 
-    await AsyncStorage.multiRemove([
+    await AsyncStorage.removeMany([
       STORAGE_USER,
       STORAGE_TOKEN,
       STORAGE_AUTH_PROVIDER,

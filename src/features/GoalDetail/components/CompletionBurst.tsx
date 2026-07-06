@@ -142,7 +142,7 @@ function BurstParticle({ config }: { config: ParticleConfig }) {
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     overlay: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 20,

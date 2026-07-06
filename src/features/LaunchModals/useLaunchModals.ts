@@ -72,7 +72,7 @@ export function useLaunchModals({ ctx, registry }: UseLaunchModalsParams) {
     if (!mountedRef.current) return;
     setActive(null);
     // small cooldown to avoid flicker between modals
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await new Promise<void>(resolve => setTimeout(resolve, 600));
     await evaluate();
   }, [active, evaluate]);
 
