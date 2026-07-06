@@ -10,7 +10,6 @@ import { spacing, ThemeColors, useThemedStyles } from '@shared/theme';
 import { timeAgo, toShortName } from '@shared/utils/helperFunctions';
 import { GoalTypeEnum } from '@features/Goals/types/goals';
 import { HelperUser } from '../types/home';
-import GoalModerationMenu from './GoalModerationMenu';
 
 type Props = {
   avatar: string;
@@ -19,10 +18,6 @@ type Props = {
   type: GoalTypeEnum;
   helpers?: HelperUser[];
   avatarSize?: number;
-  /** When provided, shows a report/block menu (hidden for the owner's own goal). */
-  taskId?: string;
-  ownerUserId?: string;
-  taskText?: string;
 };
 
 export default function GoalHeader({
@@ -32,9 +27,6 @@ export default function GoalHeader({
   type,
   helpers = [],
   avatarSize = ms(36),
-  taskId,
-  ownerUserId,
-  taskText,
 }: Props) {
   const styles = useThemedStyles(createStyles);
 
@@ -72,15 +64,6 @@ export default function GoalHeader({
           <GoalMetaRow type={type} timeAgo={timeAgo(createdAt)} />
         </View>
       </Row>
-
-      {taskId ? (
-        <GoalModerationMenu
-          taskId={taskId}
-          ownerUserId={ownerUserId}
-          ownerName={name}
-          taskText={taskText}
-        />
-      ) : null}
     </Row>
   );
 }

@@ -8,12 +8,10 @@ import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import HelperAvatarGroup from '@features/Home/components/HelperAvatarGroup';
 
-import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
+import { ThemeColors, useThemedStyles } from '@shared/theme';
 import { timeAgo, toShortName } from '@shared/utils/helperFunctions';
-import { typeIcons } from '@shared/utils/typeVisuals';
 import { GoalType } from '@features/Goals/types/goals';
 import { HelperUser } from '@features/Home/types/home';
-import { Icon } from '@shared/components/Icons';
 import Ripple from '@shared/components/Buttons/Ripple';
 import { openFriendsProfile } from '@navigation/types/navigationUtils';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -35,28 +33,11 @@ type Props = {
 };
 
 export function GoalDetailHeader({ task }: Props) {
-  const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const avatarSize = ms(45);
 
-  const iconName = typeIcons[task.type];
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const { user } = useAuth();
-
-  const getTypeColor = (type: GoalType) => {
-    switch (type) {
-      case 'advice':
-        return colors.adviceBgHardest;
-      case 'reminder':
-        return colors.reminderBgHardest;
-      case 'motivation':
-        return colors.motivationBgHardest;
-      case 'decision':
-        return colors.decisionBgHardest;
-      default:
-        return colors.muted;
-    }
-  };
 
   return (
     <Row align="center" justify="flex-start">
@@ -119,7 +100,7 @@ const createStyles = (colors: ThemeColors) =>
     },
 
     avatarText: {
-      color: colors.onboardingInk,
+      color: colors.tactileMomentumSecondary,
       fontWeight: '800',
     },
 

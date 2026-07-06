@@ -503,7 +503,7 @@ export default function HomeScreen() {
                       onChange={handleFeedSortChange}
                     />
                   </Animated.View>
-                  {/* {canSeeDevTools && (
+                  {canSeeDevTools && (
                     <Ripple hitSlop={8} onPress={handleOpenDevMenu} style={styles.devDotsButton}>
                       <Icon
                         set="ion"
@@ -512,7 +512,7 @@ export default function HomeScreen() {
                         color={colors.onboardingInk}
                       />
                     </Ripple>
-                  )} */}
+                  )}
                 </View>
               </View>
             }

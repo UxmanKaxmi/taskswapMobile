@@ -19,7 +19,6 @@ import Avatar from '@shared/components/Avatar/Avatar';
 import { getAvatarColor } from '@shared/utils/avatarColor';
 import PushTicks from '@shared/components/PushTicks/PushTicks';
 import PushButton from '@shared/components/PushButton';
-import Ripple from '@shared/components/Buttons/Ripple';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { usePushInteraction } from '../hooks/usePushInteraction';
 import { getFeelingLabel } from '@shared/utils/feelings';
@@ -29,7 +28,6 @@ import { useSendCheer } from '@features/Goals/hooks/useGoalCheer';
 import Icon from '@shared/components/Icons/Icon';
 import { showToast } from '@shared/utils/toast';
 import { CHEER_PRESETS } from '@features/Goals/constants/cheerPresets';
-import GoalModerationMenu from './GoalModerationMenu';
 
 type Props = {
   task: MotivationGoal;
@@ -54,7 +52,6 @@ function MotivationCard({ task, onPressCard }: Props) {
   // Tracks a push made in this session so we can show a brief confirmation
   // without the card disappearing from the "Needs a push" feed.
   const [justPushed, setJustPushed] = useState(false);
-  const [isShowingPushConfirmation, setIsShowingPushConfirmation] = useState(false);
   const [localCheeredPhrase, setLocalCheeredPhrase] = useState<string | null>(null);
 
   const isOwner = task.userId === user?.id;
@@ -104,12 +101,10 @@ function MotivationCard({ task, onPressCard }: Props) {
   const handleOnPush = useCallback(() => {
     triggerCardNudge();
     setJustPushed(true);
-    setIsShowingPushConfirmation(true);
     if (pushConfirmationTimerRef.current) {
       clearTimeout(pushConfirmationTimerRef.current);
     }
     pushConfirmationTimerRef.current = setTimeout(() => {
-      setIsShowingPushConfirmation(false);
       pushConfirmationTimerRef.current = null;
     }, 1500);
     togglePush();
@@ -235,111 +230,107 @@ function MotivationCard({ task, onPressCard }: Props) {
   return (
     <Animated.View style={{ transform: [{ translateX: cardNudgeX }] }}>
       <Shadow size="tint" color="rgba(0, 0, 0, 0.08)" style={styles.shadowWrap}>
-        <Pressable
-          style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-          onPress={() => onPressCard(task)}
-        >
-          <View style={styles.headerRow}>
-            <View style={styles.identityRow}>
-              <View style={styles.avatarWrap}>
-                <Avatar
-                  uri={avatar || null}
-                  fallback={name}
-                  size={ms(42)}
-                  borderColor={colors.onboardingCard}
-                  fallbackStyle={{ ...styles.avatarFallback, backgroundColor: avatarColor }}
-                  textStyle={styles.avatarText}
-                />
-
-                {helpers.length > 0 && (
-                  <HelperAvatarGroup
-                    helpers={helpers}
-                    avatarSize={ms(18)}
-                    containerStyle={styles.helperOverlay}
+        <View style={styles.card}>
+          <Pressable
+            style={({ pressed }) => pressed && styles.pressed}
+            onPress={() => onPressCard(task)}
+          >
+            <View style={styles.headerRow}>
+              <View style={styles.identityRow}>
+                <View style={styles.avatarWrap}>
+                  <Avatar
+                    uri={avatar || null}
+                    fallback={name}
+                    size={ms(42)}
+                    borderColor={colors.onboardingCard}
+                    fallbackStyle={{ ...styles.avatarFallback, backgroundColor: avatarColor }}
+                    textStyle={styles.avatarText}
                   />
+
+                  {helpers.length > 0 && (
+                    <HelperAvatarGroup
+                      helpers={helpers}
+                      avatarSize={ms(18)}
+                      containerStyle={styles.helperOverlay}
+                    />
+                  )}
+                </View>
+
+                <View style={styles.identityTextBlock}>
+                  <TextElement style={styles.name}>{toShortName(name)}</TextElement>
+                  <TextElement style={styles.timeText}>{timeAgo(createdAt)}</TextElement>
+                </View>
+              </View>
+
+              <View style={styles.headerRight}>
+                <View style={styles.feelingPill}>
+                  <TextElement style={styles.feelingText}>{feelingLabel}</TextElement>
+                </View>
+              </View>
+            </View>
+
+            <TextElement style={styles.taskText}>{stripOuterQuotes(text)}</TextElement>
+
+            {progressText ? (
+              <View style={styles.progressBlock}>
+                <View style={styles.progressAccent} />
+                <View style={styles.progressTextBlock}>
+                  <TextElement variant="title" weight="700" style={styles.progressLabel}>
+                    PROGRESS
+                  </TextElement>
+                  <TextElement style={styles.progressText}>{progressText}</TextElement>
+                </View>
+              </View>
+            ) : null}
+
+            <View
+              style={[
+                styles.footerRow,
+                progressText ? { marginTop: spacing.md } : { marginTop: spacing.md },
+              ]}
+            >
+              <View style={styles.footerLeft}>
+                {pushCount > 0 ? (
+                  <PushTicks
+                    count={pushCount}
+                    animateNonce={pushCount}
+                    replayOnNonceChange={false}
+                    style={styles.ticks}
+                  />
+                ) : (
+                  <TextElement style={styles.noPushes}>No pushes yet</TextElement>
+                )}
+                {pushCount > 0 && (
+                  <TextElement style={styles.countLine}>
+                    <TextElement style={styles.countStrong}>
+                      {pushCount} {pushCount === 1 ? 'push' : 'pushes'}
+                    </TextElement>
+                    {visibleCheerTotal > 0 ? (
+                      <TextElement style={styles.countMuted}>
+                        {' '}
+                        · {visibleCheerTotal} {visibleCheerTotal === 1 ? 'cheer' : 'cheers'}
+                      </TextElement>
+                    ) : null}
+                  </TextElement>
                 )}
               </View>
 
-              <View style={styles.identityTextBlock}>
-                <TextElement style={styles.name}>{toShortName(name)}</TextElement>
-                <TextElement style={styles.timeText}>{timeAgo(createdAt)}</TextElement>
-              </View>
-            </View>
-
-            <View style={styles.headerRight}>
-              <View style={styles.feelingPill}>
-                <TextElement style={styles.feelingText}>{feelingLabel}</TextElement>
-              </View>
-              <GoalModerationMenu
-                taskId={task.id}
-                ownerUserId={task.userId}
-                ownerName={name}
-                taskText={text}
-              />
-            </View>
-          </View>
-
-          <TextElement style={styles.taskText}>{stripOuterQuotes(text)}</TextElement>
-
-          {progressText ? (
-            <View style={styles.progressBlock}>
-              <View style={styles.progressAccent} />
-              <View style={styles.progressTextBlock}>
-                <TextElement variant="title" weight="700" style={styles.progressLabel}>
-                  PROGRESS
-                </TextElement>
-                <TextElement style={styles.progressText}>{progressText}</TextElement>
-              </View>
-            </View>
-          ) : null}
-
-          <View
-            style={[
-              styles.footerRow,
-              progressText ? { marginTop: spacing.md } : { marginTop: spacing.md },
-            ]}
-          >
-            <View style={styles.footerLeft}>
-              {pushCount > 0 ? (
-                <PushTicks
-                  count={pushCount}
-                  animateNonce={pushCount}
-                  replayOnNonceChange={false}
-                  style={styles.ticks}
+              {!isOwner && (
+                <PushButton
+                  onPress={handlePush}
+                  loading={isPending}
+                  active={hasPushed || justPushed}
+                  taskType={GoalTypeEnum.Motivation}
+                  variant="push"
+                  label="Push"
+                  activeLabel="Pushed"
+                  size="sm"
+                  buttonStyle={styles.pushButton}
+                  textStyle={styles.pushButtonText}
                 />
-              ) : (
-                <TextElement style={styles.noPushes}>No pushes yet</TextElement>
-              )}
-              {pushCount > 0 && (
-                <TextElement style={styles.countLine}>
-                  <TextElement style={styles.countStrong}>
-                    {pushCount} {pushCount === 1 ? 'push' : 'pushes'}
-                  </TextElement>
-                  {visibleCheerTotal > 0 ? (
-                    <TextElement style={styles.countMuted}>
-                      {' '}
-                      · {visibleCheerTotal} {visibleCheerTotal === 1 ? 'cheer' : 'cheers'}
-                    </TextElement>
-                  ) : null}
-                </TextElement>
               )}
             </View>
-
-            {!isOwner && (
-              <PushButton
-                onPress={handlePush}
-                loading={isPending}
-                active={hasPushed || justPushed}
-                taskType={GoalTypeEnum.Motivation}
-                variant="push"
-                label="Push"
-                activeLabel="Pushed"
-                size="sm"
-                buttonStyle={styles.pushButton}
-                textStyle={styles.pushButtonText}
-              />
-            )}
-          </View>
+          </Pressable>
 
           {!isOwner && shouldShowCheerStrip && (
             <Animated.View pointerEvents="auto" style={[styles.cheerStrip, cheerStripStyle as any]}>
@@ -357,11 +348,15 @@ function MotivationCard({ task, onPressCard }: Props) {
                   </TextElement>
                 </View>
               ) : (
-                <Ripple
-                  radius={22}
+                <Pressable
                   disabled={sendCheer.isPending}
                   onPress={handleCheerPress}
-                  style={styles.cheerOpenButton}
+                  hitSlop={8}
+                  style={({ pressed }) => [
+                    styles.cheerOpenButton,
+                    pressed && styles.cheerOpenButtonPressed,
+                    sendCheer.isPending && styles.cheerOpenButtonDisabled,
+                  ]}
                 >
                   <Icon
                     set="fa6"
@@ -371,11 +366,11 @@ function MotivationCard({ task, onPressCard }: Props) {
                     color={colors.onboardingPushDeep}
                   />
                   <TextElement style={styles.cheerOpenText}>Cheer</TextElement>
-                </Ripple>
+                </Pressable>
               )}
             </Animated.View>
           )}
-        </Pressable>
+        </View>
       </Shadow>
     </Animated.View>
   );
@@ -596,7 +591,6 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'flex-start',
     },
     cheerOpenButton: {
-      // minHeight: vs(18),
       borderRadius: 14,
       borderWidth: 1,
       borderColor: colors.onboardingPushDeep,
@@ -606,6 +600,12 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: ms(8),
+    },
+    cheerOpenButtonPressed: {
+      opacity: 0.65,
+    },
+    cheerOpenButtonDisabled: {
+      opacity: 0.45,
     },
     cheerOpenText: {
       fontSize: ms(14),

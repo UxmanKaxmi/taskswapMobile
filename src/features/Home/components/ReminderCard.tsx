@@ -124,9 +124,6 @@ export default function ReminderCard({ task, onPressCard, onPressShare }: Props)
             createdAt={createdAt}
             type={GoalTypeEnum.Reminder}
             helpers={helpers}
-            taskId={task.id}
-            ownerUserId={task.userId}
-            taskText={text}
           />
 
           {/* Message */}

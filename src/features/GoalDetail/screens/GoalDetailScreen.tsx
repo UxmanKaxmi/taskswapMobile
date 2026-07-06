@@ -203,8 +203,8 @@ export default function GoalDetailScreen({
   const [, setCooldownTick] = React.useState(0);
   React.useEffect(() => {
     if (!isShareUpdateCoolingDown) return;
-    const interval = setInterval(() => setCooldownTick(t => t + 1), 1000);
-    return () => clearInterval(interval);
+    const interval = globalThis.setInterval(() => setCooldownTick(t => t + 1), 1000);
+    return () => globalThis.clearInterval(interval);
   }, [isShareUpdateCoolingDown, latestProgressUpdate?.createdAt]);
   const hasVoted = task?.hasVoted;
   const hasReminded = task?.hasReminded;
@@ -240,12 +240,6 @@ export default function GoalDetailScreen({
   const handleCloseShare = useCallback(() => {
     setShareVisible(false);
   }, []);
-
-  // Owner shares a progress update — reuses the task share module.
-  const handleShareUpdate = useCallback(() => {
-    if (!task) return;
-    handleShareGoal(task as ShareGoal);
-  }, [handleShareGoal, task]);
 
   const handleMarkCompletePress = useCallback(() => {
     if (!task?.id) return;
@@ -433,6 +427,10 @@ export default function GoalDetailScreen({
         }),
     });
   }, [isCompleted, latestProgressUpdate, openShareUpdateSheet, shareProgressUpdate, task]);
+
+  const handleShareUpdate = useCallback(() => {
+    openShareUpdateComposer();
+  }, [openShareUpdateComposer]);
 
   const handleCheerPress = React.useCallback(
     (beat: GoalBeat) => {

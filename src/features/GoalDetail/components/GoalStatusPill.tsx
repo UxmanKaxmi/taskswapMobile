@@ -23,8 +23,8 @@ export default function GoalStatusPill({ status }: Props) {
       backgroundColor: hexToRgba(colors.tactileMomentumPrimary, 0.2),
       borderColor: hexToRgba(colors.tactileMomentumPrimary, 0.3),
     },
-    text: colors.tactileMomentumSecondary,
-    icon: colors.tactileMomentumSecondary,
+    text: colors.onboardingInk,
+    icon: colors.onboardingInk,
   };
 
   const completedTone = {

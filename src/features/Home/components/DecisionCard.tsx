@@ -102,9 +102,6 @@ export default function DecisionCard({ task, onPressCard, onPressShare }: Props)
             createdAt={createdAt}
             type={GoalTypeEnum.Decision}
             helpers={helpers}
-            taskId={task.id}
-            ownerUserId={task.userId}
-            taskText={text}
           />
 
           {/* Question */}
