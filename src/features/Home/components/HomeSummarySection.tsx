@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
+  Dimensions,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -19,7 +20,8 @@ import { AppStackParamList } from '@navigation/types/navigation';
 import { HomeSummaryResponse, Goal } from '../types/home';
 import { ms, vs } from 'react-native-size-matters';
 import { differenceInCalendarDays, isValid, parseISO } from 'date-fns';
-import { WINDOW_WIDTH } from '@gorhom/bottom-sheet';
+// bottom-sheet 5.2.14 no longer re-exports WINDOW_WIDTH
+const WINDOW_WIDTH = Dimensions.get('window').width;
 
 type Props = {
   summary?: HomeSummaryResponse | null;

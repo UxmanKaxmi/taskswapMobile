@@ -169,7 +169,6 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
       {children}
 
       <BottomSheetModal
-        key={modal?.type ?? 'default'}
         ref={sheetRef}
         snapPoints={sheetSnapPoints}
         enablePanDownToClose
