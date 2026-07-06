@@ -6,6 +6,9 @@ export const isIOS = Platform.OS === 'ios';
 
 export const APP_NAME = 'PushMeUp';
 
+// Keep in sync with ios MARKETING_VERSION and android versionName.
+export const APP_VERSION = '1.0';
+
 export const CONTACTS_SCOPE = 'https://www.googleapis.com/auth/contacts.readonly';
 
 // Legal / support links (required for App Store submission). Update the paths

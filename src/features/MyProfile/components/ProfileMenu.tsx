@@ -22,7 +22,7 @@ import { triggerLogout } from '@shared/api/authBridge';
 import Ripple from '@shared/components/Buttons/Ripple';
 import { deleteMyAccount } from '../api/MyProfileAPI';
 import { showToast } from '@shared/utils/toast';
-import { PRIVACY_POLICY_URL, TERMS_URL, SUPPORT_URL } from '@shared/utils/constants';
+import { SUPPORT_URL } from '@shared/utils/constants';
 import AppModal from '@shared/components/AppModal/AppModal';
 import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
@@ -63,10 +63,16 @@ export type MenuItem = {
   valueLabel?: string;
   disabled?: boolean;
   loading?: boolean;
+  tone?: 'warm' | 'neutral' | 'danger';
+};
+
+type MenuSection = {
+  label: string;
+  items: MenuItem[];
 };
 
 /**
- * Profile menu that takes a dynamic list of items with icons and callbacks.
+ * Grouped profile menu: labeled section cards of rows with icon tiles.
  */
 export default function ProfileMenu() {
   const { colors, preference, setPreference } = useTheme();
@@ -144,188 +150,177 @@ export default function ProfileMenu() {
     );
   }, [isDeletingAccount]);
 
-  const primaryItems = useMemo<MenuItem[]>(
+  // TODO: Add a "Your tasks" row (flag icon + "N active" pill) above PEOPLE
+  // once an owned-task-list route and an active-task count source exist.
+  // There is currently no screen for the user's own task list — do not link
+  // this to the Home feed or FriendsProfileScreen.
+  const sections = useMemo<MenuSection[]>(
     () => [
       {
-        label: 'Appearance',
-        icon: 'color-palette-outline',
-        onPress: () => {
-          setThemeSheetVisible(true);
-        },
-        iconSet: 'ion',
-        valueLabel: activeThemeOption.label,
+        label: 'YOU',
+        items: [
+          {
+            label: 'Your Impact',
+            icon: 'sparkles-outline',
+            onPress: () => {
+              navigation.navigate('YourImpactScreen');
+            },
+            iconSet: 'ion',
+          },
+        ],
       },
       {
-        label: 'Find Friends',
-        icon: 'people-outline',
-        onPress: () => {
-          navigation.navigate('FindFriendsScreen');
-        },
-        iconSet: 'ion',
-      },
-      // {
-      //   label: 'Invite Friends',
-      //   icon: 'person-add-outline',
-      //   onPress: () => {
-      //     navigation.navigate('InviteFriendsScreen');
-      //   },
-      //   iconSet: 'ion',
-      // },
-      {
-        label: 'Blocked Users',
-        icon: 'ban-outline',
-        onPress: () => {
-          navigation.navigate('BlockedUsersScreen');
-        },
-        iconSet: 'ion',
+        label: 'PEOPLE',
+        items: [
+          {
+            label: 'Find Friends',
+            icon: 'people-outline',
+            onPress: () => {
+              navigation.navigate('FindFriendsScreen');
+            },
+            iconSet: 'ion',
+          },
+          {
+            label: 'Blocked Users',
+            icon: 'ban-outline',
+            onPress: () => {
+              navigation.navigate('BlockedUsersScreen');
+            },
+            iconSet: 'ion',
+          },
+        ],
       },
       {
-        label: 'Help Center',
-        icon: 'help-circle-outline',
-        onPress: () => {
-          Linking.openURL(SUPPORT_URL).catch(() => {
-            showToast({
-              type: 'error',
-              title: 'Could not open link',
-              message: 'Please try again later.',
-            });
-          });
-        },
-        iconSet: 'ion',
+        label: 'APP',
+        items: [
+          {
+            label: 'Appearance',
+            icon: 'color-palette-outline',
+            onPress: () => {
+              setThemeSheetVisible(true);
+            },
+            iconSet: 'ion',
+            valueLabel: activeThemeOption.label,
+          },
+        ],
       },
       {
-        label: 'Send Feedback',
-        icon: 'chatbubble-ellipses-outline',
-        onPress: () => {
-          navigation.navigate('SendFeedbackScreen');
-        },
-        iconSet: 'ion',
+        label: 'SUPPORT',
+        items: [
+          {
+            label: 'Help Center',
+            icon: 'help-circle-outline',
+            onPress: () => {
+              Linking.openURL(SUPPORT_URL).catch(() => {
+                showToast({
+                  type: 'error',
+                  title: 'Could not open link',
+                  message: 'Please try again later.',
+                });
+              });
+            },
+            iconSet: 'ion',
+          },
+          {
+            label: 'Send Feedback',
+            icon: 'chatbubble-ellipses-outline',
+            onPress: () => {
+              navigation.navigate('SendFeedbackScreen');
+            },
+            iconSet: 'ion',
+          },
+        ],
       },
       {
-        label: 'Privacy Policy',
-        icon: 'shield-checkmark-outline',
-        onPress: () => {
-          Linking.openURL(PRIVACY_POLICY_URL).catch(() => {
-            showToast({
-              type: 'error',
-              title: 'Could not open link',
-              message: 'Please try again later.',
-            });
-          });
-        },
-        iconSet: 'ion',
-      },
-      {
-        label: 'Terms of Service',
-        icon: 'document-text-outline',
-        onPress: () => {
-          Linking.openURL(TERMS_URL).catch(() => {
-            showToast({
-              type: 'error',
-              title: 'Could not open link',
-              message: 'Please try again later.',
-            });
-          });
-        },
-        iconSet: 'ion',
-      },
-      // {
-      //   label: 'Debug Notification',
-      //   icon: 'terminal',
-      //   onPress: () => navigation.navigate('MainDebugScreen'),
-      //   iconSet: 'ion',
-      // },
-    ],
-    [activeThemeOption.label, navigation],
-  ); // ← keep the literal types
-
-  const dangerItems = useMemo<MenuItem[]>(
-    () => [
-      {
-        id: 'delete-account',
-        label: isDeletingAccount ? 'Deleting Account...' : 'Delete Account',
-        icon: 'trash-outline',
-        onPress: handleDeleteAccount,
-        iconSet: 'ion',
-        disabled: isDeletingAccount,
-        loading: isDeletingAccount,
-      },
-      {
-        id: 'logout',
-        label: 'Log Out',
-        icon: 'log-out',
-        onPress: () => handleLogout(),
-        iconSet: 'ion',
+        label: 'ACCOUNT',
+        items: [
+          {
+            id: 'logout',
+            label: 'Log Out',
+            icon: 'log-out-outline',
+            onPress: () => handleLogout(),
+            iconSet: 'ion',
+            tone: 'neutral',
+          },
+          {
+            id: 'delete-account',
+            label: isDeletingAccount ? 'Deleting Account...' : 'Delete Account',
+            icon: 'trash-outline',
+            onPress: handleDeleteAccount,
+            iconSet: 'ion',
+            disabled: isDeletingAccount,
+            loading: isDeletingAccount,
+            tone: 'danger',
+          },
+        ],
       },
     ],
-    [handleDeleteAccount, handleLogout, isDeletingAccount],
+    [activeThemeOption.label, handleDeleteAccount, handleLogout, isDeletingAccount, navigation],
   );
+
+  const renderItem = (item: MenuItem, isLast: boolean) => {
+    const isDanger = item.tone === 'danger';
+    const isNeutral = item.tone === 'neutral';
+    const iconColor = isDanger
+      ? colors.error
+      : isNeutral
+        ? colors.onboardingInkSoft
+        : colors.onboardingInk;
+
+    return (
+      <Ripple
+        key={item.id ?? item.label}
+        style={[styles.row, isLast && styles.lastRow, item.disabled && styles.disabledRow]}
+        onPress={item.onPress}
+        disabled={item.disabled}
+      >
+        <Row align="center" justify="space-between" style={styles.innerRow}>
+          <Row align="center">
+            <View
+              style={[
+                styles.iconTile,
+                isNeutral && styles.iconTileNeutral,
+                isDanger && styles.iconTileDanger,
+              ]}
+            >
+              {item.loading ? (
+                <ActivityIndicator size="small" color={colors.error} />
+              ) : (
+                <Icon set={item.iconSet} name={item.icon} size={17} color={iconColor} />
+              )}
+            </View>
+            <TextElement weight="700" style={[styles.label, isDanger && styles.labelDanger]}>
+              {item.label}
+            </TextElement>
+          </Row>
+          <Row align="center" style={styles.rowAccessory}>
+            {!!item.valueLabel && (
+              <TextElement style={styles.valueLabel}>{item.valueLabel}</TextElement>
+            )}
+            <Icon
+              set="ion"
+              name="chevron-forward"
+              size={16}
+              color={isDanger ? colors.error : colors.onboardingMuted}
+            />
+          </Row>
+        </Row>
+      </Ripple>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        {primaryItems.map((item, idx) => (
-          <Ripple
-            key={item.id ?? item.label}
-            style={[styles.row, idx === primaryItems.length - 1 && styles.lastRow]}
-            onPress={item.onPress}
-          >
-            <Row align="center" justify="space-between" style={styles.innerRow}>
-              <Row align="center">
-                <View style={styles.iconCircle}>
-                  <Icon
-                    set={item.iconSet}
-                    name={item.icon}
-                    size={18}
-                    color={colors.onboardingInk}
-                  />
-                </View>
-                <TextElement weight="700" style={styles.label}>
-                  {item.label}
-                </TextElement>
-              </Row>
-              <Row align="center" style={styles.rowAccessory}>
-                {!!item.valueLabel && (
-                  <TextElement style={styles.valueLabel}>{item.valueLabel}</TextElement>
-                )}
-                <Icon set="ion" name="chevron-forward" size={18} color={colors.onboardingMuted} />
-              </Row>
-            </Row>
-          </Ripple>
-        ))}
-      </View>
-
-      <View style={[styles.card, styles.cardSpacer, styles.dangerCard]}>
-        {dangerItems.map((item, idx) => (
-          <Ripple
-            key={item.id}
-            style={[
-              styles.row,
-              idx === dangerItems.length - 1 && styles.singleRow,
-              styles.dangerRow,
-              item.disabled && styles.disabledRow,
-            ]}
-            onPress={item.onPress}
-            disabled={item.disabled}
-          >
-            <Row align="center" justify="space-between" style={styles.innerRow}>
-              <Row align="center">
-                <View style={[styles.iconCircle, styles.iconCircleDanger]}>
-                  {item.loading ? (
-                    <ActivityIndicator size="small" color={colors.error} />
-                  ) : (
-                    <Icon set="ion" name={item.icon} size={20} color={colors.error} />
-                  )}
-                </View>
-                <TextElement variant="body" weight="700" style={[styles.label, styles.labelDanger]}>
-                  {item.label}
-                </TextElement>
-              </Row>
-              <Icon set="ion" name="chevron-forward" size={20} color={colors.error} />
-            </Row>
-          </Ripple>
-        ))}
-      </View>
+      {sections.map(section => (
+        <View key={section.label}>
+          <TextElement variant="overline" weight="700" style={styles.sectionLabel}>
+            {section.label}
+          </TextElement>
+          <View style={styles.card}>
+            {section.items.map((item, idx) => renderItem(item, idx === section.items.length - 1))}
+          </View>
+        </View>
+      ))}
 
       <AppModal
         visible={themeSheetVisible}
@@ -395,35 +390,34 @@ export default function ProfileMenu() {
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
-    container: {
-      // marginTop: 10,
-      // paddingHorizontal: spacing.md,
+    container: {},
+    sectionLabel: {
+      color: colors.onboardingMuted,
+      fontSize: ms(10),
+      lineHeight: ms(13),
+      letterSpacing: 0.6,
+      marginTop: vs(14),
+      marginBottom: vs(6),
+      marginHorizontal: ms(6),
     },
     card: {
       backgroundColor: colors.surface,
-      borderRadius: ms(20),
+      borderRadius: ms(16),
       overflow: 'hidden',
       borderWidth: 1,
       borderColor: colors.onboardingLine,
-    },
-    cardSpacer: {
-      marginTop: spacing.md,
     },
     row: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      minHeight: vs(62),
-      paddingVertical: vs(8),
-      paddingHorizontal: spacing.lg,
+      paddingVertical: vs(11),
+      paddingHorizontal: spacing.md,
       backgroundColor: colors.surface,
-      borderBottomWidth: 1,
+      borderBottomWidth: StyleSheet.hairlineWidth,
       borderColor: colors.onboardingLine,
     },
     lastRow: {
-      borderBottomWidth: 0,
-    },
-    singleRow: {
       borderBottomWidth: 0,
     },
     innerRow: {
@@ -434,16 +428,19 @@ const createStyles = (colors: ThemeColors) =>
     rowAccessory: {
       flexShrink: 0,
     },
-    iconCircle: {
-      width: ms(42),
-      height: ms(42),
-      borderRadius: ms(14),
+    iconTile: {
+      width: ms(34),
+      height: ms(34),
+      borderRadius: ms(10),
       backgroundColor: colors.warmIconChipBg,
       alignItems: 'center',
       justifyContent: 'center',
       marginRight: spacing.md,
     },
-    iconCircleDanger: {
+    iconTileNeutral: {
+      backgroundColor: colors.onboardingLine,
+    },
+    iconTileDanger: {
       backgroundColor: colors.dangerIconChipBg,
     },
     label: {
@@ -458,14 +455,6 @@ const createStyles = (colors: ThemeColors) =>
       lineHeight: ms(17),
       fontWeight: '700',
       marginRight: ms(6),
-    },
-    dangerCard: {
-      backgroundColor: colors.dangerSoftBg,
-      borderColor: colors.dangerSoftBorder,
-    },
-    dangerRow: {
-      backgroundColor: 'transparent',
-      borderColor: colors.dangerSoftBorder,
     },
     disabledRow: {
       opacity: 0.65,

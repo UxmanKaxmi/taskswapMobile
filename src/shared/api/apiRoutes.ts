@@ -34,6 +34,7 @@ export const buildRoute = {
   blockedUsers: () => `${ApiRoute.USERS}/me/blocked-users`,
   blockUser: (id: string) => `${ApiRoute.USERS}/${id}/block`,
   homeSummary: () => `${ApiRoute.USERS}/me/home-summary`,
+  myImpact: () => `${ApiRoute.USERS}/me/impact`,
   searchFriends: (query: string, includeFollowed: boolean = true) =>
     `${ApiRoute.USERS}/search-friends?query=${encodeURIComponent(query)}&includeFollowed=${includeFollowed}`,
   friendProfile: (id: string) => `${ApiRoute.USERS}/${id}/profile`,

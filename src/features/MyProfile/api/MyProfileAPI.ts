@@ -2,12 +2,22 @@ import { api } from '@shared/api/axios';
 import { buildRoute } from '@shared/api/apiRoutes';
 import { UserProfile } from '../types/myProfile.types';
 import type { FeedbackPayload } from '../types/feedback.types';
+import type { ImpactStats } from '../types/impact.types';
 
 /**
  * Fetch the current authenticated user's profile.
  */
 export async function getMe(): Promise<UserProfile> {
   const response = await api.get<UserProfile>(buildRoute.me());
+
+  return response.data;
+}
+
+/**
+ * Fetch the current user's private giving-first impact stats.
+ */
+export async function getMyImpact(): Promise<ImpactStats> {
+  const response = await api.get<ImpactStats>(buildRoute.myImpact());
 
   return response.data;
 }

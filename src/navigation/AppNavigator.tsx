@@ -15,6 +15,7 @@ import BottomTabsAndroid from './BottomTabsAndroid';
 import AddGoalNavigator from '@features/AddGoal/navigation/AddGoalNavigator';
 import GoalDetailScreen from '@features/GoalDetail/screens/GoalDetailScreen';
 import SendFeedbackScreen from '@features/MyProfile/screens/SendFeedbackScreen';
+import YourImpactScreen from '@features/MyProfile/screens/YourImpactScreen';
 import BlockedUsersScreen from '@features/Reports/screens/BlockedUsersScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -53,6 +54,7 @@ export default function AppNavigator() {
 
       <Stack.Screen name="FriendsProfileScreen" component={FriendsProfileScreen} />
       <Stack.Screen name="SendFeedbackScreen" component={SendFeedbackScreen} />
+      <Stack.Screen name="YourImpactScreen" component={YourImpactScreen} />
       <Stack.Screen name="BlockedUsersScreen" component={BlockedUsersScreen} />
     </Stack.Navigator>
   );
