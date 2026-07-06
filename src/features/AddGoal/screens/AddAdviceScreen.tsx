@@ -10,7 +10,7 @@ import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 // import MultilineInput from '@shared/components/Inputs/MultilineInput';
 import { showToast } from '@shared/utils/toast';
 
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
 import GoalBackground from '../components/GoalBackground';
 import { ms, vs } from 'react-native-size-matters';
@@ -18,12 +18,7 @@ import AppTextInput from '@shared/components/Inputs/AppTextInput';
 import { getButtonText, getGoalPlaceholder, getTitle } from '../utils/goalCopy';
 import { GoalTypeEnum } from '@features/Goals/types/goals';
 import GoalDescriptionInput from '../components/GoalDescriptionInput';
-import {
-  getTypeVisual,
-  typeBackgrounds,
-  typeBackgroundsHard,
-  typeIcons,
-} from '@shared/utils/typeVisuals';
+import { typeIcons, useTypeVisuals } from '@shared/utils/typeVisuals';
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import { Height } from '@shared/components/Spacing';
 import TagHelperCard from '../components/TagHelperCard';
@@ -43,6 +38,9 @@ import { useAuth } from '@features/Auth/AuthProvider';
 type Props = NativeStackScreenProps<AddGoalStackParamList, 'AddAdvice'>;
 
 export default function AddAdviceScreen({ navigation, route }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const { typeBackgrounds, typeBackgroundsHard } = useTypeVisuals();
   const { user } = useAuth();
   const [text, setText] = useState('');
   const [helpers, setHelpers] = useState<HelperUser[]>([]);
@@ -250,36 +248,38 @@ export default function AddAdviceScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  title: {
-    marginTop: spacing.lg,
-  },
-  subtitle: {
-    marginTop: vs(20),
-    fontSize: vs(20),
-    lineHeight: vs(26),
-    fontWeight: '700',
-  },
-  inputCard: {
-    // marginTop: spacing.md,
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: spacing.md,
-  },
-  inputFooter: {
-    marginTop: spacing.sm,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cta: {
-    // marginTop: spacing.lg,
-  },
-  container: {
-    backgroundColor: typeBackgrounds.advice,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    title: {
+      marginTop: spacing.lg,
+    },
+    subtitle: {
+      marginTop: vs(20),
+      fontSize: vs(20),
+      lineHeight: vs(26),
+      fontWeight: '700',
+    },
+    inputCard: {
+      // marginTop: spacing.md,
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: spacing.md,
+    },
+    inputFooter: {
+      marginTop: spacing.sm,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    cta: {
+      // marginTop: spacing.lg,
+    },
+    container: {
+      // typeBackgrounds.advice (theme-derived)
+      backgroundColor: colors.adviceBg,
+    },
+    content: {
+      padding: 16,
+      paddingBottom: 40,
+    },
+  });

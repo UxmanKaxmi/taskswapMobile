@@ -3,7 +3,7 @@
 import React, { PropsWithChildren } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { StyleSheet, ViewStyle } from 'react-native';
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme } from '@shared/theme';
 import { GoalType } from '@features/Goals/types/goals';
 
 type Props = PropsWithChildren<{
@@ -11,7 +11,7 @@ type Props = PropsWithChildren<{
   style?: ViewStyle;
 }>;
 
-const GRADIENTS: Record<GoalType, string[]> = {
+const buildGradients = (colors: ThemeColors): Record<GoalType, string[]> => ({
   motivation: [
     colors.motivationIconBackground, // light top glow
     colors.motivationBg, // base
@@ -19,9 +19,11 @@ const GRADIENTS: Record<GoalType, string[]> = {
   advice: [colors.adviceIconBackground, colors.adviceBg],
   decision: [colors.decisionIconBackground, colors.decisionBg],
   reminder: [colors.reminderIconBackground, colors.reminderBg],
-};
+});
 
 export default function GoalCardGradient({ type, children, style }: Props) {
+  const { colors } = useTheme();
+  const GRADIENTS = buildGradients(colors);
   return (
     <LinearGradient
       colors={GRADIENTS[type]}

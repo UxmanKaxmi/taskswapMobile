@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Icon } from '@shared/components/Icons';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { getFirstName, timeAgo } from '@shared/utils/helperFunctions';
 import HelperAvatarStack from '@features/Home/components/HelperAvatarStack';
 import { ms, vs } from 'react-native-size-matters';
@@ -47,6 +47,8 @@ export default function PushSupportCard({
   emptyStateDescription,
   cheerSummary,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   /* --------------------------------------------------
      0️⃣ Normalize users (presence only, NOT intent)
   -------------------------------------------------- */
@@ -390,155 +392,156 @@ function buildCheerSummaryParts(cheerSummary?: Props['cheerSummary']) {
 /* --------------------------------------------------
    Styles
 -------------------------------------------------- */
-const styles = StyleSheet.create({
-  emptyShadow: {
-    borderRadius: 24,
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    emptyShadow: {
+      borderRadius: 24,
+    },
 
-  emptyCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.card,
-    borderRadius: 24,
-    padding: spacing.md,
-    paddingVertical: vs(10),
-  },
+    emptyCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.card,
+      borderRadius: 24,
+      padding: spacing.md,
+      paddingVertical: vs(10),
+    },
 
-  emptyLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    flex: 1,
-  },
+    emptyLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      flex: 1,
+    },
 
-  emptyIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.onboardingPush,
-  },
+    emptyIconCircle: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.onboardingPush,
+    },
 
-  emptyTextWrap: {
-    flex: 1,
-  },
+    emptyTextWrap: {
+      flex: 1,
+    },
 
-  emptyTitle: {
-    fontSize: ms(13),
-    fontWeight: '500',
-    color: colors.text,
-  },
+    emptyTitle: {
+      fontSize: ms(13),
+      fontWeight: '500',
+      color: colors.text,
+    },
 
-  emptyDescription: {
-    fontSize: ms(11),
-  },
+    emptyDescription: {
+      fontSize: ms(11),
+    },
 
-  card: {
-    backgroundColor: colors.onboardingCard,
-    borderRadius: 24,
-    paddingHorizontal: ms(18),
-    paddingVertical: vs(16),
-    // alignItems: 'flex-start',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: vs(22),
-  },
-  iconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 14,
-    backgroundColor: colors.onboardingPush,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm,
-  },
-  title: {
-    flex: 1,
-    fontSize: ms(20),
-    fontWeight: '700',
-    color: colors.onboardingInk,
-  },
-  avatars: {
-    marginBottom: vs(16),
-  },
-  summaryDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.onboardingLine,
-    marginBottom: vs(14),
-  },
-  supportCountBubble: {
-    backgroundColor: colors.tactileMomentumPrimary,
-    borderColor: colors.tactileMomentumPrimary,
-  },
-  supportCountText: {
-    color: colors.onboardingInk,
-  },
-  description: {
-    fontSize: ms(12),
-    color: colors.muted,
-  },
-  selfPushFooterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  cheerSummaryRow: {
-    marginTop: vs(4),
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: ms(5),
-  },
-  cheerSummaryText: {
-    flex: 1,
-    fontSize: ms(12),
-    fontWeight: '700',
-    color: colors.muted,
-  },
-  cheerSummaryStrong: {
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    fontWeight: '800',
-    color: colors.onboardingInk,
-  },
-  pushTogetherRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  pushTogetherText: {
-    fontSize: ms(12),
-    color: colors.muted,
-    flex: 1,
-  },
-  namesStrong: {
-    fontSize: ms(12),
-    fontWeight: '700',
-    color: colors.onboardingInk,
-  },
-  namesMuted: {
-    fontSize: ms(12),
-    fontWeight: '600',
-  },
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: vs(14),
-  },
-  dot: {
-    width: ms(6),
-    height: ms(6),
-    borderRadius: ms(3),
-    backgroundColor: colors.onboardingPushDeep,
-    marginRight: ms(10),
-    marginLeft: ms(2),
-  },
-  time: {
-    fontSize: ms(13),
-    color: colors.muted,
-    fontWeight: '700',
-  },
-});
+    card: {
+      backgroundColor: colors.onboardingCard,
+      borderRadius: 24,
+      paddingHorizontal: ms(18),
+      paddingVertical: vs(16),
+      // alignItems: 'flex-start',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: vs(22),
+    },
+    iconWrap: {
+      width: 38,
+      height: 38,
+      borderRadius: 14,
+      backgroundColor: colors.onboardingPush,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: spacing.sm,
+    },
+    title: {
+      flex: 1,
+      fontSize: ms(20),
+      fontWeight: '700',
+      color: colors.onboardingInk,
+    },
+    avatars: {
+      marginBottom: vs(16),
+    },
+    summaryDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.onboardingLine,
+      marginBottom: vs(14),
+    },
+    supportCountBubble: {
+      backgroundColor: colors.tactileMomentumPrimary,
+      borderColor: colors.tactileMomentumPrimary,
+    },
+    supportCountText: {
+      color: colors.tactileMomentumSecondary,
+    },
+    description: {
+      fontSize: ms(12),
+      color: colors.muted,
+    },
+    selfPushFooterRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+    },
+    cheerSummaryRow: {
+      marginTop: vs(4),
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: ms(5),
+    },
+    cheerSummaryText: {
+      flex: 1,
+      fontSize: ms(12),
+      fontWeight: '700',
+      color: colors.muted,
+    },
+    cheerSummaryStrong: {
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      fontWeight: '800',
+      color: colors.onboardingInk,
+    },
+    pushTogetherRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+    },
+    pushTogetherText: {
+      fontSize: ms(12),
+      color: colors.muted,
+      flex: 1,
+    },
+    namesStrong: {
+      fontSize: ms(12),
+      fontWeight: '700',
+      color: colors.onboardingInk,
+    },
+    namesMuted: {
+      fontSize: ms(12),
+      fontWeight: '600',
+    },
+    timeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: vs(14),
+    },
+    dot: {
+      width: ms(6),
+      height: ms(6),
+      borderRadius: ms(3),
+      backgroundColor: colors.onboardingPushDeep,
+      marginRight: ms(10),
+      marginLeft: ms(2),
+    },
+    time: {
+      fontSize: ms(13),
+      color: colors.muted,
+      fontWeight: '700',
+    },
+  });

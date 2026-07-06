@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { ms } from 'react-native-size-matters';
-import { colors } from '@shared/theme';
+import { ThemeColors, useThemedStyles } from '@shared/theme';
 import { Shadow } from '@shared/components/Shadow';
 import Avatar from '@shared/components/Avatar/Avatar';
 import { getAvatarColor } from '@shared/utils/avatarColor';
@@ -30,6 +30,7 @@ export default function HelperAvatarStack({
   moreTextStyle,
   marginLeft = 0.35,
 }: Props) {
+  const styles = useThemedStyles(createStyles);
   if (!helpers.length) return null;
 
   const visible = helpers.slice(0, maxVisible);
@@ -85,34 +86,35 @@ export default function HelperAvatarStack({
     </View>
   );
 }
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
 
-  avatarWrap: {
-    // borderWidth: 1,
-    // borderColor: colors.card,
-    backgroundColor: colors.card,
-  },
+    avatarWrap: {
+      // borderWidth: 1,
+      // borderColor: colors.card,
+      backgroundColor: colors.card,
+    },
 
-  more: {
-    backgroundColor: colors.motivationIconBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
-    // borderWidth: 1,
-    // borderColor: colors.motivationIconBackground,
-  },
+    more: {
+      backgroundColor: colors.motivationIconBackground,
+      justifyContent: 'center',
+      alignItems: 'center',
+      // borderWidth: 1,
+      // borderColor: colors.motivationIconBackground,
+    },
 
-  moreText: {
-    fontSize: ms(12),
-    fontWeight: '700',
-    color: colors.motivationBgHardest,
-  },
-  avatarText: {
-    color: colors.onboardingInk,
-    fontWeight: '800',
-  },
-  avatar: {},
-});
+    moreText: {
+      fontSize: ms(12),
+      fontWeight: '700',
+      color: colors.motivationBgHardest,
+    },
+    avatarText: {
+      color: colors.tactileMomentumSecondary,
+      fontWeight: '800',
+    },
+    avatar: {},
+  });

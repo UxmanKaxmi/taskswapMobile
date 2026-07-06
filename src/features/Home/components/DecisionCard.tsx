@@ -5,10 +5,10 @@ import { ms, vs } from 'react-native-size-matters';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Row from '@shared/components/Layout/Row';
 import Column from '@shared/components/Layout/Column';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 
 import { DecisionGoal } from '../types/home';
-import { getTypeVisual, typeIcons } from '@shared/utils/typeVisuals';
+import { typeIcons, useTypeVisuals } from '@shared/utils/typeVisuals';
 
 import { useCastVote } from '@features/Goals/hooks/useVote';
 import { useVoteStats } from '../hooks/useVoteStats';
@@ -23,7 +23,7 @@ import GoalCardGradient from './GoalCardGradient';
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import Icon from '@shared/components/Icons/Icon';
 import { GoalTypeEnum } from '@features/Goals/types/goals';
-import { cardStyles } from './styles';
+import { useCardStyles } from './styles';
 import DecisionChoiceBar from '@features/AddGoal/components/DecisionChoiceBar';
 import { Height } from '@shared/components/Spacing';
 import { showConfirmAlert } from '@shared/utils/confirmAlert';
@@ -36,6 +36,10 @@ type Props = {
 };
 
 export default function DecisionCard({ task, onPressCard, onPressShare }: Props) {
+  const { colors } = useTheme();
+  const cardStyles = useCardStyles();
+  const styles = useThemedStyles(createStyles);
+  const { getTypeVisual } = useTypeVisuals();
   const { avatar, name = 'John Doe', createdAt, text, options, helpers, id, type } = task;
   const { emoji } = getTypeVisual(type);
 
@@ -193,25 +197,26 @@ export default function DecisionCard({ task, onPressCard, onPressShare }: Props)
   );
 }
 
-const styles = StyleSheet.create({
-  backgroundShadeView: {
-    position: 'absolute',
-    bottom: vs(0),
-    right: 5,
-    transform: [{ rotate: '20deg' }],
-  },
-  backgroundIcon: {
-    opacity: 0.05,
-  },
-  voteRow: {
-    marginTop: spacing.sm,
-    gap: spacing.sm,
-  },
-  voteOption: {
-    flex: 1,
-    paddingVertical: spacing.sm,
-    borderRadius: spacing.sm,
-    backgroundColor: colors.secondary,
-    alignItems: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    backgroundShadeView: {
+      position: 'absolute',
+      bottom: vs(0),
+      right: 5,
+      transform: [{ rotate: '20deg' }],
+    },
+    backgroundIcon: {
+      opacity: 0.05,
+    },
+    voteRow: {
+      marginTop: spacing.sm,
+      gap: spacing.sm,
+    },
+    voteOption: {
+      flex: 1,
+      paddingVertical: spacing.sm,
+      borderRadius: spacing.sm,
+      backgroundColor: colors.secondary,
+      alignItems: 'center',
+    },
+  });

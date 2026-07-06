@@ -1,6 +1,6 @@
 import React from 'react';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 
 import HomeScreen from '@features/Home/screens/HomeScreen';
@@ -12,13 +12,14 @@ import { useUnreadNotificationCount } from '@features/Notification/hooks/useUnre
 import { useAuth } from '@features/Auth/AuthProvider';
 import { useCheckAuthThenNavigate } from './types/navigationUtils';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors } from '@shared/theme';
+import { useTheme } from '@shared/theme';
 import { AppStackParamList } from './types/navigation';
 import AddGoalNavigator from '@features/AddGoal/navigation/AddGoalNavigator';
 
 const Tab = createNativeBottomTabNavigator();
 
 export default function BottomTabsIOS() {
+  const { colors } = useTheme();
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const { user } = useAuth();
   const { count: unreadCount } = useUnreadNotificationCount();
@@ -135,19 +136,3 @@ export default function BottomTabsIOS() {
     </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  addButtonContainer: {
-    top: -30,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

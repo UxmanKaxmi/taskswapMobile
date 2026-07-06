@@ -12,7 +12,7 @@ import {
   StyleProp,
 } from 'react-native';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { colors, spacing, typography } from '@shared/theme';
+import { ThemeColors, spacing, typography, useTheme, useThemedStyles } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { resolveAppTextStyle } from '@shared/theme/fonts';
 import Row from '../Layout/Row';
@@ -55,6 +55,8 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
     },
     ref,
   ) => {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(createStyles);
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const shakeAnim = useRef(new Animated.Value(0)).current;
     const labelPulse = useRef(new Animated.Value(1)).current;
@@ -180,31 +182,32 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
 
 export default AppTextInput;
 
-const styles = StyleSheet.create({
-  wrapper: {
-    width: '100%',
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: spacing.xs,
-  },
-  input: {
-    paddingHorizontal: spacing.sm,
-    fontSize: typography.caption,
-    marginBottom: spacing.xs,
-    // height: 60,
-    lineHeight: 20,
-    textAlignVertical: 'center',
-  },
-  charCount: {
-    alignSelf: 'flex-end',
-    marginTop: 2,
-    marginBottom: spacing.md,
-    color: colors.muted,
-  },
-  label: {
-    marginBottom: spacing.xs,
-    fontWeight: '600',
-    color: colors.text,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    wrapper: {
+      width: '100%',
+      borderColor: colors.border,
+      borderWidth: 1,
+      borderRadius: 8,
+      marginBottom: spacing.xs,
+    },
+    input: {
+      paddingHorizontal: spacing.sm,
+      fontSize: typography.caption,
+      marginBottom: spacing.xs,
+      // height: 60,
+      lineHeight: 20,
+      textAlignVertical: 'center',
+    },
+    charCount: {
+      alignSelf: 'flex-end',
+      marginTop: 2,
+      marginBottom: spacing.md,
+      color: colors.muted,
+    },
+    label: {
+      marginBottom: spacing.xs,
+      fontWeight: '600',
+      color: colors.text,
+    },
+  });

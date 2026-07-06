@@ -10,7 +10,7 @@ import {
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme } from '@shared/theme';
 import { getFirstName, stripOuterQuotes } from '@shared/utils/helperFunctions';
 import { haptics } from '@shared/utils/haptics';
 import { useAuth } from '@features/Auth/AuthProvider';
@@ -83,22 +83,26 @@ const HOME_SUMMARY_CARD_KEYS: HomeSummaryCardKey[] = [
 
 // Single dark tone shared by every summary card, mirroring HomeHeroCard:
 // ink background, white title, muted-white body, yellow icon chip.
-const DARK_TONE: CardTone = {
-  background: colors.onboardingInk,
-  titleColor: colors.onPrimary,
-  bodyColor: 'rgba(255,255,255,0.76)',
-  eyebrowColor: colors.onboardingPush,
-  iconColor: colors.onboardingInk,
-  leadingBg: colors.onboardingPush,
+const buildTones = (colors: ThemeColors) => {
+  const DARK_TONE: CardTone = {
+    background: colors.inkSurface,
+    titleColor: colors.onPrimary,
+    bodyColor: 'rgba(255,255,255,0.76)',
+    eyebrowColor: colors.onboardingPush,
+    iconColor: colors.tactileMomentumSecondary,
+    leadingBg: colors.onboardingPush,
+  };
+
+  return {
+    success: DARK_TONE,
+    push: DARK_TONE,
+    progress: DARK_TONE,
+    advice: DARK_TONE,
+    firstGoal: DARK_TONE,
+  } satisfies Record<string, CardTone>;
 };
 
-const TONES = {
-  success: DARK_TONE,
-  push: DARK_TONE,
-  progress: DARK_TONE,
-  advice: DARK_TONE,
-  firstGoal: DARK_TONE,
-} satisfies Record<string, CardTone>;
+type Tones = ReturnType<typeof buildTones>;
 
 export default function HomeSummarySection({
   summary,
@@ -114,6 +118,8 @@ export default function HomeSummarySection({
   previewAllCards = false,
 }: Props) {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const { colors } = useTheme();
+  const tones = useMemo(() => buildTones(colors), [colors]);
   const cardWidth = CARD_WIDTH;
   const scrollRef = useRef<ScrollView | null>(null);
   const scrollOffsetRef = useRef(0);
@@ -140,7 +146,7 @@ export default function HomeSummarySection({
   }, [navigation, user]);
   const cards = useMemo(() => {
     const nextCards = isGuestMode
-      ? buildGuestCards(navigation)
+      ? buildGuestCards(navigation, tones)
       : buildCards({
           summary,
           tasks: tasks ?? [],
@@ -148,6 +154,7 @@ export default function HomeSummarySection({
           onPressGoal,
           onCreateFirstPushPress: handleCreateFirstPushPress,
           previewAllCards,
+          tones,
         });
 
     return nextCards.filter(card => includeCardKeys.includes(card.key as HomeSummaryCardKey));
@@ -161,6 +168,7 @@ export default function HomeSummarySection({
     previewAllCards,
     summary,
     tasks,
+    tones,
   ]);
   const cardStride = cardWidth + CARD_GAP;
 
@@ -307,6 +315,7 @@ function buildCards({
   onPressGoal,
   onCreateFirstPushPress,
   previewAllCards = false,
+  tones,
 }: {
   summary?: HomeSummaryResponse | null;
   tasks: Goal[];
@@ -314,6 +323,7 @@ function buildCards({
   onPressGoal?: (task: Goal) => void;
   onCreateFirstPushPress: () => void;
   previewAllCards?: boolean;
+  tones: Tones;
 }): CardConfig[] {
   const trimmedCurrentUserId = currentUserId?.trim() ?? '';
   const hasCreatedAnyGoal = tasks.some(task => task.userId === trimmedCurrentUserId);
@@ -364,7 +374,7 @@ function buildCards({
           title: goalText,
           body: '',
           metric: buildPushMetric(goalPushCount),
-          tone: TONES.success,
+          tone: tones.success,
           leadingIcon: { set: 'fa6', name: 'flag-checkered', iconStyle: 'solid' },
           fingerprint: goalFingerprint,
           task: goalForPress,
@@ -380,7 +390,7 @@ function buildCards({
           title: buildSuccessStoryTitle(summary),
           body: '',
           trailingIcon: { set: 'fa6', name: 'trophy', iconStyle: 'solid' },
-          tone: TONES.success,
+          tone: tones.success,
           leadingIcon: { set: 'fa6', name: 'circle-check', iconStyle: 'solid' },
           fingerprint: buildSuccessStoryFingerprint(summary),
           task: successGoal,
@@ -399,7 +409,7 @@ function buildCards({
           title: buildPushBody(pushGoal),
           body: '',
           metric: buildPushMetric(pushGoal?.pushCount ?? 0),
-          tone: TONES.push,
+          tone: tones.push,
           leadingIcon: { set: 'fa6', name: 'person-running', iconStyle: 'solid' },
           fingerprint: buildGoalFingerprint(pushGoal),
           task: pushGoal,
@@ -413,7 +423,7 @@ function buildCards({
           title: progressGoal ? stripOuterQuotes(progressGoal.text) : 'Update your progress',
           body: '',
           metric: buildPushMetric(progressGoal?.pushCount ?? 0),
-          tone: TONES.progress,
+          tone: tones.progress,
           leadingIcon: { set: 'fa6', name: 'bullseye', iconStyle: 'solid' },
           fingerprint: buildGoalFingerprint(progressGoal),
           task: progressGoal,
@@ -431,7 +441,7 @@ function buildCards({
           title: 'Share what you’re trying to finish and get pushed forward.',
           body: '',
           trailingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
-          tone: TONES.firstGoal,
+          tone: tones.firstGoal,
           leadingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
           fingerprint: 'create-first-push:v1',
           onPress: onCreateFirstPushPress,
@@ -441,7 +451,10 @@ function buildCards({
   return [firstGoalCard, ...dataCards].filter(Boolean) as CardConfig[];
 }
 
-function buildGuestCards(navigation: NavigationProp<AppStackParamList>): CardConfig[] {
+function buildGuestCards(
+  navigation: NavigationProp<AppStackParamList>,
+  tones: Tones,
+): CardConfig[] {
   // Guests see the same "create your first push" CTA; tapping it routes to login.
   return [
     {
@@ -450,7 +463,7 @@ function buildGuestCards(navigation: NavigationProp<AppStackParamList>): CardCon
       title: 'Share what you’re trying to finish and get pushed forward.',
       body: '',
       trailingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
-      tone: TONES.firstGoal,
+      tone: tones.firstGoal,
       leadingIcon: { set: 'fa6', name: 'circle-plus', iconStyle: 'solid' },
       fingerprint: 'create-first-push:guest',
       onPress: () => {

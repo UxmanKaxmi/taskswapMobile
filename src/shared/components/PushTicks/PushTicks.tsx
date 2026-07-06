@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import TextElement from '../TextElement/TextElement';
 import TickMark from '../TickMark';
 
@@ -25,6 +25,8 @@ export default function PushTicks({
   showCount = false,
   style,
 }: PushTicksProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const marks = useMemo(() => buildMarks(count), [count]);
   const animatedValues = useRef<Animated.Value[]>([]);
   const previousLengthRef = useRef(0);
@@ -129,7 +131,10 @@ export default function PushTicks({
           if (!animatedValue) return null;
 
           return (
-            <View key={`${mark}-${index}`} style={[styles.tickSlot, index !== marks.length - 1 && styles.tickGap]}>
+            <View
+              key={`${mark}-${index}`}
+              style={[styles.tickSlot, index !== marks.length - 1 && styles.tickGap]}
+            >
               <Animated.View
                 style={[
                   styles.tickBase,
@@ -142,7 +147,7 @@ export default function PushTicks({
                   },
                 ]}
               >
-                <TickMark color={getTickColor(mark)} height={getTickHeight(mark)} />
+                <TickMark color={getTickColor(mark, colors)} height={getTickHeight(mark)} />
               </Animated.View>
             </View>
           );
@@ -187,7 +192,7 @@ function getTickHeight(mark: TickMarkType) {
   }
 }
 
-function getTickColor(mark: TickMarkType) {
+function getTickColor(mark: TickMarkType, colors: ThemeColors) {
   switch (mark) {
     case 'major':
     case 'accent':
@@ -198,35 +203,36 @@ function getTickColor(mark: TickMarkType) {
   }
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    minHeight: ms(18),
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      minHeight: ms(18),
+    },
 
-  tickSlot: {
-    width: ms(5),
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
+    tickSlot: {
+      width: ms(5),
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+    },
 
-  tickGap: {
-    marginRight: ms(1.5),
-  },
+    tickGap: {
+      marginRight: ms(1.5),
+    },
 
-  tickBase: {
-    overflow: 'hidden',
-  },
+    tickBase: {
+      overflow: 'hidden',
+    },
 
-  pushCount: {
-    color: colors.onboardingMuted,
-    marginTop: vs(5),
-    fontSize: ms(12),
-  },
+    pushCount: {
+      color: colors.onboardingMuted,
+      marginTop: vs(5),
+      fontSize: ms(12),
+    },
 
-  pushCountStrong: {
-    color: colors.onboardingInk,
-    fontSize: ms(12),
-  },
-});
+    pushCountStrong: {
+      color: colors.onboardingInk,
+      fontSize: ms(12),
+    },
+  });

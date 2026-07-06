@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { ThemeColors, spacing, useTheme, useThemedStyles } from '@shared/theme';
 import { ms } from 'react-native-size-matters';
 import Ripple from '@shared/components/Buttons/Ripple';
 
@@ -39,18 +39,27 @@ export default function SectionHeader({
   icon = 'eye',
   iconSet = 'ion',
   iconStyle = 'solid',
-  iconColor = colors.onboardingInk,
+  iconColor,
   labelColor,
   rightIcon,
   rightLabel,
   onPressRightIcon,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const resolvedIconColor = iconColor ?? colors.onboardingInk;
   const showRight = (!!rightIcon || !!rightLabel) && !!onPressRightIcon;
 
   return (
     <View style={styles.container}>
       <View style={styles.left}>
-        <Icon set={iconSet} name={icon} iconStyle={iconStyle} size={ms(12)} color={iconColor} />
+        <Icon
+          set={iconSet}
+          name={icon}
+          iconStyle={iconStyle}
+          size={ms(12)}
+          color={resolvedIconColor}
+        />
         <TextElement
           variant="caption"
           style={[styles.label, labelColor ? { color: labelColor } : null]}
@@ -75,37 +84,38 @@ export default function SectionHeader({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  label: {
-    color: colors.tactileMomentumSecondary,
-    letterSpacing: 0.9,
-    fontSize: ms(12),
-    fontWeight: '600',
-    marginLeft: spacing.xs,
-    lineHeight: ms(14),
-  },
-  rightHitSlop: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: 999,
-  },
-  rightLabel: {
-    color: colors.muted,
-    letterSpacing: 0.9,
-    fontSize: ms(12),
-    fontWeight: '600',
-    marginLeft: spacing.xs,
-    lineHeight: ms(14),
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: spacing.sm,
+    },
+    left: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    label: {
+      color: colors.onboardingInk,
+      letterSpacing: 0.9,
+      fontSize: ms(12),
+      fontWeight: '600',
+      marginLeft: spacing.xs,
+      lineHeight: ms(14),
+    },
+    rightHitSlop: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: 999,
+    },
+    rightLabel: {
+      color: colors.muted,
+      letterSpacing: 0.9,
+      fontSize: ms(12),
+      fontWeight: '600',
+      marginLeft: spacing.xs,
+      lineHeight: ms(14),
+    },
+  });

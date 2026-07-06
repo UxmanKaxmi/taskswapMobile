@@ -7,9 +7,9 @@ import { ms } from 'react-native-size-matters';
 import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
-import { colors } from '@shared/theme';
+import { ThemeColors, useThemedStyles } from '@shared/theme';
 import { GoalType } from '@features/Goals/types/goals';
-import { getTypeColor, typeIcons } from '@shared/utils/typeVisuals';
+import { typeIcons, useTypeVisuals } from '@shared/utils/typeVisuals';
 
 type Props = {
   type: GoalType;
@@ -17,6 +17,8 @@ type Props = {
 };
 
 export default function GoalMetaRow({ type, timeAgo }: Props) {
+  const styles = useThemedStyles(createStyles);
+  const { getTypeColor } = useTypeVisuals();
   const iconName = typeIcons[type];
   const typeColor = getTypeColor(type);
 
@@ -38,30 +40,31 @@ export default function GoalMetaRow({ type, timeAgo }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginLeft: ms(1),
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      marginLeft: ms(1),
+    },
 
-  icon: {
-    marginRight: ms(5),
-  },
+    icon: {
+      marginRight: ms(5),
+    },
 
-  text: {
-    fontSize: ms(12),
-    fontWeight: '600',
-    color: colors.muted,
-    textTransform: 'capitalize',
-  },
-  timeText: {
-    fontSize: ms(12),
-    // fontWeight: '600',
-    color: colors.muted,
-  },
+    text: {
+      fontSize: ms(12),
+      fontWeight: '600',
+      color: colors.muted,
+      textTransform: 'capitalize',
+    },
+    timeText: {
+      fontSize: ms(12),
+      // fontWeight: '600',
+      color: colors.muted,
+    },
 
-  dot: {
-    fontSize: ms(12),
-    marginHorizontal: ms(4),
-    color: colors.muted,
-  },
-});
+    dot: {
+      fontSize: ms(12),
+      marginHorizontal: ms(4),
+      color: colors.muted,
+    },
+  });

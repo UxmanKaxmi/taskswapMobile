@@ -5,7 +5,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
-import { notificationStyles } from '../styles/notification.styles';
+import { useNotificationStyles } from '../styles/notification.styles';
 import NotificationIconBadge from './NotificationIconBadge';
 
 type Props = {
@@ -18,6 +18,7 @@ function getSenderName(item: NotificationDTO) {
 }
 
 export default function GoalCompletedNotification({ item, onPress }: Props) {
+  const notificationStyles = useNotificationStyles();
   const senderName = getSenderName(item);
 
   return (

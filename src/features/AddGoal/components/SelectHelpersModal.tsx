@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import Avatar from '@shared/components/Avatar/Avatar';
@@ -60,6 +60,8 @@ export default function SelectHelpersModal({
   friends = [],
   onConfirm,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [localSelection, setLocalSelection] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const translateY = useRef(new Animated.Value(420)).current;
@@ -135,7 +137,7 @@ export default function SelectHelpersModal({
 
         <View style={[styles.radio, isSelected && styles.radioSelected]}>
           {isSelected ? (
-            <Icon set="ion" name="checkmark" size={ms(18)} color={colors.onboardingInk} />
+            <Icon set="ion" name="checkmark" size={ms(18)} color={colors.tactileMomentumSecondary} />
           ) : null}
         </View>
       </Pressable>
@@ -198,130 +200,131 @@ export default function SelectHelpersModal({
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-  sheetAnchor: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    width: '100%',
-    maxHeight: '88%',
-    backgroundColor: colors.onboardingCard,
-    borderTopLeftRadius: MODAL_TOP_RADIUS,
-    borderTopRightRadius: MODAL_TOP_RADIUS,
-    paddingTop: vs(8),
-    paddingHorizontal: ms(18),
-    paddingBottom: vs(18),
-  },
-  handle: {
-    alignSelf: 'center',
-    width: ms(68),
-    height: vs(6),
-    borderRadius: 999,
-    backgroundColor: '#E4E2DA',
-    marginBottom: vs(16),
-  },
-  title: {
-    color: colors.onboardingInk,
-    fontSize: ms(20),
-    lineHeight: ms(24),
-    letterSpacing: -0.6,
-    flex: 1,
-    paddingRight: ms(10),
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: vs(14),
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ECEAE2',
-    borderRadius: 24,
-    paddingHorizontal: ms(18),
-    height: vs(36),
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: ms(10),
-    fontSize: ms(14),
-    lineHeight: ms(18),
-    color: colors.onboardingInk,
-    paddingVertical: 0,
-  },
-  listWrap: {
-    marginTop: vs(10),
-    marginBottom: vs(12),
-  },
-  list: {
-    maxHeight: vs(270),
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: vs(64),
-    paddingVertical: vs(8),
-  },
-  rowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    paddingRight: ms(12),
-  },
-  textBlock: {
-    marginLeft: ms(12),
-    flex: 1,
-  },
-  name: {
-    color: colors.onboardingInk,
-    fontSize: ms(15),
-    lineHeight: ms(20),
-    letterSpacing: -0.3,
-  },
-  username: {
-    marginTop: vs(1),
-    fontSize: ms(12),
-    lineHeight: ms(15),
-    color: colors.onboardingMuted,
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.onboardingLine,
-  },
-  radio: {
-    width: ms(24),
-    height: ms(24),
-    borderRadius: ms(12),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.onboardingCard,
-  },
-  radioSelected: {
-    borderColor: colors.onboardingPush,
-    backgroundColor: colors.onboardingPush,
-  },
-  avatarFallback: {
-    backgroundColor: '#F1F0E9',
-    borderColor: colors.onboardingLine,
-  },
-  avatarText: {
-    color: colors.onboardingInk,
-  },
-  emptyList: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginTop: vs(18),
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+    },
+    sheetAnchor: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      width: '100%',
+      maxHeight: '88%',
+      backgroundColor: colors.onboardingCard,
+      borderTopLeftRadius: MODAL_TOP_RADIUS,
+      borderTopRightRadius: MODAL_TOP_RADIUS,
+      paddingTop: vs(8),
+      paddingHorizontal: ms(18),
+      paddingBottom: vs(18),
+    },
+    handle: {
+      alignSelf: 'center',
+      width: ms(68),
+      height: vs(6),
+      borderRadius: 999,
+      backgroundColor: '#E4E2DA',
+      marginBottom: vs(16),
+    },
+    title: {
+      color: colors.onboardingInk,
+      fontSize: ms(20),
+      lineHeight: ms(24),
+      letterSpacing: -0.6,
+      flex: 1,
+      paddingRight: ms(10),
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: vs(14),
+    },
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.inputBackground,
+      borderRadius: 24,
+      paddingHorizontal: ms(18),
+      height: vs(36),
+    },
+    searchInput: {
+      flex: 1,
+      marginLeft: ms(10),
+      fontSize: ms(14),
+      lineHeight: ms(18),
+      color: colors.onboardingInk,
+      paddingVertical: 0,
+    },
+    listWrap: {
+      marginTop: vs(10),
+      marginBottom: vs(12),
+    },
+    list: {
+      maxHeight: vs(270),
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      minHeight: vs(64),
+      paddingVertical: vs(8),
+    },
+    rowLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+      paddingRight: ms(12),
+    },
+    textBlock: {
+      marginLeft: ms(12),
+      flex: 1,
+    },
+    name: {
+      color: colors.onboardingInk,
+      fontSize: ms(15),
+      lineHeight: ms(20),
+      letterSpacing: -0.3,
+    },
+    username: {
+      marginTop: vs(1),
+      fontSize: ms(12),
+      lineHeight: ms(15),
+      color: colors.onboardingMuted,
+    },
+    separator: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.onboardingLine,
+    },
+    radio: {
+      width: ms(24),
+      height: ms(24),
+      borderRadius: ms(12),
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.onboardingCard,
+    },
+    radioSelected: {
+      borderColor: colors.onboardingPush,
+      backgroundColor: colors.onboardingPush,
+    },
+    avatarFallback: {
+      backgroundColor: colors.inputBackground,
+      borderColor: colors.onboardingLine,
+    },
+    avatarText: {
+      color: colors.tactileMomentumSecondary,
+    },
+    emptyList: {
+      flexGrow: 1,
+      justifyContent: 'center',
+    },
+    emptyText: {
+      textAlign: 'center',
+      marginTop: vs(18),
+    },
+  });

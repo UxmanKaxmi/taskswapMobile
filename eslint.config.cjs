@@ -50,8 +50,9 @@ module.exports = [
       'import/no-cycle': 'warn',
       'case-sensitive-paths': 'off',
 
-      // ✅ React Native: warn on unused styles in StyleSheet.create()
-      'react-native/no-unused-styles': 'warn',
+      // Disabled: styles are built via theme factories (createStyles(colors)),
+      // which this rule cannot analyze — it flags every themed sheet as unused.
+      'react-native/no-unused-styles': 'off',
       // (optional) also catches inline style object duplicates
       // 'react-native/no-inline-styles': 'warn',
     },

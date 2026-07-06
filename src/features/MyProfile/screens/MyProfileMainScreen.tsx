@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Layout } from '@shared/components/Layout';
-import { spacing, colors } from '@shared/theme';
+import { spacing, useTheme } from '@shared/theme';
 
 import { vs } from 'react-native-size-matters';
 import ProfileHeader from '../components/ProfileHeader';
@@ -12,10 +12,12 @@ import { useAuth } from '@features/Auth/AuthProvider';
 import ListView from '@shared/components/ListView/ListView';
 import StatsAchievements from '../components/StatsAchievements';
 import ProfileMenu from '../components/ProfileMenu';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 import { useMyProfileData } from '../hooks/useMyProfileData';
 import { isAndroid } from '@shared/utils/constants';
 
 export default function MyProfileMainScreen() {
+  const { colors } = useTheme();
   const { user } = useAuth();
   const { data: MyProfileData } = useMyProfileData();
   const navigation = useNavigation();
@@ -63,6 +65,7 @@ export default function MyProfileMainScreen() {
             tasksDone={MyProfileData?.tasksDone ?? 0}
             dayStreak={MyProfileData?.dayStreak ?? 0}
           />
+          <ThemeSwitcher />
           <ProfileMenu />
         </ListView>
       </View>

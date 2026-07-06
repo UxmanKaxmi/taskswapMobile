@@ -5,7 +5,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import PushButton from '@shared/components/PushButton';
 import { Height } from '@shared/components/Spacing';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { MainStackParamList } from '@navigation/types/navigation';
 import { resetToHomeRoot } from '@navigation/types/navigationUtils';
 import { ms, vs } from 'react-native-size-matters';
@@ -103,6 +103,8 @@ const authCopyMap: Record<
 };
 
 export default function AuthIntroScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const route = useRoute<RouteProp<MainStackParamList, 'AuthIntro'>>();
 
   const redirectTo = route.params?.redirectTo;
@@ -188,43 +190,44 @@ export default function AuthIntroScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  ctaButton: {
-    alignSelf: 'stretch',
-    width: '100%',
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: vs(8),
-  },
-  image: {
-    width: width,
-    height: height * 0.4,
-    // marginTop: vs(-18),
-    // marginBottom: vs(2),
-  },
-  title: {
-    fontWeight: '900',
-    textAlign: 'center',
-    marginTop: vs(10),
-    marginBottom: vs(10),
-    fontSize: ms(30),
-    // lineHeight: 24,
-  },
-  subtitle: {
-    color: colors.onboardingMuted,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 18,
-  },
-  skipText: {
-    textAlign: 'center',
-    color: colors.onboardingInk,
-    fontWeight: '600',
-    fontSize: ms(14),
-    marginTop: vs(7),
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    ctaButton: {
+      alignSelf: 'stretch',
+      width: '100%',
+    },
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingTop: vs(8),
+    },
+    image: {
+      width: width,
+      height: height * 0.4,
+      // marginTop: vs(-18),
+      // marginBottom: vs(2),
+    },
+    title: {
+      fontWeight: '900',
+      textAlign: 'center',
+      marginTop: vs(10),
+      marginBottom: vs(10),
+      fontSize: ms(30),
+      // lineHeight: 24,
+    },
+    subtitle: {
+      color: colors.onboardingMuted,
+      textAlign: 'center',
+      lineHeight: 22,
+      marginBottom: 18,
+    },
+    skipText: {
+      textAlign: 'center',
+      color: colors.onboardingInk,
+      fontWeight: '600',
+      fontSize: ms(14),
+      marginTop: vs(7),
+    },
+  });

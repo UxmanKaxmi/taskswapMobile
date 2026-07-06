@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { spacing, colors } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { showToast } from '@shared/utils/toast';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Icon from '@shared/components/Icons/Icon';
@@ -14,6 +14,8 @@ type Props = {
 };
 
 const ReferralLinkCard: React.FC<Props> = ({ link }) => {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -59,26 +61,27 @@ const ReferralLinkCard: React.FC<Props> = ({ link }) => {
 
 export default ReferralLinkCard;
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    width: '100%',
-    marginTop: spacing.md,
-  },
-  linkBox: {
-    backgroundColor: colors.inputBackground,
-    borderRadius: 10,
-    paddingVertical: spacing.sm + 2,
-    paddingHorizontal: spacing.md,
-    width: '100%',
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.sm,
-  },
-  linkText: {
-    textAlign: 'center',
-  },
-  copyButton: {
-    width: '100%',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      width: '100%',
+      marginTop: spacing.md,
+    },
+    linkBox: {
+      backgroundColor: colors.inputBackground,
+      borderRadius: 10,
+      paddingVertical: spacing.sm + 2,
+      paddingHorizontal: spacing.md,
+      width: '100%',
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: spacing.sm,
+    },
+    linkText: {
+      textAlign: 'center',
+    },
+    copyButton: {
+      width: '100%',
+    },
+  });

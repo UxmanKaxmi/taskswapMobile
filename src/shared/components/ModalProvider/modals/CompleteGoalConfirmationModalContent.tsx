@@ -5,8 +5,14 @@ import { ms, vs } from 'react-native-size-matters';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, platformShadow, spacing } from '@shared/theme';
-import { getTypeColor, typeBackgrounds, typeBackgroundsHard } from '@shared/utils/typeVisuals';
+import {
+  platformShadow,
+  spacing,
+  type ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from '@shared/theme';
+import { useTypeVisuals } from '@shared/utils/typeVisuals';
 import type { CompleteGoalConfirmationModalPayload } from '../modalTypes';
 
 const CLOSE_ANIMATION_DELAY_MS = 260;
@@ -44,6 +50,9 @@ type Props = {
 };
 
 export default function CompleteGoalConfirmationModalContent({ payload, closeModal }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const { getTypeColor, typeBackgrounds, typeBackgroundsHard } = useTypeVisuals();
   const copy = COPY[payload.type];
   const typeColor = getTypeColor(payload.type);
   const bubbleColor = typeBackgrounds[payload.type];
@@ -110,57 +119,58 @@ export default function CompleteGoalConfirmationModalContent({ payload, closeMod
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    paddingBottom: spacing.md,
-    // paddingHorizontal: spacing.md,
-  },
-  iconWrap: {
-    // marginTop: vs(8),
-    marginBottom: vs(18),
-  },
-  iconBubble: {
-    width: ms(78),
-    height: ms(78),
-    borderRadius: ms(19),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    textAlign: 'center',
-    fontSize: ms(24),
-    lineHeight: ms(28),
-  },
-  body: {
-    textAlign: 'center',
-    marginTop: vs(8),
-    fontSize: ms(15),
-    paddingHorizontal: spacing.sm,
-  },
-  actions: {
-    alignSelf: 'stretch',
-    marginTop: 'auto',
-    paddingTop: vs(16),
-  },
-  primaryButton: {
-    alignSelf: 'stretch',
-    marginVertical: 0,
-    marginHorizontal: 0,
-    borderRadius: 18,
-    minHeight: 58,
-  },
-  primaryText: {
-    color: colors.tactileMomentumSecondary,
-  },
-  cancelButton: {
-    alignSelf: 'center',
-    marginTop: vs(14),
-    // paddingVertical: vs(4),
-    color: colors.tactileMomentumSecondary,
-  },
-  cancelText: {
-    color: colors.text,
-    textAlign: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      paddingBottom: spacing.md,
+      // paddingHorizontal: spacing.md,
+    },
+    iconWrap: {
+      // marginTop: vs(8),
+      marginBottom: vs(18),
+    },
+    iconBubble: {
+      width: ms(78),
+      height: ms(78),
+      borderRadius: ms(19),
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    title: {
+      textAlign: 'center',
+      fontSize: ms(24),
+      lineHeight: ms(28),
+    },
+    body: {
+      textAlign: 'center',
+      marginTop: vs(8),
+      fontSize: ms(15),
+      paddingHorizontal: spacing.sm,
+    },
+    actions: {
+      alignSelf: 'stretch',
+      marginTop: 'auto',
+      paddingTop: vs(16),
+    },
+    primaryButton: {
+      alignSelf: 'stretch',
+      marginVertical: 0,
+      marginHorizontal: 0,
+      borderRadius: 18,
+      minHeight: 58,
+    },
+    primaryText: {
+      color: colors.tactileMomentumSecondary,
+    },
+    cancelButton: {
+      alignSelf: 'center',
+      marginTop: vs(14),
+      // paddingVertical: vs(4),
+      color: colors.tactileMomentumSecondary,
+    },
+    cancelText: {
+      color: colors.text,
+      textAlign: 'center',
+    },
+  });

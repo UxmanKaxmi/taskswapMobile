@@ -13,8 +13,7 @@ import {
   BottomSheetScrollView,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
-import { spacing } from '@shared/theme';
-import { colors } from '@shared/theme/colors';
+import { spacing, useTheme } from '@shared/theme';
 import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
 import {
@@ -44,6 +43,7 @@ type ModalContextType = {
 const ModalContext = createContext<ModalContextType | null>(null);
 
 export function ModalProvider({ children }: { children: React.ReactNode }) {
+  const { colors } = useTheme();
   const sheetRef = useRef<BottomSheetModal>(null);
   const [modal, setModal] = useState<ModalState>(null);
   const activeModalRef = useRef<ModalState>(null);

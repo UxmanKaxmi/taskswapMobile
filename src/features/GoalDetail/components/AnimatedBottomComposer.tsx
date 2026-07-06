@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@shared/theme/useTheme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { vs, ms } from 'react-native-size-matters';
-import { colors, platformShadow, spacing } from '@shared/theme';
+import { platformShadow, spacing, ThemeColors, useThemedStyles } from '@shared/theme';
 import { isAndroid } from '@shared/utils/constants';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import AppTextInput from '@shared/components/Inputs/AppTextInput';
@@ -36,6 +36,7 @@ export default function AnimatedBottomComposer({
 }: Props) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
 
   const translateY = useRef(new Animated.Value(visible ? 0 : COMPOSER_HEIGHT)).current;
 
@@ -161,74 +162,75 @@ export default function AnimatedBottomComposer({
   );
 }
 
-const styles = StyleSheet.create({
-  inputWrapper: {
-    borderRadius: ms(18),
-    borderWidth: 0, // 🔑 remove form look
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    inputWrapper: {
+      borderRadius: ms(18),
+      borderWidth: 0, // 🔑 remove form look
+    },
 
-  inputText: {
-    fontSize: ms(12),
-    marginTop: vs(8),
-    paddingHorizontal: ms(12),
-  },
-  backgroundDisabled: {
-    backgroundColor: colors.adviceBgHardest,
-  },
+    inputText: {
+      fontSize: ms(12),
+      marginTop: vs(8),
+      paddingHorizontal: ms(12),
+    },
+    backgroundDisabled: {
+      backgroundColor: colors.adviceBgHardest,
+    },
 
-  wrapper: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: -10, // start hidden below screen
-    alignItems: 'stretch',
-  },
-  keyboardAvoiding: {
-    width: '100%',
-  },
+    wrapper: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: -10, // start hidden below screen
+      alignItems: 'stretch',
+    },
+    keyboardAvoiding: {
+      width: '100%',
+    },
 
-  sheet: {
-    // width: '100%',
-    paddingHorizontal: spacing.md,
-    paddingTop: vs(20),
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    sheet: {
+      // width: '100%',
+      paddingHorizontal: spacing.md,
+      paddingTop: vs(20),
+      borderTopLeftRadius: 40,
+      borderTopRightRadius: 40,
 
-    ...platformShadow({
-      color: '#000',
-      opacity: 0.15,
-      radius: 12,
-      offset: { width: 0, height: -4 },
-    }),
-  },
+      ...platformShadow({
+        color: '#000',
+        opacity: 0.15,
+        radius: 12,
+        offset: { width: 0, height: -4 },
+      }),
+    },
 
-  input: {
-    height: INPUT_HEIGHT,
-    borderRadius: ms(18),
-    paddingHorizontal: ms(16),
-    fontSize: ms(14),
-  },
+    input: {
+      height: INPUT_HEIGHT,
+      borderRadius: ms(18),
+      paddingHorizontal: ms(16),
+      fontSize: ms(14),
+    },
 
-  footerRow: {
-    marginTop: vs(0),
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
+    footerRow: {
+      marginTop: vs(0),
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
 
-  helperText: {
-    fontSize: ms(12),
-    marginLeft: ms(4),
-    opacity: 0.85,
-  },
+    helperText: {
+      fontSize: ms(12),
+      marginLeft: ms(4),
+      opacity: 0.85,
+    },
 
-  cta: {
-    paddingHorizontal: ms(18),
-    paddingVertical: vs(8),
-    borderRadius: ms(999),
-  },
+    cta: {
+      paddingHorizontal: ms(18),
+      paddingVertical: vs(8),
+      borderRadius: ms(999),
+    },
 
-  ctaText: {
-    fontSize: ms(12),
-  },
-});
+    ctaText: {
+      fontSize: ms(12),
+    },
+  });

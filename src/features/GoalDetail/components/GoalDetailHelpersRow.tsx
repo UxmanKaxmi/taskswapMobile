@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import Avatar from '@shared/components/Avatar/Avatar';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { ms } from 'react-native-size-matters';
 import { HelperUser } from '@features/Home/types/home';
 import { GoalTypeEnum } from '@features/Goals/types/goals';
@@ -31,6 +31,9 @@ export default function GoalDetailHelpersRow({
   isOwner,
   ownerName,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   if (!helpers || helpers.length === 0) return null;
 
   const visible = helpers.slice(0, 3);
@@ -38,10 +41,10 @@ export default function GoalDetailHelpersRow({
 
   const iconBg = isMotivation
     ? colors.onboardingPush
-    : colors[`${taskType}IconBackground` as keyof typeof colors];
+    : colors[`${taskType}IconBackground` as keyof ThemeColors];
   const accentColor = isMotivation
     ? colors.onboardingInk
-    : (colors[`${taskType}BgHardest` as keyof typeof colors] as string);
+    : (colors[`${taskType}BgHardest` as keyof ThemeColors] as string);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
@@ -82,37 +85,38 @@ export default function GoalDetailHelpersRow({
     </TouchableOpacity>
   );
 }
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
 
-  iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    // backgroundColor: '#EEF2FF', // soft blue
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
+    iconWrap: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      // backgroundColor: '#EEF2FF', // soft blue
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: spacing.md,
+    },
 
-  avatarStack: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: spacing.sm,
-  },
-  nameTitle: {
-    fontSize: ms(13),
-    fontWeight: '700',
-    color: colors.onboardingInk,
-  },
-  subTextHeading: {
-    fontSize: ms(12),
-    fontWeight: '500',
-  },
-  subText: {
-    fontSize: ms(11),
-  },
-});
+    avatarStack: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginRight: spacing.sm,
+    },
+    nameTitle: {
+      fontSize: ms(13),
+      fontWeight: '700',
+      color: colors.onboardingInk,
+    },
+    subTextHeading: {
+      fontSize: ms(12),
+      fontWeight: '500',
+    },
+    subText: {
+      fontSize: ms(11),
+    },
+  });

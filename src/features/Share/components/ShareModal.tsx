@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ms, vs } from 'react-native-size-matters';
 import ViewShot from 'react-native-view-shot';
 
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { showToast } from '@shared/utils/toast';
 import {
@@ -184,6 +184,7 @@ const waitForLayout = () => new Promise<void>(r => setTimeout(r, 80));
 
 // Reusable preview card shown in the sheet and baked into the shared image
 function SharePreviewCard({ task }: { task: Goal }) {
+  const styles = useThemedStyles(createStyles);
   const pushCount = task.pushCount ?? 0;
 
   return (
@@ -213,6 +214,8 @@ function SharePreviewCard({ task }: { task: Goal }) {
 }
 
 export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [isSharing, setIsSharing] = useState(false);
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
@@ -317,7 +320,7 @@ export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
             isLoading={isSharing}
             style={styles.shareButton}
             backgroundColor={colors.onboardingPush}
-            textColor={colors.onboardingInk}
+            textColor={colors.tactileMomentumSecondary}
             disabled={isSharing}
           />
           <TextElement style={styles.privacy} color="muted">
@@ -368,161 +371,162 @@ export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
 
-  topBar: {
-    paddingHorizontal: spacing.md,
-    alignItems: 'flex-end',
-  },
+    topBar: {
+      paddingHorizontal: spacing.md,
+      alignItems: 'flex-end',
+    },
 
-  closeButton: {
-    width: ms(36),
-    height: ms(36),
-    borderRadius: ms(18),
-    backgroundColor: colors.inputBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+    closeButton: {
+      width: ms(36),
+      height: ms(36),
+      borderRadius: ms(18),
+      backgroundColor: colors.inputBackground,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
 
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-  },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: spacing.lg,
+    },
 
-  iconCircle: {
-    alignSelf: 'center',
-    width: ms(96),
-    height: ms(96),
-    borderRadius: ms(48),
-    backgroundColor: 'rgba(255, 210, 63, 0.18)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: vs(20),
-  },
+    iconCircle: {
+      alignSelf: 'center',
+      width: ms(96),
+      height: ms(96),
+      borderRadius: ms(48),
+      backgroundColor: 'rgba(255, 210, 63, 0.18)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: vs(20),
+    },
 
-  title: {
-    fontSize: ms(28),
-    lineHeight: ms(38),
-    fontWeight: '800',
-    textAlign: 'center',
-    color: colors.text,
-    paddingHorizontal: spacing.sm,
-  },
+    title: {
+      fontSize: ms(28),
+      lineHeight: ms(38),
+      fontWeight: '800',
+      textAlign: 'center',
+      color: colors.text,
+      paddingHorizontal: spacing.sm,
+    },
 
-  subtitle: {
-    fontSize: ms(15),
-    lineHeight: ms(22),
-    textAlign: 'center',
-    marginTop: vs(8),
-    marginBottom: vs(24),
-    paddingHorizontal: spacing.md,
-  },
+    subtitle: {
+      fontSize: ms(15),
+      lineHeight: ms(22),
+      textAlign: 'center',
+      marginTop: vs(8),
+      marginBottom: vs(24),
+      paddingHorizontal: spacing.md,
+    },
 
-  // ===== Preview card =====
-  previewCard: {
-    backgroundColor: '#EFEFEA',
-    borderRadius: ms(20),
-    padding: spacing.md,
-  },
+    // ===== Preview card =====
+    previewCard: {
+      backgroundColor: '#EFEFEA',
+      borderRadius: ms(20),
+      padding: spacing.md,
+    },
 
-  previewHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+    previewHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
 
-  previewAvatar: {
-    width: ms(44),
-    height: ms(44),
-    borderRadius: ms(22),
-    backgroundColor: colors.muted,
-    marginRight: spacing.sm,
-  },
+    previewAvatar: {
+      width: ms(44),
+      height: ms(44),
+      borderRadius: ms(22),
+      backgroundColor: colors.muted,
+      marginRight: spacing.sm,
+    },
 
-  previewHeaderText: {
-    flex: 1,
-  },
+    previewHeaderText: {
+      flex: 1,
+    },
 
-  previewName: {
-    fontSize: ms(16),
-    fontWeight: '700',
-    color: colors.text,
-  },
+    previewName: {
+      fontSize: ms(16),
+      fontWeight: '700',
+      color: colors.text,
+    },
 
-  previewMeta: {
-    fontSize: ms(13),
-    marginTop: vs(2),
-  },
+    previewMeta: {
+      fontSize: ms(13),
+      marginTop: vs(2),
+    },
 
-  previewQuote: {
-    fontSize: ms(16),
-    lineHeight: ms(23),
-    fontWeight: '700',
-    color: colors.text,
-    marginTop: vs(14),
-  },
+    previewQuote: {
+      fontSize: ms(16),
+      lineHeight: ms(23),
+      fontWeight: '700',
+      color: colors.text,
+      marginTop: vs(14),
+    },
 
-  previewFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: vs(18),
-  },
+    previewFooter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: vs(18),
+    },
 
-  previewPushes: {
-    fontSize: ms(13),
-    fontWeight: '600',
-  },
+    previewPushes: {
+      fontSize: ms(13),
+      fontWeight: '600',
+    },
 
-  // ===== Footer =====
-  footer: {
-    paddingHorizontal: spacing.lg,
-  },
+    // ===== Footer =====
+    footer: {
+      paddingHorizontal: spacing.lg,
+    },
 
-  shareButton: {
-    borderRadius: ms(28),
-  },
+    shareButton: {
+      borderRadius: ms(28),
+    },
 
-  privacy: {
-    fontSize: ms(12),
-    textAlign: 'center',
-    opacity: 0.9,
-    // marginTop: vs(12),
-  },
+    privacy: {
+      fontSize: ms(12),
+      textAlign: 'center',
+      opacity: 0.9,
+      // marginTop: vs(12),
+    },
 
-  // ===== Hidden poster capture =====
-  hiddenPoster: {
-    position: 'absolute',
-    left: -9999,
-    top: -9999,
-    opacity: 0,
-  },
+    // ===== Hidden poster capture =====
+    hiddenPoster: {
+      position: 'absolute',
+      left: -9999,
+      top: -9999,
+      opacity: 0,
+    },
 
-  posterRoot: {
-    width: 390, // iPhone-ish width
-    height: 844, // iPhone-ish height
-    backgroundColor: colors.surface,
-  },
+    posterRoot: {
+      width: 390, // iPhone-ish width
+      height: 844, // iPhone-ish height
+      backgroundColor: colors.surface,
+    },
 
-  posterSheet: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-  },
+    posterSheet: {
+      flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: spacing.lg,
+    },
 
-  branding: {
-    fontSize: ms(12),
-    textAlign: 'center',
-    opacity: 0.6,
-    marginTop: vs(24),
-  },
+    branding: {
+      fontSize: ms(12),
+      textAlign: 'center',
+      opacity: 0.6,
+      marginTop: vs(24),
+    },
 
-  blocker: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,255,255,0.01)',
-  },
-});
+    blocker: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(255,255,255,0.01)',
+    },
+  });

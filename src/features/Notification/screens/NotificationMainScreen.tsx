@@ -16,7 +16,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PageHeader from '@shared/components/PageHeader/PageHeader';
-import { spacing, colors } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { useNotifications } from '../hooks/useNotifications';
 import { useBatchMarkNotificationsAsRead } from '../hooks/useBatchMarkNotificationsAsRead';
 import EmptyState from '@features/Empty/EmptyState';
@@ -31,6 +31,8 @@ import { Height } from '@shared/components/Spacing';
 import { getGoalByIdAPI } from '@features/Home/api/api';
 
 export default function NotificationMainScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const { data: notifications = [], isLoading, refetch } = useNotifications();
   const { mutate: markBatch } = useBatchMarkNotificationsAsRead();
@@ -423,73 +425,74 @@ export default function NotificationMainScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  header: {
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    // paddingTop: spacing.sm,
-    // paddingBottom: spacing.md,
-  },
-  markAllReadButton: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: 999,
-  },
-  markAllReadButtonPressed: {
-    opacity: 0.6,
-  },
-  markAllReadButtonDisabled: {
-    opacity: 0.45,
-  },
-  markAllReadText: {
-    color: colors.onboardingMuted,
-    letterSpacing: -0.2,
-    fontSize: ms(12),
-  },
-  markAllReadTextDisabled: {
-    color: colors.muted,
-  },
-  sectionHeaderContainer: {
-    // paddingVertical: vs(12),
-    paddingVertical: spacing.md,
-    // marginTop: spacing.lg,
-    // paddingHorizontal: spacing.md,
-    backgroundColor: colors.onboardingPaper,
-  },
-  firstItem: {
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    // marginTop: spacing.md,
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+    },
+    header: {
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      // paddingTop: spacing.sm,
+      // paddingBottom: spacing.md,
+    },
+    markAllReadButton: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: 999,
+    },
+    markAllReadButtonPressed: {
+      opacity: 0.6,
+    },
+    markAllReadButtonDisabled: {
+      opacity: 0.45,
+    },
+    markAllReadText: {
+      color: colors.onboardingMuted,
+      letterSpacing: -0.2,
+      fontSize: ms(12),
+    },
+    markAllReadTextDisabled: {
+      color: colors.muted,
+    },
+    sectionHeaderContainer: {
+      // paddingVertical: vs(12),
+      paddingVertical: spacing.md,
+      // marginTop: spacing.lg,
+      // paddingHorizontal: spacing.md,
+      backgroundColor: colors.onboardingPaper,
+    },
+    firstItem: {
+      borderTopLeftRadius: 10,
+      borderTopRightRadius: 10,
+      // marginTop: spacing.md,
+    },
 
-  lastItem: {
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    // marginBottom: spacing.md,
-  },
-  sectionHeader: {
-    fontSize: ms(16),
-    color: colors.text,
-    marginLeft: spacing.lg,
-  },
-  rowContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    // paddingHorizontal: spacing.md,
-    // paddingVertical: spacing.md,
-    marginHorizontal: spacing.lg,
-    // marginTop: spacing.md,
-    // backgroundColor: '#fff',
-    backgroundColor: 'transparent',
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
+    lastItem: {
+      borderBottomLeftRadius: 10,
+      borderBottomRightRadius: 10,
+      // marginBottom: spacing.md,
+    },
+    sectionHeader: {
+      fontSize: ms(16),
+      color: colors.text,
+      marginLeft: spacing.lg,
+    },
+    rowContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      // paddingHorizontal: spacing.md,
+      // paddingVertical: spacing.md,
+      marginHorizontal: spacing.lg,
+      // marginTop: spacing.md,
+      // backgroundColor: '#fff',
+      backgroundColor: 'transparent',
+      borderRadius: 10,
+      overflow: 'hidden',
+    },
 
-  listFooter: {
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-  },
-});
+    listFooter: {
+      paddingVertical: spacing.md,
+      alignItems: 'center',
+    },
+  });

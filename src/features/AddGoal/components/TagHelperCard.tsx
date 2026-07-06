@@ -3,7 +3,7 @@ import { View, StyleSheet, Pressable } from 'react-native';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Avatar from '@shared/components/Avatar/Avatar';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import { ms, vs } from 'react-native-size-matters';
 import SectionHeader from '@shared/components/SectionHeader/SectionHeader';
@@ -34,6 +34,8 @@ export default function TagHelperCard({
   title,
   subtitle,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const hasHelpers = helpers.length > 0;
 
   if (variant === 'prompt') {
@@ -53,7 +55,7 @@ export default function TagHelperCard({
             <>
               <View style={styles.promptLeft}>
                 <View style={styles.promptIconCircle}>
-                  <Icon set="ion" name="add" size={ms(22)} color={colors.onboardingInk} />
+                  <Icon set="ion" name="add" size={ms(22)} color={colors.tactileMomentumSecondary} />
                 </View>
 
                 <View style={styles.promptTextWrap}>
@@ -81,7 +83,7 @@ export default function TagHelperCard({
                     set="ion"
                     name="people"
                     size={ms(20)}
-                    // color={colors[`${taskType}BgHardest`]}
+                    color={colors.tactileMomentumSecondary}
                   />
                 </View>
 
@@ -153,109 +155,110 @@ export default function TagHelperCard({
   );
 }
 
-const styles = StyleSheet.create({
-  promptWrapper: {
-    marginTop: spacing.lg,
-  },
-  promptHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: ms(8),
-    marginBottom: vs(12),
-  },
-  promptHeaderLabel: {
-    color: colors.onboardingMuted,
-    letterSpacing: 0.8,
-  },
-  promptHeaderSuffix: {
-    color: colors.onboardingMuted,
-    opacity: 0.9,
-    fontSize: ms(12),
-  },
-  promptCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.onboardingPaper,
-    borderRadius: 26,
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: '#E5E3DA',
-    paddingVertical: vs(10),
-    paddingHorizontal: ms(18),
-  },
-  promptLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(16),
-    flex: 1,
-    paddingRight: ms(12),
-  },
-  promptIconCircle: {
-    width: ms(38),
-    height: ms(38),
-    borderRadius: ms(19),
-    backgroundColor: colors.onboardingPush,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  promptTextWrap: {
-    flex: 1,
-  },
-  promptAvatars: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: spacing.sm,
-    paddingLeft: ms(10),
-  },
-  promptTitle: {
-    color: colors.onboardingInk,
-    fontSize: ms(12),
-    lineHeight: ms(18),
-    letterSpacing: -0.3,
-  },
-  promptSubtitle: {
-    marginTop: vs(4),
-    fontSize: ms(12),
-    lineHeight: ms(12),
-  },
-  wrapper: {
-    marginTop: spacing.md,
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    promptWrapper: {
+      marginTop: spacing.lg,
+    },
+    promptHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      gap: ms(8),
+      marginBottom: vs(12),
+    },
+    promptHeaderLabel: {
+      color: colors.onboardingMuted,
+      letterSpacing: 0.8,
+    },
+    promptHeaderSuffix: {
+      color: colors.onboardingMuted,
+      opacity: 0.9,
+      fontSize: ms(12),
+    },
+    promptCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.onboardingPaper,
+      borderRadius: 26,
+      borderWidth: 1.5,
+      borderStyle: 'dashed',
+      borderColor: '#E5E3DA',
+      paddingVertical: vs(10),
+      paddingHorizontal: ms(18),
+    },
+    promptLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(16),
+      flex: 1,
+      paddingRight: ms(12),
+    },
+    promptIconCircle: {
+      width: ms(38),
+      height: ms(38),
+      borderRadius: ms(19),
+      backgroundColor: colors.onboardingPush,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    promptTextWrap: {
+      flex: 1,
+    },
+    promptAvatars: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginRight: spacing.sm,
+      paddingLeft: ms(10),
+    },
+    promptTitle: {
+      color: colors.onboardingInk,
+      fontSize: ms(12),
+      lineHeight: ms(18),
+      letterSpacing: -0.3,
+    },
+    promptSubtitle: {
+      marginTop: vs(4),
+      fontSize: ms(12),
+      lineHeight: ms(12),
+    },
+    wrapper: {
+      marginTop: spacing.md,
+    },
 
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.card,
-    borderRadius: 24,
-    padding: spacing.md,
-    paddingVertical: vs(10),
-  },
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.card,
+      borderRadius: 24,
+      padding: spacing.md,
+      paddingVertical: vs(10),
+    },
 
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    flex: 1,
-  },
+    left: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      flex: 1,
+    },
 
-  iconCircle: {
-    width: ms(35),
-    height: ms(35),
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    iconCircle: {
+      width: ms(35),
+      height: ms(35),
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  subText: {
-    fontSize: ms(11),
-  },
-  subTextHeading: {
-    fontSize: ms(13),
-    fontWeight: '500',
-  },
-});
+    subText: {
+      fontSize: ms(11),
+    },
+    subTextHeading: {
+      fontSize: ms(13),
+      fontWeight: '500',
+    },
+  });
 
 function formatHelperNames(helpers: HelperUser[]) {
   if (helpers.length === 1) return helpers[0].name;

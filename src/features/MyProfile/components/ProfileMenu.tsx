@@ -5,7 +5,7 @@ import { ActivityIndicator, View, StyleSheet, Alert, Linking } from 'react-nativ
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import Row from '@shared/components/Layout/Row';
-import { spacing, colors } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigationProp } from '@navigation/types/navigation';
@@ -29,6 +29,8 @@ export type MenuItem = {
  * Profile menu that takes a dynamic list of items with icons and callbacks.
  */
 export default function ProfileMenu() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const navigation = useNavigation<AppNavigationProp>();
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
@@ -243,73 +245,74 @@ export default function ProfileMenu() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    // marginTop: 10,
-    // paddingHorizontal: spacing.md,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: ms(20),
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.onboardingLine,
-  },
-  cardSpacer: {
-    marginTop: spacing.md,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: vs(62),
-    paddingVertical: vs(8),
-    paddingHorizontal: spacing.lg,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderColor: colors.onboardingLine,
-  },
-  lastRow: {
-    borderBottomWidth: 0,
-  },
-  singleRow: {
-    borderBottomWidth: 0,
-  },
-  innerRow: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  iconCircle: {
-    width: ms(42),
-    height: ms(42),
-    borderRadius: ms(14),
-    backgroundColor: '#FFF4D1',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-  iconCircleDanger: {
-    backgroundColor: '#FEECEC',
-  },
-  label: {
-    fontSize: ms(15),
-    lineHeight: ms(20),
-    color: colors.onboardingInk,
-    letterSpacing: 0,
-  },
-  dangerCard: {
-    backgroundColor: '#FFF3F3',
-    borderColor: '#F5D6D6',
-  },
-  dangerRow: {
-    backgroundColor: 'transparent',
-    borderColor: '#F5D6D6',
-  },
-  disabledRow: {
-    opacity: 0.65,
-  },
-  labelDanger: {
-    color: colors.error,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      // marginTop: 10,
+      // paddingHorizontal: spacing.md,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: ms(20),
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.onboardingLine,
+    },
+    cardSpacer: {
+      marginTop: spacing.md,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      minHeight: vs(62),
+      paddingVertical: vs(8),
+      paddingHorizontal: spacing.lg,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderColor: colors.onboardingLine,
+    },
+    lastRow: {
+      borderBottomWidth: 0,
+    },
+    singleRow: {
+      borderBottomWidth: 0,
+    },
+    innerRow: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    iconCircle: {
+      width: ms(42),
+      height: ms(42),
+      borderRadius: ms(14),
+      backgroundColor: colors.warmIconChipBg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: spacing.md,
+    },
+    iconCircleDanger: {
+      backgroundColor: colors.dangerIconChipBg,
+    },
+    label: {
+      fontSize: ms(15),
+      lineHeight: ms(20),
+      color: colors.onboardingInk,
+      letterSpacing: 0,
+    },
+    dangerCard: {
+      backgroundColor: colors.dangerSoftBg,
+      borderColor: colors.dangerSoftBorder,
+    },
+    dangerRow: {
+      backgroundColor: 'transparent',
+      borderColor: colors.dangerSoftBorder,
+    },
+    disabledRow: {
+      opacity: 0.65,
+    },
+    labelDanger: {
+      color: colors.error,
+    },
+  });

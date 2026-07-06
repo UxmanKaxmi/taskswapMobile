@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Animated, StyleSheet, Pressable, Easing } from 'react-native';
 import { ms } from 'react-native-size-matters';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Row from '@shared/components/Layout/Row';
 import { showToast } from '@shared/utils/toast';
@@ -33,6 +33,8 @@ export default function StackedVoteBar({
   isSubmitting = false,
   onChangeVote,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const progress1 = useRef(new Animated.Value(0)).current;
   const progress2 = useRef(new Animated.Value(0)).current;
   const [barW, setBarW] = React.useState(0);
@@ -147,36 +149,37 @@ export default function StackedVoteBar({
   );
 }
 
-const styles = StyleSheet.create({
-  optionLabel: {
-    fontSize: ms(16),
-    fontWeight: '600',
-    color: colors.text,
-    maxWidth: '70%',
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    optionLabel: {
+      fontSize: ms(16),
+      fontWeight: '600',
+      color: colors.text,
+      maxWidth: '70%',
+    },
 
-  percentText: {
-    fontSize: ms(14),
-    fontWeight: '700',
-    color: colors.decisionBgHardest,
-  },
+    percentText: {
+      fontSize: ms(14),
+      fontWeight: '700',
+      color: colors.decisionBgHardest,
+    },
 
-  mutedText: {
-    color: colors.muted,
-    fontWeight: '500',
-  },
+    mutedText: {
+      color: colors.muted,
+      fontWeight: '500',
+    },
 
-  barContainer: {
-    height: ms(20),
-    backgroundColor: colors.surface,
-    borderRadius: ms(10), // 👈 half of height
-    overflow: 'hidden', // 👈 THIS is the mask
-  },
+    barContainer: {
+      height: ms(20),
+      backgroundColor: colors.surface,
+      borderRadius: ms(10), // 👈 half of height
+      overflow: 'hidden', // 👈 THIS is the mask
+    },
 
-  barFill: {
-    height: '100%',
-    width: '100%',
-    borderRadius: ms(7), // 👈 same radius as container
-    alignSelf: 'flex-start', // 👈 prevent centering during scale
-  },
-});
+    barFill: {
+      height: '100%',
+      width: '100%',
+      borderRadius: ms(7), // 👈 same radius as container
+      alignSelf: 'flex-start', // 👈 prevent centering during scale
+    },
+  });

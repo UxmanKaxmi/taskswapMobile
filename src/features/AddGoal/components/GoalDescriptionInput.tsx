@@ -6,7 +6,7 @@ import AppTextInput from '@shared/components/Inputs/AppTextInput';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { GoalType } from '@features/Goals/types/goals';
 import { ms, vs } from 'react-native-size-matters';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import AppBorder from '@shared/components/AppBorder/AppBorder';
 import { getGoalHints } from '../utils/goalCopy';
 // import InspireMeButton from '@features/addGoal/components/InspireMeButton';
@@ -20,7 +20,7 @@ type Props = {
   charLimit?: number;
   minLength?: number;
   footerText?: string;
-  footerTextColor?: keyof typeof colors;
+  footerTextColor?: keyof ThemeColors;
   dividerColor?: string;
   inputWrapperStyle?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
@@ -36,10 +36,12 @@ export default function GoalDescriptionInput({
   minLength,
   footerText,
   footerTextColor = 'muted',
-  dividerColor = colors.border,
+  dividerColor,
   inputWrapperStyle,
   inputStyle,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [charCount, setCharCount] = useState(0);
   const resolvedFooterText = footerText ?? getGoalHints(taskType);
   // Red when at/over the max, or once typing has started but is still under the min.
@@ -66,73 +68,68 @@ export default function GoalDescriptionInput({
         onCharCountChange={count => setCharCount(count)}
         numberOfLines={4}
       />
-      <AppBorder color={dividerColor} />
+      <AppBorder color={dividerColor ?? colors.border} />
       {/* FOOTER — shows the error in place of the hint when present */}
       <View style={styles.footer}>
-        <TextElement
-          style={styles.footerText}
-          color={error ? 'error' : footerTextColor}
-        >
+        <TextElement style={styles.footerText} color={error ? 'error' : footerTextColor}>
           {error ?? resolvedFooterText}
         </TextElement>
 
-        <TextElement
-          style={styles.charCount}
-          color={countIsError ? 'error' : footerTextColor}
-        >
+        <TextElement style={styles.charCount} color={countIsError ? 'error' : footerTextColor}>
           {charCount}/{charLimit}
         </TextElement>
       </View>
     </View>
   );
 }
-const styles = StyleSheet.create({
-  charCount: {
-    letterSpacing: 0.2,
-    fontSize: ms(12),
-    alignSelf: 'flex-end',
-    flexShrink: 0,
-    marginLeft: spacing.sm,
-  },
-  footerText: {
-    letterSpacing: 0.2,
-    fontSize: ms(12),
-    fontWeight: '500',
-    flex: 1,
-  },
-  wrapperStyle: {
-    borderWidth: 0,
-  },
-  // backgroundColor: colors.background,
-  // borderRadius: 16,
-  // padding: spacing.md,
-  // // subtle elevation
-  // shadowColor: '#000',
-  // shadowOffset: { width: 0, height: 6 },
-  // shadowOpacity: 0.06,
-  // shadowRadius: 12,
-  // elevation: 4,
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    charCount: {
+      letterSpacing: 0.2,
+      fontSize: ms(12),
+      alignSelf: 'flex-end',
+      flexShrink: 0,
+      marginLeft: spacing.sm,
+    },
+    footerText: {
+      letterSpacing: 0.2,
+      fontSize: ms(12),
+      fontWeight: '500',
+      flex: 1,
+    },
+    wrapperStyle: {
+      borderWidth: 0,
+    },
+    // backgroundColor: colors.background,
+    // borderRadius: 16,
+    // padding: spacing.md,
+    // // subtle elevation
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 6 },
+    // shadowOpacity: 0.06,
+    // shadowRadius: 12,
+    // elevation: 4,
 
-  inputContainer: {
-    width: '100%',
-    marginBottom: spacing.md,
-  },
+    inputContainer: {
+      width: '100%',
+      marginBottom: spacing.md,
+    },
 
-  input: {
-    minHeight: vs(50),
-    textAlignVertical: 'top',
-    fontSize: ms(15),
-    lineHeight: ms(20),
-    paddingTop: 0, // important: keeps text aligned like design
-    borderWidth: 0,
-  },
+    input: {
+      minHeight: vs(50),
+      textAlignVertical: 'top',
+      fontSize: ms(15),
+      lineHeight: ms(20),
+      paddingTop: 0, // important: keeps text aligned like design
+      borderWidth: 0,
+    },
 
-  footer: {
-    borderTopColor: colors.border,
-    paddingTop: spacing.sm,
+    footer: {
+      borderTopColor: colors.border,
+      paddingTop: spacing.sm,
 
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-});
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+  });

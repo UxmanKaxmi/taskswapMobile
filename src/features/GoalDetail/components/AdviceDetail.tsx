@@ -3,7 +3,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { spacing, colors } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import Avatar from '@shared/components/Avatar/Avatar';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import { MOCK_ADVICE } from '@shared/utils/mock';
@@ -39,12 +39,10 @@ type Props = {
   highlightCommentId?: string;
 };
 
-export default function AdviceDetail({
-  task,
-  adviceSectionRef,
-  highlightCommentId,
-}: Props) {
+export default function AdviceDetail({ task, adviceSectionRef, highlightCommentId }: Props) {
   /** 👉 UI-only mock */
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { data: advice = [], isLoading } = useComments(task.id);
   const { mutate: toggleLike } = useToggleCommentLike(task.id);
   return (
@@ -131,112 +129,113 @@ export default function AdviceDetail({
   );
 }
 
-const styles = StyleSheet.create({
-  emptyAdviceCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    paddingHorizontal: spacing.md,
-    paddingVertical: vs(17),
-    marginHorizontal: spacing.md,
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    emptyAdviceCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      paddingHorizontal: spacing.md,
+      paddingVertical: vs(17),
+      marginHorizontal: spacing.md,
+    },
 
-  emptyHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    // marginBottom: spacing.sm,
-  },
+    emptyHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      // marginBottom: spacing.sm,
+    },
 
-  iconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.adviceIconBackground,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm,
-  },
+    iconWrap: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.adviceIconBackground,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: spacing.sm,
+    },
 
-  emptyTitle: {
-    fontSize: ms(14),
-    fontWeight: '500',
-    color: colors.muted,
-    marginLeft: ms(15),
-  },
+    emptyTitle: {
+      fontSize: ms(14),
+      fontWeight: '500',
+      color: colors.muted,
+      marginLeft: ms(15),
+    },
 
-  emptyDescription: {
-    fontSize: 14,
-    color: colors.muted,
-    lineHeight: 20,
-  },
+    emptyDescription: {
+      fontSize: 14,
+      color: colors.muted,
+      lineHeight: 20,
+    },
 
-  containerShadow: {
-    paddingVertical: vs(8),
-    marginHorizontal: -spacing.md,
-  },
+    containerShadow: {
+      paddingVertical: vs(8),
+      marginHorizontal: -spacing.md,
+    },
 
-  separator: {
-    height: vs(12),
-  },
+    separator: {
+      height: vs(12),
+    },
 
-  adviceCard: {
-    marginHorizontal: spacing.md,
-    paddingVertical: vs(14),
-    paddingHorizontal: ms(14),
-    borderRadius: ms(20),
-    backgroundColor: colors.surface,
-  },
-  highlightedCard: {
-    backgroundColor: colors.onPrimary,
-    borderWidth: 1,
-    borderColor: colors.adviceBgHard,
-  },
+    adviceCard: {
+      marginHorizontal: spacing.md,
+      paddingVertical: vs(14),
+      paddingHorizontal: ms(14),
+      borderRadius: ms(20),
+      backgroundColor: colors.surface,
+    },
+    highlightedCard: {
+      backgroundColor: colors.onPrimary,
+      borderWidth: 1,
+      borderColor: colors.adviceBgHard,
+    },
 
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: vs(10),
-  },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: vs(10),
+    },
 
-  headerText: {
-    marginLeft: ms(12),
-  },
+    headerText: {
+      marginLeft: ms(12),
+    },
 
-  userName: {
-    fontWeight: '600',
-    fontSize: ms(14),
-    lineHeight: ms(16),
-  },
+    userName: {
+      fontWeight: '600',
+      fontSize: ms(14),
+      lineHeight: ms(16),
+    },
 
-  timestamp: {
-    fontSize: ms(12),
-    color: colors.muted,
-    // lineHeight: ms(16),
-  },
+    timestamp: {
+      fontSize: ms(12),
+      color: colors.muted,
+      // lineHeight: ms(16),
+    },
 
-  adviceText: {
-    lineHeight: ms(20),
-    fontSize: ms(14),
-    opacity: 0.8,
-    fontWeight: '400',
-    // marginLeft: ms(36 + 12), // aligns under text, not avatar
-  },
-  likePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: ms(10),
-    paddingVertical: vs(2),
-    borderRadius: ms(999),
-    backgroundColor: colors.inputBackground,
-    marginLeft: 'auto',
-  },
+    adviceText: {
+      lineHeight: ms(20),
+      fontSize: ms(14),
+      opacity: 0.8,
+      fontWeight: '400',
+      // marginLeft: ms(36 + 12), // aligns under text, not avatar
+    },
+    likePill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: ms(10),
+      paddingVertical: vs(2),
+      borderRadius: ms(999),
+      backgroundColor: colors.inputBackground,
+      marginLeft: 'auto',
+    },
 
-  likePillActive: {
-    backgroundColor: colors.adviceBgHard,
-  },
+    likePillActive: {
+      backgroundColor: colors.adviceBgHard,
+    },
 
-  likeCount: {
-    fontSize: ms(12),
-    fontWeight: '500',
-    color: colors.muted,
-  },
-});
+    likeCount: {
+      fontSize: ms(12),
+      fontWeight: '500',
+      color: colors.muted,
+    },
+  });

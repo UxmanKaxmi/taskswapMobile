@@ -8,7 +8,7 @@ import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import HelperAvatarGroup from '@features/Home/components/HelperAvatarGroup';
 
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { timeAgo, toShortName } from '@shared/utils/helperFunctions';
 import { typeIcons } from '@shared/utils/typeVisuals';
 import { GoalType } from '@features/Goals/types/goals';
@@ -35,6 +35,8 @@ type Props = {
 };
 
 export function GoalDetailHeader({ task }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const avatarSize = ms(45);
 
   const iconName = typeIcons[task.type];
@@ -109,52 +111,53 @@ export function GoalDetailHeader({ task }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  avatarWrapper: {
-    position: 'relative',
-    marginRight: ms(5),
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    avatarWrapper: {
+      position: 'relative',
+      marginRight: ms(5),
+    },
 
-  avatarText: {
-    color: colors.onboardingInk,
-    fontWeight: '800',
-  },
+    avatarText: {
+      color: colors.onboardingInk,
+      fontWeight: '800',
+    },
 
-  helperOverlay: {
-    position: 'absolute',
-    bottom: ms(-2),
-    right: ms(-3),
-  },
+    helperOverlay: {
+      position: 'absolute',
+      bottom: ms(-2),
+      right: ms(-3),
+    },
 
-  name: {
-    fontSize: ms(16),
-    // lineHeight: ms(18),
-    fontWeight: '600',
-  },
+    name: {
+      fontSize: ms(16),
+      // lineHeight: ms(18),
+      fontWeight: '600',
+    },
 
-  metaRow: {
-    marginLeft: ms(1),
-  },
+    metaRow: {
+      marginLeft: ms(1),
+    },
 
-  metaIcon: {
-    marginRight: ms(5),
-  },
+    metaIcon: {
+      marginRight: ms(5),
+    },
 
-  metaText: {
-    fontSize: ms(12),
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
+    metaText: {
+      fontSize: ms(12),
+      fontWeight: '600',
+      textTransform: 'capitalize',
+    },
 
-  timeText: {
-    fontSize: ms(12),
-    color: colors.muted,
-    flexShrink: 1,
-  },
+    timeText: {
+      fontSize: ms(12),
+      color: colors.muted,
+      flexShrink: 1,
+    },
 
-  dot: {
-    fontSize: ms(10),
-    marginHorizontal: ms(2),
-    color: colors.muted,
-  },
-});
+    dot: {
+      fontSize: ms(10),
+      marginHorizontal: ms(2),
+      color: colors.muted,
+    },
+  });

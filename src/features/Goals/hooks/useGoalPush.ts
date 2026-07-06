@@ -1,9 +1,4 @@
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  type InfiniteData,
-} from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import { GoalPush } from '../types/goals';
 import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
 import { getGoalPushes, toggleGoalPush } from '../api/goalPush.api';
@@ -65,27 +60,24 @@ export function useToggleGoalPush(taskId: string) {
         queryKey: [QueryKeys.Goals],
       });
 
-      queryClient.setQueriesData<InfiniteData<GoalPage>>(
-        { queryKey: [QueryKeys.Goals] },
-        old => {
-          if (!old) return old;
-          return {
-            ...old,
-            pages: old.pages.map(page => ({
-              ...page,
-              data: page.data.map(t =>
-                t.id === taskId
-                  ? {
-                      ...t,
-                      hasPushed: nextHasPushed,
-                      pushCount: Math.max(0, (t.pushCount ?? 0) + compactStatusDelta),
-                    }
-                  : t,
-              ),
-            })),
-          };
-        },
-      );
+      queryClient.setQueriesData<InfiniteData<GoalPage>>({ queryKey: [QueryKeys.Goals] }, old => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map(page => ({
+            ...page,
+            data: page.data.map(t =>
+              t.id === taskId
+                ? {
+                    ...t,
+                    hasPushed: nextHasPushed,
+                    pushCount: Math.max(0, (t.pushCount ?? 0) + compactStatusDelta),
+                  }
+                : t,
+            ),
+          })),
+        };
+      });
 
       queryClient.setQueriesData<HomeSummaryResponse>(
         { queryKey: [QueryKeys.HomeSummary] },

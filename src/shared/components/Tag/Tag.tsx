@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { ThemeColors, spacing, useTheme, useThemedStyles } from '@shared/theme';
 import Ripple from '../Buttons/Ripple';
 import Icon from '@shared/components/Icons/Icon';
 import { ms } from 'react-native-size-matters';
@@ -16,7 +16,7 @@ type Props = {
   style?: ViewStyle;
   fillColor?: string; // override default fill color
   borderColor?: string; // override default border color
-  labelColor?: keyof typeof colors; // override default label color
+  labelColor?: keyof ThemeColors; // override default label color
 };
 
 export default function Tag({
@@ -31,8 +31,9 @@ export default function Tag({
   borderColor,
   labelColor,
 }: Props) {
-  const resolvedLabelColor: keyof typeof colors =
-    labelColor ?? (selected ? 'background' : 'primary');
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const resolvedLabelColor: keyof ThemeColors = labelColor ?? (selected ? 'background' : 'primary');
 
   return (
     <Ripple
@@ -76,35 +77,36 @@ export default function Tag({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 999,
-    backgroundColor: colors.background,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.primary,
-  },
-  selected: {
-    backgroundColor: colors.primary,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-    gap: spacing.xs,
-  },
-  label: {
-    marginHorizontal: 2,
-    fontSize: ms(12),
-    lineHeight: ms(14),
-    includeFontPadding: false,
-    textAlignVertical: 'center',
-  },
-  selectOnlyContent: {
-    justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
-  },
-  selectOnlyLabel: {
-    marginHorizontal: 0,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      borderRadius: 999,
+      backgroundColor: colors.background,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.primary,
+    },
+    selected: {
+      backgroundColor: colors.primary,
+    },
+    content: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.xs,
+      paddingHorizontal: spacing.md,
+      gap: spacing.xs,
+    },
+    label: {
+      marginHorizontal: 2,
+      fontSize: ms(12),
+      lineHeight: ms(14),
+      includeFontPadding: false,
+      textAlignVertical: 'center',
+    },
+    selectOnlyContent: {
+      justifyContent: 'center',
+      paddingHorizontal: spacing.sm,
+    },
+    selectOnlyLabel: {
+      marginHorizontal: 0,
+    },
+  });

@@ -10,7 +10,7 @@ import GoalProgressUpdateHistory from './GoalProgressUpdateHistory';
 import type { AvatarUser, ProgressUpdate, GoalBeat } from '@features/Goals/types/goals';
 import { Height } from '@shared/components/Spacing';
 import { vs } from 'react-native-size-matters';
-import { colors } from '@shared/theme';
+import { useTheme } from '@shared/theme';
 import CompletedSupportCard from './CompletedSupportCard';
 
 // 🚧 TEMP TEST SCAFFOLDING — flip to true to preview many progress updates. Remove when done.
@@ -90,6 +90,7 @@ export default function MotivationDetail({
   onShareUpdate,
   isSendingCheer,
 }: Props) {
+  const { colors } = useTheme();
   const isOwner = useIsOwner(task.userId);
   const isCompleted = Boolean(task.completed || task.completedAt);
 

@@ -3,7 +3,7 @@ import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors } from '@shared/theme';
+import { ThemeColors, useThemedStyles } from '@shared/theme';
 
 type Props = {
   /** Large page title, e.g. "Friends" */
@@ -15,6 +15,8 @@ type Props = {
 };
 
 export default function PageHeader({ title, right, style }: Props) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={[styles.container, style]}>
       <TextElement style={styles.title} numberOfLines={1}>
@@ -25,22 +27,23 @@ export default function PageHeader({ title, right, style }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: vs(2),
-  },
-  title: {
-    flexShrink: 1,
-    fontSize: ms(25),
-    lineHeight: ms(30),
-    fontWeight: '800',
-    letterSpacing: -0.4,
-    color: colors.onboardingInk,
-  },
-  right: {
-    marginLeft: ms(12),
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: vs(2),
+    },
+    title: {
+      flexShrink: 1,
+      fontSize: ms(25),
+      lineHeight: ms(30),
+      fontWeight: '800',
+      letterSpacing: -0.4,
+      color: colors.onboardingInk,
+    },
+    right: {
+      marginLeft: ms(12),
+    },
+  });

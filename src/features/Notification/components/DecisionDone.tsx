@@ -5,8 +5,8 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
-import { getTypeColor } from '@shared/utils/typeVisuals';
-import { notificationStyles } from '../styles/notification.styles';
+import { useTypeVisuals } from '@shared/utils/typeVisuals';
+import { useNotificationStyles } from '../styles/notification.styles';
 import NotificationIconBadge from './NotificationIconBadge';
 
 interface Props {
@@ -15,6 +15,8 @@ interface Props {
 }
 
 export default function DecisionDone({ item, onPress }: Props) {
+  const notificationStyles = useNotificationStyles();
+  const { getTypeColor } = useTypeVisuals();
   const typeColor = getTypeColor(item.taskType || 'decision');
 
   return (

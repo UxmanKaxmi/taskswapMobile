@@ -1,4 +1,4 @@
-export const colors = {
+export const lightColors = {
   // Brand
   primary: '#7B6CF6', // Indigo – buttons, highlights
   onPrimary: '#FFFFFF', // Text/iconography on primary backgrounds
@@ -29,6 +29,7 @@ export const colors = {
   card: '#FFFFFF',
   surface: '#FFFFFF', // White surfaces (cards, sheets)
   onSurface: '#212121', // Default text/icon on surface
+  inkSurface: '#16171F', // Hero cards that stay ink-dark in BOTH themes (pair with onPrimary text)
 
   text: '#212121', // Near-black – main text
   muted: '#757575', // Mid-grey – placeholders, secondary text
@@ -78,4 +79,72 @@ export const colors = {
   motivationPurple: '#7B6CF6',
   lavendarPink: '#D8B4F8',
   gradientDarkPurple: '#E9D9FF',
+
+  // Soft tinted fills (danger cards, icon chips) that need a dark counterpart
+  dangerSoftBg: '#FFF3F3',
+  dangerSoftBorder: '#F5D6D6',
+  warmIconChipBg: '#FFF4D1',
+  dangerIconChipBg: '#FEECEC',
 };
+
+export type ThemeColors = typeof lightColors;
+
+// Dark palette: brand/semantic hues stay, neutrals invert, tinted fills get
+// deep muted counterparts that keep their hue.
+export const darkColors: ThemeColors = {
+  ...lightColors,
+
+  // Onboarding neutrals (ink flips to light-on-dark)
+  onboardingInk: '#F2F3F5',
+  onboardingInkSoft: '#D3D5DC',
+  onboardingPaper: '#131318',
+  onboardingCard: '#1E1F26',
+  onboardingDoneSoft: '#14352A',
+  onboardingMuted: '#9BA0AA',
+  onboardingLine: '#2B2C35',
+
+  // Neutral
+  background: '#101014',
+  card: '#1E1F26',
+  surface: '#1E1F26',
+  onSurface: '#ECEDEF',
+  inkSurface: '#23242C', // slightly elevated so ink cards still read against the dark bg
+
+  text: '#ECEDEF',
+  muted: '#A0A4AD',
+  placeHolder: '#6E7683',
+  disabled: '#4E525C',
+
+  border: '#2E3038',
+
+  reminderBg: '#3B300F',
+  adviceBg: '#0F3238',
+  decisionBg: '#2A2145',
+  motivationBg: '#0F3526',
+
+  reminderBgHard: '#5A461A',
+  adviceBgHard: '#155E68',
+  decisionBgHard: '#4A3A80',
+  motivationBgHard: '#1B6647',
+
+  adviceIconBackground: '#1D2A45',
+  decisionIconBackground: '#2E2347',
+  motivationIconBackground: '#15382B',
+  reminderIconBackground: '#3B330F',
+
+  tabActive: '#FFFFFF',
+  tabInactive: '#8B8F98',
+  inputBackground: '#26272F',
+
+  gradientDarkPurple: '#3B2F5E',
+
+  dangerSoftBg: '#331B1B',
+  dangerSoftBorder: '#4A2626',
+  warmIconChipBg: '#3A3115',
+  dangerIconChipBg: '#3D2020',
+};
+
+export const palettes = {
+  light: lightColors,
+  dark: darkColors,
+} as const;

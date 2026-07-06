@@ -6,7 +6,7 @@ import SectionHeader from '@shared/components/SectionHeader/SectionHeader';
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Icon } from '@shared/components/Icons';
-import { colors, platformShadow, spacing } from '@shared/theme';
+import { platformShadow, spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { getFirstName } from '@shared/utils/helperFunctions';
 import HelperAvatarStack from '@features/Home/components/HelperAvatarStack';
 
@@ -46,6 +46,8 @@ export default function CompletedSupportCard({
   currentUserId,
   didUserPush,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const users = useMemo<Supporter[]>(
     () =>
       pushes
@@ -174,77 +176,78 @@ function formatDuration(createdAt: string, completedAt?: string | null) {
   return `about ${days} day${days === 1 ? '' : 's'}`;
 }
 
-const styles = StyleSheet.create({
-  shadow: {
-    borderRadius: 24,
-  },
-  card: {
-    backgroundColor: colors.onPrimary,
-    borderRadius: 24,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    paddingRight: spacing.lg,
-    ...platformShadow({
-      color: '#000',
-      opacity: 0.08,
-      radius: 16,
-      offset: { width: 0, height: 10 },
-    }),
-    borderWidth: 1,
-    borderColor: '#E6EFE8',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  iconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.tactileMomentumPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: ms(16),
-    lineHeight: ms(24),
-    fontWeight: '600',
-    color: colors.text,
-  },
-  helperNames: {
-    marginTop: vs(6),
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    fontWeight: '400',
-    color: colors.placeHolder,
-  },
-  namesStrong: {
-    fontSize: ms(12),
-    fontWeight: '600',
-    color: colors.text,
-  },
-  namesMuted: {
-    fontSize: ms(12),
-    fontWeight: '600',
-    color: colors.muted,
-  },
-  avatars: {
-    marginTop: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  supportCountBubble: {
-    backgroundColor: colors.tactileMomentumPrimary,
-    borderColor: colors.tactileMomentumPrimary,
-  },
-  supportCountText: {
-    color: colors.tactileMomentumSecondary,
-  },
-  time: {
-    marginTop: vs(2),
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    color: colors.muted,
-    fontWeight: '400',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    shadow: {
+      borderRadius: 24,
+    },
+    card: {
+      backgroundColor: colors.onPrimary,
+      borderRadius: 24,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      paddingRight: spacing.lg,
+      ...platformShadow({
+        color: '#000',
+        opacity: 0.08,
+        radius: 16,
+        offset: { width: 0, height: 10 },
+      }),
+      borderWidth: 1,
+      borderColor: '#E6EFE8',
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    iconWrap: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.tactileMomentumPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    title: {
+      fontSize: ms(16),
+      lineHeight: ms(24),
+      fontWeight: '600',
+      color: colors.text,
+    },
+    helperNames: {
+      marginTop: vs(6),
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      fontWeight: '400',
+      color: colors.placeHolder,
+    },
+    namesStrong: {
+      fontSize: ms(12),
+      fontWeight: '600',
+      color: colors.text,
+    },
+    namesMuted: {
+      fontSize: ms(12),
+      fontWeight: '600',
+      color: colors.muted,
+    },
+    avatars: {
+      marginTop: spacing.md,
+      marginBottom: spacing.sm,
+    },
+    supportCountBubble: {
+      backgroundColor: colors.tactileMomentumPrimary,
+      borderColor: colors.tactileMomentumPrimary,
+    },
+    supportCountText: {
+      color: colors.tactileMomentumSecondary,
+    },
+    time: {
+      marginTop: vs(2),
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      color: colors.muted,
+      fontWeight: '400',
+    },
+  });

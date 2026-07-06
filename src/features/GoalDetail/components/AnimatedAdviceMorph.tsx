@@ -5,7 +5,7 @@ import { StyleSheet } from 'react-native';
 import Animated, { interpolate, useAnimatedStyle } from 'react-native-reanimated';
 import AnimatedBottomButtonWithHeader from '@shared/components/Buttons/AnimatedBottomButtonWithHeader';
 import AnimatedBottomComposer, { COMPOSER_HEIGHT } from './AnimatedBottomComposer';
-import { colors } from '@shared/theme';
+import { useTheme } from '@shared/theme';
 import { BOTTOM_BUTTON_HEIGHT } from '@shared/components/Buttons/AnimatedBottomButton';
 import { vs } from 'react-native-size-matters';
 
@@ -30,6 +30,7 @@ export default function AnimatedAdviceMorph({
   onOpenComposer,
   isComposerOpen,
 }: Props) {
+  const { colors } = useTheme();
   const containerStyle = useAnimatedStyle(() => {
     return {
       height: interpolate(progress.value, [0, 1], [BUTTON_HEIGHT, COMPOSER_HEIGHT]),

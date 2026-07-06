@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
-import { notificationStyles } from '../styles/notification.styles';
+import { useNotificationStyles } from '../styles/notification.styles';
 import type { NotificationDTO } from '../types/notification.types';
 import { typeIcons } from '@shared/utils/typeVisuals';
 import NotificationIconBadge from './NotificationIconBadge';
@@ -19,6 +19,7 @@ const TITLE_BY_TYPE: Partial<Record<NotificationDTO['type'], string>> = {
 };
 
 export default function MotivationSystemNotification({ item, onPress }: Props) {
+  const notificationStyles = useNotificationStyles();
   const iconName = typeIcons.motivation;
   const title = TITLE_BY_TYPE[item.type] ?? 'Motivation';
 

@@ -8,14 +8,14 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import Row from '@shared/components/Layout/Row';
 import { AdviceGoal } from '../types/home';
 import { stripOuterQuotes, timeAgo, toShortName } from '@shared/utils/helperFunctions';
-import { cardStyles } from './styles';
-import { getTypeVisual, typeIcons } from '@shared/utils/typeVisuals';
+import { useCardStyles } from './styles';
+import { typeIcons, useTypeVisuals } from '@shared/utils/typeVisuals';
 import GoalFooter from './GoalFooter';
 import { Shadow } from '@shared/components/Shadow';
 import { Icon } from '@shared/components/Icons';
 import GoalMetaRow from './GoalMetaRow';
 import GoalCardGradient from './GoalCardGradient';
-import { colors, spacing } from '@shared/theme';
+import { spacing, useTheme } from '@shared/theme';
 import HelperAvatarGroup from './HelperAvatarGroup';
 import { GoalTypeEnum } from '@features/Goals/types/goals';
 import GoalHeader from './GoalHeader';
@@ -29,6 +29,9 @@ type Props = {
 };
 
 export default function AdviceCard({ task, onPressCard, onPressShare }: Props) {
+  const { colors } = useTheme();
+  const cardStyles = useCardStyles();
+  const { getTypeVisual } = useTypeVisuals();
   const { avatar, name = 'John Doe', createdAt, text, type, helpers } = task;
   const { emoji } = getTypeVisual(type);
 

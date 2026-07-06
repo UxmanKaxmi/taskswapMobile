@@ -7,7 +7,7 @@ import { AddGoalStackParamList } from '../navigation/AddGoalNavigator';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
 import OnboardingHeader from '@shared/components/OnboardingHeader';
-import { colors, platformShadow, spacing } from '@shared/theme';
+import { platformShadow, spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import GoalDescriptionInput from '../components/GoalDescriptionInput';
 import { CreateGoalPayload } from '../types/addGoal.types';
 import { useCreateGoal } from '../hooks/useCreateGoal';
@@ -35,6 +35,8 @@ type Props = NativeStackScreenProps<AddGoalStackParamList, 'AddMotivation'>;
 const MIN_TASK_LENGTH = 50;
 
 export default function AddMotivationScreen({ navigation, route }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { user } = useAuth();
   const { openModal } = useModal();
   const rootNavigation = React.useMemo(
@@ -279,7 +281,7 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
                   onPress={() => setSelectedFeeling(feeling.value)}
                   fillColor={selected ? colors.onboardingInk : colors.onboardingCard}
                   borderColor={selected ? colors.onboardingInk : colors.onboardingLine}
-                  labelColor={selected ? 'onPrimary' : 'onboardingInk'}
+                  labelColor={selected ? 'onboardingCard' : 'onboardingInk'}
                   style={styles.feelTag}
                 />
               );
@@ -319,120 +321,121 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.onboardingPaper,
-  },
-  screen: {
-    paddingTop: isAndroid ? vs(18) : 0,
-    // paddingHorizontal: ms(28),
-  },
-  closeButton: {
-    alignSelf: 'flex-end',
-    width: ms(35),
-    height: ms(35),
-    borderRadius: ms(35 / 2),
-    backgroundColor: colors.onboardingLine,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: vs(-5),
-    marginEnd: ms(5),
-  },
-  closeButtonPressed: {
-    opacity: 0.7,
-  },
-  header: {
-    marginBottom: vs(16),
-    paddingHorizontal: 0,
-  },
-  headerBlock: {
-    // marginTop: vs(8),
-    // marginEnd: vs(16),
-  },
-  titleWrap: {},
-  titleLine: {
-    color: colors.onboardingInk,
-    fontSize: ms(28),
-    lineHeight: ms(28),
-    letterSpacing: -0.6,
-  },
-  titleSecondLine: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  highlightWrap: {
-    position: 'relative',
-    marginLeft: ms(4),
-    paddingHorizontal: ms(2),
-    paddingBottom: vs(2),
-  },
-  highlightBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: vs(2),
-    height: vs(11),
-    backgroundColor: colors.onboardingPush,
-  },
-  highlightText: {
-    position: 'relative',
-    color: colors.onboardingInk,
-    fontSize: ms(28),
-    lineHeight: ms(28),
-    letterSpacing: -0.6,
-  },
-  subtitle: {
-    marginTop: vs(10),
-    fontSize: ms(14),
-    lineHeight: ms(20),
-    letterSpacing: -0.1,
-  },
-  inputCard: {
-    backgroundColor: colors.onboardingCard,
-    borderRadius: 28,
-    padding: spacing.md,
-    marginTop: vs(16),
-    ...platformShadow({
-      color: '#000',
-      opacity: 0.06,
-      radius: 18,
-      offset: { width: 0, height: 8 },
-    }),
-  },
-  inputWrapper: {
-    height: vs(70),
-    borderColor: colors.onboardingPush,
-    // borderWidth: 2,
-    minHeight: vs(120),
-    backgroundColor: colors.onboardingCard,
-  },
-  input: {
-    // minHeight: vs(90),
-    fontSize: ms(17),
-    lineHeight: ms(23),
-    paddingHorizontal: spacing.sm,
-    paddingTop: 0,
-    color: colors.onboardingInk,
-  },
-  feelingsBlock: {
-    marginTop: vs(24),
-  },
-  sectionLabel: {
-    color: colors.muted,
-    letterSpacing: 1.4,
-    fontSize: ms(12),
-    fontWeight: '800',
-  },
-  tagWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginTop: vs(7),
-  },
-  feelTag: {
-    borderRadius: 999,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: colors.onboardingPaper,
+    },
+    screen: {
+      paddingTop: isAndroid ? vs(18) : 0,
+      // paddingHorizontal: ms(28),
+    },
+    closeButton: {
+      alignSelf: 'flex-end',
+      width: ms(35),
+      height: ms(35),
+      borderRadius: ms(35 / 2),
+      backgroundColor: colors.onboardingLine,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: vs(-5),
+      marginEnd: ms(5),
+    },
+    closeButtonPressed: {
+      opacity: 0.7,
+    },
+    header: {
+      marginBottom: vs(16),
+      paddingHorizontal: 0,
+    },
+    headerBlock: {
+      // marginTop: vs(8),
+      // marginEnd: vs(16),
+    },
+    titleWrap: {},
+    titleLine: {
+      color: colors.onboardingInk,
+      fontSize: ms(28),
+      lineHeight: ms(28),
+      letterSpacing: -0.6,
+    },
+    titleSecondLine: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+    },
+    highlightWrap: {
+      position: 'relative',
+      marginLeft: ms(4),
+      paddingHorizontal: ms(2),
+      paddingBottom: vs(2),
+    },
+    highlightBar: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: vs(2),
+      height: vs(11),
+      backgroundColor: colors.onboardingPush,
+    },
+    highlightText: {
+      position: 'relative',
+      color: colors.onboardingInk,
+      fontSize: ms(28),
+      lineHeight: ms(28),
+      letterSpacing: -0.6,
+    },
+    subtitle: {
+      marginTop: vs(10),
+      fontSize: ms(14),
+      lineHeight: ms(20),
+      letterSpacing: -0.1,
+    },
+    inputCard: {
+      backgroundColor: colors.onboardingCard,
+      borderRadius: 28,
+      padding: spacing.md,
+      marginTop: vs(16),
+      ...platformShadow({
+        color: '#000',
+        opacity: 0.06,
+        radius: 18,
+        offset: { width: 0, height: 8 },
+      }),
+    },
+    inputWrapper: {
+      height: vs(70),
+      borderColor: colors.onboardingPush,
+      // borderWidth: 2,
+      minHeight: vs(120),
+      backgroundColor: colors.onboardingCard,
+    },
+    input: {
+      // minHeight: vs(90),
+      fontSize: ms(17),
+      lineHeight: ms(23),
+      paddingHorizontal: spacing.sm,
+      paddingTop: 0,
+      color: colors.onboardingInk,
+    },
+    feelingsBlock: {
+      marginTop: vs(24),
+    },
+    sectionLabel: {
+      color: colors.muted,
+      letterSpacing: 1.4,
+      fontSize: ms(12),
+      fontWeight: '800',
+    },
+    tagWrap: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+      marginTop: vs(7),
+    },
+    feelTag: {
+      borderRadius: 999,
+      paddingVertical: spacing.xs,
+      paddingHorizontal: spacing.sm,
+    },
+  });

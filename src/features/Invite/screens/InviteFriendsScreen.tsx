@@ -9,7 +9,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import ReferralLinkCard from '../components/ReferralLinkCard';
 
-import { spacing, typography, colors } from '@shared/theme';
+import { spacing, typography, ThemeColors, useThemedStyles } from '@shared/theme';
 import { showToast } from '@shared/utils/toast';
 
 // ⬇️ your hook from earlier (channel-aware cache)
@@ -19,6 +19,7 @@ import Ripple from '@shared/components/Buttons/Ripple';
 import { APP_NAME } from '@shared/utils/constants';
 
 export default function InviteFriendsScreen() {
+  const styles = useThemedStyles(createStyles);
   // Pick a default channel for analytics attribution; change as needed.
   const { data, isLoading, refetch, sharePayload, rotateLink, rotating } = useReferralLink();
 
@@ -131,45 +132,46 @@ export default function InviteFriendsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  helperText: {
-    marginTop: spacing.sm,
-    textAlign: 'center',
-  },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  shareButton: {
-    marginBottom: spacing.md,
-    backgroundColor: colors.primary,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: spacing.xs,
-  },
-  statBox: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statValue: {
-    fontWeight: '700',
-  },
-  statLabel: {
-    marginTop: 4,
-  },
-  statsContainer: {
-    marginTop: vs(40),
-    width: '100%',
-    // borderWidth: 1,
-    // borderColor: colors.border,
-    // borderRadius: 12,
-    // padding: spacing.md,
-  },
-  statsHeader: {
-    fontWeight: '600',
-    textAlign: 'left',
-    marginBottom: spacing.sm,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    helperText: {
+      marginTop: spacing.sm,
+      textAlign: 'center',
+    },
+    content: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    shareButton: {
+      marginBottom: spacing.md,
+      backgroundColor: colors.primary,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginVertical: spacing.xs,
+    },
+    statBox: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    statValue: {
+      fontWeight: '700',
+    },
+    statLabel: {
+      marginTop: 4,
+    },
+    statsContainer: {
+      marginTop: vs(40),
+      width: '100%',
+      // borderWidth: 1,
+      // borderColor: colors.border,
+      // borderRadius: 12,
+      // padding: spacing.md,
+    },
+    statsHeader: {
+      fontWeight: '600',
+      textAlign: 'left',
+      marginBottom: spacing.sm,
+    },
+  });

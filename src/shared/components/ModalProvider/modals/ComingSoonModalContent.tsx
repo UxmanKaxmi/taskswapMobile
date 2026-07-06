@@ -5,7 +5,7 @@ import { ms, vs } from 'react-native-size-matters';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, platformShadow, spacing } from '@shared/theme';
+import { platformShadow, spacing, type ThemeColors, useTheme } from '@shared/theme';
 import { GoalTypeEnum } from '@features/Goals/types/goals';
 import type { ComingSoonModalPayload } from '../modalTypes';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
@@ -13,41 +13,42 @@ import { typeIcons } from '@shared/utils/typeVisuals';
 
 const CLOSE_ANIMATION_DELAY_MS = 280;
 
-const COMING_SOON_COPY = {
-  [GoalTypeEnum.Advice]: {
-    accent: colors.adviceBgHardest,
-    bubble: colors.adviceIconBackground,
-    title: 'Advice is coming soon',
-    body:
-      'Soon, you’ll be able to ask for thoughtful advice from people who understand.' +
-      '\n \n' +
-      ' For now, share what you’re struggling with and get a motivational push.',
-  },
-  [GoalTypeEnum.Decision]: {
-    accent: colors.decisionBgHardest,
-    bubble: colors.decisionIconBackground,
-    title: 'Decisions are coming soon',
-    body:
-      'Soon, you’ll be able to get help choosing when you feel stuck.' +
-      '\n \n' +
-      ' For now, post your situation and let others push you forward.',
-  },
-  [GoalTypeEnum.Reminder]: {
-    accent: colors.reminderBgHardest,
-    bubble: colors.reminderIconBackground,
-    title: 'Reminders are coming soon',
-    body:
-      'Soon, you’ll be able to set gentle nudges for later.' +
-      '\n \n' +
-      ' For now, create a motivation and come back with a progress update.',
-  },
-  [GoalTypeEnum.Motivation]: {
-    accent: colors.motivationBgHardest,
-    bubble: colors.motivationIconBackground,
-    title: 'Motivation is available',
-    body: 'Create a motivation to get a push from people who can help you move forward.',
-  },
-} as const;
+const getComingSoonCopy = (colors: ThemeColors) =>
+  ({
+    [GoalTypeEnum.Advice]: {
+      accent: colors.adviceBgHardest,
+      bubble: colors.adviceIconBackground,
+      title: 'Advice is coming soon',
+      body:
+        'Soon, you’ll be able to ask for thoughtful advice from people who understand.' +
+        '\n \n' +
+        ' For now, share what you’re struggling with and get a motivational push.',
+    },
+    [GoalTypeEnum.Decision]: {
+      accent: colors.decisionBgHardest,
+      bubble: colors.decisionIconBackground,
+      title: 'Decisions are coming soon',
+      body:
+        'Soon, you’ll be able to get help choosing when you feel stuck.' +
+        '\n \n' +
+        ' For now, post your situation and let others push you forward.',
+    },
+    [GoalTypeEnum.Reminder]: {
+      accent: colors.reminderBgHardest,
+      bubble: colors.reminderIconBackground,
+      title: 'Reminders are coming soon',
+      body:
+        'Soon, you’ll be able to set gentle nudges for later.' +
+        '\n \n' +
+        ' For now, create a motivation and come back with a progress update.',
+    },
+    [GoalTypeEnum.Motivation]: {
+      accent: colors.motivationBgHardest,
+      bubble: colors.motivationIconBackground,
+      title: 'Motivation is available',
+      body: 'Create a motivation to get a push from people who can help you move forward.',
+    },
+  }) as const;
 
 type Props = {
   payload: ComingSoonModalPayload;
@@ -55,7 +56,8 @@ type Props = {
 };
 
 export default function ComingSoonModalContent({ payload, closeModal }: Props) {
-  const copy = COMING_SOON_COPY[payload.type];
+  const { colors } = useTheme();
+  const copy = getComingSoonCopy(colors)[payload.type];
   const iconName = typeIcons[payload.type];
   const { height } = useWindowDimensions();
   const minContentHeight = Math.max(vs(360), height * 0.6 - vs(25));

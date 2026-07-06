@@ -13,23 +13,14 @@ import { getGoalByIdAPI } from '@features/Home/api/api';
 import { GoalDetailHeader } from '../components/GoalDetailHeader';
 import MotivationStatsHeader from '../components/MotivationStatsHeader';
 import GoalBackground from '@features/AddGoal/components/GoalBackground';
-import {
-  getGoalBackgroundVisual,
-  getTypeVisual,
-  getTypeColor,
-  typeBackgroundsHard,
-  typeBackgroundsHardest,
-  typeIcons,
-} from '@shared/utils/typeVisuals';
-import GoalCardGradient from '@features/Home/components/GoalCardGradient';
-import { cardStyles } from '@features/Home/components/styles';
+import { useTypeVisuals } from '@shared/utils/typeVisuals';
 import { Height } from '@shared/components/Spacing';
 import { ms, vs } from 'react-native-size-matters';
 import { GoalThemeContainer } from '../components/GoalThemeContainer';
 import GoalDetailBody from '../components/GoalDetailBody';
 import GoalDetailCaption from '../components/GoalDetailCaption';
 import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
-import { colors, spacing } from '@shared/theme';
+import { spacing, useTheme } from '@shared/theme';
 import {
   isAndroid,
   PROGRESS_UPDATE_COOLDOWN_LABEL,
@@ -98,6 +89,8 @@ export default function GoalDetailScreen({
     beatId,
     highlightBeatId,
   } = route.params ?? {};
+  const { colors } = useTheme();
+  const { getTypeVisual, getGoalBackgroundVisual } = useTypeVisuals();
   const resolvedGoalId = taskId ?? initialGoal?.id;
   const openAdviceComposer =
     route.params?.openAdviceComposer || Boolean((route.params?.task as any)?.openAdviceComposer);
@@ -756,7 +749,7 @@ export default function GoalDetailScreen({
           }
           isLoading={canShareProgressUpdate ? shareProgressUpdate.isPending : false}
           buttonColor={colors.onboardingPush}
-          textColor={colors.onboardingInk}
+          textColor={colors.tactileMomentumSecondary}
           containerColor={colors.onboardingCard}
           buttonHeader={
             canShareProgressUpdate
@@ -779,7 +772,7 @@ export default function GoalDetailScreen({
           onPress={push.handlePush}
           isLoading={isPending}
           buttonColor={colors.onboardingPush}
-          textColor={colors.onboardingInk}
+          textColor={colors.tactileMomentumSecondary}
           containerColor={colors.onboardingCard}
           buttonHeader="A small push can make a big difference."
         />
@@ -872,6 +865,7 @@ export default function GoalDetailScreen({
     hasHelpers,
     openHelpersSheet,
     openAddHelperSheet,
+    colors,
   ]);
 
   const renderAdvice = React.useCallback(() => {

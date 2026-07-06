@@ -17,13 +17,14 @@ import PageHeader from '@shared/components/PageHeader/PageHeader';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Height } from '@shared/components/Spacing';
 import { useAuth } from '@features/Auth/AuthProvider';
-import { colors, spacing } from '@shared/theme';
+import { spacing, useTheme } from '@shared/theme';
 import { ms } from 'react-native-size-matters';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 export default function FindFriendsMainScreen() {
+  const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState<'following' | 'followers'>('following');
   const [searchQuery, setSearchQuery] = useState('');
   const isSearching = !!searchQuery.trim();

@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { isAndroid, isIOS } from '@shared/utils/constants';
 import { vs } from 'react-native-size-matters';
 
@@ -36,7 +36,7 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
       children = null,
       style = {},
       variant = 'auto',
-      backgroundColor = colors.onboardingPaper,
+      backgroundColor,
       useSafeArea = true,
       statusBarHidden = false,
       scrollable = false,
@@ -50,6 +50,9 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
     },
     ref,
   ) => {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(createStyles);
+    const resolvedBackgroundColor = backgroundColor ?? colors.onboardingPaper;
     const insets = useSafeAreaInsets();
     const Container = useSafeArea ? SafeAreaView : View;
     const edges = useSafeArea
@@ -104,7 +107,7 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        <View style={[styles.outerContainer, { backgroundColor }]}>
+        <View style={[styles.outerContainer, { backgroundColor: resolvedBackgroundColor }]}>
           <Container
             edges={finalEdges}
             style={[styles.container, allowPaddingVertical && styles.paddedVertical, style]}
@@ -126,28 +129,28 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
 
 export default Layout;
 
-const styles = StyleSheet.create({
-  outerContainer: {
-    flex: 1,
-    backgroundColor: colors.onboardingPaper,
-    // paddingTop: isAndroid ? spacing.md : 0,
-  },
-  container: {
-    flexGrow: 1, // ✅ instead of flex:1
-  },
-  paddedVertical: {
-    paddingVertical: isAndroid ? vs(5) : 0,
-  },
-  footer: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.transparent,
-    paddingTop: spacing.sm,
-  },
-  flex: {
-    flex: 1,
-  },
-  paddedHorizontal: {
-    paddingHorizontal: spacing.md, // ✅ HERE
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    outerContainer: {
+      flex: 1,
+      backgroundColor: colors.onboardingPaper,
+    },
+    container: {
+      flexGrow: 1, // ✅ instead of flex:1
+    },
+    paddedVertical: {
+      paddingVertical: isAndroid ? vs(5) : 0,
+    },
+    footer: {
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+      backgroundColor: colors.transparent,
+      paddingTop: spacing.sm,
+    },
+    flex: {
+      flex: 1,
+    },
+    paddedHorizontal: {
+      paddingHorizontal: spacing.md, // ✅ HERE
+    },
+  });

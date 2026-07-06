@@ -16,7 +16,7 @@ import PushButton from '@shared/components/PushButton';
 import PushTicks from '@shared/components/PushTicks/PushTicks';
 import TextElement from '@shared/components/TextElement/TextElement';
 import LiveSupportBanner from '@features/Auth/components/LiveSupportBanner';
-import { colors, platformShadow, spacing } from '@shared/theme';
+import { platformShadow, spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { isPROD } from '@shared/utils/constants';
 import { ms, vs } from 'react-native-size-matters';
 import HomeHeader from '@features/Home/components/HomeHeader';
@@ -25,18 +25,6 @@ const { width, height } = Dimensions.get('window');
 const SCREEN_HORIZONTAL_PADDING = ms(28);
 const SLIDE_WIDTH = width;
 const HERO_HEIGHT = Math.min(330, height * 0.25);
-const demoCardShadow = platformShadow({
-  color: colors.onboardingInk,
-  opacity: 0.06,
-  radius: 24,
-  offset: { width: 0, height: 8 },
-});
-const nextGoalCardShadow = platformShadow({
-  color: colors.onboardingInk,
-  opacity: 0.03,
-  radius: 10,
-  offset: { width: 0, height: 3 },
-});
 
 type IntroContent = {
   heading: string;
@@ -78,6 +66,8 @@ const introExamples: IntroContent[] = [
 ];
 
 const IntroScreen = ({ navigation }: { navigation: any }) => {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slideHeight, setSlideHeight] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -364,271 +354,287 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
 
 export default IntroScreen;
 
-const styles = StyleSheet.create({
-  layout: {
-    backgroundColor: colors.onboardingPaper,
-  },
-  screen: {
-    flex: 1,
-    paddingBottom: vs(34),
-  },
-  homeHeaderWrap: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
-  },
-  skipButton: {
-    width: ms(56),
-    alignItems: 'flex-end',
-  },
-  skipText: {
-    color: colors.onboardingMuted,
-    fontSize: ms(16),
-  },
-  slideWindow: {
-    flex: 1,
-    overflow: 'hidden',
-  },
-  slideTrack: {
-    alignItems: 'stretch',
-  },
-  slide: {
-    width: SLIDE_WIDTH,
-    flexShrink: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: vs(12),
-  },
-  slideContent: {
-    width: '100%',
-    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
-  },
-  hero: {
-    width: '100%',
-    minHeight: HERO_HEIGHT,
-    justifyContent: 'center',
-  },
-  doneHero: {
-    minHeight: HERO_HEIGHT - vs(18),
-    justifyContent: 'flex-start',
-    paddingTop: vs(8),
-  },
-  demoCard: {
-    backgroundColor: colors.onboardingCard,
-    borderRadius: 18,
-    paddingHorizontal: ms(16),
-    paddingVertical: vs(16),
-    ...demoCardShadow,
-  },
-  sayCard: {
-    width: '100%',
-    transform: [{ rotate: '-1.5deg' }],
-  },
-  pushDemoCard: {
-    width: '100%',
-    transform: [{ rotate: '1deg' }],
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(10),
-  },
-  avatar: {
-    width: ms(38),
-    height: ms(38),
-    borderRadius: ms(19),
-    backgroundColor: colors.onboardingPush,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
+const demoCardShadow = (colors: ThemeColors) =>
+  platformShadow({
     color: colors.onboardingInk,
-  },
-  cardName: {
+    opacity: 0.06,
+    radius: 24,
+    offset: { width: 0, height: 8 },
+  });
+const nextGoalCardShadow = (colors: ThemeColors) =>
+  platformShadow({
     color: colors.onboardingInk,
-    fontSize: ms(14),
-    lineHeight: ms(18),
-  },
-  cardMeta: {
-    color: colors.onboardingMuted,
-    fontSize: ms(12),
-    lineHeight: ms(15),
-  },
-  feelingPill: {
-    marginLeft: 'auto',
-    backgroundColor: colors.onboardingPaper,
-    borderWidth: 1,
-    borderColor: colors.onboardingLine,
-    paddingVertical: vs(4),
-    paddingHorizontal: ms(9),
-    borderRadius: 999,
-  },
-  feelingText: {
-    color: colors.onboardingInkSoft,
-    fontSize: ms(10.5),
-  },
-  promptText: {
-    marginTop: vs(10),
-    color: colors.onboardingInk,
-    fontSize: ms(16.5),
-    lineHeight: ms(23),
-    letterSpacing: -0.2,
-  },
-  promptTextCompact: {
-    color: colors.onboardingInk,
-    fontSize: ms(15),
-    lineHeight: ms(21),
-    letterSpacing: -0.15,
-  },
-  responseBody: {
-    marginTop: vs(14),
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    gap: ms(12),
-  },
-  ticksWrap: {
-    flex: 1,
-  },
-  pushButton: {
-    minWidth: ms(88),
-    alignSelf: 'flex-start',
-  },
-  doneVisual: {
-    width: '100%',
-    alignItems: 'center',
-    gap: vs(16),
-    marginTop: vs(-6),
-    paddingBottom: vs(6),
-  },
-  completedCard: {
-    width: '100%',
-    gap: vs(12),
-  },
-  completedGoalText: {
-    color: colors.onboardingInk,
-    fontSize: ms(16),
-    lineHeight: ms(22),
-    letterSpacing: -0.15,
-  },
-  completedMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: ms(10),
-  },
-  doneChip: {
-    backgroundColor: colors.onboardingDone,
-    borderRadius: 999,
-    paddingVertical: vs(8),
-    paddingHorizontal: ms(18),
-  },
-  doneChipText: {
-    color: colors.onboardingCard,
-    fontSize: ms(13),
-  },
-  pushedByText: {
-    color: colors.onboardingMuted,
-    flexShrink: 1,
-    textAlign: 'right',
-  },
-  nextGoalCard: {
-    width: '84%',
-    alignSelf: 'flex-end',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(8),
-    paddingVertical: vs(10),
-    paddingHorizontal: ms(14),
-    marginLeft: ms(20),
-    backgroundColor: '#FAFAF7',
-    borderWidth: 1,
-    borderColor: '#E9E6DB',
-    ...nextGoalCardShadow,
-    transform: [{ translateX: ms(10) }, { rotate: '1deg' }],
-  },
-  nextGoalCopy: {
-    flex: 1,
-  },
-  nextGoalLabel: {
-    color: colors.onboardingMuted,
-    letterSpacing: 0.5,
-  },
-  nextGoalText: {
-    color: colors.onboardingInkSoft,
-    marginTop: vs(3),
-    fontSize: ms(12.5),
-    lineHeight: ms(16),
-  },
-  miniPushButton: {
-    minWidth: ms(74),
-    alignSelf: 'flex-start',
-  },
-  headlineWrap: {
-    alignItems: 'flex-start',
-    width: '100%',
-    marginTop: vs(4),
-  },
-  doneHeadlineWrap: {
-    marginTop: vs(28),
-  },
-  headlineLine: {
-    color: colors.onboardingInk,
-    fontSize: ms(40),
-    lineHeight: ms(42),
-    letterSpacing: -1.2,
-  },
-  headlineAccent: {
-    color: colors.onboardingInk,
-    fontSize: ms(40),
-    lineHeight: ms(42),
-    letterSpacing: -1.2,
-  },
-  headlineAccentWrap: {
-    alignSelf: 'flex-start',
-    position: 'relative',
-  },
-  headlineUnderline: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: vs(2),
-    height: vs(8),
-    backgroundColor: colors.onboardingPush,
-  },
-  subtitle: {
-    marginTop: vs(12),
-    marginBottom: vs(12),
-    color: colors.onboardingMuted,
-    fontSize: ms(15),
-    lineHeight: ms(23),
-  },
-  doneSubtitle: {
-    marginTop: vs(10),
-  },
-  footer: {
-    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
-    paddingTop: vs(6),
-    gap: vs(14),
-  },
-  footerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  dots: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(6),
-  },
-  dot: {
-    width: ms(6),
-    height: ms(6),
-    borderRadius: 999,
-    backgroundColor: '#D8D8D0',
-  },
-  nextButton: {
-    minWidth: ms(96),
-    alignSelf: 'flex-end',
-  },
-});
+    opacity: 0.03,
+    radius: 10,
+    offset: { width: 0, height: 3 },
+  });
+
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    layout: {
+      backgroundColor: colors.onboardingPaper,
+    },
+    screen: {
+      flex: 1,
+      paddingBottom: vs(34),
+    },
+    homeHeaderWrap: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.sm,
+    },
+    skipButton: {
+      width: ms(56),
+      alignItems: 'flex-end',
+    },
+    skipText: {
+      color: colors.onboardingMuted,
+      fontSize: ms(16),
+    },
+    slideWindow: {
+      flex: 1,
+      overflow: 'hidden',
+    },
+    slideTrack: {
+      alignItems: 'stretch',
+    },
+    slide: {
+      width: SLIDE_WIDTH,
+      flexShrink: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingBottom: vs(12),
+    },
+    slideContent: {
+      width: '100%',
+      paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
+    },
+    hero: {
+      width: '100%',
+      minHeight: HERO_HEIGHT,
+      justifyContent: 'center',
+    },
+    doneHero: {
+      minHeight: HERO_HEIGHT - vs(18),
+      justifyContent: 'flex-start',
+      paddingTop: vs(8),
+    },
+    demoCard: {
+      backgroundColor: colors.onboardingCard,
+      borderRadius: 18,
+      paddingHorizontal: ms(16),
+      paddingVertical: vs(16),
+      ...demoCardShadow(colors),
+    },
+    sayCard: {
+      width: '100%',
+      transform: [{ rotate: '-1.5deg' }],
+    },
+    pushDemoCard: {
+      width: '100%',
+      transform: [{ rotate: '1deg' }],
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(10),
+    },
+    avatar: {
+      width: ms(38),
+      height: ms(38),
+      borderRadius: ms(19),
+      backgroundColor: colors.onboardingPush,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarText: {
+      color: colors.tactileMomentumSecondary,
+    },
+    cardName: {
+      color: colors.onboardingInk,
+      fontSize: ms(14),
+      lineHeight: ms(18),
+    },
+    cardMeta: {
+      color: colors.onboardingMuted,
+      fontSize: ms(12),
+      lineHeight: ms(15),
+    },
+    feelingPill: {
+      marginLeft: 'auto',
+      backgroundColor: colors.onboardingPaper,
+      borderWidth: 1,
+      borderColor: colors.onboardingLine,
+      paddingVertical: vs(4),
+      paddingHorizontal: ms(9),
+      borderRadius: 999,
+    },
+    feelingText: {
+      color: colors.onboardingInkSoft,
+      fontSize: ms(10.5),
+    },
+    promptText: {
+      marginTop: vs(10),
+      color: colors.onboardingInk,
+      fontSize: ms(16.5),
+      lineHeight: ms(23),
+      letterSpacing: -0.2,
+    },
+    promptTextCompact: {
+      color: colors.onboardingInk,
+      fontSize: ms(15),
+      lineHeight: ms(21),
+      letterSpacing: -0.15,
+    },
+    responseBody: {
+      marginTop: vs(14),
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      gap: ms(12),
+    },
+    ticksWrap: {
+      flex: 1,
+    },
+    pushButton: {
+      minWidth: ms(88),
+      alignSelf: 'flex-start',
+    },
+    doneVisual: {
+      width: '100%',
+      alignItems: 'center',
+      gap: vs(16),
+      marginTop: vs(-6),
+      paddingBottom: vs(6),
+    },
+    completedCard: {
+      width: '100%',
+      gap: vs(12),
+    },
+    completedGoalText: {
+      color: colors.onboardingInk,
+      fontSize: ms(16),
+      lineHeight: ms(22),
+      letterSpacing: -0.15,
+    },
+    completedMetaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: ms(10),
+    },
+    doneChip: {
+      backgroundColor: colors.onboardingDone,
+      borderRadius: 999,
+      paddingVertical: vs(8),
+      paddingHorizontal: ms(18),
+    },
+    doneChipText: {
+      color: colors.onboardingCard,
+      fontSize: ms(13),
+    },
+    pushedByText: {
+      color: colors.onboardingMuted,
+      flexShrink: 1,
+      textAlign: 'right',
+    },
+    nextGoalCard: {
+      width: '84%',
+      alignSelf: 'flex-end',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(8),
+      paddingVertical: vs(10),
+      paddingHorizontal: ms(14),
+      marginLeft: ms(20),
+      backgroundColor: '#FAFAF7',
+      borderWidth: 1,
+      borderColor: '#E9E6DB',
+      ...nextGoalCardShadow(colors),
+      transform: [{ translateX: ms(10) }, { rotate: '1deg' }],
+    },
+    nextGoalCopy: {
+      flex: 1,
+    },
+    nextGoalLabel: {
+      color: colors.onboardingMuted,
+      letterSpacing: 0.5,
+    },
+    nextGoalText: {
+      color: colors.onboardingInkSoft,
+      marginTop: vs(3),
+      fontSize: ms(12.5),
+      lineHeight: ms(16),
+    },
+    miniPushButton: {
+      minWidth: ms(74),
+      alignSelf: 'flex-start',
+    },
+    headlineWrap: {
+      alignItems: 'flex-start',
+      width: '100%',
+      marginTop: vs(4),
+    },
+    doneHeadlineWrap: {
+      marginTop: vs(28),
+    },
+    headlineLine: {
+      color: colors.onboardingInk,
+      fontSize: ms(40),
+      lineHeight: ms(42),
+      letterSpacing: -1.2,
+    },
+    headlineAccent: {
+      color: colors.onboardingInk,
+      fontSize: ms(40),
+      lineHeight: ms(42),
+      letterSpacing: -1.2,
+    },
+    headlineAccentWrap: {
+      alignSelf: 'flex-start',
+      position: 'relative',
+    },
+    headlineUnderline: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: vs(2),
+      height: vs(8),
+      backgroundColor: colors.onboardingPush,
+    },
+    subtitle: {
+      marginTop: vs(12),
+      marginBottom: vs(12),
+      color: colors.onboardingMuted,
+      fontSize: ms(15),
+      lineHeight: ms(23),
+    },
+    doneSubtitle: {
+      marginTop: vs(10),
+    },
+    footer: {
+      paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
+      paddingTop: vs(6),
+      gap: vs(14),
+    },
+    footerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    dots: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(6),
+    },
+    dot: {
+      width: ms(6),
+      height: ms(6),
+      borderRadius: 999,
+      backgroundColor: '#D8D8D0',
+    },
+    nextButton: {
+      minWidth: ms(96),
+      alignSelf: 'flex-end',
+    },
+  });

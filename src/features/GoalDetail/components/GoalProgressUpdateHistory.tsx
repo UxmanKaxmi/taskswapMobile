@@ -4,7 +4,7 @@ import { ms, vs } from 'react-native-size-matters';
 
 import Ripple from '@shared/components/Buttons/Ripple';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { getFirstName, stripOuterQuotes } from '@shared/utils/helperFunctions';
 import type { AvatarUser, ProgressUpdate, GoalBeat } from '@features/Goals/types/goals';
 import HelperAvatarStack from '@features/Home/components/HelperAvatarStack';
@@ -47,6 +47,8 @@ export default function GoalProgressUpdateHistory({
   onShareUpdate,
   isSendingCheer,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const rows = useMemo(() => buildRows({ beats, updates, taskText }), [beats, taskText, updates]);
   const firstName = getFirstName(ownerName);
   const actor = isOwner ? 'You' : firstName;
@@ -152,6 +154,8 @@ function ProgressBeatCard({
   onShareUpdate?: (beat: GoalBeat) => void;
   isSendingCheer?: boolean;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const cheerCount = beat.cheerCount ?? 0;
   const isCheeringOpen = Boolean(
     beat.isCheeringOpen === true || (beat.isLatest && beat.isCheeringOpen !== false),
@@ -181,7 +185,7 @@ function ProgressBeatCard({
         </View>
         {isMostCheered ? (
           <View style={styles.mostCheeredPill}>
-            <Icon set="ion" name="sparkles" size={ms(9)} color={colors.text} />
+            <Icon set="ion" name="sparkles" size={ms(9)} color={colors.tactileMomentumSecondary} />
             <TextElement style={styles.mostCheeredText}>MOST CHEERED</TextElement>
           </View>
         ) : (
@@ -260,6 +264,7 @@ function ProgressBeatCard({
 }
 
 function PulsingDot() {
+  const styles = useThemedStyles(createStyles);
   const pulse = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -289,6 +294,9 @@ function PulsingDot() {
 }
 
 function GapSeparator({ label }: { label: string | null }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   if (!label) return null;
 
   return (
@@ -436,265 +444,266 @@ function normalizeCheerers(users?: AvatarUser[]) {
   }));
 }
 
-const styles = StyleSheet.create({
-  section: {
-    backgroundColor: colors.onboardingPaper,
-    // borderRadius: 26,
-    // paddingHorizontal: ms(12),
-    // paddingTop: vs(14),
-    // paddingBottom: vs(14),
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(8),
-    marginBottom: vs(16),
-  },
-  headerTitle: {
-    fontSize: ms(17),
-    lineHeight: ms(22),
-    fontWeight: '900',
-    color: colors.onboardingInk,
-  },
-  emptyWrap: {
-    borderRadius: 18,
-    backgroundColor: colors.onboardingCard,
-    paddingHorizontal: ms(16),
-    paddingVertical: vs(14),
-  },
-  emptyTitle: {
-    fontSize: ms(15),
-    lineHeight: ms(20),
-    fontWeight: '800',
-    color: colors.onboardingInk,
-  },
-  emptyBody: {
-    marginTop: vs(4),
-    fontSize: ms(13),
-    lineHeight: ms(18),
-    color: colors.onboardingMuted,
-    fontWeight: '600',
-  },
-  card: {
-    backgroundColor: colors.onboardingCard,
-    borderRadius: 22,
-    paddingHorizontal: ms(18),
-    paddingTop: ms(10),
-    paddingBottom: ms(14),
-  },
-  gapRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(10),
-    paddingVertical: vs(16),
-  },
-  gapLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.onboardingLine,
-  },
-  gapLabelWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(5),
-    flexShrink: 0,
-  },
-  gapText: {
-    fontSize: ms(11),
-    lineHeight: ms(15),
-    fontWeight: '900',
-    letterSpacing: 0.8,
-    color: colors.onboardingMuted,
-  },
-  showAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: ms(6),
-    marginTop: vs(12),
-    paddingTop: vs(12),
-    borderTopWidth: 1,
-    borderTopColor: colors.onboardingLine,
-  },
-  showAllText: {
-    fontSize: ms(13),
-    lineHeight: ms(17),
-    fontWeight: '800',
-    color: colors.onboardingPushDeep,
-  },
-  beatRow: {},
-  dotWrap: {
-    width: ms(9),
-    height: ms(9),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dotCore: {
-    width: ms(8),
-    height: ms(8),
-    borderRadius: ms(4),
-    backgroundColor: colors.onboardingPushDeep,
-  },
-  dotRing: {
-    position: 'absolute',
-    width: ms(8),
-    height: ms(8),
-    borderRadius: ms(4),
-    backgroundColor: colors.onboardingPush,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: ms(10),
-    marginBottom: vs(4),
-  },
-  dateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(7),
-    flexShrink: 1,
-  },
-  dateText: {
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    fontWeight: '900',
-    letterSpacing: 0.6,
-    color: colors.placeHolder,
-  },
-  dotSep: {
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    fontWeight: '900',
-    color: colors.onboardingLine,
-  },
-  clockText: {
-    fontSize: ms(10),
-    lineHeight: ms(15),
-    fontWeight: '700',
-    letterSpacing: 0.3,
-    color: colors.onboardingMuted,
-  },
-  clockTextMost: {
-    // color: colors.onboardingPushDeep,
-  },
-  mostCheeredPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(5),
-    flexShrink: 0,
-    backgroundColor: colors.onboardingPush,
-    borderRadius: 16,
-    paddingHorizontal: ms(8),
-    paddingVertical: vs(4),
-  },
-  mostCheeredPillAbsent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    // gap: ms(5),
-    flexShrink: 0,
-    // backgroundColor: colors.tactileMomentumSecondary,
-    // borderRadius: 16,
-    paddingHorizontal: ms(8),
-    paddingVertical: vs(4),
-  },
-  mostCheeredText: {
-    fontSize: ms(8),
-    lineHeight: ms(14),
-    fontWeight: '900',
-    letterSpacing: 0.5,
-    color: colors.text,
-    textTransform: 'uppercase',
-  },
-  rowLabel: {
-    fontSize: ms(10),
-    lineHeight: ms(10),
-    fontWeight: '700',
-    color: colors.onboardingMuted,
-  },
-  beatText: {
-    marginTop: vs(4),
-    fontSize: ms(14),
-    lineHeight: ms(15),
-    fontWeight: '800',
-    color: colors.onboardingInk,
-  },
-  divider: {
-    backgroundColor: colors.onboardingLine,
-    marginVertical: ms(6),
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: ms(8),
-  },
-  footerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexShrink: 0,
-    gap: ms(8),
-  },
-  cheerCountWrap: {
-    // flexDirection: 'row',
-    // alignItems: 'center',
-    // gap: ms(6),
-  },
-  cheerCountText: {
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    fontWeight: '700',
-    color: colors.onboardingInk,
-  },
-  cheerCountTextMost: {
-    color: colors.onboardingPushDeep,
-  },
-  cheerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: ms(6),
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.onboardingPushDeep,
-    backgroundColor: 'rgba(255, 210, 63, 0.14)',
-    paddingHorizontal: ms(13),
-    paddingVertical: vs(5),
-    marginLeft: ms(6),
-  },
-  cheerButtonText: {
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    fontWeight: '700',
-    color: colors.onboardingInk,
-  },
-  cheeredPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexShrink: 1,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(237, 187, 23, 0.34)',
-    backgroundColor: 'rgba(255, 210, 63, 0.16)',
-    paddingHorizontal: ms(9),
-    paddingVertical: vs(4),
-  },
-  cheeredPillText: {
-    flexShrink: 1,
-    fontSize: ms(10),
-    lineHeight: ms(14),
-    fontWeight: '700',
-    color: colors.onboardingInk,
-  },
-  closedWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(8),
-  },
-  closedText: {
-    fontSize: ms(13),
-    lineHeight: ms(17),
-    fontWeight: '800',
-    color: colors.onboardingMuted,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    section: {
+      backgroundColor: colors.onboardingPaper,
+      // borderRadius: 26,
+      // paddingHorizontal: ms(12),
+      // paddingTop: vs(14),
+      // paddingBottom: vs(14),
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(8),
+      marginBottom: vs(16),
+    },
+    headerTitle: {
+      fontSize: ms(17),
+      lineHeight: ms(22),
+      fontWeight: '900',
+      color: colors.onboardingInk,
+    },
+    emptyWrap: {
+      borderRadius: 18,
+      backgroundColor: colors.onboardingCard,
+      paddingHorizontal: ms(16),
+      paddingVertical: vs(14),
+    },
+    emptyTitle: {
+      fontSize: ms(15),
+      lineHeight: ms(20),
+      fontWeight: '800',
+      color: colors.onboardingInk,
+    },
+    emptyBody: {
+      marginTop: vs(4),
+      fontSize: ms(13),
+      lineHeight: ms(18),
+      color: colors.onboardingMuted,
+      fontWeight: '600',
+    },
+    card: {
+      backgroundColor: colors.onboardingCard,
+      borderRadius: 22,
+      paddingHorizontal: ms(18),
+      paddingTop: ms(10),
+      paddingBottom: ms(14),
+    },
+    gapRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(10),
+      paddingVertical: vs(16),
+    },
+    gapLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: colors.onboardingLine,
+    },
+    gapLabelWrap: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(5),
+      flexShrink: 0,
+    },
+    gapText: {
+      fontSize: ms(11),
+      lineHeight: ms(15),
+      fontWeight: '900',
+      letterSpacing: 0.8,
+      color: colors.onboardingMuted,
+    },
+    showAllButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: ms(6),
+      marginTop: vs(12),
+      paddingTop: vs(12),
+      borderTopWidth: 1,
+      borderTopColor: colors.onboardingLine,
+    },
+    showAllText: {
+      fontSize: ms(13),
+      lineHeight: ms(17),
+      fontWeight: '800',
+      color: colors.onboardingPushDeep,
+    },
+    beatRow: {},
+    dotWrap: {
+      width: ms(9),
+      height: ms(9),
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    dotCore: {
+      width: ms(8),
+      height: ms(8),
+      borderRadius: ms(4),
+      backgroundColor: colors.onboardingPushDeep,
+    },
+    dotRing: {
+      position: 'absolute',
+      width: ms(8),
+      height: ms(8),
+      borderRadius: ms(4),
+      backgroundColor: colors.onboardingPush,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: ms(10),
+      marginBottom: vs(4),
+    },
+    dateRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(7),
+      flexShrink: 1,
+    },
+    dateText: {
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      fontWeight: '900',
+      letterSpacing: 0.6,
+      color: colors.placeHolder,
+    },
+    dotSep: {
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      fontWeight: '900',
+      color: colors.onboardingLine,
+    },
+    clockText: {
+      fontSize: ms(10),
+      lineHeight: ms(15),
+      fontWeight: '700',
+      letterSpacing: 0.3,
+      color: colors.onboardingMuted,
+    },
+    clockTextMost: {
+      // color: colors.onboardingPushDeep,
+    },
+    mostCheeredPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(5),
+      flexShrink: 0,
+      backgroundColor: colors.onboardingPush,
+      borderRadius: 16,
+      paddingHorizontal: ms(8),
+      paddingVertical: vs(4),
+    },
+    mostCheeredPillAbsent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      // gap: ms(5),
+      flexShrink: 0,
+      // backgroundColor: colors.tactileMomentumSecondary,
+      // borderRadius: 16,
+      paddingHorizontal: ms(8),
+      paddingVertical: vs(4),
+    },
+    mostCheeredText: {
+      fontSize: ms(8),
+      lineHeight: ms(14),
+      fontWeight: '900',
+      letterSpacing: 0.5,
+      color: colors.tactileMomentumSecondary,
+      textTransform: 'uppercase',
+    },
+    rowLabel: {
+      fontSize: ms(10),
+      lineHeight: ms(10),
+      fontWeight: '700',
+      color: colors.onboardingMuted,
+    },
+    beatText: {
+      marginTop: vs(4),
+      fontSize: ms(14),
+      lineHeight: ms(15),
+      fontWeight: '800',
+      color: colors.onboardingInk,
+    },
+    divider: {
+      backgroundColor: colors.onboardingLine,
+      marginVertical: ms(6),
+    },
+    footer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: ms(8),
+    },
+    footerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexShrink: 0,
+      gap: ms(8),
+    },
+    cheerCountWrap: {
+      // flexDirection: 'row',
+      // alignItems: 'center',
+      // gap: ms(6),
+    },
+    cheerCountText: {
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      fontWeight: '700',
+      color: colors.onboardingInk,
+    },
+    cheerCountTextMost: {
+      color: colors.onboardingPushDeep,
+    },
+    cheerButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: ms(6),
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.onboardingPushDeep,
+      backgroundColor: 'rgba(255, 210, 63, 0.14)',
+      paddingHorizontal: ms(13),
+      paddingVertical: vs(5),
+      marginLeft: ms(6),
+    },
+    cheerButtonText: {
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      fontWeight: '700',
+      color: colors.onboardingInk,
+    },
+    cheeredPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexShrink: 1,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: 'rgba(237, 187, 23, 0.34)',
+      backgroundColor: 'rgba(255, 210, 63, 0.16)',
+      paddingHorizontal: ms(9),
+      paddingVertical: vs(4),
+    },
+    cheeredPillText: {
+      flexShrink: 1,
+      fontSize: ms(10),
+      lineHeight: ms(14),
+      fontWeight: '700',
+      color: colors.onboardingInk,
+    },
+    closedWrap: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(8),
+    },
+    closedText: {
+      fontSize: ms(13),
+      lineHeight: ms(17),
+      fontWeight: '800',
+      color: colors.onboardingMuted,
+    },
+  });

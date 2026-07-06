@@ -8,7 +8,7 @@ import { useTheme } from '@shared/theme/useTheme';
 import { moderateScale, ms, vs } from 'react-native-size-matters';
 import Avatar from '@shared/components/Avatar/Avatar';
 import { getAvatarColor } from '@shared/utils/avatarColor';
-import { colors } from '@shared/theme';
+import { ThemeColors, useThemedStyles } from '@shared/theme';
 type Props = {
   userId?: string | null;
   name: string;
@@ -31,6 +31,7 @@ export default function FriendFollowRow({
   onPressRow,
 }: Props) {
   const { colors, spacing } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const handle = username?.trim() ? `@${username.trim()}` : null;
 
   return (
@@ -71,7 +72,7 @@ export default function FriendFollowRow({
         type={isFollowing ? 'default' : 'alt'}
         backgroundColor={isFollowing ? colors.tactileMomentumPrimary : colors.onboardingInk}
         borderColor={isFollowing ? colors.onboardingLine : colors.onboardingInk}
-        textColor={isFollowing ? colors.onboardingInk : colors.onPrimary}
+        textColor={isFollowing ? colors.tactileMomentumSecondary : colors.onboardingCard}
         textStyle={{ fontSize: moderateScale(12), fontWeight: '700' }}
         style={styles.button}
       />
@@ -79,39 +80,40 @@ export default function FriendFollowRow({
   );
 }
 
-const styles = StyleSheet.create({
-  avatarText: {
-    color: colors.onboardingInk,
-    fontWeight: '800',
-  },
-  nameText: {
-    fontSize: moderateScale(15),
-    fontWeight: '700',
-  },
-  emailText: {
-    fontSize: moderateScale(12),
-    marginTop: vs(1),
-  },
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  leftSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: ms(10),
-  },
-  textContainer: {
-    flexShrink: 1,
-    marginLeft: 10,
-  },
-  button: {
-    minWidth: ms(96),
-    borderRadius: 999,
-    paddingVertical: vs(7),
-    paddingHorizontal: ms(14),
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    avatarText: {
+      color: colors.onboardingInk,
+      fontWeight: '800',
+    },
+    nameText: {
+      fontSize: moderateScale(15),
+      fontWeight: '700',
+    },
+    emailText: {
+      fontSize: moderateScale(12),
+      marginTop: vs(1),
+    },
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: '100%',
+    },
+    leftSection: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+      marginRight: ms(10),
+    },
+    textContainer: {
+      flexShrink: 1,
+      marginLeft: 10,
+    },
+    button: {
+      minWidth: ms(96),
+      borderRadius: 999,
+      paddingVertical: vs(7),
+      paddingHorizontal: ms(14),
+    },
+  });

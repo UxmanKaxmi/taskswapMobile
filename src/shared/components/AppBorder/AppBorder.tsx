@@ -1,4 +1,4 @@
-import { colors } from '@shared/theme';
+import { useTheme } from '@shared/theme';
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 
@@ -38,15 +38,18 @@ type Props = {
 
 export default function AppBorder({
   style,
-  color = colors.border,
+  color,
   thickness = StyleSheet.hairlineWidth,
   horizontal = true,
 }: Props) {
+  const { colors } = useTheme();
+  const resolvedColor = color ?? colors.border;
+
   return (
     <View
       style={[
         horizontal ? { height: thickness, width: '100%' } : { width: thickness, height: '100%' },
-        { backgroundColor: color },
+        { backgroundColor: resolvedColor },
         style,
       ]}
     />

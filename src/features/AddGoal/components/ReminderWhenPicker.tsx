@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Row from '@shared/components/Layout/Row';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 import Icon from '@shared/components/Icons/Icon';
 import DatePicker from 'react-native-date-picker';
@@ -33,6 +33,8 @@ export default function ReminderWhenPicker({
   removeHeading = false,
   removeBottomDescription = false,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
@@ -140,42 +142,43 @@ export default function ReminderWhenPicker({
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  headerText: {
-    marginLeft: spacing.sm,
-    fontSize: ms(16),
-    fontWeight: '600',
-  },
-  noteText: {
-    fontStyle: 'italic',
-    marginTop: vs(8),
-    fontSize: ms(12),
-    fontWeight: '500',
-    lineHeight: ms(16),
-  },
-  wrapper: {},
-  card: {
-    flex: 1,
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  label: {
-    fontSize: vs(10),
-    fontWeight: '600',
-    color: colors.muted,
-  },
-  value: {
-    fontSize: vs(16),
-    fontWeight: '700',
-    color: colors.reminderBgHardest,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    headerText: {
+      marginLeft: spacing.sm,
+      fontSize: ms(16),
+      fontWeight: '600',
+    },
+    noteText: {
+      fontStyle: 'italic',
+      marginTop: vs(8),
+      fontSize: ms(12),
+      fontWeight: '500',
+      lineHeight: ms(16),
+    },
+    wrapper: {},
+    card: {
+      flex: 1,
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    label: {
+      fontSize: vs(10),
+      fontWeight: '600',
+      color: colors.muted,
+    },
+    value: {
+      fontSize: vs(16),
+      fontWeight: '700',
+      color: colors.reminderBgHardest,
+    },
+  });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import Icon from '@shared/components/Icons/Icon';
-import { colors } from '@shared/theme';
+import { useTheme } from '@shared/theme';
 import { ms } from 'react-native-size-matters';
 
 type Props = {
@@ -15,10 +15,13 @@ type Props = {
 export default function InfoIcon({
   onPress,
   size = ms(16),
-  color = colors.placeHolder,
+  color,
   style,
   disabled = false,
 }: Props) {
+  const { colors } = useTheme();
+  const resolvedColor = color ?? colors.placeHolder;
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -27,7 +30,7 @@ export default function InfoIcon({
       style={[styles.container, style]}
       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
     >
-      <Icon set="ion" name="information-circle-outline" size={size} color={color} />
+      <Icon set="ion" name="information-circle-outline" size={size} color={resolvedColor} />
     </TouchableOpacity>
   );
 }

@@ -8,7 +8,7 @@ import Column from '@shared/components/Layout/Column';
 import { Height } from '@shared/components/Spacing';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
 import Icon from '@shared/components/Icons/Icon';
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import {
   AppStackParamList,
@@ -45,6 +45,8 @@ function GoogleLogo({ size = 22 }: { size?: number }) {
 }
 
 export default function LoginScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { signIn, loading } = useAuth();
   const [signingInProvider, setSigningInProvider] = React.useState<AuthProviderName | null>(null);
 
@@ -180,7 +182,7 @@ export default function LoginScreen() {
                   name="chart-line"
                   iconStyle="solid"
                   size={18}
-                  color={colors.onboardingInk}
+                  color={colors.tactileMomentumSecondary}
                 />
               </View>
               <TextElement variant="subtitle" style={styles.featureText}>
@@ -197,7 +199,7 @@ export default function LoginScreen() {
                   name="user-group"
                   iconStyle="solid"
                   size={18}
-                  color={colors.onboardingInk}
+                  color={colors.tactileMomentumSecondary}
                 />
               </View>
               <TextElement variant="subtitle" style={styles.featureText}>
@@ -209,7 +211,7 @@ export default function LoginScreen() {
           <AnimatedFeatureRow delay={180}>
             <View style={styles.featureItem}>
               <View style={styles.featureIcon}>
-                <Icon set="fa6" name="bell" size={18} color={colors.onboardingInk} />
+                <Icon set="fa6" name="bell" size={18} color={colors.tactileMomentumSecondary} />
               </View>
               <TextElement variant="subtitle" style={styles.featureText}>
                 Know the moment a push lands
@@ -232,7 +234,7 @@ export default function LoginScreen() {
         >
           {signingInProvider === 'google' ? (
             <>
-              <ActivityIndicator size="small" color={colors.onboardingInk} />
+              <ActivityIndicator size="small" color={colors.tactileMomentumSecondary} />
               <Text style={styles.googleButtonText}>Signing in...</Text>
             </>
           ) : (
@@ -278,108 +280,109 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  content: {
-    paddingTop: verticalScale(18),
-  },
-  tagline: {
-    fontSize: moderateScale(17),
-    lineHeight: moderateScale(24),
-    color: colors.muted,
-    marginBottom: 0,
-  },
-  titleBlock: {
-    marginBottom: verticalScale(5),
-  },
-  titleLine: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: moderateScale(8),
-  },
-  titleText: {
-    textAlign: 'left',
-    fontWeight: '800',
-    fontSize: moderateScale(35),
-    lineHeight: moderateScale(38),
-    color: colors.onboardingInk,
-  },
-  highlightedWord: {
-    position: 'relative',
-  },
-  titleUnderline: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: moderateScale(2),
-    height: moderateScale(15),
-    backgroundColor: colors.onboardingPush,
-  },
-  featuresContainer: {
-    marginTop: verticalScale(20),
-    gap: verticalScale(20),
-    width: '100%',
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: moderateScale(18),
-  },
-  featureIcon: {
-    width: moderateScale(40),
-    height: moderateScale(40),
-    borderRadius: moderateScale(14),
-    backgroundColor: colors.tactileMomentumPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  featureText: {
-    color: colors.onboardingInk,
-    fontSize: moderateScale(18),
-    lineHeight: moderateScale(24),
-    fontWeight: '600',
-    flex: 1,
-    flexShrink: 1,
-  },
-  buttonContainer: {
-    width: '100%',
-    paddingHorizontal: moderateScale(12),
-  },
-  socialButton: {
-    minHeight: verticalScale(45),
-    borderRadius: moderateScale(18),
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: moderateScale(12),
-  },
-  googleButton: {
-    backgroundColor: colors.onPrimary,
-    borderWidth: 1,
-    borderColor: colors.onboardingLine,
-    marginBottom: verticalScale(12),
-  },
-  buttonPressed: {
-    opacity: 0.82,
-  },
-  googleButtonText: {
-    color: colors.onboardingInk,
-    fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
-    fontWeight: '700',
-  },
-  appleButton: {
-    backgroundColor: colors.onboardingInk,
-  },
-  appleButtonText: {
-    color: colors.onPrimary,
-    fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
-    fontWeight: '700',
-  },
-  permissionText: {
-    textAlign: 'center',
-    fontSize: moderateScale(12),
-    lineHeight: moderateScale(18),
-    marginTop: verticalScale(10),
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    content: {
+      paddingTop: verticalScale(18),
+    },
+    tagline: {
+      fontSize: moderateScale(17),
+      lineHeight: moderateScale(24),
+      color: colors.muted,
+      marginBottom: 0,
+    },
+    titleBlock: {
+      marginBottom: verticalScale(5),
+    },
+    titleLine: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      gap: moderateScale(8),
+    },
+    titleText: {
+      textAlign: 'left',
+      fontWeight: '800',
+      fontSize: moderateScale(35),
+      lineHeight: moderateScale(38),
+      color: colors.onboardingInk,
+    },
+    highlightedWord: {
+      position: 'relative',
+    },
+    titleUnderline: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: moderateScale(2),
+      height: moderateScale(15),
+      backgroundColor: colors.onboardingPush,
+    },
+    featuresContainer: {
+      marginTop: verticalScale(20),
+      gap: verticalScale(20),
+      width: '100%',
+    },
+    featureItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: moderateScale(18),
+    },
+    featureIcon: {
+      width: moderateScale(40),
+      height: moderateScale(40),
+      borderRadius: moderateScale(14),
+      backgroundColor: colors.tactileMomentumPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    featureText: {
+      color: colors.onboardingInk,
+      fontSize: moderateScale(18),
+      lineHeight: moderateScale(24),
+      fontWeight: '600',
+      flex: 1,
+      flexShrink: 1,
+    },
+    buttonContainer: {
+      width: '100%',
+      paddingHorizontal: moderateScale(12),
+    },
+    socialButton: {
+      minHeight: verticalScale(45),
+      borderRadius: moderateScale(18),
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: moderateScale(12),
+    },
+    googleButton: {
+      backgroundColor: colors.onPrimary,
+      borderWidth: 1,
+      borderColor: colors.onboardingLine,
+      marginBottom: verticalScale(12),
+    },
+    buttonPressed: {
+      opacity: 0.82,
+    },
+    googleButtonText: {
+      color: colors.tactileMomentumSecondary,
+      fontSize: moderateScale(16),
+      lineHeight: moderateScale(22),
+      fontWeight: '700',
+    },
+    appleButton: {
+      backgroundColor: colors.inkSurface,
+    },
+    appleButtonText: {
+      color: colors.onPrimary,
+      fontSize: moderateScale(16),
+      lineHeight: moderateScale(22),
+      fontWeight: '700',
+    },
+    permissionText: {
+      textAlign: 'center',
+      fontSize: moderateScale(12),
+      lineHeight: moderateScale(18),
+      marginTop: verticalScale(10),
+    },
+  });

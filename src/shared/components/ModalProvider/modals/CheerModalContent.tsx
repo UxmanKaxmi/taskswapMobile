@@ -5,7 +5,7 @@ import { ms, vs } from 'react-native-size-matters';
 import Ripple from '@shared/components/Buttons/Ripple';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing, type ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { CHEER_PRESETS } from '@features/Goals/constants/cheerPresets';
 import type { CheerModalPayload } from '../modalTypes';
 
@@ -17,6 +17,8 @@ type Props = {
 };
 
 export default function CheerModalContent({ payload, closeModal }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [submittingKey, setSubmittingKey] = useState<string | null>(null);
   const contextText = compactContextText(payload.taskText);
   const visiblePresets = CHEER_PRESETS.slice(0, ACTIVE_CHEER_PRESET_LIMIT);
@@ -42,7 +44,7 @@ export default function CheerModalContent({ payload, closeModal }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.headerIcon}>
-        <Icon set="ion" name="sparkles" size={ms(16)} color={colors.onboardingInk} />
+        <Icon set="ion" name="sparkles" size={ms(16)} color={colors.tactileMomentumSecondary} />
       </View>
 
       <TextElement style={styles.title}>Send a cheer</TextElement>
@@ -97,113 +99,114 @@ function compactContextText(text?: string) {
     .replace(/\s+/g, ' ');
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingBottom: spacing.md,
-  },
-  headerIcon: {
-    width: ms(36),
-    height: ms(36),
-    borderRadius: ms(18),
-    backgroundColor: colors.onboardingPush,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-    marginTop: vs(1),
-  },
-  title: {
-    marginTop: vs(8),
-    fontSize: ms(23),
-    lineHeight: ms(27),
-    fontWeight: '800',
-    color: colors.onboardingInk,
-    textAlign: 'center',
-  },
-  subtitle: {
-    marginTop: vs(5),
-    fontSize: ms(13),
-    lineHeight: ms(18),
-    color: colors.onboardingMuted,
-    textAlign: 'center',
-  },
-  contextChip: {
-    marginTop: vs(12),
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.onboardingLine,
-    backgroundColor: 'rgba(245, 244, 240, 0.68)',
-    paddingHorizontal: ms(12),
-    paddingVertical: vs(8),
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(7),
-  },
-  contextText: {
-    flex: 1,
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    color: colors.onboardingInkSoft,
-    fontWeight: '600',
-  },
-  list: {
-    marginTop: vs(14),
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 0,
-    borderColor: colors.onboardingLine,
-    backgroundColor: colors.onboardingCard,
-  },
-  row: {
-    minHeight: vs(50),
-    paddingHorizontal: spacing.md,
-    paddingVertical: vs(9),
-    backgroundColor: colors.onboardingCard,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.onboardingLine,
-  },
-  rowSubmitting: {
-    opacity: 0.68,
-  },
-  rowIcon: {
-    width: ms(24),
-    height: ms(24),
-    borderRadius: ms(12),
-    backgroundColor: 'rgba(255, 210, 63, 0.18)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm,
-  },
-  rowText: {
-    flex: 1,
-    fontSize: ms(15),
-    lineHeight: ms(20),
-    fontWeight: '700',
-    color: colors.onboardingInk,
-  },
-  disabledRow: {
-    minHeight: vs(42),
-    paddingHorizontal: spacing.md,
-    paddingVertical: vs(9),
-    backgroundColor: 'rgba(245, 244, 240, 0.42)',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  disabledIcon: {
-    backgroundColor: 'transparent',
-  },
-  disabledText: {
-    flex: 1,
-    fontSize: ms(13),
-    lineHeight: ms(17),
-    fontWeight: '600',
-    color: colors.onboardingMuted,
-  },
-  comingSoonText: {
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    fontWeight: '700',
-    color: colors.onboardingMuted,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      paddingBottom: spacing.md,
+    },
+    headerIcon: {
+      width: ms(36),
+      height: ms(36),
+      borderRadius: ms(18),
+      backgroundColor: colors.onboardingPush,
+      alignItems: 'center',
+      justifyContent: 'center',
+      alignSelf: 'center',
+      marginTop: vs(1),
+    },
+    title: {
+      marginTop: vs(8),
+      fontSize: ms(23),
+      lineHeight: ms(27),
+      fontWeight: '800',
+      color: colors.onboardingInk,
+      textAlign: 'center',
+    },
+    subtitle: {
+      marginTop: vs(5),
+      fontSize: ms(13),
+      lineHeight: ms(18),
+      color: colors.onboardingMuted,
+      textAlign: 'center',
+    },
+    contextChip: {
+      marginTop: vs(12),
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.onboardingLine,
+      backgroundColor: colors.inputBackground,
+      paddingHorizontal: ms(12),
+      paddingVertical: vs(8),
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(7),
+    },
+    contextText: {
+      flex: 1,
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      color: colors.onboardingInkSoft,
+      fontWeight: '600',
+    },
+    list: {
+      marginTop: vs(14),
+      borderRadius: 16,
+      overflow: 'hidden',
+      borderWidth: 0,
+      borderColor: colors.onboardingLine,
+      backgroundColor: colors.onboardingCard,
+    },
+    row: {
+      minHeight: vs(50),
+      paddingHorizontal: spacing.md,
+      paddingVertical: vs(9),
+      backgroundColor: colors.onboardingCard,
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderBottomWidth: 1,
+      borderBottomColor: colors.onboardingLine,
+    },
+    rowSubmitting: {
+      opacity: 0.68,
+    },
+    rowIcon: {
+      width: ms(24),
+      height: ms(24),
+      borderRadius: ms(12),
+      backgroundColor: 'rgba(255, 210, 63, 0.18)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: spacing.sm,
+    },
+    rowText: {
+      flex: 1,
+      fontSize: ms(15),
+      lineHeight: ms(20),
+      fontWeight: '700',
+      color: colors.onboardingInk,
+    },
+    disabledRow: {
+      minHeight: vs(42),
+      paddingHorizontal: spacing.md,
+      paddingVertical: vs(9),
+      backgroundColor: colors.inputBackground,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    disabledIcon: {
+      backgroundColor: 'transparent',
+    },
+    disabledText: {
+      flex: 1,
+      fontSize: ms(13),
+      lineHeight: ms(17),
+      fontWeight: '600',
+      color: colors.onboardingMuted,
+    },
+    comingSoonText: {
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      fontWeight: '700',
+      color: colors.onboardingMuted,
+    },
+  });

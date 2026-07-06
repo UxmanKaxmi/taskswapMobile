@@ -7,7 +7,7 @@ import { getAvatarColor } from '@shared/utils/avatarColor';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import Row from '@shared/components/Layout/Row';
-import { spacing, colors } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import Column from '@shared/components/Layout/Column';
 import { ms, vs } from 'react-native-size-matters';
 import { Width } from '@shared/components/Spacing';
@@ -34,6 +34,8 @@ export default function FriendsProfileHeader({
   youFollowHim,
   onPressToggleFollow,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const avatarColor = getAvatarColor(userId || name);
   const handle = username?.trim() ? `@${username.trim()}` : null;
   const followTitle = youFollowHim ? 'Following' : 'Follow';
@@ -101,75 +103,76 @@ export default function FriendsProfileHeader({
   );
 }
 
-const styles = StyleSheet.create({
-  buttonText: {
-    fontSize: ms(16),
-    lineHeight: ms(20),
-    fontWeight: '800',
-  },
-  followingValue: {
-    fontSize: ms(10),
-    letterSpacing: 0.5,
-    lineHeight: ms(14),
-  },
-  followingHeading: {
-    color: colors.onboardingInk,
-    fontSize: ms(16),
-    lineHeight: ms(20),
-  },
-  card: {
-    flex: 1,
-    borderRadius: 0,
-    paddingBottom: 0,
-    paddingTop: 0,
-    alignItems: 'flex-start',
-    width: '100%',
-  },
-  profileRow: {
-    minHeight: vs(88),
-  },
-  avatarFallback: {
-    borderWidth: 0,
-  },
-  avatarText: {
-    color: colors.onboardingInk,
-    fontSize: ms(34),
-    lineHeight: ms(42),
-    fontWeight: '800',
-  },
-  infoColumn: {
-    flex: 1,
-    marginLeft: spacing.md,
-  },
-  topRow: {
-    alignSelf: 'flex-start',
-  },
-  nameContainer: {
-    maxWidth: '100%',
-  },
-  name: {
-    color: colors.onboardingInk,
-    fontSize: ms(21),
-    lineHeight: ms(26),
-    letterSpacing: 0,
-  },
-  username: {
-    color: colors.onboardingMuted,
-    lineHeight: ms(16),
-    fontSize: ms(12),
-  },
-  statsRow: {
-    marginTop: vs(8),
-  },
-  stat: {
-    alignItems: 'flex-start',
-  },
-  followButton: {
-    flex: 1,
-    marginHorizontal: 0,
-    marginTop: vs(20),
-    marginBottom: vs(18),
-    borderRadius: ms(24),
-    paddingVertical: vs(15),
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    buttonText: {
+      fontSize: ms(16),
+      lineHeight: ms(20),
+      fontWeight: '800',
+    },
+    followingValue: {
+      fontSize: ms(10),
+      letterSpacing: 0.5,
+      lineHeight: ms(14),
+    },
+    followingHeading: {
+      color: colors.onboardingInk,
+      fontSize: ms(16),
+      lineHeight: ms(20),
+    },
+    card: {
+      flex: 1,
+      borderRadius: 0,
+      paddingBottom: 0,
+      paddingTop: 0,
+      alignItems: 'flex-start',
+      width: '100%',
+    },
+    profileRow: {
+      minHeight: vs(88),
+    },
+    avatarFallback: {
+      borderWidth: 0,
+    },
+    avatarText: {
+      color: colors.onboardingInk,
+      fontSize: ms(34),
+      lineHeight: ms(42),
+      fontWeight: '800',
+    },
+    infoColumn: {
+      flex: 1,
+      marginLeft: spacing.md,
+    },
+    topRow: {
+      alignSelf: 'flex-start',
+    },
+    nameContainer: {
+      maxWidth: '100%',
+    },
+    name: {
+      color: colors.onboardingInk,
+      fontSize: ms(21),
+      lineHeight: ms(26),
+      letterSpacing: 0,
+    },
+    username: {
+      color: colors.onboardingMuted,
+      lineHeight: ms(16),
+      fontSize: ms(12),
+    },
+    statsRow: {
+      marginTop: vs(8),
+    },
+    stat: {
+      alignItems: 'flex-start',
+    },
+    followButton: {
+      flex: 1,
+      marginHorizontal: 0,
+      marginTop: vs(20),
+      marginBottom: vs(18),
+      borderRadius: ms(24),
+      paddingVertical: vs(15),
+    },
+  });

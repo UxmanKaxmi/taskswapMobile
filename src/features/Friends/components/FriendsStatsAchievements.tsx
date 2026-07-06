@@ -4,7 +4,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Row from '@shared/components/Layout/Row';
-import { spacing, colors } from '@shared/theme';
+import { spacing, ThemeColors, useThemedStyles } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 
 export type FriendsStatsAchievementsType = {
@@ -18,6 +18,7 @@ export default function FriendsStatsAchievements({
   tasksDone,
   dayStreak,
 }: FriendsStatsAchievementsType) {
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.card}>
       <Row style={styles.statsRow}>
@@ -46,42 +47,43 @@ export default function FriendsStatsAchievements({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: ms(20),
-    paddingVertical: vs(12),
-    paddingHorizontal: spacing.md,
-    marginTop: 0,
-    marginBottom: vs(16),
-    borderWidth: 1,
-    borderColor: colors.onboardingLine,
-  },
-  statsRow: {
-    alignItems: 'center',
-  },
-  statItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  statNumber: {
-    color: colors.onboardingInk,
-    marginBottom: vs(5),
-    fontSize: ms(22),
-    lineHeight: ms(27),
-  },
-  pushesNumber: {
-    color: colors.onboardingPushDeep,
-  },
-  statLabel: {
-    color: colors.onboardingMuted,
-    letterSpacing: 0.7,
-    fontSize: ms(9),
-    lineHeight: ms(13),
-  },
-  divider: {
-    width: 1,
-    height: vs(34),
-    backgroundColor: colors.onboardingLine,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: ms(20),
+      paddingVertical: vs(12),
+      paddingHorizontal: spacing.md,
+      marginTop: 0,
+      marginBottom: vs(16),
+      borderWidth: 1,
+      borderColor: colors.onboardingLine,
+    },
+    statsRow: {
+      alignItems: 'center',
+    },
+    statItem: {
+      alignItems: 'center',
+      flex: 1,
+    },
+    statNumber: {
+      color: colors.onboardingInk,
+      marginBottom: vs(5),
+      fontSize: ms(22),
+      lineHeight: ms(27),
+    },
+    pushesNumber: {
+      color: colors.onboardingPushDeep,
+    },
+    statLabel: {
+      color: colors.onboardingMuted,
+      letterSpacing: 0.7,
+      fontSize: ms(9),
+      lineHeight: ms(13),
+    },
+    divider: {
+      width: 1,
+      height: vs(34),
+      backgroundColor: colors.onboardingLine,
+    },
+  });

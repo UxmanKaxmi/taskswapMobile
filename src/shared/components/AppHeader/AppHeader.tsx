@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import Icon from '@shared/components/Icons/Icon'; // assumes you have an icon component
 import { ms } from 'react-native-size-matters';
 import { isAndroid } from '@shared/utils/constants';
@@ -28,6 +28,8 @@ export default function AppHeader({
   inDevelopment = false,
 }: Props) {
   const navigation = useNavigation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const insets = useSafeAreaInsets();
   const androidTopOffset = isAndroid ? insets.top : 0;
 
@@ -83,62 +85,63 @@ export default function AppHeader({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    // borderBottomColor: colors.border,
-  },
-  title: {
-    fontSize: ms(18),
-    fontWeight: '500',
-    textAlign: 'center',
-    // backgroundColor: 'green',
-  },
-  titleRow: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: ms(6),
-  },
-  side: {
-    // width: ms(50),
-    // backgroundColor: 'blue',
-  },
-  leftSide: {
-    width: ms(50),
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    // backgroundColor: 'red',
-  },
-  rightSide: {
-    width: ms(50),
-    alignItems: 'flex-end',
-    // backgroundColor: 'yellow',
-  },
-  devBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: ms(999),
-    paddingHorizontal: ms(8),
-    paddingVertical: ms(3),
-    justifyContent: 'center',
-    // borderWidth: 1,
-    // borderColor: colors.border,
-  },
-  devDot: {
-    width: ms(6),
-    height: ms(6),
-    borderRadius: ms(3),
-    backgroundColor: colors.warning ?? colors.primary,
-    marginRight: ms(4),
-  },
-  devText: {
-    fontSize: ms(10),
-    fontWeight: '700',
-    color: colors.text,
-    letterSpacing: 0.6,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      // borderBottomColor: colors.border,
+    },
+    title: {
+      fontSize: ms(18),
+      fontWeight: '500',
+      textAlign: 'center',
+      // backgroundColor: 'green',
+    },
+    titleRow: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: ms(6),
+    },
+    side: {
+      // width: ms(50),
+      // backgroundColor: 'blue',
+    },
+    leftSide: {
+      width: ms(50),
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
+      // backgroundColor: 'red',
+    },
+    rightSide: {
+      width: ms(50),
+      alignItems: 'flex-end',
+      // backgroundColor: 'yellow',
+    },
+    devBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderRadius: ms(999),
+      paddingHorizontal: ms(8),
+      paddingVertical: ms(3),
+      justifyContent: 'center',
+      // borderWidth: 1,
+      // borderColor: colors.border,
+    },
+    devDot: {
+      width: ms(6),
+      height: ms(6),
+      borderRadius: ms(3),
+      backgroundColor: colors.warning ?? colors.primary,
+      marginRight: ms(4),
+    },
+    devText: {
+      fontSize: ms(10),
+      fontWeight: '700',
+      color: colors.text,
+      letterSpacing: 0.6,
+    },
+  });

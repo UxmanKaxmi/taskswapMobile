@@ -5,7 +5,7 @@ import { ms, vs } from 'react-native-size-matters';
 import AppModal from '@shared/components/AppModal/AppModal';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
 export type FeedSortKey = 'all' | 'needs_push' | 'new' | 'almost_there';
@@ -52,6 +52,8 @@ type Props = {
 };
 
 export default function HorizontalFilterTabs({ value, onChange, iconOnly = false }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [visible, setVisible] = useState(false);
   const translateY = useRef(new Animated.Value(320)).current;
   const activeOption =
@@ -167,132 +169,133 @@ export default function HorizontalFilterTabs({ value, onChange, iconOnly = false
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(8),
-    paddingHorizontal: ms(16),
-    paddingVertical: vs(8),
-    borderRadius: 999,
-    backgroundColor: colors.onboardingPaper,
-    borderWidth: 1,
-    borderColor: colors.onboardingMuted,
-  },
-  iconButton: {
-    width: ms(30),
-    height: ms(30),
-    borderRadius: ms(15),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.onboardingPaper,
-  },
-  pressed: {
-    opacity: 0.78,
-  },
-  buttonText: {
-    color: colors.onboardingInk,
-    fontSize: ms(14),
-    lineHeight: ms(17),
-    fontWeight: '800',
-  },
-  buttonValue: {
-    color: colors.onboardingMuted,
-    fontSize: ms(12),
-    lineHeight: ms(15),
-    fontWeight: '700',
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.52)',
-  },
-  sheet: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.onboardingPaper,
-    borderTopLeftRadius: MODAL_TOP_RADIUS,
-    borderTopRightRadius: MODAL_TOP_RADIUS,
-    paddingTop: spacing.md,
-    paddingBottom: vs(34),
-  },
-  handle: {
-    alignSelf: 'center',
-    width: ms(40),
-    height: vs(5),
-    borderRadius: 999,
-    marginBottom: spacing.md,
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-  },
-  sheetTitle: {
-    color: colors.onboardingInk,
-    fontSize: ms(19),
-    lineHeight: ms(24),
-    fontWeight: '900',
-    letterSpacing: -0.4,
-  },
-  closeButton: {
-    width: ms(34),
-    height: ms(34),
-    borderRadius: ms(17),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.onboardingLine,
-  },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    marginHorizontal: spacing.lg,
-    // marginTop: spacing.md,
-    backgroundColor: colors.onboardingLine,
-  },
-  optionList: {
-    marginTop: spacing.xs,
-  },
-  optionRow: {
-    minHeight: vs(54),
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    // Reserve the accent-bar width on every row so the selected state doesn't
-    // nudge content sideways.
-    borderLeftWidth: 3,
-    borderLeftColor: 'transparent',
-  },
-  selectedOptionRow: {
-    backgroundColor: 'rgba(255, 210, 63, 0.18)',
-    borderLeftColor: colors.onboardingPush,
-  },
-  optionIcon: {
-    width: ms(34),
-    height: ms(34),
-    borderRadius: ms(17),
-    backgroundColor: colors.onboardingPush,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  optionTextBlock: {
-    flex: 1,
-  },
-  optionTitle: {
-    color: colors.onboardingInk,
-    fontSize: ms(15),
-    lineHeight: ms(19),
-    fontWeight: '800',
-  },
-  optionDescription: {
-    marginTop: vs(3),
-    color: colors.onboardingMuted,
-    fontSize: ms(12),
-    lineHeight: ms(15),
-    fontWeight: '600',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    button: {
+      alignSelf: 'flex-start',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(8),
+      paddingHorizontal: ms(16),
+      paddingVertical: vs(8),
+      borderRadius: 999,
+      backgroundColor: colors.onboardingPaper,
+      borderWidth: 1,
+      borderColor: colors.onboardingMuted,
+    },
+    iconButton: {
+      width: ms(30),
+      height: ms(30),
+      borderRadius: ms(15),
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.onboardingPaper,
+    },
+    pressed: {
+      opacity: 0.78,
+    },
+    buttonText: {
+      color: colors.onboardingInk,
+      fontSize: ms(14),
+      lineHeight: ms(17),
+      fontWeight: '800',
+    },
+    buttonValue: {
+      color: colors.onboardingMuted,
+      fontSize: ms(12),
+      lineHeight: ms(15),
+      fontWeight: '700',
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.52)',
+    },
+    sheet: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: colors.onboardingPaper,
+      borderTopLeftRadius: MODAL_TOP_RADIUS,
+      borderTopRightRadius: MODAL_TOP_RADIUS,
+      paddingTop: spacing.md,
+      paddingBottom: vs(34),
+    },
+    handle: {
+      alignSelf: 'center',
+      width: ms(40),
+      height: vs(5),
+      borderRadius: 999,
+      marginBottom: spacing.md,
+    },
+    sheetHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.lg,
+    },
+    sheetTitle: {
+      color: colors.onboardingInk,
+      fontSize: ms(19),
+      lineHeight: ms(24),
+      fontWeight: '900',
+      letterSpacing: -0.4,
+    },
+    closeButton: {
+      width: ms(34),
+      height: ms(34),
+      borderRadius: ms(17),
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.onboardingLine,
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      marginHorizontal: spacing.lg,
+      // marginTop: spacing.md,
+      backgroundColor: colors.onboardingLine,
+    },
+    optionList: {
+      marginTop: spacing.xs,
+    },
+    optionRow: {
+      minHeight: vs(54),
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      // Reserve the accent-bar width on every row so the selected state doesn't
+      // nudge content sideways.
+      borderLeftWidth: 3,
+      borderLeftColor: 'transparent',
+    },
+    selectedOptionRow: {
+      backgroundColor: 'rgba(255, 210, 63, 0.18)',
+      borderLeftColor: colors.onboardingPush,
+    },
+    optionIcon: {
+      width: ms(34),
+      height: ms(34),
+      borderRadius: ms(17),
+      backgroundColor: colors.onboardingPush,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    optionTextBlock: {
+      flex: 1,
+    },
+    optionTitle: {
+      color: colors.onboardingInk,
+      fontSize: ms(15),
+      lineHeight: ms(19),
+      fontWeight: '800',
+    },
+    optionDescription: {
+      marginTop: vs(3),
+      color: colors.onboardingMuted,
+      fontSize: ms(12),
+      lineHeight: ms(15),
+      fontWeight: '600',
+    },
+  });

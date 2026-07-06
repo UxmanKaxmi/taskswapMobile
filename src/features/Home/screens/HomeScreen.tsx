@@ -25,7 +25,7 @@ import Animated, {
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Layout } from '@shared/components/Layout';
 import { Height } from '@shared/components/Spacing';
-import { colors, platformShadow, spacing } from '@shared/theme';
+import { platformShadow, spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { QueryKeys } from '@shared/constants/queryKeys';
@@ -74,6 +74,8 @@ const FEED_SORT_LABELS: Record<FeedSortKey, string> = {
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
 export default function HomeScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
   const queryClient = useQueryClient();
@@ -156,7 +158,7 @@ export default function HomeScreen() {
 
   const listContentStyle = useMemo(
     () => [styles.listContent, { paddingTop: headerSpacerHeight }],
-    [headerSpacerHeight],
+    [headerSpacerHeight, styles.listContent],
   );
 
   const scrollHandler = useAnimatedScrollHandler({
@@ -597,130 +599,131 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  layout: {
-    backgroundColor: colors.onboardingPaper,
-  },
-  headerRegion: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: colors.onboardingPaper,
-    paddingBottom: spacing.sm,
-    zIndex: 2,
-    // Shadow opacity is animated in on scroll (see headerElevationStyle).
-    ...platformShadow({
-      color: '#000',
-      opacity: 0,
-      radius: 6,
-      offset: { width: 0, height: 3 },
-    }),
-  },
-  headerDivider: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.onboardingLine,
-  },
-  fixedHeader: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-  },
-  headerRightRow: {
-    position: 'relative',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: ms(0),
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(0),
-    marginLeft: ms(0),
-  },
-  feedButtonInline: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-  },
-  devDotsButton: {
-    // width: ms(30),
-    // height: ms(30),
-    borderRadius: ms(15),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.onboardingPaper,
-    borderWidth: 1,
-    borderColor: colors.onboardingLine,
-    bottom: -10,
-    position: 'absolute',
-  },
-  compactSummaryPressable: {
-    borderRadius: ms(999),
-  },
-  compactSummaryBadge: {
-    minWidth: ms(172),
-    paddingHorizontal: ms(13),
-    paddingVertical: vs(6),
-    borderRadius: ms(999),
-    backgroundColor: colors.onboardingInk,
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    justifyContent: 'center',
-    gap: ms(8),
-  },
-  compactSummaryDivider: {
-    width: StyleSheet.hairlineWidth,
-    alignSelf: 'stretch',
-    backgroundColor: 'rgba(255, 210, 63, 0.72)',
-  },
-  compactSummaryText: {
-    color: colors.onboardingPush,
-    fontSize: ms(11),
-    lineHeight: ms(13),
-    fontWeight: '900',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    alignSelf: 'center',
-  },
-  list: {
-    flex: 1,
-  },
-  collapseWrap: {
-    // Only this lightweight shell changes height; the expensive carousel inside
-    // is absolutely positioned and uses transform/opacity for smoother scroll.
-    overflow: 'hidden',
-  },
-  cardInner: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xs,
-  },
-  feedTabsWrap: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  feedTabsLoading: {
-    marginTop: vs(6),
-    color: colors.onboardingMuted,
-    fontSize: ms(12),
-    lineHeight: ms(15),
-    fontWeight: '700',
-  },
-  listContent: {
-    paddingBottom: vs(120),
-  },
-  emptyContainer: {
-    paddingHorizontal: spacing.lg,
-    alignItems: 'flex-start',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    layout: {
+      backgroundColor: colors.onboardingPaper,
+    },
+    headerRegion: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: colors.onboardingPaper,
+      paddingBottom: spacing.sm,
+      zIndex: 2,
+      // Shadow opacity is animated in on scroll (see headerElevationStyle).
+      ...platformShadow({
+        color: '#000',
+        opacity: 0,
+        radius: 6,
+        offset: { width: 0, height: 3 },
+      }),
+    },
+    headerDivider: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.onboardingLine,
+    },
+    fixedHeader: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
+    },
+    headerRightRow: {
+      position: 'relative',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      gap: ms(0),
+    },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(0),
+      marginLeft: ms(0),
+    },
+    feedButtonInline: {
+      position: 'absolute',
+      right: 0,
+      top: 0,
+      bottom: 0,
+      justifyContent: 'center',
+    },
+    devDotsButton: {
+      // width: ms(30),
+      // height: ms(30),
+      borderRadius: ms(15),
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.onboardingPaper,
+      borderWidth: 1,
+      borderColor: colors.onboardingLine,
+      bottom: -10,
+      position: 'absolute',
+    },
+    compactSummaryPressable: {
+      borderRadius: ms(999),
+    },
+    compactSummaryBadge: {
+      minWidth: ms(172),
+      paddingHorizontal: ms(13),
+      paddingVertical: vs(6),
+      borderRadius: ms(999),
+      backgroundColor: colors.inkSurface,
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      justifyContent: 'center',
+      gap: ms(8),
+    },
+    compactSummaryDivider: {
+      width: StyleSheet.hairlineWidth,
+      alignSelf: 'stretch',
+      backgroundColor: 'rgba(255, 210, 63, 0.72)',
+    },
+    compactSummaryText: {
+      color: colors.onboardingPush,
+      fontSize: ms(11),
+      lineHeight: ms(13),
+      fontWeight: '900',
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+      alignSelf: 'center',
+    },
+    list: {
+      flex: 1,
+    },
+    collapseWrap: {
+      // Only this lightweight shell changes height; the expensive carousel inside
+      // is absolutely positioned and uses transform/opacity for smoother scroll.
+      overflow: 'hidden',
+    },
+    cardInner: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.xs,
+    },
+    feedTabsWrap: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.sm,
+    },
+    feedTabsLoading: {
+      marginTop: vs(6),
+      color: colors.onboardingMuted,
+      fontSize: ms(12),
+      lineHeight: ms(15),
+      fontWeight: '700',
+    },
+    listContent: {
+      paddingBottom: vs(120),
+    },
+    emptyContainer: {
+      paddingHorizontal: spacing.lg,
+      alignItems: 'flex-start',
+    },
+  });

@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { moderateScale, ms, vs } from 'react-native-size-matters';
 import { hexToRgba } from '@shared/utils/helperFunctions';
-import { colors } from '@shared/theme';
+import { useTheme } from '@shared/theme';
 import { resolveAppTextStyle } from '@shared/theme/fonts';
 
 const AnimatedTouchable = Animated.createAnimatedComponent(Animated.View);
@@ -43,6 +43,7 @@ export default function ButtonBase({
   style,
   textStyle,
 }: Props) {
+  const { colors } = useTheme();
   const pressAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const resolvedTextStyle = resolveAppTextStyle(

@@ -4,7 +4,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import { ms, vs } from 'react-native-size-matters';
 import SectionHeader from '@shared/components/SectionHeader/SectionHeader';
@@ -36,6 +36,8 @@ export default function GoalDetailHelpers({
   onAddPress,
   ownerName,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const hasHelpers = helpers.length > 0;
   const isMotivation = taskType === GoalTypeEnum.Motivation;
 
@@ -112,42 +114,43 @@ export default function GoalDetailHelpers({
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: {
-    marginTop: spacing.lg,
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    wrapper: {
+      marginTop: spacing.lg,
+    },
 
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.onPrimary,
-    borderRadius: 24,
-    padding: spacing.md,
-    paddingVertical: vs(10),
-  },
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.onPrimary,
+      borderRadius: 24,
+      padding: spacing.md,
+      paddingVertical: vs(10),
+    },
 
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    flex: 1,
-  },
+    left: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      flex: 1,
+    },
 
-  iconCircleMuted: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.border,
-  },
+    iconCircleMuted: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.border,
+    },
 
-  subTextHeading: {
-    fontSize: ms(13),
-    fontWeight: '500',
-  },
+    subTextHeading: {
+      fontSize: ms(13),
+      fontWeight: '500',
+    },
 
-  subText: {
-    fontSize: ms(11),
-  },
-});
+    subText: {
+      fontSize: ms(11),
+    },
+  });

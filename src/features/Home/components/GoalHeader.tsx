@@ -6,7 +6,7 @@ import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import GoalMetaRow from './GoalMetaRow';
 import HelperAvatarGroup from './HelperAvatarGroup';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useThemedStyles } from '@shared/theme';
 import { timeAgo, toShortName } from '@shared/utils/helperFunctions';
 import { GoalTypeEnum } from '@features/Goals/types/goals';
 import { HelperUser } from '../types/home';
@@ -28,6 +28,7 @@ export default function GoalHeader({
   helpers = [],
   avatarSize = ms(36),
 }: Props) {
+  const styles = useThemedStyles(createStyles);
   return (
     <Row align="center" justify="flex-start">
       {/* Avatar + helper overlay */}
@@ -64,25 +65,26 @@ export default function GoalHeader({
   );
 }
 
-const styles = StyleSheet.create({
-  avatarWrapper: {
-    position: 'relative',
-    marginRight: spacing.sm,
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    avatarWrapper: {
+      position: 'relative',
+      marginRight: spacing.sm,
+    },
 
-  ownerAvatar: {
-    backgroundColor: colors.muted,
-  },
+    ownerAvatar: {
+      backgroundColor: colors.muted,
+    },
 
-  helperOverlay: {
-    position: 'absolute',
-    bottom: ms(-4),
-    right: ms(-6),
-  },
+    helperOverlay: {
+      position: 'absolute',
+      bottom: ms(-4),
+      right: ms(-6),
+    },
 
-  name: {
-    fontSize: ms(16),
-    lineHeight: ms(18),
-    fontWeight: '600',
-  },
-});
+    name: {
+      fontSize: ms(16),
+      lineHeight: ms(18),
+      fontWeight: '600',
+    },
+  });

@@ -3,7 +3,7 @@ import { ListRenderItem, StyleSheet, View } from 'react-native';
 import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 
 import { Layout } from '@shared/components/Layout';
-import { spacing, colors } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 
 import { vs } from 'react-native-size-matters';
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -51,6 +51,8 @@ import { navigateToGoalDetails, useCheckAuthThenNavigate } from '@navigation/typ
 // };
 
 export default function FriendsProfileScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const route = useRoute<any>();
   const friendId = route.params?.id;
@@ -204,18 +206,19 @@ export default function FriendsProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  headerWrap: {
-    paddingHorizontal: spacing.lg,
-  },
-  recentTasks: {
-    gap: spacing.sm,
-    marginHorizontal: -spacing.lg,
-    marginBottom: vs(40),
-  },
-  errorText: {
-    textAlign: 'center',
-    marginTop: spacing.xl,
-    color: colors.error,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    headerWrap: {
+      paddingHorizontal: spacing.lg,
+    },
+    recentTasks: {
+      gap: spacing.sm,
+      marginHorizontal: -spacing.lg,
+      marginBottom: vs(40),
+    },
+    errorText: {
+      textAlign: 'center',
+      marginTop: spacing.xl,
+      color: colors.error,
+    },
+  });

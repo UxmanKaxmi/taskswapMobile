@@ -6,7 +6,7 @@ import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
 import { typeIcons } from '@shared/utils/typeVisuals';
-import { notificationStyles } from '../styles/notification.styles';
+import { useNotificationStyles } from '../styles/notification.styles';
 import NotificationIconBadge from './NotificationIconBadge';
 
 type Props = {
@@ -15,6 +15,7 @@ type Props = {
 };
 
 export default function GoalProgressUpdateNotification({ item, onPress }: Props) {
+  const notificationStyles = useNotificationStyles();
   const taskType = item.taskType || 'motivation';
   const senderName = item.sender?.name || item.metadata?.senderName || 'Someone';
   const senderPhoto = item.sender?.photo || item.metadata?.senderPhoto;

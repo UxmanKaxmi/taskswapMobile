@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, View, StyleSheet } from 'react-native';
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useThemedStyles } from '@shared/theme';
 import Avatar from '@shared/components/Avatar/Avatar';
 import Ripple from '@shared/components/Buttons/Ripple';
 import { ms, vs } from 'react-native-size-matters';
@@ -55,6 +55,7 @@ export default function ReminderNoteList({
   onPressRemainingLink,
   viewAll = false,
 }: Props) {
+  const styles = useThemedStyles(createStyles);
   const extraAnim = useRef(new Animated.Value(viewAll ? 1 : 0)).current;
   const [renderExtra, setRenderExtra] = useState(viewAll);
   const [extraHeight, setExtraHeight] = useState(0);
@@ -314,145 +315,146 @@ export default function ReminderNoteList({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.onPrimary,
-    borderRadius: 28,
-    paddingTop: vs(16),
-    paddingBottom: vs(22),
-    paddingHorizontal: ms(12),
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.onPrimary,
+      borderRadius: 28,
+      paddingTop: vs(16),
+      paddingBottom: vs(22),
+      paddingHorizontal: ms(12),
+    },
 
-  timeline: {
-    position: 'relative',
-    paddingLeft: vs(22),
-  },
-  rail: {
-    position: 'absolute',
-    left: vs(10),
-    top: 0,
-    bottom: 0,
-    width: 2,
-    borderRadius: 1,
-    backgroundColor: colors.reminderBgHard,
-  },
+    timeline: {
+      position: 'relative',
+      paddingLeft: vs(22),
+    },
+    rail: {
+      position: 'absolute',
+      left: vs(10),
+      top: 0,
+      bottom: 0,
+      width: 2,
+      borderRadius: 1,
+      backgroundColor: colors.reminderBgHard,
+    },
 
-  itemRow: {
-    flexDirection: 'row',
-    marginBottom: spacing.lg,
-  },
-  lastRow: {
-    marginBottom: 0,
-  },
-  remainingWrap: {
-    overflow: 'visible',
-  },
-  measureWrap: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    opacity: 0,
-  },
-  extraWrap: {
-    marginLeft: vs(-23),
-    paddingLeft: vs(23),
-  },
+    itemRow: {
+      flexDirection: 'row',
+      marginBottom: spacing.lg,
+    },
+    lastRow: {
+      marginBottom: 0,
+    },
+    remainingWrap: {
+      overflow: 'visible',
+    },
+    measureWrap: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      opacity: 0,
+    },
+    extraWrap: {
+      marginLeft: vs(-23),
+      paddingLeft: vs(23),
+    },
 
-  dotWrap: {
-    width: ms(30),
-    height: ms(40),
-    marginTop: vs(-7),
-    marginLeft: vs(-23),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.onPrimary,
-  },
-  endDotWrap: {
-    width: ms(30),
-    height: ms(40),
-    marginLeft: vs(-23),
-    marginBottom: vs(-10),
+    dotWrap: {
+      width: ms(30),
+      height: ms(40),
+      marginTop: vs(-7),
+      marginLeft: vs(-23),
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.onPrimary,
+    },
+    endDotWrap: {
+      width: ms(30),
+      height: ms(40),
+      marginLeft: vs(-23),
+      marginBottom: vs(-10),
 
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.onPrimary,
-  },
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.onPrimary,
+    },
 
-  dotHalo: {
-    position: 'absolute',
-    width: ms(18),
-    height: ms(18),
-    borderRadius: ms(9),
-    backgroundColor: colors.reminderBgHard,
-    opacity: 0.6,
-  },
+    dotHalo: {
+      position: 'absolute',
+      width: ms(18),
+      height: ms(18),
+      borderRadius: ms(9),
+      backgroundColor: colors.reminderBgHard,
+      opacity: 0.6,
+    },
 
-  dot: {
-    width: ms(12),
-    height: ms(12),
-    borderRadius: ms(6),
-    backgroundColor: colors.reminderBgHardest,
-  },
+    dot: {
+      width: ms(12),
+      height: ms(12),
+      borderRadius: ms(6),
+      backgroundColor: colors.reminderBgHardest,
+    },
 
-  content: {
-    flex: 1,
-    paddingLeft: ms(10),
-  },
+    content: {
+      flex: 1,
+      paddingLeft: ms(10),
+    },
 
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  timeText: {
-    fontSize: ms(10),
-    color: colors.placeHolder,
-    fontWeight: '600',
-    letterSpacing: 0.6,
-  },
+    topRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    timeText: {
+      fontSize: ms(10),
+      color: colors.placeHolder,
+      fontWeight: '600',
+      letterSpacing: 0.6,
+    },
 
-  senderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: vs(7),
-    marginTop: vs(15),
-  },
-  senderLine: {
-    flex: 1,
-    fontSize: ms(13),
-    color: colors.muted,
-  },
-  senderNameStrong: {
-    fontSize: ms(13),
-    fontWeight: '500',
-    color: colors.text,
-  },
+    senderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: vs(7),
+      marginTop: vs(15),
+    },
+    senderLine: {
+      flex: 1,
+      fontSize: ms(13),
+      color: colors.muted,
+    },
+    senderNameStrong: {
+      fontSize: ms(13),
+      fontWeight: '500',
+      color: colors.text,
+    },
 
-  bubble: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.reminderIconBackground,
-    borderRadius: 20,
-    paddingVertical: vs(10),
-    paddingHorizontal: spacing.md,
-    maxWidth: '92%',
-  },
-  bubbleText: {
-    fontSize: ms(14),
-    color: colors.text,
-    lineHeight: ms(20),
-  },
-  remainingLinkWrap: {
-    marginTop: vs(7),
-    marginBottom: vs(-9),
-    alignSelf: 'flex-start',
-    marginLeft: vs(10),
-    borderRadius: 999,
-  },
-  remainingLinkText: {
-    fontSize: ms(12),
-    color: colors.reminderBgHardest,
-    fontWeight: '500',
-    // textDecorationLine: 'underline',
-  },
-});
+    bubble: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.reminderIconBackground,
+      borderRadius: 20,
+      paddingVertical: vs(10),
+      paddingHorizontal: spacing.md,
+      maxWidth: '92%',
+    },
+    bubbleText: {
+      fontSize: ms(14),
+      color: colors.text,
+      lineHeight: ms(20),
+    },
+    remainingLinkWrap: {
+      marginTop: vs(7),
+      marginBottom: vs(-9),
+      alignSelf: 'flex-start',
+      marginLeft: vs(10),
+      borderRadius: 999,
+    },
+    remainingLinkText: {
+      fontSize: ms(12),
+      color: colors.reminderBgHardest,
+      fontWeight: '500',
+      // textDecorationLine: 'underline',
+    },
+  });

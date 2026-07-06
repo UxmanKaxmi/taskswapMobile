@@ -5,7 +5,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import { NotificationDTO } from '../types/notification.types';
-import { notificationStyles } from '../styles/notification.styles';
+import { useNotificationStyles } from '../styles/notification.styles';
 import NotificationIconBadge from './NotificationIconBadge';
 
 interface Props {
@@ -14,6 +14,8 @@ interface Props {
 }
 
 export default function CommentMention({ item, onPress }: Props) {
+  const notificationStyles = useNotificationStyles();
+
   return (
     <TouchableOpacity
       onPress={onPress}

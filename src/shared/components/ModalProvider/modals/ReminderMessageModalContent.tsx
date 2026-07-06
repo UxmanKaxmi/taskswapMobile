@@ -5,7 +5,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import AppTextInput from '@shared/components/Inputs/AppTextInput';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import { Height } from '@shared/components/Spacing';
-import { colors, spacing } from '@shared/theme';
+import { spacing, type ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { vs, ms } from 'react-native-size-matters';
 import { Icon } from '@shared/components/Icons';
 import type { ReminderMessageModalPayload } from '../modalTypes';
@@ -23,6 +23,8 @@ type Tone = 'quick' | 'friendly' | 'direct';
 const CHAR_LIMIT = 50;
 
 export default function ReminderMessageModalContent({ payload, closeModal }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [message, setMessage] = useState(payload.initialMessage ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tone, setTone] = useState<Tone>('friendly');
@@ -219,78 +221,79 @@ export default function ReminderMessageModalContent({ payload, closeModal }: Pro
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    // paddingTop: spacing.lg,
-    paddingBottom: spacing.lg,
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      // paddingTop: spacing.lg,
+      paddingBottom: spacing.lg,
+    },
 
-  topIconWrap: {
-    alignItems: 'center',
-    marginTop: vs(4),
-  },
-  topIconCircle: {
-    width: vs(44),
-    height: vs(44),
-    borderRadius: vs(22),
-    backgroundColor: colors.reminderIconBackground,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    topIconWrap: {
+      alignItems: 'center',
+      marginTop: vs(4),
+    },
+    topIconCircle: {
+      width: vs(44),
+      height: vs(44),
+      borderRadius: vs(22),
+      backgroundColor: colors.reminderIconBackground,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  title: {
-    textAlign: 'center',
-    fontWeight: '700',
-    marginTop: vs(10),
-    color: colors.text,
-  },
-  name: {
-    textAlign: 'center',
-    // fontWeight: '600',
-    fontSize: ms(13),
-    color: colors.muted,
-  },
+    title: {
+      textAlign: 'center',
+      fontWeight: '700',
+      marginTop: vs(10),
+      color: colors.text,
+    },
+    name: {
+      textAlign: 'center',
+      // fontWeight: '600',
+      fontSize: ms(13),
+      color: colors.muted,
+    },
 
-  quoteCard: {
-    borderWidth: 1,
-    borderColor: colors.reminderBgHard,
-    backgroundColor: colors.reminderIconBackground,
-    borderRadius: vs(14),
-    paddingVertical: vs(18),
-    paddingHorizontal: spacing.lg,
-  },
-  quoteText: {
-    fontStyle: 'italic',
-    color: colors.text,
-    fontWeight: '600',
-    lineHeight: vs(22),
-  },
+    quoteCard: {
+      borderWidth: 1,
+      borderColor: colors.reminderBgHard,
+      backgroundColor: colors.reminderIconBackground,
+      borderRadius: vs(14),
+      paddingVertical: vs(18),
+      paddingHorizontal: spacing.lg,
+    },
+    quoteText: {
+      fontStyle: 'italic',
+      color: colors.text,
+      fontWeight: '600',
+      lineHeight: vs(22),
+    },
 
-  noteHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  charCount: {
-    color: colors.placeHolder,
-    fontSize: ms(11),
-    fontWeight: '700',
-  },
+    noteHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    charCount: {
+      color: colors.placeHolder,
+      fontSize: ms(11),
+      fontWeight: '700',
+    },
 
-  tagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: ms(10),
-  },
+    tagsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: ms(10),
+    },
 
-  inputWrapper: {
-    backgroundColor: colors.inputBackground,
-    borderRadius: vs(12),
-  },
-  input: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    minHeight: vs(70),
-    textAlignVertical: 'top',
-  },
-});
+    inputWrapper: {
+      backgroundColor: colors.inputBackground,
+      borderRadius: vs(12),
+    },
+    input: {
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.md,
+      minHeight: vs(70),
+      textAlignVertical: 'top',
+    },
+  });

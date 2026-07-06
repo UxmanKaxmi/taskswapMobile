@@ -8,13 +8,13 @@ import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { showToast } from '@shared/utils/toast';
 
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
 import GoalBackground from '../components/GoalBackground';
 import { vs } from 'react-native-size-matters';
 import GoalDescriptionInput from '../components/GoalDescriptionInput';
 
-import { typeBackgrounds, typeBackgroundsHard, typeIcons } from '@shared/utils/typeVisuals';
+import { typeIcons, useTypeVisuals } from '@shared/utils/typeVisuals';
 
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import { Height } from '@shared/components/Spacing';
@@ -41,6 +41,9 @@ import { useAuth } from '@features/Auth/AuthProvider';
 type Props = NativeStackScreenProps<AddGoalStackParamList, 'AddReminder'>;
 
 export default function AddReminderScreen({ navigation, route }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const { typeBackgrounds, typeBackgroundsHard } = useTypeVisuals();
   const { user } = useAuth();
   const MIN_REMINDER_OFFSET_MS = 2 * 60 * 60 * 1000; // 2 hours
   const normalizeToMinute = (date: Date) =>
@@ -266,19 +269,21 @@ export default function AddReminderScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  subtitle: {
-    marginTop: vs(20),
-    fontSize: vs(20),
-    lineHeight: vs(26),
-    fontWeight: '700',
-  },
-  inputCard: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: spacing.md,
-  },
-  container: {
-    backgroundColor: typeBackgrounds.reminder,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    subtitle: {
+      marginTop: vs(20),
+      fontSize: vs(20),
+      lineHeight: vs(26),
+      fontWeight: '700',
+    },
+    inputCard: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: spacing.md,
+    },
+    container: {
+      // typeBackgrounds.reminder (theme-derived)
+      backgroundColor: colors.reminderBg,
+    },
+  });

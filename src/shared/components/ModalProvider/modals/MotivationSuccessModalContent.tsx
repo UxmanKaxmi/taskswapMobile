@@ -5,7 +5,13 @@ import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
 import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import PushButton from '@shared/components/PushButton';
-import { colors, platformShadow, spacing } from '@shared/theme';
+import {
+  platformShadow,
+  spacing,
+  type ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 import type { MotivationSuccessModalPayload } from '../modalTypes';
 
@@ -23,9 +29,11 @@ export default function MotivationSuccessModalContent({
   closeModal,
   markNextCloseAsCustom,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const iconName = 'paper-plane';
   const outlineColor = colors.onboardingLine;
-  const bubbleColor = '#FFF5D8';
+  const bubbleColor = colors.warmIconChipBg;
   const shadowColor = '#E6C84D';
 
   const runAfterClose = React.useCallback(
@@ -102,49 +110,50 @@ export default function MotivationSuccessModalContent({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingBottom: spacing.lg,
-    alignItems: 'center',
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      paddingBottom: spacing.lg,
+      alignItems: 'center',
+    },
 
-  iconWrap: {
-    marginTop: vs(6),
-    marginBottom: vs(20),
-  },
-  iconBubble: {
-    width: ms(100),
-    height: ms(100),
-    borderRadius: ms(50),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    textAlign: 'center',
-    fontSize: ms(30),
-    lineHeight: ms(34),
-  },
-  body: {
-    textAlign: 'center',
-    marginTop: vs(14),
-    fontSize: ms(16),
-    lineHeight: ms(24),
-  },
-  actionButton: {
-    marginVertical: 0,
-    marginHorizontal: 0,
-    alignSelf: 'stretch',
-    borderRadius: BUTTON_RADIUS,
-  },
-  primaryButton: {
-    marginTop: vs(20),
-  },
-  primaryButtonText: {
-    fontSize: ms(16),
-    fontWeight: '800',
-    color: colors.onboardingInk,
-  },
-  secondary: {
-    marginTop: vs(10),
-  },
-});
+    iconWrap: {
+      marginTop: vs(6),
+      marginBottom: vs(20),
+    },
+    iconBubble: {
+      width: ms(100),
+      height: ms(100),
+      borderRadius: ms(50),
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    title: {
+      textAlign: 'center',
+      fontSize: ms(30),
+      lineHeight: ms(34),
+    },
+    body: {
+      textAlign: 'center',
+      marginTop: vs(14),
+      fontSize: ms(16),
+      lineHeight: ms(24),
+    },
+    actionButton: {
+      marginVertical: 0,
+      marginHorizontal: 0,
+      alignSelf: 'stretch',
+      borderRadius: BUTTON_RADIUS,
+    },
+    primaryButton: {
+      marginTop: vs(20),
+    },
+    primaryButtonText: {
+      fontSize: ms(16),
+      fontWeight: '800',
+      color: colors.tactileMomentumSecondary,
+    },
+    secondary: {
+      marginTop: vs(10),
+    },
+  });

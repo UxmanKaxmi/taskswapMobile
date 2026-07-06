@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import RootNavigator from './navigation/RootNavigator';
 import { QueryClientProvider } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
@@ -13,7 +13,7 @@ import { AuthProvider } from '@features/Auth/AuthProvider';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ModalProvider } from '@shared/components/ModalProvider';
-import { colors } from '@shared/theme/colors';
+import { ThemeProvider, useTheme } from '@shared/theme';
 import { incrementAppLaunchCount } from '@features/LaunchModals';
 import { FeatureFlagsProvider } from '@shared/featureFlags';
 import { navigationRef } from './navigation/navigationRef';
@@ -23,26 +23,63 @@ import { queryClient } from './lib/react-query/client';
 
 const loginImage = require('@assets/images/loginImage5.png');
 
-const LightNavTheme = {
-  ...DefaultTheme,
-  dark: false,
-  colors: {
-    ...DefaultTheme.colors,
-    background: colors.onboardingPaper,
-  },
-};
+function ThemedApp() {
+  const { colors, scheme } = useTheme();
 
-export default function App() {
-  const [visible, setVisible] = useState(true);
+  const navTheme = useMemo(() => {
+    const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
+    return {
+      ...base,
+      colors: {
+        ...base.colors,
+        primary: colors.primary,
+        background: colors.onboardingPaper,
+        card: colors.card,
+        text: colors.text,
+        border: colors.border,
+      },
+    };
+  }, [colors, scheme]);
 
   useEffect(() => {
-    StatusBar.setBarStyle('dark-content');
+    StatusBar.setBarStyle(scheme === 'dark' ? 'light-content' : 'dark-content');
 
     if (Platform.OS === 'android') {
       StatusBar.setBackgroundColor(colors.onboardingPaper);
       StatusBar.setTranslucent(false);
     }
-  }, []);
+  }, [colors, scheme]);
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.onboardingPaper }}>
+      <BottomSheetModalProvider>
+        <ModalProvider>
+          <QueryClientProvider client={queryClient}>
+            <NotificationPermissionPrompt />
+
+            <AuthProvider>
+              <FeatureFlagsProvider>
+                <NavigationContainer
+                  ref={navigationRef}
+                  theme={navTheme}
+                  onReady={() => setNotificationNavigationReady(true)}
+                >
+                  <NotificationNavigationBridge />
+                  <RootNavigator />
+                </NavigationContainer>
+              </FeatureFlagsProvider>
+            </AuthProvider>
+
+            <Toast config={toastConfig} position="bottom" bottomOffset={60} />
+          </QueryClientProvider>
+        </ModalProvider>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
+  );
+}
+
+export default function App() {
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     console.log('✅ Firebase apps:', firebase.apps);
@@ -73,49 +110,8 @@ export default function App() {
   return visible ? (
     <AnimatedBootSplash onAnimationEnd={() => setVisible(false)} />
   ) : (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.onboardingPaper }}>
-      <BottomSheetModalProvider>
-        <ModalProvider>
-          <QueryClientProvider client={queryClient}>
-            <NotificationPermissionPrompt />
-
-            <AuthProvider>
-              <FeatureFlagsProvider>
-                <NavigationContainer
-                  ref={navigationRef}
-                  theme={LightNavTheme}
-                  onReady={() => setNotificationNavigationReady(true)}
-                >
-                  <NotificationNavigationBridge />
-                  <RootNavigator />
-                </NavigationContainer>
-              </FeatureFlagsProvider>
-            </AuthProvider>
-
-            <Toast config={toastConfig} position="bottom" bottomOffset={60} />
-          </QueryClientProvider>
-        </ModalProvider>
-      </BottomSheetModalProvider>
-      {/* {showDevBadge && (
-        <View pointerEvents="none" style={styles.devBadgeContainer}>
-          <View style={styles.devBadge}>
-            <View style={styles.devBadgeDot} />
-            <View style={styles.devBadgeTextWrap}>
-              <Text style={styles.devBadgeText}>DEV</Text>
-              <Text style={styles.devBadgeSubText}>API: {backendUrl}</Text>
-            </View>
-          </View>
-        </View>
-      )} */}
-    </GestureHandlerRootView>
+    <ThemeProvider>
+      <ThemedApp />
+    </ThemeProvider>
   );
 }
-//     <QueryClientProvider client={queryClient}>
-//       <NotificationPermissionPrompt />
-//       <AuthProvider>
-//         <RootNavigator />
-//       </AuthProvider>
-//       <Toast config={toastConfig} position="bottom" bottomOffset={60} />
-//     </QueryClientProvider>
-//   );
-// }

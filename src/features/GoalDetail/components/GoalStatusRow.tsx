@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Icon } from '@shared/components/Icons';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { formatViewCount } from '@shared/utils/helperFunctions';
 import { GoalType } from '@features/Goals/types/goals';
 import ButtonBase from '@shared/components/Buttons/ButtonBase';
@@ -24,7 +24,9 @@ export default function GoalStatusRow({
   containerStyle,
   taskType,
 }: Props) {
-  const ctaColor = getCtaColor(taskType);
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const ctaColor = getCtaColor(colors, taskType);
   const ctaLabel = taskType === 'decision' ? "I've decided" : 'Mark complete';
 
   return (
@@ -57,7 +59,7 @@ export default function GoalStatusRow({
   );
 }
 
-function getCtaColor(taskType?: GoalType) {
+function getCtaColor(colors: ThemeColors, taskType?: GoalType) {
   switch (taskType) {
     case 'decision':
       return colors.decisionBgHardest;
@@ -71,52 +73,53 @@ function getCtaColor(taskType?: GoalType) {
       return colors.primary;
   }
 }
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: spacing.sm,
+    },
 
-  /* LEFT */
+    /* LEFT */
 
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+    left: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
 
-  views: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
+    views: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
 
-  viewsText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.placeHolder,
-  },
+    viewsText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: colors.placeHolder,
+    },
 
-  /* RIGHT */
+    /* RIGHT */
 
-  right: {
-    alignItems: 'flex-end',
-  },
+    right: {
+      alignItems: 'flex-end',
+    },
 
-  completeButton: {
-    alignSelf: 'flex-end',
-    marginVertical: 0,
-    marginHorizontal: 0,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 0,
-    minHeight: 36,
-    borderRadius: 999,
-    borderWidth: 0,
-  },
+    completeButton: {
+      alignSelf: 'flex-end',
+      marginVertical: 0,
+      marginHorizontal: 0,
+      paddingHorizontal: spacing.md,
+      paddingVertical: 0,
+      minHeight: 36,
+      borderRadius: 999,
+      borderWidth: 0,
+    },
 
-  completeButtonText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-});
+    completeButtonText: {
+      fontSize: 13,
+      fontWeight: '700',
+    },
+  });

@@ -5,7 +5,7 @@ import { ms, vs } from 'react-native-size-matters';
 import AppLogo from '@shared/components/AppLogo';
 import Icon from '@shared/components/Icons/Icon';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 
 type OnboardingHeaderProps = {
   actionLabel?: string;
@@ -22,6 +22,9 @@ export default function OnboardingHeader({
   onActionPress,
   style,
 }: OnboardingHeaderProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={[styles.container, style]}>
       <AppLogo size="lg" align="left" textStyle={styles.wordmarkText} />
@@ -52,36 +55,37 @@ export default function OnboardingHeader({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: vs(22),
-    paddingHorizontal: ms(28),
-  },
-  wordmarkText: {
-    color: colors.onboardingInk,
-    letterSpacing: 0,
-    fontSize: ms(20),
-  },
-  textButton: {
-    width: ms(56),
-    alignItems: 'flex-end',
-  },
-  iconButton: {
-    width: ms(35),
-    height: ms(35),
-    borderRadius: ms(35 / 2),
-    backgroundColor: colors.onboardingLine,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionText: {
-    color: colors.onboardingMuted,
-    fontSize: ms(16),
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: vs(22),
+      paddingHorizontal: ms(28),
+    },
+    wordmarkText: {
+      color: colors.onboardingInk,
+      letterSpacing: 0,
+      fontSize: ms(20),
+    },
+    textButton: {
+      width: ms(56),
+      alignItems: 'flex-end',
+    },
+    iconButton: {
+      width: ms(35),
+      height: ms(35),
+      borderRadius: ms(35 / 2),
+      backgroundColor: colors.onboardingLine,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    actionText: {
+      color: colors.onboardingMuted,
+      fontSize: ms(16),
+    },
+    pressed: {
+      opacity: 0.7,
+    },
+  });

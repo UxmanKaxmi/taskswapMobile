@@ -3,7 +3,7 @@ import { Animated, Image, StyleSheet, View } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, platformShadow } from '@shared/theme';
+import { platformShadow, ThemeColors, useThemedStyles } from '@shared/theme';
 
 type SupportAvatar = {
   id: string;
@@ -178,6 +178,8 @@ export default function LiveSupportBanner({
     visibleAvatarIdsRef.current = visibleAvatarIds;
   }, [visibleAvatarIds]);
 
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.container}>
       <View style={styles.avatarGroup}>
@@ -216,69 +218,70 @@ export default function LiveSupportBanner({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    borderRadius: ms(10),
-    backgroundColor: '#FFF',
-    paddingHorizontal: ms(18),
-    paddingVertical: vs(10),
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(12),
-    ...platformShadow({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      width: '100%',
+      borderRadius: ms(10),
+      backgroundColor: colors.onboardingCard,
+      paddingHorizontal: ms(18),
+      paddingVertical: vs(10),
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(12),
+      ...platformShadow({
+        color: colors.onboardingInk,
+        opacity: 0.04,
+        radius: 18,
+        offset: { width: 0, height: 6 },
+      }),
+    },
+    avatarGroup: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      minWidth: ms(94),
+    },
+    avatarWrap: {
+      width: ms(30),
+      height: ms(30),
+      borderRadius: ms(15),
+      borderWidth: 1,
+      borderColor: '#F8F6EF',
+      overflow: 'hidden',
+      backgroundColor: colors.card,
+    },
+    avatar: {
+      width: '100%',
+      height: '100%',
+      borderRadius: ms(14),
+    },
+    moreBubble: {
+      width: ms(32),
+      height: ms(32),
+      borderRadius: ms(15),
+      marginLeft: -ms(6),
+      backgroundColor: colors.tactileMomentumPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    moreText: {
+      color: colors.tactileMomentumSecondary,
+      fontSize: ms(10),
+    },
+    copyWrap: {
+      flex: 1,
+      minWidth: 0,
+    },
+    copyStrong: {
       color: colors.onboardingInk,
-      opacity: 0.04,
-      radius: 18,
-      offset: { width: 0, height: 6 },
-    }),
-  },
-  avatarGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minWidth: ms(94),
-  },
-  avatarWrap: {
-    width: ms(30),
-    height: ms(30),
-    borderRadius: ms(15),
-    borderWidth: 1,
-    borderColor: '#F8F6EF',
-    overflow: 'hidden',
-    backgroundColor: colors.card,
-  },
-  avatar: {
-    width: '100%',
-    height: '100%',
-    borderRadius: ms(14),
-  },
-  moreBubble: {
-    width: ms(32),
-    height: ms(32),
-    borderRadius: ms(15),
-    marginLeft: -ms(6),
-    backgroundColor: colors.tactileMomentumPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  moreText: {
-    color: colors.tactileMomentumSecondary,
-    fontSize: ms(10),
-  },
-  copyWrap: {
-    flex: 1,
-    minWidth: 0,
-  },
-  copyStrong: {
-    color: colors.onboardingInk,
-    fontSize: ms(12),
-    lineHeight: vs(14),
-    // letterSpacing: -0.25,
-  },
-  copyMuted: {
-    color: colors.onboardingMuted,
-    fontSize: ms(12),
-    // lineHeight: ms(19),
-    // marginTop: vs(2),
-  },
-});
+      fontSize: ms(12),
+      lineHeight: vs(14),
+      // letterSpacing: -0.25,
+    },
+    copyMuted: {
+      color: colors.onboardingMuted,
+      fontSize: ms(12),
+      // lineHeight: ms(19),
+      // marginTop: vs(2),
+    },
+  });

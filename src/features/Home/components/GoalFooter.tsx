@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import Ripple from '@shared/components/Buttons/Ripple';
 import { formatViews, getFirstName, toShortName } from '@shared/utils/helperFunctions';
 import PushButton from '@shared/components/PushButton';
@@ -13,7 +13,7 @@ import { ms, vs } from 'react-native-size-matters';
 import { isDEV } from '@shared/utils/constants';
 import { usePushInteraction } from '../hooks/usePushInteraction';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { getTypeVisual } from '@shared/utils/typeVisuals';
+import { useTypeVisuals } from '@shared/utils/typeVisuals';
 import { useIsOwner } from '@features/Auth/AuthProvider';
 import Row from '@shared/components/Layout/Row';
 import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
@@ -64,6 +64,9 @@ export default function GoalFooter({
   reminderText,
   reminderExpired,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const { getTypeVisual } = useTypeVisuals();
   const isCompleted = Boolean(taskDetails?.completed || taskDetails?.completedAt);
   const {
     hasPushed: pushed,
@@ -372,81 +375,82 @@ export default function GoalFooter({
   );
 }
 
-const styles = StyleSheet.create({
-  reminderSubText: {
-    fontSize: ms(12),
-    color: colors.muted,
-    opacity: 0.6,
-    textAlign: 'center',
-  },
-  pushActionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 12,
-    flex: 1,
-  },
-  pushButtonColumn: {
-    alignItems: 'flex-end',
-  },
-  unpushButton: {
-    marginTop: vs(6),
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    reminderSubText: {
+      fontSize: ms(12),
+      color: colors.muted,
+      opacity: 0.6,
+      textAlign: 'center',
+    },
+    pushActionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      gap: 12,
+      flex: 1,
+    },
+    pushButtonColumn: {
+      alignItems: 'flex-end',
+    },
+    unpushButton: {
+      marginTop: vs(6),
+    },
 
-  unpushText: {
-    fontSize: ms(11),
-    color: colors.error,
-    opacity: 0.6,
-  },
-  pushedText: {
-    // marginTop: vs(6),
-    fontSize: ms(12),
-    color: colors.muted,
-    opacity: 0.6,
-    // backgroundColor: 'red',
-  },
-  footer: {
-    gap: 20,
-    flexDirection: 'row',
-    // paddingHorizontal: 6,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  action: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    opacity: 0.6,
-  },
-  count: {
-    marginLeft: 6,
-    color: colors.muted,
-    fontSize: ms(14),
-  },
-  completedRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-  },
-  completedLine: {
-    fontSize: ms(11),
-    lineHeight: ms(14),
-    color: colors.muted,
-    fontWeight: '400',
-    flexShrink: 1,
-  },
-  adviceCount: {
-    color: colors.adviceBgHardest,
-    fontSize: ms(12),
-    fontWeight: '600',
-  },
-  adviceCountText: {
-    // marginLeft: 6,
-    color: colors.adviceBgHardest,
-    fontSize: ms(12),
-    fontWeight: '500',
-  },
-  reminderEmoji: {
-    fontSize: ms(10),
-    opacity: 0.7,
-  },
-});
+    unpushText: {
+      fontSize: ms(11),
+      color: colors.error,
+      opacity: 0.6,
+    },
+    pushedText: {
+      // marginTop: vs(6),
+      fontSize: ms(12),
+      color: colors.muted,
+      opacity: 0.6,
+      // backgroundColor: 'red',
+    },
+    footer: {
+      gap: 20,
+      flexDirection: 'row',
+      // paddingHorizontal: 6,
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+    },
+    action: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      opacity: 0.6,
+    },
+    count: {
+      marginLeft: 6,
+      color: colors.muted,
+      fontSize: ms(14),
+    },
+    completedRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 7,
+    },
+    completedLine: {
+      fontSize: ms(11),
+      lineHeight: ms(14),
+      color: colors.muted,
+      fontWeight: '400',
+      flexShrink: 1,
+    },
+    adviceCount: {
+      color: colors.adviceBgHardest,
+      fontSize: ms(12),
+      fontWeight: '600',
+    },
+    adviceCountText: {
+      // marginLeft: 6,
+      color: colors.adviceBgHardest,
+      fontSize: ms(12),
+      fontWeight: '500',
+    },
+    reminderEmoji: {
+      fontSize: ms(10),
+      opacity: 0.7,
+    },
+  });

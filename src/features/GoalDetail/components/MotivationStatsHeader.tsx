@@ -4,7 +4,7 @@ import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
 import TickMark from '@shared/components/TickMark';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_TICKS = 12;
@@ -15,6 +15,8 @@ type Props = {
 };
 
 export default function MotivationStatsHeader({ createdAt, pushCount }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const dayCount = React.useMemo(() => {
     const created = new Date(createdAt ?? '').getTime();
     if (!Number.isFinite(created)) return 1;
@@ -87,53 +89,54 @@ export default function MotivationStatsHeader({ createdAt, pushCount }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  boxesRow: {
-    flexDirection: 'row',
-    gap: ms(12),
-  },
-  box: {
-    flex: 1,
-    minHeight: vs(64),
-    borderRadius: 20,
-    paddingHorizontal: spacing.md,
-    paddingVertical: vs(11),
-    justifyContent: 'space-between',
-  },
-  boxDark: {
-    backgroundColor: colors.onboardingInk,
-  },
-  boxLight: {
-    backgroundColor: colors.onboardingCard,
-  },
-  boxValue: {
-    fontSize: ms(30),
-    lineHeight: ms(32),
-    fontWeight: '800',
-    color: colors.onboardingInk,
-  },
-  boxValueDark: {
-    color: colors.onboardingCard,
-  },
-  boxLabel: {
-    marginTop: vs(0),
-    fontSize: ms(12),
-    fontWeight: '500',
-    color: colors.onboardingMuted,
-  },
-  boxLabelDark: {
-    color: 'rgba(255, 255, 255, 0.72)',
-  },
-  ticksRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: vs(12),
-  },
-  tick: {
-    width: ms(5),
-    height: vs(14),
-    marginRight: ms(4),
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    boxesRow: {
+      flexDirection: 'row',
+      gap: ms(12),
+    },
+    box: {
+      flex: 1,
+      minHeight: vs(64),
+      borderRadius: 20,
+      paddingHorizontal: spacing.md,
+      paddingVertical: vs(11),
+      justifyContent: 'space-between',
+    },
+    boxDark: {
+      backgroundColor: colors.inkSurface,
+    },
+    boxLight: {
+      backgroundColor: colors.onboardingCard,
+    },
+    boxValue: {
+      fontSize: ms(30),
+      lineHeight: ms(32),
+      fontWeight: '800',
+      color: colors.onboardingInk,
+    },
+    boxValueDark: {
+      color: colors.onPrimary,
+    },
+    boxLabel: {
+      marginTop: vs(0),
+      fontSize: ms(12),
+      fontWeight: '500',
+      color: colors.onboardingMuted,
+    },
+    boxLabelDark: {
+      color: 'rgba(255, 255, 255, 0.72)',
+    },
+    ticksRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: vs(12),
+    },
+    tick: {
+      width: ms(5),
+      height: vs(14),
+      marginRight: ms(4),
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+    },
+  });

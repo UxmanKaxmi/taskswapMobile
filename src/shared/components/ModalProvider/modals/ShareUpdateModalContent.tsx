@@ -7,8 +7,14 @@ import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Height } from '@shared/components/Spacing';
 import Icon from '@shared/components/Icons/Icon';
-import { colors, platformShadow, spacing } from '@shared/theme';
-import { typeBackgroundsHard, typeIcons } from '@shared/utils/typeVisuals';
+import {
+  platformShadow,
+  spacing,
+  type ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from '@shared/theme';
+import { typeIcons, useTypeVisuals } from '@shared/utils/typeVisuals';
 import {
   PROGRESS_UPDATE_COOLDOWN_LABEL,
   SHARE_UPDATE_CHARACTER_LIMIT,
@@ -23,6 +29,9 @@ type Props = {
 };
 
 export default function ShareUpdateModalContent({ payload, closeModal }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const { typeBackgroundsHard } = useTypeVisuals();
   const [message, setMessage] = useState(payload.initialMessage ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -148,60 +157,61 @@ export default function ShareUpdateModalContent({ payload, closeModal }: Props) 
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingBottom: spacing.lg,
-    alignItems: 'center',
-  },
-  iconWrap: {
-    marginTop: vs(8),
-    marginBottom: vs(15),
-  },
-  iconBubble: {
-    width: ms(80),
-    height: ms(80),
-    borderRadius: ms(40),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    textAlign: 'center',
-    fontSize: ms(31),
-    lineHeight: ms(36),
-  },
-  body: {
-    textAlign: 'center',
-    marginTop: vs(12),
-  },
-  inputWrapper: {
-    backgroundColor: colors.inputBackground,
-    borderRadius: vs(12),
-  },
-  input: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    minHeight: vs(80),
-    textAlignVertical: 'top',
-  },
-  countRow: {
-    alignSelf: 'stretch',
-    marginTop: vs(5),
-  },
-  hint: {
-    flexShrink: 1,
-    fontSize: ms(11),
-  },
-  charCount: {
-    flexShrink: 0,
-    fontSize: ms(11),
-  },
-  button: {
-    width: '100%',
-    alignSelf: 'stretch',
-    marginHorizontal: 0,
-    borderRadius: 18,
-  },
-  primaryText: {
-    color: colors.tactileMomentumSecondary,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      paddingBottom: spacing.lg,
+      alignItems: 'center',
+    },
+    iconWrap: {
+      marginTop: vs(8),
+      marginBottom: vs(15),
+    },
+    iconBubble: {
+      width: ms(80),
+      height: ms(80),
+      borderRadius: ms(40),
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    title: {
+      textAlign: 'center',
+      fontSize: ms(31),
+      lineHeight: ms(36),
+    },
+    body: {
+      textAlign: 'center',
+      marginTop: vs(12),
+    },
+    inputWrapper: {
+      backgroundColor: colors.inputBackground,
+      borderRadius: vs(12),
+    },
+    input: {
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.md,
+      minHeight: vs(80),
+      textAlignVertical: 'top',
+    },
+    countRow: {
+      alignSelf: 'stretch',
+      marginTop: vs(5),
+    },
+    hint: {
+      flexShrink: 1,
+      fontSize: ms(11),
+    },
+    charCount: {
+      flexShrink: 0,
+      fontSize: ms(11),
+    },
+    button: {
+      width: '100%',
+      alignSelf: 'stretch',
+      marginHorizontal: 0,
+      borderRadius: 18,
+    },
+    primaryText: {
+      color: colors.tactileMomentumSecondary,
+    },
+  });

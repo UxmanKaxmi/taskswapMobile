@@ -5,7 +5,7 @@ import Icon from '@shared/components/Icons/Icon'; // ✅ your custom Icon compon
 import HomeScreen from '@features/Home/screens/HomeScreen';
 import AddGoalNavigator from '@features/AddGoal/navigation/AddGoalNavigator';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
-import { colors, platformShadow } from '@shared/theme';
+import { platformShadow, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import AnimatedTabIcon from '@shared/components/AnimatedTabBarIcon/AnimatedTabBarIcon';
 import { ms, vs } from 'react-native-size-matters';
 import FindFriendsMainScreen from '@features/Friends/screens/FriendsMainScreen';
@@ -48,6 +48,8 @@ export function useCheckAuthForTab() {
 }
 
 export default function BottomTabsAndroid({ route }: any) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home';
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
   const checkAuthForTab = useCheckAuthForTab();
@@ -205,58 +207,59 @@ export default function BottomTabsAndroid({ route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  navigationBarBackdrop: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.surface,
-  },
-  addButtonContainer: {
-    top: -40, // raise the button
-    justifyContent: 'center',
-    alignItems: 'center',
-    // shadowColor: colors.tactileMomentumPrimary,
-  },
-  addButton: {
-    width: 70,
-    height: 70,
-    // borderWidth: 1,
-    borderRadius: 100,
-    // borderColor: colors.background,
-    backgroundColor: colors.tactileMomentumPrimary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    // boxShadow: '0px 6px 20px rgba(255, 210, 63, 0.35)',
-    ...platformShadow({
-      color: colors.tactileMomentumPrimary,
-      opacity: 0.3,
-      radius: 4,
-      offset: { width: 0, height: 4 },
-    }),
-  },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -10,
-    backgroundColor: colors.error,
-    borderRadius: 10,
-    minWidth: ms(16),
-    height: ms(16),
-    paddingHorizontal: ms(5),
-    justifyContent: 'center', // ✅ Center vertically
-    alignItems: 'center', // ✅ Center horizontally
-    zIndex: 1,
-  },
-  badgeText: {
-    fontSize: ms(10),
-    fontWeight: 'bold',
-    lineHeight: ms(12), // optional for fine-tuning
-    color: 'white',
-    textAlign: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+    },
+    navigationBarBackdrop: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: colors.surface,
+    },
+    addButtonContainer: {
+      top: -40, // raise the button
+      justifyContent: 'center',
+      alignItems: 'center',
+      // shadowColor: colors.tactileMomentumPrimary,
+    },
+    addButton: {
+      width: 70,
+      height: 70,
+      // borderWidth: 1,
+      borderRadius: 100,
+      // borderColor: colors.background,
+      backgroundColor: colors.tactileMomentumPrimary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      // boxShadow: '0px 6px 20px rgba(255, 210, 63, 0.35)',
+      ...platformShadow({
+        color: colors.tactileMomentumPrimary,
+        opacity: 0.3,
+        radius: 4,
+        offset: { width: 0, height: 4 },
+      }),
+    },
+    badge: {
+      position: 'absolute',
+      top: -4,
+      right: -10,
+      backgroundColor: colors.error,
+      borderRadius: 10,
+      minWidth: ms(16),
+      height: ms(16),
+      paddingHorizontal: ms(5),
+      justifyContent: 'center', // ✅ Center vertically
+      alignItems: 'center', // ✅ Center horizontally
+      zIndex: 1,
+    },
+    badgeText: {
+      fontSize: ms(10),
+      fontWeight: 'bold',
+      lineHeight: ms(12), // optional for fine-tuning
+      color: 'white',
+      textAlign: 'center',
+    },
+  });

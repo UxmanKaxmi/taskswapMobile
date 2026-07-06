@@ -10,7 +10,7 @@ import {
   Animated,
 } from 'react-native';
 
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useThemedStyles } from '@shared/theme';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Avatar from '@shared/components/Avatar/Avatar';
 import { HelperUser } from '@features/Home/types/home';
@@ -24,6 +24,7 @@ type Props = {
 };
 
 export default function ViewHelpersModal({ visible, onClose, helpers }: Props) {
+  const styles = useThemedStyles(createStyles);
   const translateY = useRef(new Animated.Value(300)).current;
 
   useEffect(() => {
@@ -76,38 +77,39 @@ export default function ViewHelpersModal({ visible, onClose, helpers }: Props) {
 
 const { height } = Dimensions.get('window');
 
-const styles = StyleSheet.create({
-  container: {
-    maxHeight: height * 0.6,
-    backgroundColor: colors.background,
-    padding: spacing.md,
-    borderTopLeftRadius: MODAL_TOP_RADIUS,
-    borderTopRightRadius: MODAL_TOP_RADIUS,
-    overflow: 'hidden',
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      maxHeight: height * 0.6,
+      backgroundColor: colors.background,
+      padding: spacing.md,
+      borderTopLeftRadius: MODAL_TOP_RADIUS,
+      borderTopRightRadius: MODAL_TOP_RADIUS,
+      overflow: 'hidden',
+    },
 
-  overlay: {
-    flex: 1,
-    backgroundColor: '#00000088',
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
+    overlay: {
+      flex: 1,
+      backgroundColor: '#00000088',
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+    },
 
-  modalContent: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-  },
+    modalContent: {
+      position: 'absolute',
+      bottom: 0,
+      width: '100%',
+    },
 
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-  },
+    item: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.sm,
+    },
 
-  name: {
-    marginLeft: spacing.md,
-    fontSize: 15,
-  },
-});
+    name: {
+      marginLeft: spacing.md,
+      fontSize: 15,
+    },
+  });

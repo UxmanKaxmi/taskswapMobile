@@ -11,7 +11,7 @@ import { Layout } from '@shared/components/Layout';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { Height } from '@shared/components/Spacing';
 import { useGoalsQuery } from '@features/Goals/hooks/useGoalsQuery';
 import {
@@ -27,6 +27,7 @@ type DebugValues = {
 };
 
 function DebugInput({ label, value }: { label: string; value: string }) {
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.field}>
       <TextElement style={styles.label}>{label}</TextElement>
@@ -36,6 +37,8 @@ function DebugInput({ label, value }: { label: string; value: string }) {
 }
 
 export default function MainDebugScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { user } = useAuth();
   const [sendingKey, setSendingKey] = useState<string | null>(null);
   const { data: tasksQuery } = useGoalsQuery();
@@ -163,37 +166,38 @@ export default function MainDebugScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  content: {
-    paddingBottom: 24,
-  },
-  subtitle: {
-    marginBottom: 16,
-  } as TextStyle,
-  field: {
-    gap: 6,
-  },
-  label: {
-    color: colors.text,
-    fontWeight: '600',
-  } as TextStyle,
-  value: {
-    color: colors.text,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    backgroundColor: colors.surface,
-  } as TextStyle,
-  section: {
-    gap: 8,
-  },
-  sectionLabel: {
-    color: colors.muted,
-    fontWeight: '600',
-  } as TextStyle,
-  button: {
-    marginHorizontal: 0,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    content: {
+      paddingBottom: 24,
+    },
+    subtitle: {
+      marginBottom: 16,
+    } as TextStyle,
+    field: {
+      gap: 6,
+    },
+    label: {
+      color: colors.text,
+      fontWeight: '600',
+    } as TextStyle,
+    value: {
+      color: colors.text,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      backgroundColor: colors.surface,
+    } as TextStyle,
+    section: {
+      gap: 8,
+    },
+    sectionLabel: {
+      color: colors.muted,
+      fontWeight: '600',
+    } as TextStyle,
+    button: {
+      marginHorizontal: 0,
+    },
+  });

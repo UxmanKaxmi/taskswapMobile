@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
-import { colors, platformShadow } from '@shared/theme';
+import { ThemeColors, platformShadow, useTheme, useThemedStyles } from '@shared/theme';
 import { GoalType } from '@features/Goals/types/goals';
 import { haptics } from '@shared/utils/haptics';
 import ButtonBase from '../Buttons/ButtonBase';
@@ -44,11 +44,14 @@ export default function PushButton({
   buttonStyle,
   textStyle,
   backgroundColor,
-  textColor = colors.onPrimary,
+  textColor,
   borderColor = 'transparent',
 }: PushButtonProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const isLocked = disabled || loading || active;
   const resolvedBg = backgroundColor ?? colors[`${taskType || 'reminder'}BgHardest`];
+  const resolvedTextColor = textColor ?? colors.onPrimary;
 
   if (variant !== 'default') {
     const isPushVariant = variant === 'push';
@@ -135,7 +138,7 @@ export default function PushButton({
       disabled={isLocked}
       icon={icon}
       backgroundColor={resolvedBg}
-      textColor={textColor}
+      textColor={resolvedTextColor}
       borderColor={borderColor}
       style={StyleSheet.flatten([sizeStyles[size], style, buttonStyle])}
       textStyle={StyleSheet.flatten([textSizeStyles[size], textStyle])}
@@ -164,109 +167,110 @@ const customTextVariants = {
   lg: 'title',
 } as const;
 
-const styles = StyleSheet.create({
-  /* Button sizes */
-  small: {
-    paddingVertical: vs(6),
-    paddingHorizontal: ms(12),
-    borderRadius: ms(24),
-    alignSelf: 'flex-start',
-    marginVertical: 0,
-    marginHorizontal: 0,
-  },
-  medium: {
-    paddingVertical: vs(10),
-    paddingHorizontal: ms(18),
-    borderRadius: ms(24),
-  },
-  large: {
-    paddingVertical: vs(14),
-    paddingHorizontal: ms(24),
-    borderRadius: ms(24),
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    /* Button sizes */
+    small: {
+      paddingVertical: vs(6),
+      paddingHorizontal: ms(12),
+      borderRadius: ms(24),
+      alignSelf: 'flex-start',
+      marginVertical: 0,
+      marginHorizontal: 0,
+    },
+    medium: {
+      paddingVertical: vs(10),
+      paddingHorizontal: ms(18),
+      borderRadius: ms(24),
+    },
+    large: {
+      paddingVertical: vs(14),
+      paddingHorizontal: ms(24),
+      borderRadius: ms(24),
+    },
 
-  /* Text sizes */
-  textSm: {
-    fontSize: ms(12),
-    fontWeight: '600',
-  },
-  textMd: {
-    fontSize: ms(14),
-    fontWeight: '700',
-  },
-  textLg: {
-    fontSize: ms(16),
-    fontWeight: '700',
-  },
+    /* Text sizes */
+    textSm: {
+      fontSize: ms(12),
+      fontWeight: '600',
+    },
+    textMd: {
+      fontSize: ms(14),
+      fontWeight: '700',
+    },
+    textLg: {
+      fontSize: ms(16),
+      fontWeight: '700',
+    },
 
-  pillBase: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: ms(24),
-    borderWidth: 1.5,
-    alignSelf: 'flex-start',
-    minHeight: 38,
-    ...platformShadow({
+    pillBase: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: ms(24),
+      borderWidth: 1.5,
+      alignSelf: 'flex-start',
+      minHeight: 38,
+      ...platformShadow({
+        color: colors.tactileMomentumSecondary,
+        opacity: 0.16,
+        radius: 0,
+        offset: { width: 0, height: 2 },
+      }),
+    },
+    pushPill: {
+      backgroundColor: colors.tactileMomentumPrimary,
+      borderColor: colors.tactileMomentumPrimary,
+    },
+    pushActive: {
+      backgroundColor: colors.tactileMomentumSecondary,
+      borderColor: colors.tactileMomentumSecondary,
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      boxShadow: 'none',
+      elevation: 0,
+    },
+    cheerPill: {
+      backgroundColor: '#FFFFFF',
+      borderColor: colors.border,
+      ...platformShadow({
+        color: colors.border,
+        opacity: 0.16,
+        radius: 0,
+        offset: { width: 0, height: 2 },
+      }),
+    },
+    cheerActive: {
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      boxShadow: 'none',
+      elevation: 0,
+    },
+    pillPressed: {
+      transform: [{ translateY: 2 }],
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      boxShadow: 'none',
+      elevation: 0,
+    },
+    contentRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    iconWrapRight: {
+      marginLeft: 7,
+    },
+    pillText: {
+      includeFontPadding: false,
+    },
+    pushIdleText: {
       color: colors.tactileMomentumSecondary,
-      opacity: 0.16,
-      radius: 0,
-      offset: { width: 0, height: 2 },
-    }),
-  },
-  pushPill: {
-    backgroundColor: colors.tactileMomentumPrimary,
-    borderColor: colors.tactileMomentumPrimary,
-  },
-  pushActive: {
-    backgroundColor: colors.tactileMomentumSecondary,
-    borderColor: colors.tactileMomentumSecondary,
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    boxShadow: 'none',
-    elevation: 0,
-  },
-  cheerPill: {
-    backgroundColor: '#FFFFFF',
-    borderColor: colors.border,
-    ...platformShadow({
-      color: colors.border,
-      opacity: 0.16,
-      radius: 0,
-      offset: { width: 0, height: 2 },
-    }),
-  },
-  cheerActive: {
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    boxShadow: 'none',
-    elevation: 0,
-  },
-  pillPressed: {
-    transform: [{ translateY: 2 }],
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    boxShadow: 'none',
-    elevation: 0,
-  },
-  contentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconWrapRight: {
-    marginLeft: 7,
-  },
-  pillText: {
-    includeFontPadding: false,
-  },
-  pushIdleText: {
-    color: colors.tactileMomentumSecondary,
-  },
-  pushActiveText: {
-    color: colors.tactileMomentumPrimary,
-  },
-  cheerText: {
-    color: colors.tactileMomentumSecondary,
-  },
-});
+    },
+    pushActiveText: {
+      color: colors.tactileMomentumPrimary,
+    },
+    cheerText: {
+      color: colors.tactileMomentumSecondary,
+    },
+  });

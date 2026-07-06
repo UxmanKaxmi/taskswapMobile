@@ -10,17 +10,11 @@ import Animated, {
 import { ms } from 'react-native-size-matters';
 
 import Icon from '@shared/components/Icons/Icon';
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 
 const PARTICLE_COUNT = 16;
 const DURATION_MS = 850;
 const HIDE_DELAY_MS = DURATION_MS + 80;
-const BURST_COLORS = [
-  colors.motivationBgHardest,
-  colors.motivationBgHard,
-  colors.motivationIconBackground,
-  colors.success,
-];
 
 type ParticleConfig = {
   angle: number;
@@ -36,16 +30,22 @@ type Props = {
 export default function CompletionBurst({ playKey }: Props) {
   const [visible, setVisible] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const particles = useMemo(
-    () =>
-      Array.from({ length: PARTICLE_COUNT }, (_, index) => ({
-        angle: (Math.PI * 2 * index) / PARTICLE_COUNT,
-        distance: ms(32 + (index % 4) * 8),
-        size: ms(4 + (index % 3)),
-        color: BURST_COLORS[index % BURST_COLORS.length],
-      })),
-    [],
-  );
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const particles = useMemo(() => {
+    const burstColors = [
+      colors.motivationBgHardest,
+      colors.motivationBgHard,
+      colors.motivationIconBackground,
+      colors.success,
+    ];
+    return Array.from({ length: PARTICLE_COUNT }, (_, index) => ({
+      angle: (Math.PI * 2 * index) / PARTICLE_COUNT,
+      distance: ms(32 + (index % 4) * 8),
+      size: ms(4 + (index % 3)),
+      color: burstColors[index % burstColors.length],
+    }));
+  }, [colors]);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
@@ -79,6 +79,8 @@ export default function CompletionBurst({ playKey }: Props) {
 }
 
 function PulseCheck({ playKey }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const progress = useSharedValue(0);
 
   useEffect(() => {
@@ -102,6 +104,7 @@ function PulseCheck({ playKey }: Props) {
 }
 
 function BurstParticle({ config }: { config: ParticleConfig }) {
+  const styles = useThemedStyles(createStyles);
   const progress = useSharedValue(0);
 
   useEffect(() => {
@@ -136,28 +139,29 @@ function BurstParticle({ config }: { config: ParticleConfig }) {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 20,
-  },
-  burstStage: {
-    width: ms(120),
-    height: ms(120),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkPulse: {
-    width: ms(54),
-    height: ms(54),
-    borderRadius: ms(27),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.motivationIconBackground,
-  },
-  particle: {
-    position: 'absolute',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 20,
+    },
+    burstStage: {
+      width: ms(120),
+      height: ms(120),
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    checkPulse: {
+      width: ms(54),
+      height: ms(54),
+      borderRadius: ms(27),
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.motivationIconBackground,
+    },
+    particle: {
+      position: 'absolute',
+    },
+  });

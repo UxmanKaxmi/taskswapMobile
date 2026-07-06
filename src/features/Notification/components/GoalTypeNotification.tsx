@@ -2,11 +2,11 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Avatar from '@shared/components/Avatar/Avatar';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
-import { getTypeColor, typeIcons } from '@shared/utils/typeVisuals';
-import { notificationStyles } from '../styles/notification.styles';
+import { typeIcons, useTypeVisuals } from '@shared/utils/typeVisuals';
+import { useNotificationStyles } from '../styles/notification.styles';
 import NotificationIconBadge from './NotificationIconBadge';
 
 type Props = {
@@ -41,6 +41,8 @@ const taskTypeCopy: Record<
 };
 
 export default function GoalTypeNotification({ item, onPress }: Props) {
+  const notificationStyles = useNotificationStyles();
+  const { getTypeColor } = useTypeVisuals();
   const taskType = item.taskType || 'advice';
   const isMotivation = taskType === 'motivation';
 

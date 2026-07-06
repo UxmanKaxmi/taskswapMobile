@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
 import { Shadow } from '@shared/components/Shadow';
 
@@ -14,6 +14,8 @@ type Props = {
 };
 
 export default function DecisionChoiceBar({ label, letter, percent, selected, onPress }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const anim = useRef(new Animated.Value(0)).current;
 
   const showFill = percent > 0 && percent < 100;
@@ -84,48 +86,49 @@ export default function DecisionChoiceBar({ label, letter, percent, selected, on
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    backgroundColor: colors.card,
-    marginBottom: spacing.sm,
-  },
-  cardSelected: {
-    backgroundColor: colors.decisionBgHardest,
-  },
-  fill: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    borderRadius: 16,
-  },
-  content: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: vs(10),
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  right: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  badge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.decisionIconBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: spacing.sm,
-  },
-  badgeSelected: {
-    backgroundColor: colors.decisionBgHardest,
-  },
-  badgeText: {
-    fontSize: ms(14),
-    fontWeight: '600',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      borderRadius: 16,
+      overflow: 'hidden',
+      backgroundColor: colors.card,
+      marginBottom: spacing.sm,
+    },
+    cardSelected: {
+      backgroundColor: colors.decisionBgHardest,
+    },
+    fill: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      borderRadius: 16,
+    },
+    content: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: vs(10),
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    right: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    badge: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.decisionIconBackground,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginLeft: spacing.sm,
+    },
+    badgeSelected: {
+      backgroundColor: colors.decisionBgHardest,
+    },
+    badgeText: {
+      fontSize: ms(14),
+      fontWeight: '600',
+    },
+  });

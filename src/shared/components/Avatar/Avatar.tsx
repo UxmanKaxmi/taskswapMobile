@@ -11,7 +11,7 @@ import {
   TextStyle,
   StyleProp,
 } from 'react-native';
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { resolveAppTextStyle } from '@shared/theme/fonts';
 
 export type AvatarProps = {
@@ -79,12 +79,15 @@ export default function Avatar({
   uri,
   fallback = '?',
   size = 44,
-  borderColor = colors.border,
+  borderColor,
   imageStyle,
   fallbackStyle,
   textStyle,
   style,
 }: AvatarProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const resolvedBorderColor = borderColor ?? colors.border;
   const [imageFailed, setImageFailed] = React.useState(false);
   const radius = size / 2;
   const fallbackText = getFallbackText(fallback);
@@ -108,7 +111,7 @@ export default function Avatar({
             width: size,
             height: size,
             borderRadius: radius,
-            borderColor,
+            borderColor: resolvedBorderColor,
           },
           imageStyle,
           style,
@@ -125,7 +128,7 @@ export default function Avatar({
           width: size,
           height: size,
           borderRadius: radius,
-          borderColor,
+          borderColor: resolvedBorderColor,
         },
         fallbackStyle,
         style,
@@ -138,21 +141,23 @@ export default function Avatar({
   );
 }
 
-const styles = StyleSheet.create({
-  image: {
-    // borderWidth: 2,
-    resizeMode: 'cover',
-  },
-  fallback: {
-    backgroundColor: colors.info,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  fallbackText: {
-    color: '#fff',
-    fontWeight: '700',
-    includeFontPadding: false,
-    textAlign: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    image: {
+      // borderWidth: 2,
+      resizeMode: 'cover',
+    },
+    fallback: {
+      backgroundColor: colors.info,
+      justifyContent: 'center',
+      alignItems: 'center',
+      overflow: 'hidden',
+    },
+    fallbackText: {
+      // White on pastel in light mode; flips dark in dark mode for contrast
+      color: colors.onboardingCard,
+      fontWeight: '700',
+      includeFontPadding: false,
+      textAlign: 'center',
+    },
+  });

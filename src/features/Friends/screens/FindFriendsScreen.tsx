@@ -130,7 +130,7 @@ export default function FindFriendsScreen() {
           title={ctaTitle}
           onPress={goHome}
           buttonColor={colors.onboardingPush}
-          textColor={colors.onboardingInk}
+          textColor={colors.tactileMomentumSecondary}
         />
       }
     >

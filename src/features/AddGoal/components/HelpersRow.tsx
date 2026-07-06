@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
 import Avatar from '@shared/components/Avatar/Avatar';
-import { colors, spacing } from '@shared/theme';
+import { spacing, useTheme } from '@shared/theme';
 import { ms } from 'react-native-size-matters';
 import { HelperUser } from '@features/Home/types/home';
 
@@ -21,6 +21,7 @@ function formatNames(helpers: HelperUser[]) {
 }
 
 export default function SelectedHelpersRow({ helpers, onPress, taskType }: Props) {
+  const { colors } = useTheme();
   if (!helpers || helpers.length === 0) return null;
 
   const visible = helpers.slice(0, 3);

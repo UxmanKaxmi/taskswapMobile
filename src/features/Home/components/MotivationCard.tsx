@@ -3,7 +3,7 @@ import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { MotivationGoal } from '../types/home';
 import {
   getFirstName,
@@ -39,6 +39,8 @@ type Props = {
 };
 
 function MotivationCard({ task, onPressCard }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { user } = useAuth();
   const { openCheerSheet } = useModal();
   const { avatar, name = 'John Doe', createdAt, text, helpers = [] } = task;
@@ -400,218 +402,219 @@ function getLatestCheerableBeat(beats?: GoalBeat[]): GoalBeat | null {
   );
 }
 
-const styles = StyleSheet.create({
-  shadowWrap: {
-    borderRadius: 28,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  card: {
-    borderRadius: 28,
-    backgroundColor: colors.onboardingCard,
-    paddingHorizontal: ms(20),
-    paddingVertical: vs(18),
-    borderWidth: 1,
-    borderColor: colors.onboardingLine,
-  },
-  pressed: {
-    opacity: 0.96,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-  identityRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    flex: 1,
-    gap: spacing.sm,
-  },
-  avatarWrap: {
-    position: 'relative',
-    width: ms(42),
-    height: ms(42),
-    flexShrink: 0,
-  },
-  avatarFallback: {
-    borderWidth: 0,
-  },
-  avatarText: {
-    color: colors.onboardingInk,
-    fontWeight: '800',
-  },
-  helperOverlay: {
-    position: 'absolute',
-    bottom: ms(-4),
-    right: ms(-3),
-  },
-  identityTextBlock: {
-    flex: 1,
-    paddingTop: vs(2),
-  },
-  name: {
-    fontSize: ms(16),
-    lineHeight: ms(19),
-    fontWeight: '800',
-    color: colors.onboardingInk,
-  },
-  timeText: {
-    // marginTop: vs(2),
-    fontSize: ms(13),
-    lineHeight: ms(16),
-    color: colors.onboardingMuted,
-    fontWeight: '500',
-  },
-  feelingPill: {
-    paddingHorizontal: ms(12),
-    paddingVertical: vs(4),
-    borderRadius: 999,
-    backgroundColor: colors.onboardingPaper,
-    borderWidth: 1,
-    borderColor: colors.onboardingLine,
-    flexShrink: 0,
-  },
-  feelingText: {
-    fontSize: ms(12),
-    lineHeight: ms(14),
-    color: colors.onboardingInkSoft,
-    fontWeight: '700',
-  },
-  taskText: {
-    marginTop: spacing.sm,
-    color: colors.onboardingInk,
-    fontSize: ms(20),
-    lineHeight: ms(24),
-    fontWeight: '700',
-    letterSpacing: 0,
-  },
-  progressBlock: {
-    marginTop: spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    paddingRight: spacing.sm,
-    backgroundColor: colors.background,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  progressAccent: {
-    width: ms(6),
-    backgroundColor: colors.motivationBgHardest,
-  },
-  progressTextBlock: {
-    paddingVertical: vs(6),
-    paddingLeft: spacing.sm,
-    flex: 1,
-  },
-  progressLabel: {
-    fontSize: ms(12),
-    lineHeight: ms(14),
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    fontWeight: '900',
-    color: colors.motivationBgHardest,
-    // marginBottom: vs(4),
-  },
-  progressText: {
-    fontSize: ms(14),
-    lineHeight: ms(20),
-    color: colors.onboardingInkSoft,
-    fontWeight: '500',
-  },
-  footerRow: {
-    // marginTop: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-  footerLeft: {
-    flex: 1,
-    minHeight: ms(36),
-    justifyContent: 'flex-end',
-  },
-  ticks: {
-    marginBottom: vs(2),
-  },
-  countLine: {
-    marginTop: vs(5),
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    color: colors.onboardingMuted,
-    fontWeight: '500',
-  },
-  countStrong: {
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    color: colors.onboardingInk,
-    fontWeight: '800',
-  },
-  countMuted: {
-    fontSize: ms(12),
-    lineHeight: ms(16),
-    color: colors.onboardingMuted,
-    fontWeight: '500',
-  },
-  noPushes: {
-    fontSize: ms(13),
-    lineHeight: ms(17),
-    color: 'rgba(118, 121, 128, 0.7)',
-    fontWeight: '500',
-  },
-  pushButton: {
-    minWidth: ms(90),
-    paddingHorizontal: ms(14),
-    paddingVertical: vs(8),
-    justifyContent: 'center',
-  },
-  pushButtonText: {
-    fontSize: ms(14),
-    lineHeight: ms(17),
-    fontWeight: '800',
-  },
-  cheerStrip: {
-    marginTop: vs(13),
-    borderTopWidth: 1,
-    borderTopColor: colors.onboardingLine,
-    paddingTop: vs(12),
-    alignItems: 'flex-start',
-  },
-  cheerOpenButton: {
-    // minHeight: vs(18),
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.onboardingPushDeep,
-    backgroundColor: 'rgba(255, 210, 63, 0.14)',
-    paddingHorizontal: ms(18),
-    paddingVertical: vs(6),
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(8),
-  },
-  cheerOpenText: {
-    fontSize: ms(14),
-    lineHeight: ms(20),
-    fontWeight: '800',
-    color: colors.onboardingInk,
-  },
-  cheeredInline: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(237, 187, 23, 0.34)',
-    backgroundColor: 'rgba(255, 210, 63, 0.16)',
-    paddingHorizontal: ms(12),
-    paddingVertical: vs(8),
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ms(8),
-  },
-  cheeredInlineText: {
-    flexShrink: 1,
-    fontSize: ms(12),
-    lineHeight: ms(17),
-    fontWeight: '700',
-    color: colors.onboardingInk,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    shadowWrap: {
+      borderRadius: 28,
+      marginHorizontal: spacing.lg,
+      marginBottom: spacing.md,
+    },
+    card: {
+      borderRadius: 28,
+      backgroundColor: colors.onboardingCard,
+      paddingHorizontal: ms(20),
+      paddingVertical: vs(18),
+      borderWidth: 1,
+      borderColor: colors.onboardingLine,
+    },
+    pressed: {
+      opacity: 0.96,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+    },
+    identityRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      flex: 1,
+      gap: spacing.sm,
+    },
+    avatarWrap: {
+      position: 'relative',
+      width: ms(42),
+      height: ms(42),
+      flexShrink: 0,
+    },
+    avatarFallback: {
+      borderWidth: 0,
+    },
+    avatarText: {
+      color: colors.tactileMomentumSecondary,
+      fontWeight: '800',
+    },
+    helperOverlay: {
+      position: 'absolute',
+      bottom: ms(-4),
+      right: ms(-3),
+    },
+    identityTextBlock: {
+      flex: 1,
+      paddingTop: vs(2),
+    },
+    name: {
+      fontSize: ms(16),
+      lineHeight: ms(19),
+      fontWeight: '800',
+      color: colors.onboardingInk,
+    },
+    timeText: {
+      // marginTop: vs(2),
+      fontSize: ms(13),
+      lineHeight: ms(16),
+      color: colors.onboardingMuted,
+      fontWeight: '500',
+    },
+    feelingPill: {
+      paddingHorizontal: ms(12),
+      paddingVertical: vs(4),
+      borderRadius: 999,
+      backgroundColor: colors.inputBackground,
+      borderWidth: 1,
+      borderColor: colors.onboardingLine,
+      flexShrink: 0,
+    },
+    feelingText: {
+      fontSize: ms(12),
+      lineHeight: ms(14),
+      color: colors.onboardingInkSoft,
+      fontWeight: '700',
+    },
+    taskText: {
+      marginTop: spacing.sm,
+      color: colors.onboardingInk,
+      fontSize: ms(20),
+      lineHeight: ms(24),
+      fontWeight: '700',
+      letterSpacing: 0,
+    },
+    progressBlock: {
+      marginTop: spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      paddingRight: spacing.sm,
+      backgroundColor: colors.background,
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+    progressAccent: {
+      width: ms(6),
+      backgroundColor: colors.motivationBgHardest,
+    },
+    progressTextBlock: {
+      paddingVertical: vs(6),
+      paddingLeft: spacing.sm,
+      flex: 1,
+    },
+    progressLabel: {
+      fontSize: ms(12),
+      lineHeight: ms(14),
+      letterSpacing: 1.5,
+      textTransform: 'uppercase',
+      fontWeight: '900',
+      color: colors.motivationBgHardest,
+      // marginBottom: vs(4),
+    },
+    progressText: {
+      fontSize: ms(14),
+      lineHeight: ms(20),
+      color: colors.onboardingInkSoft,
+      fontWeight: '500',
+    },
+    footerRow: {
+      // marginTop: spacing.md,
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+    },
+    footerLeft: {
+      flex: 1,
+      minHeight: ms(36),
+      justifyContent: 'flex-end',
+    },
+    ticks: {
+      marginBottom: vs(2),
+    },
+    countLine: {
+      marginTop: vs(5),
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      color: colors.onboardingMuted,
+      fontWeight: '500',
+    },
+    countStrong: {
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      color: colors.onboardingInk,
+      fontWeight: '800',
+    },
+    countMuted: {
+      fontSize: ms(12),
+      lineHeight: ms(16),
+      color: colors.onboardingMuted,
+      fontWeight: '500',
+    },
+    noPushes: {
+      fontSize: ms(13),
+      lineHeight: ms(17),
+      color: 'rgba(118, 121, 128, 0.7)',
+      fontWeight: '500',
+    },
+    pushButton: {
+      minWidth: ms(90),
+      paddingHorizontal: ms(14),
+      paddingVertical: vs(8),
+      justifyContent: 'center',
+    },
+    pushButtonText: {
+      fontSize: ms(14),
+      lineHeight: ms(17),
+      fontWeight: '800',
+    },
+    cheerStrip: {
+      marginTop: vs(13),
+      borderTopWidth: 1,
+      borderTopColor: colors.onboardingLine,
+      paddingTop: vs(12),
+      alignItems: 'flex-start',
+    },
+    cheerOpenButton: {
+      // minHeight: vs(18),
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.onboardingPushDeep,
+      backgroundColor: 'rgba(255, 210, 63, 0.14)',
+      paddingHorizontal: ms(18),
+      paddingVertical: vs(6),
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(8),
+    },
+    cheerOpenText: {
+      fontSize: ms(14),
+      lineHeight: ms(20),
+      fontWeight: '800',
+      color: colors.onboardingInk,
+    },
+    cheeredInline: {
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: 'rgba(237, 187, 23, 0.34)',
+      backgroundColor: 'rgba(255, 210, 63, 0.16)',
+      paddingHorizontal: ms(12),
+      paddingVertical: vs(8),
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(8),
+    },
+    cheeredInlineText: {
+      flexShrink: 1,
+      fontSize: ms(12),
+      lineHeight: ms(17),
+      fontWeight: '700',
+      color: colors.onboardingInk,
+    },
+  });

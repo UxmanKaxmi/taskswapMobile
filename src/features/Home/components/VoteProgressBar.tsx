@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 import { ms } from 'react-native-size-matters';
-import { colors, spacing } from '@shared/theme';
+import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import Icon from '@shared/components/Icons/Icon';
@@ -21,6 +21,8 @@ export default function VoteProgressBar({
   percent2,
   votedOption,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const progress1 = useRef(new Animated.Value(0)).current;
   const progress2 = useRef(new Animated.Value(0)).current;
 
@@ -117,25 +119,26 @@ export default function VoteProgressBar({
   );
 }
 
-const styles = StyleSheet.create({
-  track: {
-    flexDirection: 'row',
-    height: ms(10),
-    width: '100%',
-    borderRadius: ms(5),
-    overflow: 'hidden',
-    backgroundColor: colors.border,
-    marginBottom: spacing.sm,
-  },
-  segment: {
-    height: '100%',
-  },
-  label: {
-    fontSize: ms(14),
-    color: colors.text,
-  },
-  neutral: {
-    color: colors.muted,
-    fontWeight: 'normal',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    track: {
+      flexDirection: 'row',
+      height: ms(10),
+      width: '100%',
+      borderRadius: ms(5),
+      overflow: 'hidden',
+      backgroundColor: colors.border,
+      marginBottom: spacing.sm,
+    },
+    segment: {
+      height: '100%',
+    },
+    label: {
+      fontSize: ms(14),
+      color: colors.text,
+    },
+    neutral: {
+      color: colors.muted,
+      fontWeight: 'normal',
+    },
+  });

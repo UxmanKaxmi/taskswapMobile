@@ -5,8 +5,8 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
 import { timeAgo } from '@shared/utils/helperFunctions';
 import type { NotificationDTO } from '../types/notification.types';
-import { getTypeColor, typeIcons } from '@shared/utils/typeVisuals';
-import { notificationStyles } from '../styles/notification.styles';
+import { typeIcons, useTypeVisuals } from '@shared/utils/typeVisuals';
+import { useNotificationStyles } from '../styles/notification.styles';
 import NotificationIconBadge from './NotificationIconBadge';
 
 type Props = {
@@ -15,6 +15,8 @@ type Props = {
 };
 
 export default function GoalAdviceNotification({ item, onPress }: Props) {
+  const notificationStyles = useNotificationStyles();
+  const { getTypeColor } = useTypeVisuals();
   const taskType = item.taskType || 'advice';
 
   const iconName = typeIcons[taskType];

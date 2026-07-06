@@ -1,7 +1,9 @@
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 import { handleNotificationRoute } from './notificationNavigation';
-import { colors } from '@shared/theme';
+// Headless module (no React components): system notification accents can't
+// follow the in-app theme, so we use the light palette explicitly.
+import { lightColors } from '@shared/theme';
 
 export async function requestUserPermission() {
   const authStatus = await messaging().requestPermission();
@@ -48,7 +50,7 @@ export function onForegroundNotification() {
         channelId: 'default',
         smallIcon: 'ic_notification',
         largeIcon: require('@assets/images/logo.png'),
-        color: colors.onboardingPush,
+        color: lightColors.onboardingPush,
         pressAction: {
           id: 'default',
         },

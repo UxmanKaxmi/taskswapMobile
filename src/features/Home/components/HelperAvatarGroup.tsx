@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { GoalHelper } from '../types/home';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { ms } from 'react-native-size-matters';
-import { colors } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { Shadow } from '@shared/components/Shadow';
 import Avatar from '@shared/components/Avatar/Avatar';
 import { getAvatarColor } from '@shared/utils/avatarColor';
@@ -16,6 +16,8 @@ type Props = {
 };
 
 export default function HelperAvatarGroup({ helpers, avatarSize = ms(38), containerStyle }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   if (!helpers || helpers.length === 0) {
     return null;
   }
@@ -73,27 +75,28 @@ export default function HelperAvatarGroup({ helpers, avatarSize = ms(38), contai
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    position: 'relative',
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      position: 'relative',
+    },
 
-  avatarText: {
-    color: colors.onboardingInk,
-    fontWeight: '800',
-  },
+    avatarText: {
+      color: colors.tactileMomentumSecondary,
+      fontWeight: '800',
+    },
 
-  more: {
-    backgroundColor: colors.tactileMomentumPrimary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.tactileMomentumPrimary,
-  },
+    more: {
+      backgroundColor: colors.tactileMomentumPrimary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.tactileMomentumPrimary,
+    },
 
-  moreText: {
-    color: colors.tactileMomentumSecondary,
-    fontSize: ms(9),
-    fontWeight: '700',
-  },
-});
+    moreText: {
+      color: colors.tactileMomentumSecondary,
+      fontSize: ms(9),
+      fontWeight: '700',
+    },
+  });

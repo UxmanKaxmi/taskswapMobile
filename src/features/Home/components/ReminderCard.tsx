@@ -6,10 +6,10 @@ import { ms, vs } from 'react-native-size-matters';
 import { format, isBefore } from 'date-fns';
 
 import TextElement from '@shared/components/TextElement/TextElement';
-import { colors, spacing } from '@shared/theme';
+import { spacing, useTheme } from '@shared/theme';
 import { ReminderGoal } from '../types/home';
 import { humanizeReminderDate, stripOuterQuotes } from '@shared/utils/helperFunctions';
-import { cardStyles } from './styles';
+import { useCardStyles } from './styles';
 import GoalFooter from './GoalFooter';
 import { Shadow } from '@shared/components/Shadow';
 import { Icon } from '@shared/components/Icons';
@@ -40,6 +40,8 @@ export default function ReminderCard({ task, onPressCard, onPressShare }: Props)
     helpers,
   } = task;
 
+  const { colors } = useTheme();
+  const cardStyles = useCardStyles();
   const { user } = useAuth();
   const isOwner = userId === user?.id;
   const { openReminderMessageSheet } = useModal();
