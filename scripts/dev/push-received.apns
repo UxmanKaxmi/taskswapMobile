@@ -1,0 +1,14 @@
+{
+  "Simulator Target Bundle": "com.pushmeup.app",
+  "aps": {
+    "alert": {
+      "title": "Sara pushed you 👏",
+      "body": "Keep your goal moving!"
+    }
+  },
+  "gcm.message_id": "sim-test-push-1",
+  "notificationType": "PUSH_RECEIVED",
+  "pusherName": "Sara",
+  "taskId": "REPLACE_WITH_A_REAL_TASK_ID",
+  "pushCount": "3"
+}
