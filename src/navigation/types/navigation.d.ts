@@ -105,6 +105,7 @@ export type AppStackParamList = {
   YourImpactScreen: undefined;
   SendFeedbackScreen: undefined;
   BlockedUsersScreen: undefined;
+  ChangelogScreen: undefined;
 
   // debug
   MainDebugScreen: undefined;

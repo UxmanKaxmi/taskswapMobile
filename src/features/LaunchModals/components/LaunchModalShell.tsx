@@ -15,7 +15,9 @@ type LaunchModalShellProps = {
   onHidden?: () => void;
   tag: string;
   title: string;
-  body: string;
+  body?: string;
+  /** Custom body layout; takes precedence over the centered `body` text. */
+  bodyContent?: React.ReactNode;
   note: string;
   ctaLabel: string;
   onCtaPress: () => void;
@@ -32,6 +34,7 @@ export default function LaunchModalShell({
   tag,
   title,
   body,
+  bodyContent,
   note,
   ctaLabel,
   onCtaPress,
@@ -81,9 +84,11 @@ export default function LaunchModalShell({
               {title}
             </TextElement>
 
-            <TextElement style={styles.body} color="muted">
-              {body}
-            </TextElement>
+            {bodyContent ?? (
+              <TextElement style={styles.body} color="muted">
+                {body}
+              </TextElement>
+            )}
 
             <TextElement style={styles.note}>{note}</TextElement>
 
@@ -137,7 +142,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     card: {
       width: '100%',
-      maxWidth: ms(320),
+      maxWidth: ms(330),
       backgroundColor: colors.onboardingCard,
       borderRadius: ms(34),
       paddingHorizontal: ms(28),

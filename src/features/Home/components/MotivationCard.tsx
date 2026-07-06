@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
+import {
+  Animated,
+  Easing,
+  Pressable,
+  StyleSheet,
+  View,
+  type GestureResponderEvent,
+} from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -41,7 +48,7 @@ function MotivationCard({ task, onPressCard }: Props) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const { user } = useAuth();
-  const { openCheerSheet } = useModal();
+  const { openCheerSheet, openModal } = useModal();
   const { avatar, name = 'John Doe', createdAt, text, helpers = [] } = task;
   const { data: pushData } = useGoalPushes(task.id);
   const { mutate: togglePush, isPending } = useToggleGoalPush(task.id);
@@ -62,7 +69,10 @@ function MotivationCard({ task, onPressCard }: Props) {
   );
   const taskBeats = task.beats ?? [];
   const feelingLabel = useMemo(() => buildFeelingLabel(task), [task]);
-  const avatarColor = useMemo(() => getAvatarColor(task.userId || name), [name, task.userId]);
+  const avatarColor = useMemo(
+    () => task.avatarColor ?? getAvatarColor(task.userId || name),
+    [name, task.avatarColor, task.userId],
+  );
   const feedProgressText =
     task?.progressUpdates
       ?.map(update => stripOuterQuotes(update?.text ?? '').trim())
@@ -227,6 +237,19 @@ function MotivationCard({ task, onPressCard }: Props) {
     });
   }, [latestCheerableBeat, name, openCheerSheet, sendCheer]);
 
+  const handleAnonymousBadgePress = useCallback(
+    (event: GestureResponderEvent) => {
+      event.stopPropagation();
+      openModal('anonymousPostingInfo', {
+        userName: user?.name ?? 'you',
+        mode: 'posted',
+        primaryActionLabel: 'Got it',
+        hideSecondaryAction: true,
+      });
+    },
+    [openModal, user?.name],
+  );
+
   return (
     <Animated.View style={{ transform: [{ translateX: cardNudgeX }] }}>
       <Shadow size="tint" color="rgba(0, 0, 0, 0.08)" style={styles.shadowWrap}>
@@ -257,7 +280,23 @@ function MotivationCard({ task, onPressCard }: Props) {
                 </View>
 
                 <View style={styles.identityTextBlock}>
-                  <TextElement style={styles.name}>{toShortName(name)}</TextElement>
+                  <View style={styles.nameRow}>
+                    <TextElement style={styles.name}>{toShortName(name)}</TextElement>
+                    {task.isAnonymous && isOwner ? (
+                      <Pressable
+                        onPress={handleAnonymousBadgePress}
+                        accessibilityRole="button"
+                        accessibilityLabel="Anonymous posting info"
+                        hitSlop={8}
+                        style={({ pressed }) => [
+                          styles.anonBadge,
+                          pressed && styles.anonBadgePressed,
+                        ]}
+                      >
+                        <TextElement style={styles.anonBadgeText}>Anonymous</TextElement>
+                      </Pressable>
+                    ) : null}
+                  </View>
                   <TextElement style={styles.timeText}>{timeAgo(createdAt)}</TextElement>
                 </View>
               </View>
@@ -468,6 +507,27 @@ const createStyles = (colors: ThemeColors) =>
       lineHeight: ms(19),
       fontWeight: '800',
       color: colors.onboardingInk,
+    },
+    nameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: ms(4),
+    },
+    anonBadge: {
+      backgroundColor: colors.muted + '22',
+      borderRadius: 999,
+      paddingHorizontal: ms(5),
+      paddingVertical: vs(0.5),
+    },
+    anonBadgePressed: {
+      opacity: 0.7,
+    },
+    anonBadgeText: {
+      color: colors.muted,
+      fontSize: ms(8),
+      lineHeight: ms(11),
+      fontWeight: '700',
+      letterSpacing: 0.2,
     },
     timeText: {
       // marginTop: vs(2),

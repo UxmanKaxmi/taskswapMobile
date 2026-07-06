@@ -12,4 +12,5 @@ export interface CreateGoalPayload {
   options?: string[]; // For decision tasks
   deliverAt?: string | null; // For motivation tasks
   helpers?: string[]; // IDs of users to assign as helpers
+  isAnonymous?: boolean; // Post under a generated alias
 }

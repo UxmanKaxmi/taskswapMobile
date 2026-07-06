@@ -9,6 +9,8 @@ import MotivationSuccessModalContent from './modals/MotivationSuccessModalConten
 import ComingSoonModalContent from './modals/ComingSoonModalContent';
 import CompleteGoalConfirmationModalContent from './modals/CompleteGoalConfirmationModalContent';
 import ReportTaskModalContent from './modals/ReportTaskModalContent';
+import AnonymousPostingInfoModalContent from './modals/AnonymousPostingInfoModalContent';
+import RevealGoalModalContent from './modals/RevealGoalModalContent';
 import { type ModalPayloadMap, type ModalType } from './modalTypes';
 
 type RenderContext = {
@@ -78,6 +80,20 @@ export const modalRegistry: { [K in ModalType]: ModalDefinition<K> } = {
     scrollable: true,
     render: (payload, { closeModal }) => (
       <ReportTaskModalContent payload={payload} closeModal={closeModal} />
+    ),
+  },
+  // No fixed snap points: enableDynamicSizing opens these at content height,
+  // so the CTA is never clipped below the fold on any device.
+  anonymousPostingInfo: {
+    snapPoints: [],
+    render: (payload, { closeModal }) => (
+      <AnonymousPostingInfoModalContent payload={payload} closeModal={closeModal} />
+    ),
+  },
+  revealGoal: {
+    snapPoints: [],
+    render: (payload, { closeModal }) => (
+      <RevealGoalModalContent payload={payload} closeModal={closeModal} />
     ),
   },
 };

@@ -255,6 +255,9 @@ export default function NotificationMainScreen() {
         case 'task-motivation-push':
           openGoalDetail(item.metadata?.taskId, item.metadata?.commentId);
           return;
+        case 'task-pushed-task-milestone':
+          openGoalDetail(item.metadata?.taskId);
+          return;
         case 'task-cheer':
         case 'task-motivation-cheer':
           openGoalDetail(item.metadata?.taskId, undefined, {

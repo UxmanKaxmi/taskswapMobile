@@ -16,6 +16,7 @@ type Props = {
 const TITLE_BY_TYPE: Partial<Record<NotificationDTO['type'], string>> = {
   'task-motivation-unfinished-reminder': 'Your motivation is still waiting',
   'task-motivation-help-push-reminder': 'Someone could use a push today',
+  'task-pushed-task-milestone': 'Your push is paying off',
 };
 
 export default function MotivationSystemNotification({ item, onPress }: Props) {

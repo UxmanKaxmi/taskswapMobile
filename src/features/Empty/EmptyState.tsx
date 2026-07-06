@@ -1,10 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing } from '@shared/theme';
-import { Width } from '@shared/components/Spacing';
-import { deviceWidth } from '@shared/utils/helperFunctions';
+import { useTheme } from '@shared/theme/useTheme';
 
 type Props = {
   title?: string;
@@ -15,6 +14,7 @@ type Props = {
 export default function EmptyState({ title, subtitle, icon }: Props) {
   const fallbackTitle = title || 'Nothing to show here yet.';
   const viewRef = useRef<Animatable.View & View>(null);
+  const { colors } = useTheme();
 
   return (
     <Animatable.View
@@ -24,16 +24,12 @@ export default function EmptyState({ title, subtitle, icon }: Props) {
       useNativeDriver
       style={styles.container}
     >
-      {/* <Image
-        source={icon || require('@assets/images/emptyFriend.png')}
-        style={styles.image}
-        resizeMode="contain"
-      /> */}
+      {icon ? <Image source={icon} style={styles.image} resizeMode="contain" /> : null}
       <TextElement variant="title" style={styles.title}>
         {fallbackTitle}
       </TextElement>
       {subtitle && (
-        <TextElement variant="body" style={styles.subtitle}>
+        <TextElement variant="body" style={[styles.subtitle, { color: colors.muted }]}>
           {subtitle}
         </TextElement>
       )}
@@ -48,6 +44,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignSelf: 'center',
     flex: 1,
+    width: '100%',
   },
   image: {
     width: 250,
@@ -61,8 +58,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     textAlign: 'center',
-    color: '#777',
-    width: deviceWidth, // ✅ allow flexibility within the parent
-    alignSelf: 'center',
+    alignSelf: 'stretch',
+    paddingHorizontal: spacing.sm,
   },
 });

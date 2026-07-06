@@ -6,22 +6,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '@shared/api/axios';
 import type { CustomAxiosRequestConfig } from '@shared/api/axios';
 import { buildRoute } from '@shared/api/apiRoutes';
-import { getGoogleIdToken } from '@shared/utils/googleAuth';
 import { openAppSettings } from '@navigation/types/navigationUtils';
 import NotificationPermissionModal from './NotificationPermissionModal';
 
 const PERMISSION_KEY = 'notification_permission_granted';
 const PROMPT_DISMISSED_KEY = 'notification_permission_prompt_dismissed';
 const FCM_TOKEN_KEY = 'fcm_token';
-const AUTH_USER_KEY = 'auth:user';
 const AUTH_TOKEN_KEY = 'auth:token';
-
-type StoredUser = {
-  id?: string;
-  name?: string;
-  email?: string;
-  photo?: string;
-};
 
 type PromptListener = () => void;
 
@@ -30,43 +21,22 @@ let pendingPrompt = false;
 
 const syncFcmTokenToBackend = async (fcmToken: string) => {
   try {
-    const userRaw = await AsyncStorage.getItem(AUTH_USER_KEY);
+    // Uses the backend JWT so token refresh works for every auth provider
+    // (the old google-sync path silently failed for Apple sign-in users).
+    const storedToken = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
 
-    if (!userRaw) return;
+    if (!storedToken) return;
 
-    const parsedUser = JSON.parse(userRaw) as StoredUser;
-    const userId = parsedUser?.id?.trim();
-    const name = parsedUser?.name?.trim();
-    const email = parsedUser?.email?.trim();
-
-    if (!userId || !name || !email) return;
-
-    const idToken = await getGoogleIdToken();
-    const response = await api.post(
-      buildRoute.syncUserToDb(),
+    await api.patch(
+      buildRoute.updateFcmToken(),
+      { fcmToken },
       {
-        id: userId,
-        name,
-        email,
-        photo: parsedUser.photo ?? '',
-        fcmToken,
-      },
-      {
-        headers: { Authorization: `Bearer ${idToken}` },
+        headers: { Authorization: `Bearer ${storedToken}` },
         skipToast: true,
         skipAuthLogout: true,
         skipAuthRefresh: true,
       } as CustomAxiosRequestConfig,
     );
-
-    if (response.data?.token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-      await AsyncStorage.setItem(AUTH_TOKEN_KEY, response.data.token);
-    }
-
-    if (response.data?.user) {
-      await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(response.data.user));
-    }
   } catch (error) {
     console.warn('Failed to sync FCM token to backend', error);
   }

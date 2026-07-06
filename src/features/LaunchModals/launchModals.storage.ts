@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const KEY_PREFIX = 'launch_modal_seen:';
 const APP_LAUNCH_COUNT_KEY = 'app_launch_count';
 const LAST_SHOWN_LAUNCH_KEY = 'launch_modal_last_shown_launch';
+const WHATS_NEW_BASELINE_KEY = 'whats_new_baseline_version';
 
 export function getLaunchModalSeenKey(id: string) {
   return `${KEY_PREFIX}${id}`;
@@ -50,4 +51,14 @@ export async function getLastShownLaunch(): Promise<number> {
 
 export async function setLastShownLaunch(launchCount: number): Promise<void> {
   await AsyncStorage.setItem(LAST_SHOWN_LAUNCH_KEY, String(launchCount));
+}
+
+// The app version at install time. Users who installed at version X should
+// never see the What's New modal for X — everything was new to them.
+export async function getWhatsNewBaseline(): Promise<string | null> {
+  return AsyncStorage.getItem(WHATS_NEW_BASELINE_KEY);
+}
+
+export async function setWhatsNewBaseline(version: string): Promise<void> {
+  await AsyncStorage.setItem(WHATS_NEW_BASELINE_KEY, version);
 }

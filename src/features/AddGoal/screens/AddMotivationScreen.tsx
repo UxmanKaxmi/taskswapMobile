@@ -22,6 +22,11 @@ import { requestNotificationPermissionPromptForValueMoment } from '@lib/notifica
 import Tag from '@shared/components/Tag/Tag';
 import AnimatedBottomButtonWithHeader from '@shared/components/Buttons/AnimatedBottomButtonWithHeader';
 import TagHelperCard from '../components/TagHelperCard';
+import PostAsRow from '../components/PostAsRow';
+import {
+  hasSeenAnonymousPostingExplainer,
+  markAnonymousPostingExplainerSeen,
+} from '../anonymousPosting.storage';
 import SelectHelpersModal from '../components/SelectHelpersModal';
 import { HelperUser } from '@features/Home/types/home';
 import { useFollowers } from '@features/User/hooks/useFollowers';
@@ -49,6 +54,7 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
   const [selectedFeeling, setSelectedFeeling] = useState<FeelingValue | undefined>(undefined);
   const [helpers, setHelpers] = useState<HelperUser[]>([]);
   const [showHelperModal, setShowHelperModal] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const { mutate: createGoal, isPending } = useCreateGoal();
@@ -68,6 +74,7 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
 
     setText(draft.text ?? '');
     setSelectedFeeling(normalizeFeelingValue(draft.feeling) ?? undefined);
+    setIsAnonymous(draft.isAnonymous === true);
   }, [route.params?.draft]);
 
   const hasAutoSubmittedRef = React.useRef(false);
@@ -93,6 +100,32 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
     },
     [error],
   );
+
+  const enableAnonymous = React.useCallback(() => {
+    setIsAnonymous(true);
+    // Anonymous goals can't tag friends — contradiction in terms.
+    setHelpers([]);
+  }, []);
+
+  const handleToggleAnonymous = React.useCallback(async () => {
+    if (isAnonymous) {
+      setIsAnonymous(false);
+      return;
+    }
+
+    // First press ever: explain how anonymous posting works before enabling.
+    const seen = await hasSeenAnonymousPostingExplainer();
+    if (!seen) {
+      await markAnonymousPostingExplainerSeen();
+      openModal('anonymousPostingInfo', {
+        userName: user?.name ?? 'you',
+        onPostAnonymously: enableAnonymous,
+      });
+      return;
+    }
+
+    enableAnonymous();
+  }, [enableAnonymous, isAnonymous, openModal, user?.name]);
 
   const handleGoalCreated = React.useCallback(
     (task: Goal) => {
@@ -166,7 +199,8 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
       type: GoalTypeEnum.Motivation,
       text: text.trim(),
       feeling: selectedFeeling,
-      helpers: helpers.map(helper => helper.id),
+      helpers: isAnonymous ? [] : helpers.map(helper => helper.id),
+      isAnonymous,
     };
 
     if (!user) {
@@ -289,16 +323,24 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
           </View>
         </View>
 
-        <TagHelperCard
-          variant="prompt"
-          helpers={helpers}
-          onPress={() => setShowHelperModal(true)}
-          taskType={GoalTypeEnum.Motivation}
-          headerLabel="TAG A FRIEND  —"
-          headerSuffix="optional"
-          title="Tag someone who keeps you honest"
-          subtitle="They'll get a nudge to push you."
+        <PostAsRow
+          userName={user?.name ?? 'you'}
+          isAnonymous={isAnonymous}
+          onToggle={() => void handleToggleAnonymous()}
         />
+
+        {!isAnonymous ? (
+          <TagHelperCard
+            variant="prompt"
+            helpers={helpers}
+            onPress={() => setShowHelperModal(true)}
+            taskType={GoalTypeEnum.Motivation}
+            headerLabel="TAG A FRIEND  —"
+            headerSuffix="optional"
+            title="Tag someone who keeps you honest"
+            subtitle="They'll get a nudge to push you."
+          />
+        ) : null}
         {/* <View style={styles.footerCopy}>
           <TextElement variant="body" style={styles.footerText} color="onboardingMuted">
             Your goal is visible to the community. First pushes usually land within minutes — no one
@@ -325,6 +367,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     container: {
       backgroundColor: colors.onboardingPaper,
+      marginHorizontal: spacing.sm,
     },
     screen: {
       paddingTop: isAndroid ? vs(18) : 0,

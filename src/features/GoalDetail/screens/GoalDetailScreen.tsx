@@ -48,6 +48,7 @@ import AnimatedBottomButtonWithHeader, {
 } from '@shared/components/Buttons/AnimatedBottomButtonWithHeader';
 import GoalStatusRow from '../components/GoalStatusRow';
 import { useCompleteGoal } from '@features/Home/hooks/useCompleteGoal';
+import { useRevealGoal } from '../hooks/useRevealGoal';
 import { showToast } from '@shared/utils/toast';
 import { useAddComment } from '@features/Goals/hooks/useComment';
 import Animated, {
@@ -71,8 +72,8 @@ import { api } from '@shared/api/axios';
 import { buildRoute } from '@shared/api/apiRoutes';
 import { showConfirmAlert } from '@shared/utils/confirmAlert';
 import { useCreateGoalProgressUpdate } from '@features/Goals/hooks/useGoalProgress';
-import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
-import EmptyState from '@features/Empty/EmptyState';
+import OutlineButton from '@shared/components/Buttons/OutlineButton';
+import PushButton from '@shared/components/PushButton';
 import CompletionBurst from '../components/CompletionBurst';
 import { useSendCheer } from '@features/Goals/hooks/useGoalCheer';
 
@@ -177,6 +178,15 @@ export default function GoalDetailScreen({
 
   const task = isGoalQueryError ? null : (taskData ?? initialGoal);
   const taskError = isGoalQueryError;
+
+  const handleUnavailableGoBack = useCallback(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.navigate('Tabs', { screen: 'Home' });
+  }, [navigation]);
   const isCompleted = Boolean(task?.completed || task?.completedAt);
   const isOwner = useIsOwner(task?.userId);
   const hasHelpers = !!task?.helpers?.length;
@@ -216,6 +226,7 @@ export default function GoalDetailScreen({
   const { mutate: addReminder } = useAddReminder(task?.id ?? '');
 
   const { mutate: completeGoal } = useCompleteGoal();
+  const { mutate: revealGoal } = useRevealGoal();
   const openHelpersSheet = useCallback(() => {
     setShowHelperModal(true);
   }, []);
@@ -244,6 +255,8 @@ export default function GoalDetailScreen({
   const handleMarkCompletePress = useCallback(() => {
     if (!task?.id) return;
 
+    const wasAnonymous = task.isAnonymous === true;
+
     openModal('completeGoalConfirmation', {
       type: task.type,
       onConfirm: () => {
@@ -256,11 +269,29 @@ export default function GoalDetailScreen({
               type: 'success',
               title: 'Completed — you followed through.',
             });
+
+            // The reveal moment: claiming a hidden struggle at the moment of
+            // victory. Offered once, right after the celebration lands.
+            if (wasAnonymous) {
+              setTimeout(() => {
+                openModal('revealGoal', {
+                  onReveal: () =>
+                    revealGoal(task.id, {
+                      onSuccess: () => {
+                        showToast({
+                          type: 'success',
+                          title: 'It was you all along. Win claimed.',
+                        });
+                      },
+                    }),
+                });
+              }, 1200);
+            }
           },
         });
       },
     });
-  }, [completeGoal, isOwner, openModal, task?.id, task?.type]);
+  }, [completeGoal, isOwner, openModal, revealGoal, task?.id, task?.type, task?.isAnonymous]);
 
   const handleHelpersConfirmed = useCallback(
     async (ids: string[]) => {
@@ -1094,22 +1125,60 @@ export default function GoalDetailScreen({
       <Layout allowPaddingVertical allowPaddingHorizontal>
         <AppHeader />
 
-        <View style={styles.errorState}>
-          <EmptyState
-            title="Goal unavailable"
-            subtitle="This task may have been deleted, moved to private, or you may not have access."
-          />
+        <View style={styles.errorScreen}>
+          <View style={styles.errorState}>
+            <View
+              style={[
+                styles.errorIconShell,
+                {
+                  backgroundColor: colors.onboardingCard,
+                  borderColor: colors.onboardingLine,
+                },
+              ]}
+            >
+              <Icon
+                set="ion"
+                name="lock-closed-outline"
+                size={ms(28)}
+                color={colors.tactileMomentumSecondary}
+              />
+            </View>
+
+            <TextElement
+              variant="title"
+              weight="800"
+              style={[styles.errorTitle, { color: colors.onboardingInk }]}
+            >
+              Goal unavailable
+            </TextElement>
+            <TextElement
+              variant="body"
+              weight="500"
+              style={[styles.errorSubtitle, { color: colors.onboardingMuted }]}
+            >
+              This goal may have been deleted, moved to private, or you may not have access.
+            </TextElement>
+          </View>
 
           <View style={styles.errorActions}>
-            <PrimaryButton
-              title="Go back"
-              onPress={() => navigation.canGoBack() && navigation.goBack()}
+            <PushButton
+              size="lg"
+              label="Go back"
+              onPress={handleUnavailableGoBack}
+              backgroundColor={colors.onboardingPush}
+              textColor={colors.tactileMomentumSecondary}
+              hideIcon
+              style={styles.errorPrimaryButton}
+              textStyle={styles.errorPrimaryText}
             />
-            <PrimaryButton
+            <OutlineButton
               title="Open Inbox"
               onPress={() => navigation.navigate('NotificationMainScreen')}
-              backgroundColor={colors.surface}
-              textStyle={{ color: colors.text }}
+              borderColor={colors.onboardingLine}
+              backgroundColor={colors.onboardingCard}
+              textColor={colors.onboardingInk}
+              style={styles.errorSecondaryButton}
+              textStyle={styles.errorSecondaryText}
             />
           </View>
         </View>
@@ -1264,12 +1333,56 @@ const styles = StyleSheet.create({
   headerAction: {
     paddingHorizontal: ms(5),
   },
+  errorScreen: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingTop: vs(24),
+    paddingBottom: vs(4),
+  },
   errorState: {
     flex: 1,
+    alignItems: 'center',
     justifyContent: 'center',
+    paddingBottom: vs(54),
+  },
+  errorIconShell: {
+    width: ms(72),
+    height: ms(72),
+    borderRadius: ms(28),
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: vs(20),
+  },
+  errorTitle: {
+    textAlign: 'center',
+    marginBottom: vs(10),
+  },
+  errorSubtitle: {
+    textAlign: 'center',
+    maxWidth: ms(315),
+    paddingHorizontal: ms(8),
   },
   errorActions: {
-    marginTop: 16,
-    gap: 12,
+    gap: vs(10),
+  },
+  errorPrimaryButton: {
+    alignSelf: 'stretch',
+    marginHorizontal: 0,
+    marginVertical: 0,
+  },
+  errorPrimaryText: {
+    fontSize: ms(17),
+    fontWeight: '800',
+  },
+  errorSecondaryButton: {
+    alignSelf: 'stretch',
+    marginHorizontal: 0,
+    marginVertical: 0,
+  },
+  errorSecondaryText: {
+    fontSize: ms(16),
+    fontWeight: '800',
+    textAlign: 'center',
   },
 });

@@ -53,6 +53,19 @@ export type ReportTaskModalPayload = {
   onSubmit: (reason: ReportReason, details?: string) => void | Promise<void>;
 };
 
+export type AnonymousPostingInfoModalPayload = {
+  userName: string;
+  mode?: 'composer' | 'posted';
+  onPostAnonymously?: () => void;
+  primaryActionLabel?: string;
+  secondaryActionLabel?: string;
+  hideSecondaryAction?: boolean;
+};
+
+export type RevealGoalModalPayload = {
+  onReveal: () => void | Promise<void>;
+};
+
 export type ModalPayloadMap = {
   info: InfoModalPayload;
   reminderMessage: ReminderMessageModalPayload;
@@ -62,6 +75,8 @@ export type ModalPayloadMap = {
   comingSoon: ComingSoonModalPayload;
   completeGoalConfirmation: CompleteGoalConfirmationModalPayload;
   reportTask: ReportTaskModalPayload;
+  anonymousPostingInfo: AnonymousPostingInfoModalPayload;
+  revealGoal: RevealGoalModalPayload;
 };
 
 export type ModalType = keyof ModalPayloadMap;
@@ -98,5 +113,13 @@ export type ModalState =
   | {
       type: 'reportTask';
       payload: ReportTaskModalPayload;
+    }
+  | {
+      type: 'anonymousPostingInfo';
+      payload: AnonymousPostingInfoModalPayload;
+    }
+  | {
+      type: 'revealGoal';
+      payload: RevealGoalModalPayload;
     }
   | null;

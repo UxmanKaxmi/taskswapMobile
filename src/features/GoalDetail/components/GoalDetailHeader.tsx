@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable, type GestureResponderEvent } from 'react-native';
 import { ms } from 'react-native-size-matters';
 
 import Avatar from '@shared/components/Avatar/Avatar';
@@ -17,7 +17,9 @@ import { openFriendsProfile } from '@navigation/types/navigationUtils';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
 import { useAuth } from '@features/Auth/AuthProvider';
+import { isAnonOwnerId } from '@shared/utils/anonymity';
 import GoalStatusPill from './GoalStatusPill';
+import { useModal } from '@shared/components/ModalProvider';
 
 type Props = {
   task: {
@@ -29,6 +31,8 @@ type Props = {
     helpers?: HelperUser[];
     completed?: boolean;
     userId?: string;
+    isAnonymous?: boolean;
+    avatarColor?: string;
   };
 };
 
@@ -38,18 +42,41 @@ export function GoalDetailHeader({ task }: Props) {
 
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const { user } = useAuth();
+  const { openModal } = useModal();
+
+  // Anonymous goals: the masked owner id never resolves to a profile, so the
+  // author chip must not navigate anywhere.
+  const canOpenProfile = !isAnonOwnerId(task.userId);
+  const isOwnAnonymousGoal = task.isAnonymous === true && !!user?.id && task.userId === user.id;
+
+  const handleOpenProfile = () => {
+    if (!canOpenProfile) return;
+    openFriendsProfile(navigation, task?.userId || '', user?.id);
+  };
+
+  const handleAnonymousBadgePress = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    openModal('anonymousPostingInfo', {
+      userName: user?.name ?? 'you',
+      mode: 'posted',
+      primaryActionLabel: 'Got it',
+      hideSecondaryAction: true,
+    });
+  };
 
   return (
     <Row align="center" justify="flex-start">
       {/* Avatar + helpers */}
       <View style={[styles.avatarWrapper, { width: avatarSize, height: avatarSize }]}>
-        <Ripple onPress={() => openFriendsProfile(navigation, task?.userId || '', user?.id)}>
+        <Ripple onPress={handleOpenProfile}>
           <Avatar
             uri={task.avatar}
             fallback={task.name}
             size={avatarSize}
             borderColor="transparent"
-            fallbackStyle={{ backgroundColor: getAvatarColor(task.userId || task.name) }}
+            fallbackStyle={{
+              backgroundColor: task.avatarColor ?? getAvatarColor(task.userId || task.name),
+            }}
             textStyle={styles.avatarText}
           />
 
@@ -65,10 +92,25 @@ export function GoalDetailHeader({ task }: Props) {
 
       {/* Name + meta */}
       <View style={{ flex: 1 }}>
-        <Ripple onPress={() => openFriendsProfile(navigation, task?.userId || '', user?.id)}>
-          <TextElement variant="subtitle" style={styles.name}>
-            {toShortName(task.name)}
-          </TextElement>
+        <Ripple onPress={handleOpenProfile}>
+          <Row gap={4} justify="flex-start" align="center">
+            <TextElement variant="subtitle" style={styles.name}>
+              {toShortName(task.name)}
+            </TextElement>
+            {isOwnAnonymousGoal ? (
+              <Pressable
+                onPress={handleAnonymousBadgePress}
+                accessibilityRole="button"
+                accessibilityLabel="Anonymous posting info"
+                hitSlop={8}
+                style={({ pressed }) => [styles.anonBadge, pressed && styles.anonBadgePressed]}
+              >
+                <TextElement variant="caption" weight="700" style={styles.anonBadgeText}>
+                  Anonymous
+                </TextElement>
+              </Pressable>
+            ) : null}
+          </Row>
         </Ripple>
 
         {/* 🔥 Meta row (inline) */}
@@ -114,6 +156,24 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: ms(16),
       // lineHeight: ms(18),
       fontWeight: '600',
+    },
+
+    anonBadge: {
+      backgroundColor: colors.muted + '22',
+      borderRadius: 999,
+      paddingHorizontal: ms(5),
+      paddingVertical: ms(1),
+    },
+
+    anonBadgePressed: {
+      opacity: 0.7,
+    },
+
+    anonBadgeText: {
+      color: colors.muted,
+      fontSize: ms(8),
+      lineHeight: ms(11),
+      letterSpacing: 0.2,
     },
 
     metaRow: {

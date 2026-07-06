@@ -23,6 +23,7 @@ import Ripple from '@shared/components/Buttons/Ripple';
 import { deleteMyAccount } from '../api/MyProfileAPI';
 import { showToast } from '@shared/utils/toast';
 import { SUPPORT_URL } from '@shared/utils/constants';
+import { LATEST_RELEASE } from '../data/changelog';
 import AppModal from '@shared/components/AppModal/AppModal';
 import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
@@ -201,6 +202,15 @@ export default function ProfileMenu() {
             },
             iconSet: 'ion',
             valueLabel: activeThemeOption.label,
+          },
+          {
+            label: "What's New",
+            icon: 'gift-outline',
+            onPress: () => {
+              navigation.navigate('ChangelogScreen');
+            },
+            iconSet: 'ion',
+            valueLabel: LATEST_RELEASE.version,
           },
         ],
       },

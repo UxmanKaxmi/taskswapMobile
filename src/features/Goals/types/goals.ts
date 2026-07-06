@@ -62,6 +62,8 @@ export type Goal = {
   deliverAt?: string; // for motivation tasks
   avatar?: string;
   name?: string;
+  isAnonymous?: boolean;
+  avatarColor?: string; // server-provided for anonymous goals
   feeling?: FeelingValue;
   hasAdvised?: boolean;
   hasVoted?: boolean;

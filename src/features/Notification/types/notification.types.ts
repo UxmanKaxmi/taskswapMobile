@@ -17,6 +17,7 @@ export interface NotificationDTO {
     | 'task-cheer'
     | 'task-motivation-cheer'
     | 'task-motivation-milestone'
+    | 'task-pushed-task-milestone'
     | 'task-motivation-progress'
     | 'task-motivation-unfinished-reminder'
     | 'task-motivation-help-push-reminder'

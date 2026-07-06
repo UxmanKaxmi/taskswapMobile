@@ -209,6 +209,9 @@ export function getNotificationRoute(data: unknown): NotificationRoute {
         scrollTo: 'progress',
       });
 
+    case 'task-pushed-task-milestone':
+      return buildGoalDetailRouteOrInbox(payload, taskId);
+
     case 'comment':
     case 'commentmention':
       return buildGoalDetailRouteOrInbox(payload, taskId, {

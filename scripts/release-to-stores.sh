@@ -2,6 +2,38 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RELEASE_ENV_FILE="${RELEASE_ENV_FILE:-.env.release.local}"
+
+load_release_env() {
+  local env_file="$RELEASE_ENV_FILE"
+
+  case "$env_file" in
+    /*) ;;
+    *) env_file="$ROOT_DIR/$env_file" ;;
+  esac
+
+  if [ -f "$env_file" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$env_file"
+    set +a
+  fi
+}
+
+first_matching_file() {
+  local pattern="$1"
+  local match
+
+  for match in $pattern; do
+    [ -f "$match" ] || continue
+    printf '%s\n' "$match"
+    return 0
+  done
+
+  return 1
+}
+
+load_release_env
 
 RUN_IOS=true
 RUN_ANDROID=true
@@ -17,13 +49,23 @@ IOS_BUNDLE_ID="${IOS_BUNDLE_ID:-com.pushmeup.app}"
 IOS_TEAM_ID="${IOS_TEAM_ID:-ZW59CUVSS3}"
 IOS_ARCHIVE_PATH="${IOS_ARCHIVE_PATH:-$ROOT_DIR/ios/build-testflight/PushMeUp.xcarchive}"
 IOS_EXPORT_DIR="${IOS_EXPORT_DIR:-$ROOT_DIR/ios/build-testflight/export}"
+IOS_DERIVED_DATA_PATH="${IOS_DERIVED_DATA_PATH:-$ROOT_DIR/ios/build-testflight/DerivedData}"
 IOS_CODE_SIGN_IDENTITY="${IOS_CODE_SIGN_IDENTITY:-Apple Distribution}"
 IOS_ALLOW_XCODE_ACCOUNT_UPLOAD="${IOS_ALLOW_XCODE_ACCOUNT_UPLOAD:-false}"
+
+APP_STORE_CONNECT_API_KEY_PATH="${APP_STORE_CONNECT_API_KEY_PATH:-${ASC_API_KEY_PATH:-}}"
+if [ -z "$APP_STORE_CONNECT_API_KEY_PATH" ]; then
+  APP_STORE_CONNECT_API_KEY_PATH="$(first_matching_file "$HOME/Downloads/AuthKey_*.p8" || true)"
+fi
 
 ANDROID_AAB_PATH="${ANDROID_AAB_PATH:-$ROOT_DIR/android/app/build/outputs/bundle/release/app-release.aab}"
 PLAY_STORE_PACKAGE_NAME="${PLAY_STORE_PACKAGE_NAME:-com.pushmeup.app}"
 PLAY_STORE_TRACK="${PLAY_STORE_TRACK:-internal}"
 PLAY_STORE_RELEASE_STATUS="${PLAY_STORE_RELEASE_STATUS:-completed}"
+GOOGLE_PLAY_JSON_KEY="${GOOGLE_PLAY_JSON_KEY:-${SUPPLY_JSON_KEY:-}}"
+if [ -z "$GOOGLE_PLAY_JSON_KEY" ]; then
+  GOOGLE_PLAY_JSON_KEY="$(first_matching_file "$HOME/Downloads/*play*.json $HOME/Downloads/*google*.json $HOME/Downloads/taskswap-*.json" || true)"
+fi
 
 TEMP_FILES=()
 PREV_TMP_ENVFILE=""
@@ -60,10 +102,12 @@ Required for Google Play:
   GOOGLE_PLAY_JSON_KEY=/absolute/path/to/google-play-service-account.json
 
 Useful overrides:
+  RELEASE_ENV_FILE=.env.release.local
   PLAY_STORE_TRACK=internal|alpha|beta|production
   PLAY_STORE_RELEASE_STATUS=completed|draft|inProgress|halted
   APP_ENV_FILE=.env.prod
   IOS_ARCHIVE_PATH=/absolute/path/to/App.xcarchive
+  IOS_DERIVED_DATA_PATH=/absolute/path/to/DerivedData
   IOS_TEAM_ID=ZW59CUVSS3
 USAGE
 }
@@ -318,6 +362,8 @@ write_ios_export_options() {
   <string>app-store-connect</string>
   <key>signingStyle</key>
   <string>automatic</string>
+  <key>signingCertificate</key>
+  <string>${IOS_CODE_SIGN_IDENTITY}</string>
   <key>stripSwiftSymbols</key>
   <true/>
   <key>teamID</key>
@@ -335,19 +381,23 @@ build_ios() {
   require_ios_upload_auth
 
   log "Building iOS archive"
-  rm -rf "$IOS_ARCHIVE_PATH" "$IOS_EXPORT_DIR"
+  rm -rf "$IOS_ARCHIVE_PATH" "$IOS_EXPORT_DIR" "$IOS_DERIVED_DATA_PATH"
   mkdir -p "$(dirname "$IOS_ARCHIVE_PATH")" "$IOS_EXPORT_DIR"
 
   set_tmp_envfile
   set +e
+
   (
     cd "$ROOT_DIR"
+
     ENVFILE="$APP_ENV_FILE" xcodebuild \
       -workspace "$IOS_WORKSPACE" \
       -scheme "$IOS_SCHEME" \
       -configuration "$IOS_CONFIGURATION" \
       -sdk iphoneos \
+      -destination "generic/platform=iOS" \
       -archivePath "$IOS_ARCHIVE_PATH" \
+      -derivedDataPath "$IOS_DERIVED_DATA_PATH" \
       -allowProvisioningUpdates \
       DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
       CODE_SIGN_STYLE=Automatic \
@@ -356,9 +406,11 @@ build_ios() {
       ${IOS_AUTH_ARGS[@]+"${IOS_AUTH_ARGS[@]}"} \
       archive
   )
+
   local archive_status=$?
   set -e
   restore_tmp_envfile
+
   [ "$archive_status" -eq 0 ] || exit "$archive_status"
 }
 

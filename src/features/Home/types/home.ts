@@ -52,6 +52,8 @@ export type BaseGoal = {
   userId: string;
   avatar?: string;
   name: string;
+  isAnonymous?: boolean;
+  avatarColor?: string; // server-provided for anonymous goals
   feeling?: FeelingValue;
 
   helpers: HelperUser[];

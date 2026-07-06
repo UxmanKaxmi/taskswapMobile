@@ -51,6 +51,7 @@ export default function NotificationCard({ item, onPress }: Props) {
       return <GoalCheerNotification item={item} onPress={onPress} />;
     case 'task-motivation-unfinished-reminder':
     case 'task-motivation-help-push-reminder':
+    case 'task-pushed-task-milestone':
       return <MotivationSystemNotification item={item} onPress={onPress} />;
 
     default:
