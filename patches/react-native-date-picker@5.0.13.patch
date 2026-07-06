@@ -1,0 +1,36 @@
+diff --git a/ios/RNDatePickerManager.h b/ios/RNDatePickerManager.h
+index 6a4f206ee31075919fc19999f5601e13efdfb9ce..3080626f51e70015e78f342d4ad8942d638759c3 100644
+--- a/ios/RNDatePickerManager.h
++++ b/ios/RNDatePickerManager.h
+@@ -8,7 +8,14 @@
+ #import <React/RCTConvert.h>
+ #import <React/RCTViewManager.h>
+ 
++#ifdef RCT_NEW_ARCH_ENABLED
++#import <RNDatePickerSpecs/RNDatePickerSpecs.h>
++
++@interface RNDatePickerManager : RCTViewManager <NativeRNDatePickerSpec>
++#else
+ @interface RNDatePickerManager : RCTViewManager
++#endif
++
+ 
+ @property (strong, nonatomic) UIViewController *topViewController;
+ 
+diff --git a/ios/RNDatePickerManager.mm b/ios/RNDatePickerManager.mm
+index da42873cad53e841becb743de6e0d733ab982ce1..cee34a64607827aa5bff41990faf6a9c298289b3 100644
+--- a/ios/RNDatePickerManager.mm
++++ b/ios/RNDatePickerManager.mm
+@@ -20,6 +20,12 @@ @implementation RCTConvert(UIDatePicker)
+ 
+ @implementation RNDatePickerManager
+ 
++#ifdef RCT_NEW_ARCH_ENABLED
++- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:(const facebook::react::ObjCTurboModule::InitParams &)params {
++  return std::make_shared<facebook::react::NativeRNDatePickerSpecJSI>(params);
++}
++#endif
++
+ RCT_EXPORT_MODULE(RNDatePicker)
+ 
+ RCT_EXPORT_METHOD(addListener : (NSString *)eventName) {
