@@ -1,10 +1,7 @@
 {
   "Simulator Target Bundle": "com.pushmeup.app",
   "aps": {
-    "alert": {
-      "title": "Sara pushed you 👏",
-      "body": "Keep your goal moving!"
-    }
+    "content-available": 1
   },
   "gcm.message_id": "sim-test-push-1",
   "notificationType": "PUSH_RECEIVED",
