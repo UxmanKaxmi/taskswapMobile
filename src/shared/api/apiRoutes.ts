@@ -81,4 +81,9 @@ export const buildRoute = {
 
   // ✅ Cheer
   cheerBeat: (beatId: string) => `${ApiRoute.BEATS}/${beatId}/cheer`,
+
+  // ✅ First-time hints ("beats" in the product spec — named hints on the
+  // wire because /beats already belongs to cheerable content beats)
+  firstTimeHint: (hintId: string) => `${ApiRoute.USERS}/me/hints/${hintId}`,
+  firstTimeHintsReset: () => `${ApiRoute.USERS}/me/hints`,
 };

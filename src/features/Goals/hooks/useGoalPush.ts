@@ -3,6 +3,7 @@ import { GoalPush } from '../types/goals';
 import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
 import { getGoalPushes, toggleGoalPush } from '../api/goalPush.api';
 import { useAuth } from '@features/Auth/AuthProvider';
+import { useFirstTimeHints } from '@features/FirstTimeHints';
 import type { HomeSummaryResponse } from '@features/Home/types/home';
 import type { GoalPage } from '@features/Goals/api/goalApi';
 
@@ -24,9 +25,18 @@ export function useGoalPushes(taskId: string) {
 export function useToggleGoalPush(taskId: string) {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey.pushesForGoal(taskId);
+  const { completeHint } = useFirstTimeHints();
 
   return useMutation({
     mutationFn: () => toggleGoalPush(taskId),
+
+    onSuccess: data => {
+      // Pushing any card graduates the first-push hint — the action, not the
+      // spotlighted location. The server records completion too.
+      if (data?.hasPushed) {
+        completeHint('first_push_given');
+      }
+    },
 
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey });

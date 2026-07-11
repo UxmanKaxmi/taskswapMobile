@@ -1,3 +1,5 @@
+import type { FirstTimeHintMap } from '@features/FirstTimeHints/firstTimeHints';
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -10,4 +12,5 @@ export interface UserProfile {
   taskSuccessRate: number; // 0–100 percentage
   tasksDone: number;
   dayStreak: number;
+  firstTimeHints?: FirstTimeHintMap;
 }

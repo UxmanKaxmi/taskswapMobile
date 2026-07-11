@@ -5,6 +5,14 @@ export type FeatureFlags = {
   advice: boolean;
   decision: boolean;
   reminder: boolean;
+  // First-time hint ("beats") kill switches, served as global values by the
+  // backend. The master flag defaults OFF so a failed or pending flag fetch
+  // renders no hints — silence over flicker.
+  firstTimeBeats: boolean;
+  hintFirstGoalPosted: boolean;
+  hintFirstPushGiven: boolean;
+  hintCheerDiscovery: boolean;
+  hintFirstResponse: boolean;
 };
 
 export type FeatureFlagsResponse = {
@@ -16,6 +24,11 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   advice: true,
   decision: true,
   reminder: true,
+  firstTimeBeats: false,
+  hintFirstGoalPosted: true,
+  hintFirstPushGiven: true,
+  hintCheerDiscovery: true,
+  hintFirstResponse: true,
 };
 
 export const normalizeFeatureFlags = (raw?: Partial<FeatureFlags> | null): FeatureFlags => ({

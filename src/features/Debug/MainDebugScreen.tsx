@@ -17,6 +17,7 @@ import { handleNotificationRoute } from '@lib/notifications/notificationNavigati
 import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { Height } from '@shared/components/Spacing';
 import { useGoalsQuery } from '@features/Goals/hooks/useGoalsQuery';
+import { useFirstTimeHints } from '@features/FirstTimeHints';
 import {
   DEFAULT_TEST_NOTIFICATION_TEXT,
   getNotificationTextTemplate,
@@ -43,7 +44,9 @@ export default function MainDebugScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const { user } = useAuth();
+  const { resetHints } = useFirstTimeHints();
   const [sendingKey, setSendingKey] = useState<string | null>(null);
+  const [isResettingHints, setIsResettingHints] = useState(false);
   const { data: tasksQuery } = useGoalsQuery();
 
   const latestGoalId = useMemo(() => {
@@ -160,6 +163,24 @@ export default function MainDebugScreen() {
     }
   };
 
+  // Wipes server + local hint state so every first-time hint re-teaches this
+  // account — go back to the feed and the first-push spotlight replays.
+  const resetFirstTimeHints = async () => {
+    try {
+      setIsResettingHints(true);
+      await resetHints();
+      Alert.alert(
+        '✅ First-time hints reset',
+        'Head back to the feed — the first-push spotlight will show again.',
+      );
+    } catch (error) {
+      console.error('Failed to reset first-time hints:', error);
+      Alert.alert('❌ Failed to reset first-time hints');
+    } finally {
+      setIsResettingHints(false);
+    }
+  };
+
   return (
     <Layout>
       <AppHeader title="Notification Test Center" />
@@ -204,6 +225,17 @@ export default function MainDebugScreen() {
         <View style={styles.section}>
           <TextElement style={styles.sectionLabel}>Backend</TextElement>
           <PrimaryButton title="Send latest example push" onPress={sendLatestViaBackend} />
+        </View>
+
+        <Height size={10} />
+
+        <View style={styles.section}>
+          <TextElement style={styles.sectionLabel}>First-time hints</TextElement>
+          <PrimaryButton
+            title="Reset hints (replay spotlight)"
+            onPress={resetFirstTimeHints}
+            isLoading={isResettingHints}
+          />
         </View>
       </ScrollView>
     </Layout>

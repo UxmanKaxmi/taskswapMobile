@@ -44,6 +44,11 @@ export default function StatsAchievements({
           <TextElement style={styles.statLabel}>DAY STREAK</TextElement>
         </View>
       </Row>
+      {pushesGiven === 0 && (
+        <TextElement variant="caption" style={styles.zeroState}>
+          Every push is a real person. Give your first.
+        </TextElement>
+      )}
     </View>
   );
 }
@@ -86,5 +91,10 @@ const createStyles = (colors: ThemeColors) =>
       width: 1,
       height: vs(34),
       backgroundColor: colors.onboardingLine,
+    },
+    zeroState: {
+      marginTop: vs(10),
+      textAlign: 'center',
+      color: colors.onboardingMuted,
     },
   });

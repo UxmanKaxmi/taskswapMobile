@@ -65,7 +65,7 @@ const introExamples: IntroContent[] = [
   },
 ];
 
-const IntroScreen = ({ navigation }: { navigation: any }) => {
+const IntroScreen = ({ navigation, route }: { navigation: any; route?: any }) => {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -74,7 +74,15 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
   const scrollRef = useRef<RNScrollView | null>(null);
   const isLastSlide = currentIndex === introExamples.length - 1;
   const [isActive, setIsActive] = useState(false);
+  // Help Center replay ("How PushMeUp works"): just show the slides and pop
+  // back — never touch first-launch state or restart the composer flow.
+  const isReplay = Boolean(route?.params?.replay);
   const handleStart = async () => {
+    if (isReplay) {
+      navigation.goBack();
+      return;
+    }
+
     if (isPROD) {
       await AsyncStorage.setItem('hasSeenOnboarding', 'true');
     } else {
@@ -87,6 +95,11 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
   };
 
   const handleSkip = async () => {
+    if (isReplay) {
+      navigation.goBack();
+      return;
+    }
+
     if (isPROD) {
       await AsyncStorage.setItem('hasSeenOnboarding', 'true');
     } else {

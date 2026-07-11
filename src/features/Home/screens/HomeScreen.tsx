@@ -33,7 +33,13 @@ import { useGoalsQuery } from '@features/Goals/hooks/useGoalsQuery';
 import { Goal, GoalTypeEnum } from '@features/Goals/types/goals';
 import { MotivationGoal } from '../types/home';
 import { showToast, showPushToast } from '@shared/utils/toast';
-import MotivationCard from '../components/MotivationCard';
+import MotivationCard, { getLatestCheerableBeat } from '../components/MotivationCard';
+import {
+  SpotlightCheerDiscovery,
+  SpotlightFirstGoal,
+  SpotlightFirstPush,
+  useFirstTimeHintVisibility,
+} from '@features/FirstTimeHints';
 import DecisionCard from '../components/DecisionCard';
 import ReminderCard from '../components/ReminderCard';
 import AdviceCard from '../components/AdviceCard';
@@ -266,6 +272,51 @@ export default function HomeScreen() {
   // Show every task in the feed, including the viewer's own goals. (Your newest
   // goal also appears in the "YOUR GOAL" summary card above the list.)
   const feedGoals = flattenedGoals;
+
+  // Feed spotlight priority: post your first goal > give your first push >
+  // discover cheering. Each lower hint yields while a higher one is pending.
+  const canShowFirstGoalHint = useFirstTimeHintVisibility('first_goal_posted');
+  const canShowFirstPushHint = useFirstTimeHintVisibility('first_push_given');
+  const canShowCheerHint = useFirstTimeHintVisibility('cheer_discovery');
+
+  // Beat 2: the first pushable card in feed order that isn't the viewer's
+  // own becomes the spotlight target (full-screen SpotlightFirstPush).
+  // Guests are eligible too — their push tap hands off to the auth gate and
+  // their hint state lives on-device until they sign in.
+  const firstPushSpotlightGoal = useMemo(() => {
+    if (!canShowFirstPushHint || canShowFirstGoalHint) return null;
+    return (
+      (feedGoals.find(goal => {
+        if (goal.type !== GoalTypeEnum.Motivation) return false;
+        const motivation = goal as MotivationGoal;
+        if (user?.id && motivation.userId === user.id) return false;
+        return !motivation.hasPushed && !motivation.completed;
+      }) as MotivationGoal | undefined) ?? null
+    );
+  }, [canShowFirstPushHint, canShowFirstGoalHint, feedGoals, user?.id]);
+
+  // Beat 3 yields to Beat 2: at most one hint is visible on this screen.
+  const cheerDiscoveryGoal = useMemo(() => {
+    if (!canShowCheerHint || !user?.id) return null;
+    if (canShowFirstGoalHint || firstPushSpotlightGoal) return null;
+    const candidates = feedGoals.filter(goal => {
+      if (goal.type !== GoalTypeEnum.Motivation) return false;
+      const motivation = goal as MotivationGoal;
+      return motivation.userId !== user.id && !motivation.completed && motivation.hasPushed;
+    }) as MotivationGoal[];
+
+    return (
+      candidates.find(goal => {
+        const beat = getLatestCheerableBeat(goal.beats);
+        return Boolean(beat?.beatId && !beat.callerHasCheered && beat.isCheeringOpen !== false);
+      }) ??
+      candidates.find(goal => {
+        const beat = getLatestCheerableBeat(goal.beats);
+        return !beat?.beatId;
+      }) ??
+      null
+    );
+  }, [canShowCheerHint, canShowFirstGoalHint, feedGoals, firstPushSpotlightGoal, user?.id]);
 
   const showFeedSortLoading =
     isFeedSortChanging && isFetching && !refreshing && !isFetchingNextPage;
@@ -560,7 +611,7 @@ export default function HomeScreen() {
           <View style={styles.emptyContainer}>
             <Height size={20} />
             <TextElement variant="body" color="placeHolder">
-              {isLoading ? 'Loading tasks...' : 'No tasks found.'}
+              {isLoading ? 'Loading the feed...' : 'Someone needs a push. Be the first.'}
             </TextElement>
           </View>
         }
@@ -587,6 +638,10 @@ export default function HomeScreen() {
         onEndReachedThreshold={0.5}
         showsVerticalScrollIndicator={false}
       />
+
+      <SpotlightFirstGoal show={canShowFirstGoalHint} />
+      <SpotlightFirstPush goal={firstPushSpotlightGoal} />
+      <SpotlightCheerDiscovery goal={cheerDiscoveryGoal} />
 
       <LaunchModalHost
         ctx={{

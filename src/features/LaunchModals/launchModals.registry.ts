@@ -3,7 +3,7 @@ import BetaModal from './modals/BetaModal';
 import AddFriendsModal from './modals/AddFriendsModal';
 import FeedbackModal from './modals/FeedbackModal';
 import WhatsNewModal from './modals/WhatsNewModal';
-import { LATEST_RELEASE } from '@features/MyProfile/data/changelog';
+import { APP_VERSION_LABEL } from '@shared/utils/constants';
 import {
   getAppLaunchCount,
   getWhatsNewBaseline,
@@ -34,21 +34,21 @@ export type LaunchModalConfig = {
 };
 
 export const launchModalRegistry: LaunchModalConfig[] = [
-  // Release notes: the id embeds the version, so every release with a new
-  // CHANGELOG entry gets a fresh id and shows exactly once after updating.
+  // Release notes: the id embeds the app version, so each shipped build can
+  // show its notes exactly once after updating.
   {
-    id: `whats_new_${LATEST_RELEASE.version}`,
+    id: `whats_new_${APP_VERSION_LABEL}`,
     screen: 'HOME',
     priority: 0,
     when: async () => {
       const baseline = await getWhatsNewBaseline();
       // Installed at this version — nothing is "new" to them.
-      if (baseline === LATEST_RELEASE.version) return false;
+      if (baseline === APP_VERSION_LABEL) return false;
       if (!baseline) {
         const launches = await getAppLaunchCount();
         if (launches <= 1) {
           // Fresh install: record the install version and stay quiet.
-          await setWhatsNewBaseline(LATEST_RELEASE.version);
+          await setWhatsNewBaseline(APP_VERSION_LABEL);
           return false;
         }
         // Existing user updating into this feature — show the notes.

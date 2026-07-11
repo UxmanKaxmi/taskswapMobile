@@ -8,6 +8,7 @@ import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { ThemeColors, useThemedStyles } from '@shared/theme';
 import { LATEST_RELEASE } from '@features/MyProfile/data/changelog';
+import { APP_VERSION_LABEL } from '@shared/utils/constants';
 
 const BODY_CHANGE_LIMIT = 4;
 
@@ -37,7 +38,7 @@ export default function WhatsNewModal({ visible, onDismiss, onHidden }: LaunchMo
           ))}
         </View>
       }
-      note={`VERSION ${LATEST_RELEASE.version} 💛`}
+      note={`VERSION ${APP_VERSION_LABEL} 💛`}
       ctaLabel="See full changelog"
       onCtaPress={handleSeeChangelog}
     />

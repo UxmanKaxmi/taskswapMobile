@@ -52,9 +52,15 @@ export default function RootNavigator() {
   }
 
   return (
-    <Stack.Navigator id={undefined as any} screenOptions={{ headerShown: false }}>
-      {/* First-time onboarding */}
-      {firstTime && <Stack.Screen name="OnboardingIntro" component={IntroScreen} />}
+    <Stack.Navigator
+      id={undefined as any}
+      initialRouteName={firstTime ? 'OnboardingIntro' : 'App'}
+      screenOptions={{ headerShown: false }}
+    >
+      {/* First-time onboarding. Registered unconditionally so Help Center's
+          "How PushMeUp works" can replay it with { replay: true }; firstTime
+          only decides the initial route. */}
+      <Stack.Screen name="OnboardingIntro" component={IntroScreen} />
 
       {/* Main App */}
       <Stack.Screen

@@ -369,7 +369,10 @@ export default function NotificationMainScreen() {
 
         {sections.length === 0 ? (
           <Row align="center" justify="center" flex>
-            <EmptyState title="No notifications" subtitle="You're all caught up!" />
+            <EmptyState
+              title="No notifications"
+              subtitle="Pushes, cheers, and progress from people you support will land here."
+            />
           </Row>
         ) : (
           <SectionList

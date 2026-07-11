@@ -69,6 +69,7 @@ import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import PushButton from '@shared/components/PushButton';
 import CompletionBurst from '../components/CompletionBurst';
 import { useSendCheer } from '@features/Goals/hooks/useGoalCheer';
+import { SpotlightFirstResponse, useFirstTimeHintVisibility } from '@features/FirstTimeHints';
 
 export default function GoalDetailScreen({
   route,
@@ -228,6 +229,20 @@ export default function GoalDetailScreen({
   );
   const isShareUpdateCoolingDown = isProgressUpdateCoolingDown(latestProgressUpdate);
   const canShareProgressUpdate = hasShareUpdateRecipients && !isShareUpdateCoolingDown;
+  const canShowFirstResponseHint = useFirstTimeHintVisibility('first_response');
+  const firstResponseSpotlightTask =
+    task?.type === GoalTypeEnum.Motivation &&
+    isOwner &&
+    !isCompleted &&
+    supporterCount > 0 &&
+    canShowFirstResponseHint
+      ? {
+          id: task.id,
+          text: task.text,
+          name: task.name,
+          pushCount: supporterCount,
+        }
+      : null;
 
   // The cooldown label ("share another update in …") and the disabled state are
   // derived from Date.now() at render time. Tick once a second while cooling
@@ -1353,6 +1368,11 @@ export default function GoalDetailScreen({
           onClose={handleCloseShare}
         />
       )}
+
+      <SpotlightFirstResponse
+        task={firstResponseSpotlightTask}
+        onShareUpdate={openShareUpdateComposer}
+      />
 
       <CompletionBurst playKey={completionBurstKey} />
     </View>

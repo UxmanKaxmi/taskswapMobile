@@ -168,7 +168,7 @@ const createStyles = (colors: ThemeColors) =>
       }),
     },
     tagText: {
-      color: colors.onboardingInk,
+      color: colors.tactileMomentumSecondary,
       fontSize: ms(14),
       fontWeight: '900',
       letterSpacing: 1,

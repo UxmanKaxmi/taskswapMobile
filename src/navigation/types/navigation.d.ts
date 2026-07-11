@@ -42,7 +42,7 @@ export type MainStackParamList = {
         };
       }
     | undefined;
-  OnboardingIntro: undefined;
+  OnboardingIntro: { replay?: boolean } | undefined;
   AddGoalScreen: NavigatorScreenParams<AddGoalStackParamList>;
 };
 

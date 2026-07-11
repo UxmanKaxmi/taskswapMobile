@@ -8,13 +8,17 @@ import { createGoal } from '../api/addGoal.api';
 import { Goal } from '@features/Goals/types/goals';
 import type { GoalPage } from '@features/Goals/api/goalApi';
 import type { HomeSummaryResponse } from '@features/Home/types/home';
+import { useFirstTimeHints } from '@features/FirstTimeHints';
 
 export function useCreateGoal() {
   const queryClient = useQueryClient();
+  const { completeHint } = useFirstTimeHints();
 
   return useMutation<Goal, AxiosError, CreateGoalPayload>({
     mutationFn: createGoal,
     onSuccess: newGoal => {
+      // Graduates the "+" spotlight; the server records completion too.
+      completeHint('first_goal_posted');
       // Optimistically drop the new task at the top of every feed cache so it
       // shows immediately (no wait for the background refetch).
       if (newGoal?.id) {

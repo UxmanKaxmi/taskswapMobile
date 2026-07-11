@@ -2,13 +2,16 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { buildQueryKey, QueryKeys } from '@shared/constants/queryKeys';
 import { createGoalProgressUpdate } from '../api/goalApi';
+import { useFirstTimeHints } from '@features/FirstTimeHints';
 
 export function useCreateGoalProgressUpdate(taskId: string) {
   const queryClient = useQueryClient();
+  const { completeHint } = useFirstTimeHints();
 
   return useMutation({
     mutationFn: (text: string) => createGoalProgressUpdate(taskId, text),
     onSuccess: data => {
+      completeHint('first_response');
       queryClient.setQueryData(buildQueryKey.taskById(taskId), (old: any) => {
         if (!old) return old;
         return {

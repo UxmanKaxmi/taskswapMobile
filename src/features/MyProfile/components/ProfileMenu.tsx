@@ -16,14 +16,13 @@ import Icon from '@shared/components/Icons/Icon';
 import Row from '@shared/components/Layout/Row';
 import { spacing, ThemeColors, ThemePreference, useTheme, useThemedStyles } from '@shared/theme';
 import { ms, vs } from 'react-native-size-matters';
-import { useNavigation } from '@react-navigation/native';
-import { AppNavigationProp } from '@navigation/types/navigation';
+import { useNavigation, type NavigationProp } from '@react-navigation/native';
+import { AppNavigationProp, MainStackParamList } from '@navigation/types/navigation';
 import { triggerLogout } from '@shared/api/authBridge';
 import Ripple from '@shared/components/Buttons/Ripple';
 import { deleteMyAccount } from '../api/MyProfileAPI';
 import { showToast } from '@shared/utils/toast';
-import { SUPPORT_URL } from '@shared/utils/constants';
-import { LATEST_RELEASE } from '../data/changelog';
+import { APP_VERSION_LABEL, SUPPORT_URL } from '@shared/utils/constants';
 import AppModal from '@shared/components/AppModal/AppModal';
 import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
@@ -210,13 +209,26 @@ export default function ProfileMenu() {
               navigation.navigate('ChangelogScreen');
             },
             iconSet: 'ion',
-            valueLabel: LATEST_RELEASE.version,
+            valueLabel: APP_VERSION_LABEL,
           },
         ],
       },
       {
         label: 'SUPPORT',
         items: [
+          {
+            label: 'How PushMeUp works',
+            icon: 'play-circle-outline',
+            onPress: () => {
+              // Root-stack route (replays the three onboarding slides), so it
+              // isn't on AppStackParamList — navigate() bubbles up to the root.
+              (navigation as unknown as NavigationProp<MainStackParamList>).navigate(
+                'OnboardingIntro',
+                { replay: true },
+              );
+            },
+            iconSet: 'ion',
+          },
           {
             label: 'Help Center',
             icon: 'help-circle-outline',

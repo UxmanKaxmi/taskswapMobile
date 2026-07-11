@@ -568,7 +568,7 @@ function buildFeelingLabel(task: MotivationGoal) {
   return 'Momentum';
 }
 
-function getLatestCheerableBeat(beats?: GoalBeat[]): GoalBeat | null {
+export function getLatestCheerableBeat(beats?: GoalBeat[]): GoalBeat | null {
   if (!beats?.length) return null;
 
   return (
