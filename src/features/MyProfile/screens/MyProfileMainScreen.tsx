@@ -23,6 +23,8 @@ import {
   TERMS_URL,
 } from '@shared/utils/constants';
 
+const ANDROID_TAB_BAR_SCROLL_PADDING = vs(130);
+
 export default function MyProfileMainScreen() {
   const { colors } = useTheme();
   const { user } = useAuth();
@@ -30,6 +32,7 @@ export default function MyProfileMainScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const styles = useThemedStyles(createStyles);
+  const bottomScrollPadding = isAndroid ? ANDROID_TAB_BAR_SCROLL_PADDING : insets.bottom + vs(50);
 
   const openLegalLink = useCallback((url: string) => {
     Linking.openURL(url).catch(() => {
@@ -51,9 +54,6 @@ export default function MyProfileMainScreen() {
       allowPaddingHorizontal={false}
       allowPaddingVertical
       backgroundColor={colors.onboardingPaper}
-      style={{
-        marginTop: isAndroid ? insets.top : 0, // ✅ negative margin to offset SafeAreaView padding
-      }}
     >
       <View style={styles.screen}>
         <ListView
@@ -63,7 +63,7 @@ export default function MyProfileMainScreen() {
               width: '100%',
               paddingHorizontal: spacing.lg,
               paddingTop: vs(18),
-              paddingBottom: insets.bottom + vs(50),
+              paddingBottom: bottomScrollPadding,
             },
           }}
         >

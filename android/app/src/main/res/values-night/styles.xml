@@ -1,0 +1,16 @@
+<resources>
+    <!-- Night variant of AppTheme: dark Material parent (dark window background
+         and system dialogs) and light status/navigation bar icons on the dark
+         splash background. bootsplash_background resolves to its night value
+         automatically. -->
+    <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+        <item name="android:statusBarColor">@color/bootsplash_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:navigationBarColor">@color/bootsplash_background</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+    </style>
+</resources>

@@ -16,6 +16,7 @@ import { openFriendsProfile } from '@navigation/types/navigationUtils';
 import { haptics } from '@shared/utils/haptics';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { spacing } from '@shared/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Friend = {
   id: string;
@@ -36,6 +37,8 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
   const usingSearch = !!debouncedQuery;
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
+  const bottomTabClearance = insets.bottom + vs(96);
 
   const { data: searchData = [], isLoading: isSearching } = useSearchFriends(debouncedQuery, true);
 
@@ -67,7 +70,8 @@ export default function FriendList({ type, searchQuery = '' }: Props) {
       flatListProps={{
         ItemSeparatorComponent: () => <AppBorder />,
         keyExtractor: user => user.id,
-        ListFooterComponent: <View />,
+        ListFooterComponent: <View style={{ height: bottomTabClearance }} />,
+        scrollIndicatorInsets: { bottom: bottomTabClearance },
         contentContainerStyle: {
           flexGrow: 1,
           maxWidth: '100%',

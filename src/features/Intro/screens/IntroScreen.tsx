@@ -273,7 +273,7 @@ const IntroScreen = ({ navigation }: { navigation: any }) => {
       backgroundColor: scrollX.interpolate({
         inputRange,
         outputRange: introExamples.map((_, slideIndex) =>
-          slideIndex === index ? colors.onboardingInk : '#D8D8D0',
+          slideIndex === index ? colors.onboardingInk : colors.onboardingLine,
         ),
         extrapolate: 'clamp',
       }),
@@ -547,9 +547,9 @@ const createStyles = (colors: ThemeColors) =>
       paddingVertical: vs(10),
       paddingHorizontal: ms(14),
       marginLeft: ms(20),
-      backgroundColor: '#FAFAF7',
+      backgroundColor: colors.onboardingCard,
       borderWidth: 1,
-      borderColor: '#E9E6DB',
+      borderColor: colors.onboardingLine,
       ...nextGoalCardShadow(colors),
       transform: [{ translateX: ms(10) }, { rotate: '1deg' }],
     },
@@ -631,7 +631,7 @@ const createStyles = (colors: ThemeColors) =>
       width: ms(6),
       height: ms(6),
       borderRadius: 999,
-      backgroundColor: '#D8D8D0',
+      backgroundColor: colors.onboardingLine,
     },
     nextButton: {
       minWidth: ms(96),

@@ -182,19 +182,19 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: 24,
     },
     card: {
-      backgroundColor: colors.onPrimary,
+      backgroundColor: colors.surface,
       borderRadius: 24,
       paddingHorizontal: spacing.lg,
       paddingVertical: spacing.md,
       paddingRight: spacing.lg,
       ...platformShadow({
-        color: '#000',
+        color: colors.onboardingInk,
         opacity: 0.08,
         radius: 16,
         offset: { width: 0, height: 10 },
       }),
       borderWidth: 1,
-      borderColor: '#E6EFE8',
+      borderColor: colors.border,
     },
     headerRow: {
       flexDirection: 'row',

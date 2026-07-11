@@ -4,6 +4,7 @@ import { Alert, ScrollView, StyleSheet, View, type TextStyle } from 'react-nativ
 import notifee, { AuthorizationStatus } from '@notifee/react-native';
 import { useAuth } from '@features/Auth/AuthProvider';
 import {
+  sendSilentNotificationAPI,
   sendTestNotificationAPI,
   type NotificationTestPayload,
 } from '@features/Notification/api/NotificationApi';
@@ -11,6 +12,8 @@ import { Layout } from '@shared/components/Layout';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
 import TextElement from '@shared/components/TextElement/TextElement';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
+import { showPushToast } from '@shared/utils/toast';
+import { handleNotificationRoute } from '@lib/notifications/notificationNavigation';
 import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { Height } from '@shared/components/Spacing';
 import { useGoalsQuery } from '@features/Goals/hooks/useGoalsQuery';
@@ -107,6 +110,35 @@ export default function MainDebugScreen() {
     }
   };
 
+  // 1) Proves the pill UI + tap-to-open in isolation — no push involved.
+  const firePillDirectly = () => {
+    showPushToast({
+      pusherName: 'Sara (local test)',
+      onPress: () =>
+        handleNotificationRoute({
+          notificationType: 'task-motivation-push',
+          taskId: values.taskId,
+        }),
+    });
+  };
+
+  // 2) Proves the real path end to end: backend sends a silent (data-only) FCM
+  // message to THIS device, which (foregrounded) fires onMessage -> the pill.
+  const sendSilentPushToSelf = async () => {
+    try {
+      await sendSilentNotificationAPI({
+        notificationType: 'task-motivation-push',
+        taskId: values.taskId,
+        pusherName: 'Sara',
+        pushCount: '7',
+      });
+      Alert.alert('✅ Silent push sent — keep the app open to see the pill');
+    } catch (error) {
+      console.error('Failed to send silent push:', error);
+      Alert.alert('❌ Failed to send silent push');
+    }
+  };
+
   const sendLatestViaBackend = async () => {
     try {
       if (!user?.id) {
@@ -153,6 +185,18 @@ export default function MainDebugScreen() {
               style={styles.button}
             />
           ))}
+        </View>
+
+        <Height size={10} />
+
+        <View style={styles.section}>
+          <TextElement style={styles.sectionLabel}>Push-received toast</TextElement>
+          <PrimaryButton title="Show pill directly (UI only)" onPress={firePillDirectly} />
+          <PrimaryButton
+            title="Send silent push to me (real FCM)"
+            onPress={sendSilentPushToSelf}
+            style={styles.button}
+          />
         </View>
 
         <Height size={10} />

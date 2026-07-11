@@ -30,7 +30,7 @@ export default function FriendFollowRow({
   onToggleFollow,
   onPressRow,
 }: Props) {
-  const { colors, spacing } = useTheme();
+  const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const handle = username?.trim() ? `@${username.trim()}` : null;
 
@@ -83,7 +83,7 @@ export default function FriendFollowRow({
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     avatarText: {
-      color: colors.onboardingInk,
+      color: colors.tactileMomentumSecondary,
       fontWeight: '800',
     },
     nameText: {

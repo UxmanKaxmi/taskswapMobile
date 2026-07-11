@@ -29,7 +29,11 @@ export default function NotificationPermissionModal({
   return (
     <AppModal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose}>
       <LinearGradient
-        colors={['#F8F5EC', '#FCF9F2', '#F6F2E6']}
+        colors={[
+          colors.onboardingBackdropStart,
+          colors.onboardingBackdropMid,
+          colors.onboardingBackdropEnd,
+        ]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.backdrop}
@@ -137,7 +141,7 @@ const createStyles = (colors: ThemeColors) =>
       width: ms(98),
       height: ms(98),
       borderRadius: ms(28),
-      backgroundColor: '#FFFFFF',
+      backgroundColor: colors.onboardingCard,
       justifyContent: 'center',
       alignItems: 'center',
       ...platformShadow({

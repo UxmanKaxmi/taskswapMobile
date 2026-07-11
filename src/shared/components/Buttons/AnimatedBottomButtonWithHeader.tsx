@@ -8,7 +8,10 @@ import {
   GestureResponderEvent,
   ActivityIndicator,
   View,
+  type LayoutChangeEvent,
+  type StyleProp,
 } from 'react-native';
+import Reanimated, { type AnimatedStyle } from 'react-native-reanimated';
 import { useTheme } from '@shared/theme/useTheme';
 import { platformShadow } from '@shared/theme';
 import TextElement from '../TextElement/TextElement';
@@ -39,6 +42,21 @@ export interface AnimatedBottomButtonWithHeaderProps {
   embedded?: boolean;
 
   showButton?: boolean; // default true
+
+  /** Optional ref + layout callback on the inner button, for measuring it
+   * (e.g. as a shared-element morph target). Both are no-ops when omitted. */
+  buttonRef?: React.Ref<any>;
+  onButtonLayout?: (e: LayoutChangeEvent) => void;
+
+  /** Skip the slide-up entrance and show immediately at the resting position.
+   * Used while a shared-element morph flies the button in, so the measured
+   * landing rect matches where the button actually rests. Pair with
+   * `revealStyle` to sync the sheet's fade-in to the morph timeline. */
+  entranceDisabled?: boolean;
+
+  /** Reanimated style (typically the morph target's crossfade) applied around
+   * the sheet, so its reveal runs on the same clock as the flying clone. */
+  revealStyle?: StyleProp<AnimatedStyle<ViewStyle>>;
 }
 
 const TEXT_ONLY_HEIGHT = vs(65);
@@ -59,6 +77,10 @@ export default function AnimatedBottomButtonWithHeader({
   buttonHeader,
   embedded = false,
   showButton = true,
+  buttonRef,
+  onButtonLayout,
+  entranceDisabled = false,
+  revealStyle,
 }: AnimatedBottomButtonWithHeaderProps) {
   const { colors } = useTheme();
   const resolvedTextColor = textColor ?? colors.onPrimary;
@@ -68,12 +90,24 @@ export default function AnimatedBottomButtonWithHeader({
       ? BUTTON_HEIGHT
       : BOTTOM_BUTTON_HEIGHT
     : TEXT_ONLY_HEIGHT;
+  const restingBottomOffset = 0;
 
-  const translateY = useRef(new Animated.Value(embedded ? 0 : 120)).current;
+  const translateY = useRef(new Animated.Value(embedded || entranceDisabled ? 0 : 120)).current;
   const opacity = useRef(new Animated.Value(embedded ? 1 : 0)).current;
 
   useEffect(() => {
     if (embedded) return;
+
+    if (entranceDisabled) {
+      // Shared-element morph in flight: hold the sheet at its resting position
+      // (so the flying clone's measured landing spot is accurate) and show it
+      // immediately — the morph-synced `revealStyle` is the only fade clock,
+      // so the hand-off can't run on two competing timers.
+      translateY.setValue(0);
+      opacity.setValue(visible ? 1 : 0);
+      onToggleComplete?.(visible);
+      return;
+    }
 
     Animated.parallel([
       Animated.timing(translateY, {
@@ -87,7 +121,7 @@ export default function AnimatedBottomButtonWithHeader({
         useNativeDriver: true,
       }),
     ]).start(() => onToggleComplete?.(visible));
-  }, [visible]);
+  }, [visible, entranceDisabled]);
 
   return (
     <Animated.View
@@ -98,47 +132,53 @@ export default function AnimatedBottomButtonWithHeader({
         {
           transform: [{ translateY: embedded ? 0 : translateY }],
           opacity,
-          bottom: embedded ? 0 : hasButton ? vs(-25) : vs(-30),
+          bottom: embedded ? 0 : restingBottomOffset,
         },
         style,
       ]}
     >
-      <View
-        style={[
-          styles.sheet,
-          {
-            backgroundColor: containerColor ?? colors.card,
-            minHeight: sheetMinHeight,
-          },
-        ]}
-      >
-        {buttonHeader && (
-          <TextElement
-            variant="subtitle"
-            style={[styles.buttonHeader, !hasButton && styles.buttonHeaderOnly]}
-            color="muted"
-          >
-            {buttonHeader}
-          </TextElement>
-        )}
+      {/* Must stretch + center exactly like `wrapper`, or the sheet's
+          percentage width collapses against a content-sized parent. */}
+      <Reanimated.View style={[styles.revealWrap, revealStyle]}>
+        <View
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: containerColor ?? colors.card,
+              minHeight: sheetMinHeight,
+            },
+          ]}
+        >
+          {buttonHeader && (
+            <TextElement
+              variant="subtitle"
+              style={[styles.buttonHeader, !hasButton && styles.buttonHeaderOnly]}
+              color="muted"
+            >
+              {buttonHeader}
+            </TextElement>
+          )}
 
-        {hasButton && (
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: buttonColor ?? colors.primary }]}
-            onPress={onPress}
-            activeOpacity={0.9}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color={resolvedTextColor} />
-            ) : (
-              <TextElement weight="600" style={{ color: resolvedTextColor }}>
-                {title}
-              </TextElement>
-            )}
-          </TouchableOpacity>
-        )}
-      </View>
+          {hasButton && (
+            <TouchableOpacity
+              ref={buttonRef}
+              onLayout={onButtonLayout}
+              style={[styles.button, { backgroundColor: buttonColor ?? colors.primary }]}
+              onPress={onPress}
+              activeOpacity={0.9}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={resolvedTextColor} />
+              ) : (
+                <TextElement weight="600" style={{ color: resolvedTextColor }}>
+                  {title}
+                </TextElement>
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
+      </Reanimated.View>
     </Animated.View>
   );
 }
@@ -148,12 +188,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: vs(-25),
+    bottom: 0,
     alignItems: 'center',
   },
 
   embeddedWrapper: {
     position: 'relative',
+  },
+
+  revealWrap: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
   },
 
   sheet: {

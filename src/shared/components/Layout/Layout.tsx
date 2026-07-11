@@ -1,4 +1,4 @@
-import React, { ReactNode, forwardRef } from 'react';
+import React, { ReactNode, forwardRef, useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
@@ -28,6 +29,8 @@ type LayoutProps = {
   footerHeight?: number;
   edgesProp?: Array<'top' | 'bottom' | 'left' | 'right'>;
 };
+
+const ANDROID_KEYBOARD_FOOTER_GAP = vs(24);
 
 // ✅ forwardRef so parent can call scrollToEnd
 const Layout = forwardRef<ScrollView, LayoutProps>(
@@ -55,20 +58,46 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
     const resolvedBackgroundColor = backgroundColor ?? colors.onboardingPaper;
     const insets = useSafeAreaInsets();
     const Container = useSafeArea ? SafeAreaView : View;
+    const androidApiVersion =
+      typeof Platform.Version === 'number' ? Platform.Version : Number(Platform.Version);
+    const shouldUseAndroidTopSafeArea = isAndroid && androidApiVersion >= 35;
+    const shouldLiftAndroidFooter = isAndroid && androidApiVersion >= 35;
+    const [androidKeyboardHeight, setAndroidKeyboardHeight] = useState(0);
     const edges = useSafeArea
       ? isIOS
         ? (['top', 'left', 'right'] as const)
-        : (['left', 'right'] as const)
+        : shouldUseAndroidTopSafeArea
+          ? (['top', 'left', 'right'] as const)
+          : (['left', 'right'] as const)
       : [];
     const finalEdges: Array<'top' | 'bottom' | 'left' | 'right'> =
       Array.isArray(edgesProp) && edgesProp.length > 0 ? edgesProp : [...edges];
-    const hasBottomSafeEdge = finalEdges.includes('bottom');
-    const footerBottomInset = hasBottomSafeEdge ? 0 : insets.bottom || spacing.sm;
+    const footerBottomInset = insets.bottom || spacing.sm;
     const {
       contentContainerStyle: scrollContentContainerStyle,
       style: scrollStyle,
       ...restScrollViewProps
     } = (scrollViewProps as any) ?? {};
+    const androidFooterKeyboardLift =
+      shouldLiftAndroidFooter && androidKeyboardHeight > 0
+        ? androidKeyboardHeight + ANDROID_KEYBOARD_FOOTER_GAP
+        : 0;
+
+    useEffect(() => {
+      if (!shouldLiftAndroidFooter) return undefined;
+
+      const showSubscription = Keyboard.addListener('keyboardDidShow', event => {
+        setAndroidKeyboardHeight(event.endCoordinates.height);
+      });
+      const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+        setAndroidKeyboardHeight(0);
+      });
+
+      return () => {
+        showSubscription.remove();
+        hideSubscription.remove();
+      };
+    }, [shouldLiftAndroidFooter]);
 
     const content = scrollable ? (
       <ScrollView
@@ -79,9 +108,7 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
         contentContainerStyle={[
           allowPaddingVertical && styles.paddedVertical,
           allowPaddingHorizontal && styles.paddedHorizontal,
-          footerContent
-            ? { paddingBottom: footerHeight + (hasBottomSafeEdge ? 0 : insets.bottom) }
-            : null,
+          footerContent ? { paddingBottom: footerHeight + footerBottomInset } : null,
           scrollContentContainerStyle,
         ]}
         showsVerticalScrollIndicator={false}
@@ -116,7 +143,15 @@ const Layout = forwardRef<ScrollView, LayoutProps>(
             {content}
 
             {footerContent && (
-              <View style={[styles.footer, { paddingBottom: footerBottomInset }]}>
+              <View
+                style={[
+                  styles.footer,
+                  {
+                    paddingBottom: footerBottomInset,
+                    transform: [{ translateY: -androidFooterKeyboardLift }],
+                  },
+                ]}
+              >
                 {footerContent}
               </View>
             )}
@@ -142,6 +177,10 @@ const createStyles = (colors: ThemeColors) =>
       paddingVertical: isAndroid ? vs(5) : 0,
     },
     footer: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.border,
       backgroundColor: colors.transparent,

@@ -42,6 +42,17 @@ const BASE_URL = CONFIG_BASE_URL || DEV_BASE_URL || getDevFallbackBaseUrl() || P
 
 console.log('API base URL:', BASE_URL);
 
+// Tripwire: a dev build should never talk to production. If this fires, the
+// native build baked the wrong env — usually a stale /tmp/envfile overriding
+// ENVFILE (react-native-config gives that file priority). Fix: rm /tmp/envfile
+// and rebuild.
+if (__DEV__ && BASE_URL === PROD_BASE_URL) {
+  console.error(
+    '🚨 DEV BUILD IS POINTED AT THE PRODUCTION BACKEND. ' +
+      'Check /tmp/envfile and rebuild with ENVFILE=.env.dev.',
+  );
+}
+
 export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   skipToast?: boolean;
   skipErrorLog?: boolean;

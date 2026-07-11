@@ -246,7 +246,7 @@ const createStyles = (colors: ThemeColors) =>
       height: ms(30),
       borderRadius: ms(15),
       borderWidth: 1,
-      borderColor: '#F8F6EF',
+      borderColor: colors.onboardingPaper,
       overflow: 'hidden',
       backgroundColor: colors.card,
     },

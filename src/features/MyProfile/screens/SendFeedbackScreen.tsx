@@ -17,17 +17,17 @@ import { submitFeedback } from '../api/MyProfileAPI';
 import { FeedbackCategory, FeedbackPayload } from '../types/feedback.types';
 import { navigationRef } from '@navigation/navigationRef';
 import { AppNavigationProp } from '@navigation/types/navigation';
-import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import Ripple from '@shared/components/Buttons/Ripple';
 import Icon from '@shared/components/Icons/Icon';
 import Layout from '@shared/components/Layout/Layout';
-import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { showToast } from '@shared/utils/toast';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
 import Height from '@shared/components/Spacing/Height';
-import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
+import AnimatedBottomButton, {
+  BOTTOM_BUTTON_HEIGHT,
+} from '@shared/components/Buttons/AnimatedBottomButton';
 import { isIOS } from '@shared/utils/constants';
 
 const FEEDBACK_CATEGORIES: Array<{ label: string; value: FeedbackCategory }> = [
@@ -108,14 +108,6 @@ export default function SendFeedbackScreen() {
   return (
     <Layout
       footerContent={
-        //  <PrimaryButton
-        //         title="Send Feedback"
-        //         onPress={handleSubmit}
-        //         isLoading={feedbackMutation.isPending}
-        //         disabled={!message.trim()}
-        //         backgroundColor={colors.onboardingInk}
-        //         style={styles.cta}
-        //       />
         <AnimatedBottomButton
           style={{
             marginBottom: isIOS ? vs(12) : vs(5),
@@ -127,18 +119,13 @@ export default function SendFeedbackScreen() {
           textColor={colors.tactileMomentumSecondary}
         />
       }
+      footerHeight={BOTTOM_BUTTON_HEIGHT}
       scrollable
       allowPaddingVertical={false}
       backgroundColor={colors.onboardingPaper}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.content}>
-          {/* <Row align="center" style={styles.header}>
-            <Ripple style={styles.backButton} onPress={() => navigation.goBack()}>
-              <Icon set="ion" name="chevron-back" size={22} color={colors.onboardingInk} />
-            </Ripple>
-            <TextElement style={styles.headerTitle}>Send Feedback</TextElement>
-          </Row> */}
           <AppHeader title="" showNavigation={true} />
           <Height size={spacing.md} />
 
@@ -204,30 +191,6 @@ const createStyles = (colors: ThemeColors) =>
       flex: 1,
       paddingTop: vs(10),
       paddingBottom: vs(28),
-    },
-    header: {
-      // minHeight: vs(44),
-      marginBottom: vs(15),
-      // backgroundColor: 'red',
-      justifyContent: 'flex-start',
-    },
-    backButton: {
-      width: ms(42),
-      height: ms(42),
-      borderRadius: ms(21),
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.onboardingLine,
-      marginRight: spacing.sm,
-    },
-    headerTitle: {
-      fontSize: ms(20),
-      lineHeight: ms(25),
-      fontWeight: '800',
-      color: colors.onboardingInk,
-      letterSpacing: 0,
     },
     copyBlock: {
       marginBottom: vs(20),

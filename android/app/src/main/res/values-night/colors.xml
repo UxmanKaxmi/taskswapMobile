@@ -1,0 +1,4 @@
+<resources>
+    <!-- Dark splash background: matches the dark theme's onboardingPaper. -->
+    <color name="bootsplash_background">#131318</color>
+</resources>

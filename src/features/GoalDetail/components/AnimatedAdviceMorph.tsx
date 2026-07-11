@@ -85,7 +85,7 @@ export default function AnimatedAdviceMorph({
           title="💡 Share advice"
           buttonHeader="Your experience could really help here."
           buttonColor={colors.adviceBgHardest}
-          containerColor={colors.onPrimary}
+          containerColor={colors.card}
           onPress={onOpenComposer}
         />
       </Animated.View>

@@ -6,7 +6,6 @@ import { ms, vs } from 'react-native-size-matters';
 import { AddGoalStackParamList } from '../navigation/AddGoalNavigator';
 import { Layout } from '@shared/components/Layout';
 import TextElement from '@shared/components/TextElement/TextElement';
-import OnboardingHeader from '@shared/components/OnboardingHeader';
 import { platformShadow, spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import GoalDescriptionInput from '../components/GoalDescriptionInput';
 import { CreateGoalPayload } from '../types/addGoal.types';
@@ -14,7 +13,7 @@ import { useCreateGoal } from '../hooks/useCreateGoal';
 import { navigateToGoalDetails, resetToHomeRoot } from '@navigation/types/navigationUtils';
 import { Goal, GoalTypeEnum } from '@features/Goals/types/goals';
 import { BOTTOM_BUTTON_HEIGHT } from '@shared/components/Buttons/AnimatedBottomButton';
-import { isAndroid } from '@shared/utils/constants';
+import { isAndroid, MIN_TASK_LENGTH } from '@shared/utils/constants';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { useModal } from '@shared/components/ModalProvider';
 import { navigationRef } from '@navigation/navigationRef';
@@ -37,7 +36,6 @@ import Icon from '@shared/components/Icons/Icon';
 type Props = NativeStackScreenProps<AddGoalStackParamList, 'AddMotivation'>;
 
 // Minimum characters required before a goal can be posted.
-const MIN_TASK_LENGTH = 50;
 
 export default function AddMotivationScreen({ navigation, route }: Props) {
   const { colors } = useTheme();
@@ -76,6 +74,16 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
     setSelectedFeeling(normalizeFeelingValue(draft.feeling) ?? undefined);
     setIsAnonymous(draft.isAnonymous === true);
   }, [route.params?.draft]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const promptTimeout = setTimeout(() => {
+      void requestNotificationPermissionPromptForValueMoment();
+    }, 350);
+
+    return () => clearTimeout(promptTimeout);
+  }, [user?.id]);
 
   const hasAutoSubmittedRef = React.useRef(false);
   const canSubmit = text.trim().length > 0;
@@ -163,10 +171,6 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
           },
         });
       }, 300);
-
-      setTimeout(() => {
-        void requestNotificationPermissionPromptForValueMoment();
-      }, 900);
     },
     [navigation, openModal, rootNavigation],
   );
@@ -418,7 +422,7 @@ const createStyles = (colors: ThemeColors) =>
       left: 0,
       right: 0,
       bottom: vs(2),
-      height: vs(11),
+      height: vs(8),
       backgroundColor: colors.onboardingPush,
     },
     highlightText: {

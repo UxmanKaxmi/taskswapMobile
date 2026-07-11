@@ -135,7 +135,7 @@ const createStyles = (colors: ThemeColors) =>
       borderWidth: 0,
     },
     avatarText: {
-      color: colors.onboardingInk,
+      color: colors.tactileMomentumSecondary,
       fontSize: ms(34),
       lineHeight: ms(42),
       fontWeight: '800',

@@ -19,6 +19,7 @@ import Avatar from '@shared/components/Avatar/Avatar';
 import { HelperUser } from '@features/Home/types/home';
 import AppModal from '@shared/components/AppModal/AppModal';
 import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
+import { getAvatarColor } from '@shared/utils/avatarColor';
 
 type Props = {
   visible: boolean;
@@ -118,10 +119,13 @@ export default function SelectHelpersModal({
         <View style={styles.rowLeft}>
           <Avatar
             uri={item.photo}
-            fallback={item.name?.[0] ?? '?'}
+            fallback={item.name}
             size={44}
             borderColor={colors.onboardingLine}
-            fallbackStyle={styles.avatarFallback}
+            fallbackStyle={{
+              ...styles.avatarFallback,
+              backgroundColor: getAvatarColor(item.id || item.name),
+            }}
             textStyle={styles.avatarText}
           />
 
@@ -137,7 +141,12 @@ export default function SelectHelpersModal({
 
         <View style={[styles.radio, isSelected && styles.radioSelected]}>
           {isSelected ? (
-            <Icon set="ion" name="checkmark" size={ms(18)} color={colors.tactileMomentumSecondary} />
+            <Icon
+              set="ion"
+              name="checkmark"
+              size={ms(18)}
+              color={colors.tactileMomentumSecondary}
+            />
           ) : null}
         </View>
       </Pressable>
@@ -228,7 +237,7 @@ const createStyles = (colors: ThemeColors) =>
       width: ms(68),
       height: vs(6),
       borderRadius: 999,
-      backgroundColor: '#E4E2DA',
+      backgroundColor: colors.onboardingLine,
       marginBottom: vs(16),
     },
     title: {
@@ -313,7 +322,6 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.onboardingPush,
     },
     avatarFallback: {
-      backgroundColor: colors.inputBackground,
       borderColor: colors.onboardingLine,
     },
     avatarText: {

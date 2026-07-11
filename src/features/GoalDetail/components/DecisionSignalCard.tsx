@@ -112,7 +112,7 @@ export default function DecisionSignalCard({
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     card: {
-      backgroundColor: colors.onPrimary,
+      backgroundColor: colors.surface,
       borderRadius: 28,
       padding: spacing.md,
       alignItems: 'flex-start',

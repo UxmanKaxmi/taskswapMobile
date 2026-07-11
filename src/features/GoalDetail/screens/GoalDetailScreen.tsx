@@ -1,6 +1,6 @@
 // src/features/tasks/screens/GoalDetailScreen.tsx
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Platform, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
@@ -20,7 +20,6 @@ import { ms, vs } from 'react-native-size-matters';
 import { GoalThemeContainer } from '../components/GoalThemeContainer';
 import GoalDetailBody from '../components/GoalDetailBody';
 import GoalDetailCaption from '../components/GoalDetailCaption';
-import AnimatedBottomButton from '@shared/components/Buttons/AnimatedBottomButton';
 import { spacing, useTheme } from '@shared/theme';
 import {
   isAndroid,
@@ -36,12 +35,7 @@ import ViewHelpersModal from '../components/ViewHelpersModal';
 import SelectHelpersModal from '@features/AddGoal/components/SelectHelpersModal';
 import { usePushInteraction } from '@features/Home/hooks/usePushInteraction';
 import { useGoalPushes, useToggleGoalPush } from '@features/Goals/hooks/useGoalPush';
-import {
-  formatViewCount,
-  getFirstName,
-  stripOuterQuotes,
-  toShortName,
-} from '@shared/utils/helperFunctions';
+import { getFirstName, stripOuterQuotes, toShortName } from '@shared/utils/helperFunctions';
 import { ProgressUpdate, GoalBeat, GoalTypeEnum } from '@features/Goals/types/goals';
 import AnimatedBottomButtonWithHeader, {
   BOTTOM_BUTTON_HEIGHT,
@@ -51,19 +45,18 @@ import { useCompleteGoal } from '@features/Home/hooks/useCompleteGoal';
 import { useRevealGoal } from '../hooks/useRevealGoal';
 import { showToast } from '@shared/utils/toast';
 import { useAddComment } from '@features/Goals/hooks/useComment';
-import Animated, {
-  useSharedValue,
-  withTiming,
-  useAnimatedStyle,
-  interpolate,
-} from 'react-native-reanimated';
+import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
 import AnimatedAdviceMorph from '../components/AnimatedAdviceMorph';
+import { useMorphStagedReveal, useMorphTarget } from '@shared/morph/useMorphElement';
+import { MORPH_NODE_STYLE } from '@shared/morph/MorphProvider';
+import { resolveAppTextStyle } from '@shared/theme/fonts';
 import { queryClient } from '@lib/react-query/client';
 import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 import ReminderWhenPicker from '@features/AddGoal/components/ReminderWhenPicker';
 import { useAddReminder } from '@features/Home/hooks/useAddReminder';
 import { useModal } from '@shared/components/ModalProvider';
 import TextElement from '@shared/components/TextElement/TextElement';
+import BackButton from '@shared/components/Buttons/BackButton';
 import Ripple from '@shared/components/Buttons/Ripple';
 import Icon from '@shared/components/Icons/Icon';
 import ShareModal from '@features/Share/components/ShareModal';
@@ -178,6 +171,35 @@ export default function GoalDetailScreen({
 
   const task = isGoalQueryError ? null : (taskData ?? initialGoal);
   const taskError = isGoalQueryError;
+
+  // Shared-element morph target for the push button flying up from the card.
+  const goalButtonMorph = useMorphTarget(
+    task?.id ?? '',
+    'button',
+    {
+      // The measured rect IS the CTA button; radius matches its real style.
+      borderRadius: 14,
+      backgroundColor: colors.onboardingPush,
+      fontSize: ms(16),
+      textColor: colors.tactileMomentumSecondary,
+      paddingHorizontal: 0,
+      paddingVertical: 0,
+      align: 'center',
+      // Matches the CTA label (TextElement weight="600", body variant).
+      textStyle: resolveAppTextStyle([{ color: colors.tactileMomentumSecondary }], {
+        weight: '600',
+      }),
+    },
+    { text: task?.name ? `Push ${getFirstName(task.name)}` : undefined },
+  );
+
+  // The author block (avatar + name) flies in from the card as a node clone.
+  const goalHeaderMorph = useMorphTarget(task?.id ?? '', 'header', MORPH_NODE_STYLE);
+
+  // Detail-only content has no card counterpart: keep it hidden while the
+  // shared elements fly, then fade/slide it in as the morph lands.
+  const stagedStatsStyle = useMorphStagedReveal(task?.id ?? '', 0);
+  const stagedBodyStyle = useMorphStagedReveal(task?.id ?? '', 1);
 
   const handleUnavailableGoBack = useCallback(() => {
     if (navigation.canGoBack()) {
@@ -459,9 +481,22 @@ export default function GoalDetailScreen({
     });
   }, [isCompleted, latestProgressUpdate, openShareUpdateSheet, shareProgressUpdate, task]);
 
-  const handleShareUpdate = useCallback(() => {
-    openShareUpdateComposer();
-  }, [openShareUpdateComposer]);
+  const handleShareProgressBeat = useCallback(
+    (beat: GoalBeat) => {
+      if (!task) return;
+
+      const updateText = stripOuterQuotes(beat.text || '');
+      setShareGoal({
+        ...(task as ShareGoal),
+        id: beat.updateId ?? beat.beatId ?? task.id,
+        text: updateText || task.text,
+        createdAt: beat.createdAt || task.createdAt,
+        pushCount: beat.cheerCount ?? task.pushCount ?? 0,
+      });
+      setShareVisible(true);
+    },
+    [task],
+  );
 
   const handleCheerPress = React.useCallback(
     (beat: GoalBeat) => {
@@ -712,7 +747,7 @@ export default function GoalDetailScreen({
               onPress={() => {}}
               isLoading={false}
               buttonColor={colors.border}
-              containerColor={colors.onPrimary}
+              containerColor={colors.card}
               buttonHeader="You've already sent a reminder."
               // If your component supports it:
               // disabled
@@ -728,7 +763,7 @@ export default function GoalDetailScreen({
             onPress={() => {}}
             isLoading={false}
             buttonColor={colors.border}
-            containerColor={colors.onPrimary}
+            containerColor={colors.card}
             buttonHeader="You’ve already sent a reminder."
             showButton={false}
             // disabled
@@ -745,7 +780,7 @@ export default function GoalDetailScreen({
             onPress={() => {}}
             isLoading={false}
             buttonColor={colors.border}
-            containerColor={colors.onPrimary}
+            containerColor={colors.card}
             buttonHeader="You’ve already sent a reminder."
             showButton={false}
 
@@ -765,7 +800,7 @@ export default function GoalDetailScreen({
           }}
           isLoading={isPending}
           buttonColor={colors.reminderBgHardest}
-          containerColor={colors.onPrimary}
+          containerColor={colors.card}
           buttonHeader="A small nudge can make a big difference."
         />
       );
@@ -811,6 +846,10 @@ export default function GoalDetailScreen({
           textColor={colors.tactileMomentumSecondary}
           containerColor={colors.onboardingCard}
           buttonHeader="A small push can make a big difference."
+          buttonRef={goalButtonMorph.ref}
+          onButtonLayout={goalButtonMorph.onLayout}
+          entranceDisabled={goalButtonMorph.isActive}
+          revealStyle={goalButtonMorph.animatedStyle}
         />
       );
     }
@@ -823,7 +862,7 @@ export default function GoalDetailScreen({
           onPress={push.handlePush}
           isLoading={isPending}
           buttonColor={colors.decisionBgHardest}
-          containerColor={colors.onPrimary}
+          containerColor={colors.card}
           buttonHeader={
             isOwner ? 'Your vote counts too.' : 'Your vote helps shape the final decision.'
           }
@@ -838,7 +877,7 @@ export default function GoalDetailScreen({
           visible
           onPress={() => {}}
           showButton={false}
-          containerColor={colors.onPrimary}
+          containerColor={colors.card}
           buttonHeader={`You voted for "${task.votedOption}"`}
         />
       );
@@ -902,6 +941,10 @@ export default function GoalDetailScreen({
     openHelpersSheet,
     openAddHelperSheet,
     colors,
+    goalButtonMorph.ref,
+    goalButtonMorph.onLayout,
+    goalButtonMorph.isActive,
+    goalButtonMorph.animatedStyle,
   ]);
 
   const renderAdvice = React.useCallback(() => {
@@ -948,52 +991,63 @@ export default function GoalDetailScreen({
   const renderMotivation = React.useCallback(() => {
     return (
       <>
-        <GoalDetailHeader task={task} />
+        <Animated.View
+          ref={goalHeaderMorph.ref}
+          onLayout={goalHeaderMorph.onLayout}
+          collapsable={false}
+          style={goalHeaderMorph.animatedStyle}
+        >
+          <GoalDetailHeader task={task} />
+        </Animated.View>
 
         <GoalDetailCaption task={task} />
 
-        <MotivationStatsHeader createdAt={task.createdAt} pushCount={supporterCount} />
+        <Animated.View style={stagedStatsStyle}>
+          <MotivationStatsHeader createdAt={task.createdAt} pushCount={supporterCount} />
+        </Animated.View>
 
         <Height size={vs(18)} />
 
-        <GoalDetailBody
-          task={task}
-          adviceSectionRef={adviceSectionRef}
-          progressSectionRef={progressSectionRef}
-          highlightProgressSection={progressSectionHighlighted}
-          highlightProgressUpdateId={progressUpdateId}
-          highlightBeatId={resolvedHighlightBeatId}
-          highlightCommentId={highlightCommentId}
-          canViewerCheer={canViewerCheer}
-          onCheerPress={handleCheerPress}
-          onShareUpdate={handleShareUpdate}
-          isSendingCheer={sendCheer.isPending}
-        />
+        <Animated.View style={stagedBodyStyle}>
+          <GoalDetailBody
+            task={task}
+            adviceSectionRef={adviceSectionRef}
+            progressSectionRef={progressSectionRef}
+            highlightProgressSection={progressSectionHighlighted}
+            highlightProgressUpdateId={progressUpdateId}
+            highlightBeatId={resolvedHighlightBeatId}
+            highlightCommentId={highlightCommentId}
+            canViewerCheer={canViewerCheer}
+            onCheerPress={handleCheerPress}
+            onShareUpdate={handleShareProgressBeat}
+            isSendingCheer={sendCheer.isPending}
+          />
 
-        {!isCompleted && (isOwner || hasHelpers) && (
-          <>
-            <Height size={vs(12)} />
-            <GoalDetailHelpers
-              helpers={task.helpers}
-              taskType={task.type}
-              isOwner={isOwner}
-              completed={isCompleted}
-              ownerName={task.name}
-              onPress={openHelpersSheet}
-              onAddPress={openAddHelperSheet}
-            />
-          </>
-        )}
+          {!isCompleted && (isOwner || hasHelpers) && (
+            <>
+              <Height size={vs(12)} />
+              <GoalDetailHelpers
+                helpers={task.helpers}
+                taskType={task.type}
+                isOwner={isOwner}
+                completed={isCompleted}
+                ownerName={task.name}
+                onPress={openHelpersSheet}
+                onAddPress={openAddHelperSheet}
+              />
+            </>
+          )}
 
-        <Height size={vs(12)} />
+          <Height size={vs(12)} />
 
-        <GoalStatusRow
-          completed={isCompleted}
-          viewsCount={task.viewCount || 0}
-          isOwner={isOwner}
-          taskType={task.type}
-          onMarkComplete={handleMarkCompletePress}
-        />
+          <GoalStatusRow
+            completed={isCompleted}
+            viewsCount={task.viewCount || 0}
+            isOwner={isOwner}
+            taskType={task.type}
+            onMarkComplete={handleMarkCompletePress}
+          />
+        </Animated.View>
       </>
     );
   }, [
@@ -1007,10 +1061,15 @@ export default function GoalDetailScreen({
     resolvedHighlightBeatId,
     canViewerCheer,
     handleCheerPress,
-    handleShareUpdate,
+    handleShareProgressBeat,
     sendCheer.isPending,
     isCompleted,
     supporterCount,
+    goalHeaderMorph.ref,
+    goalHeaderMorph.onLayout,
+    goalHeaderMorph.animatedStyle,
+    stagedStatsStyle,
+    stagedBodyStyle,
   ]);
 
   const renderDecision = React.useCallback(() => {
@@ -1188,9 +1247,13 @@ export default function GoalDetailScreen({
 
   const bg = getGoalBackgroundVisual(task.type);
   const isMotivation = task.type === GoalTypeEnum.Motivation;
-  const edges: Array<'top' | 'bottom' | 'left' | 'right'> = isAndroid
-    ? ['left', 'right', 'bottom']
-    : ['top', 'left', 'right', 'bottom'];
+  const androidApiVersion =
+    typeof Platform.Version === 'number' ? Platform.Version : Number(Platform.Version);
+  const shouldUseAndroidTopSafeArea = isAndroid && androidApiVersion >= 35;
+  const edges: Array<'top' | 'bottom' | 'left' | 'right'> =
+    isAndroid && !shouldUseAndroidTopSafeArea
+      ? ['left', 'right', 'bottom']
+      : ['top', 'left', 'right', 'bottom'];
   const showOwnerMenu = isOwner && !!task?.id;
   return (
     <View style={{ flex: 1 }}>
@@ -1223,6 +1286,7 @@ export default function GoalDetailScreen({
         backgroundColor="transparent"
       >
         <AppHeader
+          left={<BackButton onPress={handleUnavailableGoBack} />}
           right={
             <View style={styles.headerActions}>
               <Ripple

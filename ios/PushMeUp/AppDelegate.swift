@@ -5,6 +5,15 @@ import ReactAppDependencyProvider
 import Firebase // ✅ Add this import
 import RNBootSplash // ⬅️ add this import
 
+// Splash background, matching BootSplash.storyboard's colorset (light #F4F4EF,
+// dark #131318). Painted on the window and React root view so no white frame
+// can flash between the launch screen, the native splash, and RN's first paint.
+private let splashBackgroundColor = UIColor { trait in
+  trait.userInterfaceStyle == .dark
+    ? UIColor(red: 0x13 / 255.0, green: 0x13 / 255.0, blue: 0x18 / 255.0, alpha: 1)
+    : UIColor(red: 0xF4 / 255.0, green: 0xF4 / 255.0, blue: 0xEF / 255.0, alpha: 1)
+}
+
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -27,6 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     reactNativeFactory = factory
 
     window = UIWindow(frame: UIScreen.main.bounds)
+    window?.backgroundColor = splashBackgroundColor
 
     factory.startReactNative(
       withModuleName: "PushMeUp",
@@ -45,6 +55,7 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 
    override func customize(_ rootView: RCTRootView) {
     super.customize(rootView)
+    rootView.backgroundColor = splashBackgroundColor
     RNBootSplash.initWithStoryboard("BootSplash", rootView: rootView) // ⬅️ initialize the splash screen
   }
 

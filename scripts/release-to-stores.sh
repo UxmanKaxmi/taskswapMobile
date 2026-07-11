@@ -221,24 +221,16 @@ bump_build_numbers() {
 }
 
 set_tmp_envfile() {
-  if [ -f /tmp/envfile ]; then
-    HAD_TMP_ENVFILE=true
-    PREV_TMP_ENVFILE="$(cat /tmp/envfile)"
-  else
-    HAD_TMP_ENVFILE=false
-    PREV_TMP_ENVFILE=""
-  fi
-
   printf '%s\n' "$APP_ENV_FILE" >/tmp/envfile
   TMP_ENVFILE_ACTIVE=true
 }
 
 restore_tmp_envfile() {
-  if [ "$HAD_TMP_ENVFILE" = true ]; then
-    printf '%s\n' "$PREV_TMP_ENVFILE" >/tmp/envfile
-  else
-    rm -f /tmp/envfile
-  fi
+  # Never restore the previous value: /tmp/envfile outranks the ENVFILE
+  # variable in react-native-config, so restoring a stale entry (e.g. from an
+  # earlier hard-killed run) silently points later dev builds at the wrong
+  # backend. Removing it always falls back to each command's own ENVFILE.
+  rm -f /tmp/envfile
   TMP_ENVFILE_ACTIVE=false
 }
 

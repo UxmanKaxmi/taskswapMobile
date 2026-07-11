@@ -23,7 +23,6 @@ import EmptyState from '@features/Empty/EmptyState';
 import { NotificationDTO } from '../types/notification.types';
 import Row from '@shared/components/Layout/Row';
 import { ms, vs } from 'react-native-size-matters';
-import AppBorder from '@shared/components/AppBorder/AppBorder';
 import NotificationCard from '../components/DefaultNotification';
 import { queryClient } from '@lib/react-query/client';
 import { buildQueryKey } from '@shared/constants/queryKeys';
@@ -390,7 +389,6 @@ export default function NotificationMainScreen() {
                 </TextElement>
               </View>
             )}
-            ItemSeparatorComponent={() => <AppBorder style={{ marginHorizontal: spacing.lg }} />}
             renderItem={({ item, index, section }) => {
               const isFirst = index === 0;
               const isLast = index === section.data.length - 1;
@@ -490,7 +488,6 @@ const createStyles = (colors: ThemeColors) =>
       // marginTop: spacing.md,
       // backgroundColor: '#fff',
       backgroundColor: 'transparent',
-      borderRadius: 10,
       overflow: 'hidden',
     },
 

@@ -41,6 +41,10 @@ export const modalRegistry: { [K in ModalType]: ModalDefinition<K> } = {
   shareUpdate: {
     snapPoints: ['62%'],
     scrollable: true,
+    bottomSheetProps: {
+      android_keyboardInputMode: 'adjustPan',
+      keyboardBehavior: 'interactive',
+    },
     render: (payload, { closeModal }) => (
       <ShareUpdateModalContent payload={payload} closeModal={closeModal} />
     ),

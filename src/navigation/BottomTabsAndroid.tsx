@@ -18,7 +18,6 @@ import { useAppNavigation, useCheckAuthThenNavigate } from './types/navigationUt
 import { useAuth } from '@features/Auth/AuthProvider';
 import { haptics } from '@shared/utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { isAndroid } from '@shared/utils/constants';
 
 type BottomTabParamList = {
   Home: undefined;
@@ -27,6 +26,8 @@ type BottomTabParamList = {
   Notification: undefined;
   Profile: undefined;
 };
+
+const TAB_BAR_GESTURE_OVERLAP = vs(5);
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -54,7 +55,7 @@ export default function BottomTabsAndroid({ route }: any) {
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
   const checkAuthForTab = useCheckAuthForTab();
   const insets = useSafeAreaInsets();
-  const tabBarBottomOffset = insets.bottom;
+  const tabBarBottomOffset = Math.max(insets.bottom - TAB_BAR_GESTURE_OVERLAP, 0);
 
   const shouldHideTabBar = ['SomeScreenYouWantToHideOn'].includes(routeName);
 
@@ -74,7 +75,7 @@ export default function BottomTabsAndroid({ route }: any) {
               position: 'absolute',
               left: 25,
               right: 25,
-              bottom: isAndroid ? tabBarBottomOffset : vs(14),
+              bottom: tabBarBottomOffset,
               borderTopEndRadius: 30,
               borderTopStartRadius: 30,
 

@@ -374,7 +374,12 @@ export default function ProfileMenu() {
                   ]}
                 >
                   <View style={styles.optionIcon}>
-                    <Icon set="ion" name={option.icon} size={ms(17)} color={colors.onboardingInk} />
+                    <Icon
+                      set="ion"
+                      name={option.icon}
+                      size={ms(17)}
+                      color={colors.tactileMomentumSecondary}
+                    />
                   </View>
                   <View style={styles.optionTextBlock}>
                     <TextElement style={styles.optionTitle}>{option.label}</TextElement>

@@ -318,7 +318,7 @@ export default function ReminderNoteList({
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     card: {
-      backgroundColor: colors.onPrimary,
+      backgroundColor: colors.surface,
       borderRadius: 28,
       paddingTop: vs(16),
       paddingBottom: vs(22),
@@ -367,7 +367,7 @@ const createStyles = (colors: ThemeColors) =>
       marginLeft: vs(-23),
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: colors.onPrimary,
+      backgroundColor: colors.surface,
     },
     endDotWrap: {
       width: ms(30),
@@ -377,7 +377,7 @@ const createStyles = (colors: ThemeColors) =>
 
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: colors.onPrimary,
+      backgroundColor: colors.surface,
     },
 
     dotHalo: {

@@ -26,7 +26,13 @@ export default function AppNavigator() {
     <Stack.Navigator id={undefined as any} screenOptions={{ headerShown: false }}>
       {/* Main app tabs */}
       <Stack.Screen name="Tabs" component={isIOS ? BottomTabsIOS : BottomTabsAndroid} />
-      <Stack.Screen name="GoalDetail" component={GoalDetailScreen} />
+      <Stack.Screen
+        name="GoalDetail"
+        component={GoalDetailScreen}
+        // Fade (not slide) so the shared-element morph overlay reads as the
+        // transition instead of competing with a horizontal push.
+        options={{ animation: 'fade', animationDuration: 320 }}
+      />
       {/* Add Goal Modal */}
       <Stack.Screen
         name="AddGoal"

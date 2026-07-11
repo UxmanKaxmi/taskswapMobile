@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import Icon from '@react-native-vector-icons/fontawesome6';
 import { resolveAppTextStyle } from '@shared/theme/fonts';
-import { platformShadow } from '@shared/theme';
+import { platformShadow, ThemeColors, useThemedStyles } from '@shared/theme';
 
 type Props = {
   text1: string;
@@ -23,6 +23,7 @@ const iconMap: Record<
 
 export default function PushMeUpToast({ text1, text2, type }: Props) {
   const icon = iconMap[type];
+  const styles = useThemedStyles(createStyles);
   const titleStyle = resolveAppTextStyle(styles.title, { variant: 'label' });
   const messageStyle = resolveAppTextStyle(styles.message, { variant: 'body' });
 
@@ -39,37 +40,38 @@ export default function PushMeUpToast({ text1, text2, type }: Props) {
 
 const { width } = Dimensions.get('window');
 
-const styles = StyleSheet.create({
-  toastContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: moderateScale(12),
-    borderRadius: moderateScale(12),
-    width: width * 0.9,
-    alignSelf: 'center',
-    marginBottom: 30,
-    ...platformShadow({
-      color: '#000',
-      opacity: 0.1,
-      radius: 6,
-      offset: { width: 0, height: 2 },
-    }),
-    alignItems: 'center',
-  },
-  icon: {
-    marginRight: 10,
-  },
-  textContainer: {
-    flexShrink: 1,
-  },
-  title: {
-    fontWeight: '700',
-    fontSize: 15,
-    color: '#333',
-  },
-  message: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 2,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    toastContainer: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      padding: moderateScale(12),
+      borderRadius: moderateScale(12),
+      width: width * 0.9,
+      alignSelf: 'center',
+      marginBottom: 30,
+      ...platformShadow({
+        color: colors.onboardingInk,
+        opacity: 0.14,
+        radius: 6,
+        offset: { width: 0, height: 2 },
+      }),
+      alignItems: 'center',
+    },
+    icon: {
+      marginRight: 10,
+    },
+    textContainer: {
+      flexShrink: 1,
+    },
+    title: {
+      fontWeight: '700',
+      fontSize: 15,
+      color: colors.text,
+    },
+    message: {
+      fontSize: 13,
+      color: colors.muted,
+      marginTop: 2,
+    },
+  });

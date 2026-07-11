@@ -144,7 +144,7 @@ export default function HorizontalFilterTabs({ value, onChange, iconOnly = false
                       name={option.icon}
                       iconStyle="solid"
                       size={ms(15)}
-                      color={colors.onboardingInk}
+                      color={colors.tactileMomentumSecondary}
                     />
                   </View>
                   <View style={styles.optionTextBlock}>

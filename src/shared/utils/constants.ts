@@ -20,7 +20,8 @@ export const SUPPORT_URL = 'https://pushmeup.app/help';
 export const DEFAULT_PROFILE_IMAGE_SIZE = 120;
 export const SHARE_UPDATE_CHARACTER_LIMIT = 120;
 // Minimum characters required before an update can be shared.
-export const SHARE_UPDATE_MIN_CHARACTER_LIMIT = 20;
+export const SHARE_UPDATE_MIN_CHARACTER_LIMIT = 15;
+export const MIN_TASK_LENGTH = 15;
 
 export const APP_ENV = Config.APP_ENV || (__DEV__ ? 'development' : 'production');
 export const isDEV = APP_ENV !== 'production';

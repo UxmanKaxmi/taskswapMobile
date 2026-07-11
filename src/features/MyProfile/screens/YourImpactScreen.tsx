@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ms, vs } from 'react-native-size-matters';
 
 import { AppNavigationProp } from '@navigation/types/navigation';
 import Avatar from '@shared/components/Avatar/Avatar';
+import BackButton from '@shared/components/Buttons/BackButton';
 import Ripple from '@shared/components/Buttons/Ripple';
 import Icon from '@shared/components/Icons/Icon';
 import Layout from '@shared/components/Layout/Layout';
 import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
+import { isDEV } from '@shared/utils/constants';
+import WhatsNewModal from '@features/LaunchModals/modals/WhatsNewModal';
 import { useMyImpact } from '../hooks/useMyImpact';
 import { ImpactStats } from '../types/impact.types';
 
@@ -31,6 +34,7 @@ export default function YourImpactScreen() {
   const styles = useThemedStyles(createStyles);
   const navigation = useNavigation<AppNavigationProp>();
   const { data: impact, isLoading } = useMyImpact();
+  const [whatsNewPreviewVisible, setWhatsNewPreviewVisible] = useState(false);
 
   return (
     <Layout
@@ -41,9 +45,7 @@ export default function YourImpactScreen() {
     >
       <View style={styles.content}>
         <Row align="center" justify="space-between" style={styles.header}>
-          <Ripple style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Icon set="ion" name="chevron-back" size={22} color={colors.onboardingInk} />
-          </Ripple>
+          <BackButton onPress={() => navigation.goBack()} />
           <View style={styles.privatePill}>
             <Icon set="ion" name="lock-closed" size={12} color={colors.onboardingInkSoft} />
             <TextElement style={styles.privatePillText}>Only you can see this</TextElement>
@@ -75,7 +77,23 @@ export default function YourImpactScreen() {
             </TextElement>
           </>
         )}
+
+        {isDEV && (
+          <Ripple style={styles.devButton} onPress={() => setWhatsNewPreviewVisible(true)}>
+            <Icon set="ion" name="construct-outline" size={16} color={colors.onboardingInk} />
+            <TextElement style={styles.devButtonText}>Preview "What's new" modal</TextElement>
+          </Ripple>
+        )}
       </View>
+
+      {isDEV && (
+        <WhatsNewModal
+          visible={whatsNewPreviewVisible}
+          onDismiss={() => setWhatsNewPreviewVisible(false)}
+          onHidden={() => setWhatsNewPreviewVisible(false)}
+          ctx={{ screen: 'HOME' }}
+        />
+      )}
     </Layout>
   );
 }
@@ -238,16 +256,6 @@ const createStyles = (colors: ThemeColors) =>
     },
     header: {
       marginBottom: vs(16),
-    },
-    backButton: {
-      width: ms(42),
-      height: ms(42),
-      borderRadius: ms(21),
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.onboardingLine,
     },
     privatePill: {
       flexDirection: 'row',
@@ -487,6 +495,26 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: ms(14),
       lineHeight: ms(21),
       fontWeight: '800',
+      color: colors.onboardingInk,
+      letterSpacing: 0,
+    },
+    devButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: ms(8),
+      marginTop: vs(24),
+      paddingVertical: vs(12),
+      borderRadius: ms(14),
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      borderColor: colors.onboardingLine,
+      backgroundColor: colors.surface,
+    },
+    devButtonText: {
+      fontSize: ms(13),
+      lineHeight: ms(17),
+      fontWeight: '700',
       color: colors.onboardingInk,
       letterSpacing: 0,
     },

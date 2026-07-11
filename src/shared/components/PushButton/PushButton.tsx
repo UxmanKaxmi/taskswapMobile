@@ -231,7 +231,7 @@ const createStyles = (colors: ThemeColors) =>
       elevation: 0,
     },
     cheerPill: {
-      backgroundColor: '#FFFFFF',
+      backgroundColor: colors.surface,
       borderColor: colors.border,
       ...platformShadow({
         color: colors.border,
@@ -271,6 +271,6 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.tactileMomentumPrimary,
     },
     cheerText: {
-      color: colors.tactileMomentumSecondary,
+      color: colors.onboardingInk,
     },
   });

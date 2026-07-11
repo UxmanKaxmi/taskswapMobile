@@ -45,7 +45,7 @@ export const createNotificationStyles = (colors: ThemeColors) =>
     readCard: {
       backgroundColor: colors.card,
       borderLeftWidth: ms(4),
-      borderLeftColor: 'transparent',
+      borderLeftColor: colors.card,
     },
     cardStyles: {
       flexDirection: 'row',

@@ -7,6 +7,9 @@
 // Writing rules: keep every point simple enough for any user. Say what they
 // can now see or do, never internals. For fixes, a friendly "squashed bugs"
 // line is enough; don't describe what the bugs were.
+//
+// NOTE: each emoji must have a matching icon in CHANGE_ICON_MAP in
+// ChangelogScreen.tsx, or it falls back to the sparkle icon on that screen.
 
 export type ChangeType = 'new' | 'improved' | 'fixed';
 
@@ -17,7 +20,7 @@ export type ChangelogChange = {
 };
 
 export type ChangelogEntry = {
-  /** User-facing version label, e.g. '1.0 (15)'. */
+  /** User-facing version label, e.g. '1.0 (21)'. */
   version: string;
   /** Human-readable release date, e.g. 'Jul 6, 2026'. */
   date: string;
@@ -30,8 +33,13 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     version: '1.0 (21)',
     date: 'Jul 6, 2026',
-    title: 'Your Impact & smoother goals',
+    title: 'Post anonymously & smoother goals',
     changes: [
+      {
+        type: 'new',
+        emoji: '🥸',
+        text: 'You can now post goals anonymously.',
+      },
       {
         type: 'new',
         emoji: '✨',
@@ -39,8 +47,18 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
       {
         type: 'improved',
+        emoji: '🪄',
+        text: 'Opening a goal now flows with a smooth animation.',
+      },
+      {
+        type: 'improved',
         emoji: '👆',
-        text: 'Managing your goals is quicker and easier.',
+        text: 'Tap a push notification to jump straight to that goal.',
+      },
+      {
+        type: 'improved',
+        emoji: '✍️',
+        text: 'Post shorter goals and updates — the minimum dropped from 50 to 15 characters.',
       },
       {
         type: 'fixed',

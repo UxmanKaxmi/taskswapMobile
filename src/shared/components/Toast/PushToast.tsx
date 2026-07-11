@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 
 import TextElement from '@shared/components/TextElement/TextElement';
@@ -8,25 +8,39 @@ import { ThemeColors, platformShadow, useThemedStyles } from '@shared/theme';
 export type PushToastProps = {
   pusherName: string;
   message?: string;
+  // When provided, the pill becomes tappable (e.g. to open the goal detail).
+  onPress?: () => void;
 };
 
 export default function PushToast({
   pusherName,
   message = 'just pushed you forward',
+  onPress,
 }: PushToastProps) {
   const styles = useThemedStyles(createStyles);
 
-  return (
-    <View style={styles.wrap}>
-      {/* <View style={styles.avatar}></View> */}
-
-      <View style={styles.pill}>
-        <TextElement variant="bodySmall" weight="700" style={styles.message}>
-          <Text style={styles.name}>{pusherName}</Text>
-          <Text style={styles.messageRest}> {message}</Text>
-        </TextElement>
-      </View>
+  const pill = (
+    <View style={styles.pill}>
+      <TextElement variant="bodySmall" weight="700" style={styles.message}>
+        <Text style={styles.name}>{pusherName}</Text>
+        <Text style={styles.messageRest}> {message}</Text>
+      </TextElement>
     </View>
+  );
+
+  if (!onPress) {
+    return <View style={styles.wrap}>{pill}</View>;
+  }
+
+  return (
+    <Pressable
+      style={styles.wrap}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${pusherName} ${message}. Open goal.`}
+    >
+      {pill}
+    </Pressable>
   );
 }
 

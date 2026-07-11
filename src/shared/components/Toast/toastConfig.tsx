@@ -15,6 +15,10 @@ export const toastConfig = {
     <PushMeUpToast type="info" text1={text1 || ''} text2={text2} />
   ),
   push: ({ props }: ToastConfigParams<PushToastProps>) => (
-    <PushToast pusherName={props?.pusherName ?? ''} message={props?.message} />
+    <PushToast
+      pusherName={props?.pusherName ?? ''}
+      message={props?.message}
+      onPress={props?.onPress}
+    />
   ),
 };

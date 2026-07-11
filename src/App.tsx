@@ -16,6 +16,7 @@ import { ModalProvider } from '@shared/components/ModalProvider';
 import { ThemeProvider, useTheme } from '@shared/theme';
 import { incrementAppLaunchCount } from '@features/LaunchModals';
 import { FeatureFlagsProvider } from '@shared/featureFlags';
+import { MorphProvider } from '@shared/morph/MorphProvider';
 import { navigationRef } from './navigation/navigationRef';
 import NotificationNavigationBridge from './lib/notifications/NotificationNavigationBridge';
 import { setNotificationNavigationReady } from './lib/notifications/notificationNavigation';
@@ -59,14 +60,16 @@ function ThemedApp() {
 
             <AuthProvider>
               <FeatureFlagsProvider>
-                <NavigationContainer
-                  ref={navigationRef}
-                  theme={navTheme}
-                  onReady={() => setNotificationNavigationReady(true)}
-                >
-                  <NotificationNavigationBridge />
-                  <RootNavigator />
-                </NavigationContainer>
+                <MorphProvider>
+                  <NavigationContainer
+                    ref={navigationRef}
+                    theme={navTheme}
+                    onReady={() => setNotificationNavigationReady(true)}
+                  >
+                    <NotificationNavigationBridge />
+                    <RootNavigator />
+                  </NavigationContainer>
+                </MorphProvider>
               </FeatureFlagsProvider>
             </AuthProvider>
 

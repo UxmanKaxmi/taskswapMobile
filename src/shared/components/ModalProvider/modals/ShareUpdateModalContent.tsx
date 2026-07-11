@@ -188,6 +188,7 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: vs(12),
     },
     input: {
+      color: colors.text,
       paddingVertical: spacing.md,
       paddingHorizontal: spacing.md,
       minHeight: vs(80),

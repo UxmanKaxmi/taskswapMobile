@@ -23,6 +23,7 @@ import {
 } from '@shared/api/authBridge';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import { buildRoute } from '@shared/api/apiRoutes';
+import { requestNotificationPermissionPromptForValueMoment } from '@lib/notifications/NotificationPermissionPrompt';
 
 type User = {
   id: string;
@@ -51,6 +52,7 @@ const STORAGE_TOKEN = 'auth:token';
 const STORAGE_AUTH_PROVIDER = 'auth:provider';
 const STORAGE_HAS_SEEN_FIND_FRIENDS = 'auth:hasSeenFindFriends';
 const STORAGE_FCM_TOKEN = 'fcm_token';
+const LOGIN_NOTIFICATION_PROMPT_DELAY_MS = 600;
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -121,6 +123,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       });
 
       setJustLoggedIn(true);
+      setTimeout(() => {
+        void requestNotificationPermissionPromptForValueMoment();
+      }, LOGIN_NOTIFICATION_PROMPT_DELAY_MS);
 
       showToast({
         type: 'success',

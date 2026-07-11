@@ -234,7 +234,7 @@ export default function LoginScreen() {
         >
           {signingInProvider === 'google' ? (
             <>
-              <ActivityIndicator size="small" color={colors.tactileMomentumSecondary} />
+              <ActivityIndicator size="small" color={colors.onboardingInk} />
               <Text style={styles.googleButtonText}>Signing in...</Text>
             </>
           ) : (
@@ -356,7 +356,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: moderateScale(12),
     },
     googleButton: {
-      backgroundColor: colors.onPrimary,
+      backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.onboardingLine,
       marginBottom: verticalScale(12),
@@ -365,7 +365,7 @@ const createStyles = (colors: ThemeColors) =>
       opacity: 0.82,
     },
     googleButtonText: {
-      color: colors.tactileMomentumSecondary,
+      color: colors.onboardingInk,
       fontSize: moderateScale(16),
       lineHeight: moderateScale(22),
       fontWeight: '700',

@@ -88,15 +88,15 @@ echo "Source ENVFILE=${SOURCE_ENVFILE}"
 echo "Using ENVFILE=${ENVFILE_DEVICE}"
 echo "Using BASE_URL_IOS=${BASE_URL_IOS}"
 
-PREV_ENVFILE="$(cat /tmp/envfile 2>/dev/null || true)"
+# Always remove /tmp/envfile on exit instead of restoring the previous value.
+# react-native-config gives /tmp/envfile priority over the ENVFILE variable,
+# so a restored stale value silently hijacks every later dev build (this is
+# how a simulator run once ended up pointed at the prod backend). The trap
+# also can't fire on hard kills — `bun ios` clears the file defensively too.
 cleanup_envfile() {
-  if [[ -n "${PREV_ENVFILE}" ]]; then
-    echo "${PREV_ENVFILE}" > /tmp/envfile
-  else
-    rm -f /tmp/envfile
-  fi
+  rm -f /tmp/envfile
 }
-trap cleanup_envfile EXIT
+trap cleanup_envfile EXIT INT TERM
 
 echo "${ENVFILE_DEVICE}" > /tmp/envfile
 ENVFILE="${ENVFILE_DEVICE}" npx react-native run-ios --device "${DEVICE_NAME}" --mode "${BUILD_MODE}" --scheme "${IOS_SCHEME}" --port "${METRO_PORT}"

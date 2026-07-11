@@ -31,6 +31,14 @@ export async function sendTestNotificationAPI(userId: string, payload?: Notifica
   });
 }
 
+// ✅ Send a silent (data-only) push to the authenticated user's own device.
+// Used to verify the "X pushed you" pill without needing a second account.
+export async function sendSilentNotificationAPI(data?: Record<string, string>) {
+  return api.post('/notification/silent', {
+    ...(data ? { data } : {}),
+  });
+}
+
 // ✅ Mark multiple notifications as read
 export async function markNotificationBatch(ids: string[]): Promise<void> {
   await api.post(buildRoute.markNotificationBatch(), { ids });

@@ -58,14 +58,18 @@ function maybeShowPushReceivedToast(remoteMessage: FirebaseMessagingTypes.Remote
     (typeof raw.senderName === 'string' && raw.senderName.trim()) ||
     '';
 
+  // Tapping the pill opens the exact goal. Reuse the notification router so the
+  // payload's taskId/type resolves to GoalDetail (and honors auth redirects).
+  const onPress = () => handleNotificationRoute(remoteMessage.data);
+
   if (pusherName) {
-    showPushToast({ pusherName });
+    showPushToast({ pusherName, onPress });
   } else if (remoteMessage.notification?.title) {
     // No structured name in the payload — the backend-authored title already
     // reads like "Sara pushed you", so render it as the whole toast text.
-    showPushToast({ pusherName: remoteMessage.notification.title, message: '' });
+    showPushToast({ pusherName: remoteMessage.notification.title, message: '', onPress });
   } else {
-    showPushToast({ pusherName: 'Someone' });
+    showPushToast({ pusherName: 'Someone', onPress });
   }
 
   return true;

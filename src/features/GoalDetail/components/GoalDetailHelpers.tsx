@@ -123,7 +123,7 @@ const createStyles = (colors: ThemeColors) =>
     card: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.onPrimary,
+      backgroundColor: colors.surface,
       borderRadius: 24,
       padding: spacing.md,
       paddingVertical: vs(10),

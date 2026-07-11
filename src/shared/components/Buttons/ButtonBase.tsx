@@ -49,7 +49,7 @@ export default function ButtonBase({
   const resolvedTextStyle = resolveAppTextStyle(
     [
       styles.text,
-      { color: disabled ? '#888' : textColor },
+      { color: disabled ? colors.disabled : textColor },
       textStyle,
       isLoading && styles.hiddenText,
     ],
@@ -88,9 +88,9 @@ export default function ButtonBase({
   const bgColor = pressAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [
-      disabled ? '#ccc' : backgroundColor,
+      disabled ? colors.inputBackground : backgroundColor,
       disabled
-        ? '#bbb'
+        ? colors.disabled
         : backgroundColor === 'transparent'
           ? hexToRgba(borderColor ?? colors.primary, 0.08) // 👈 light pressed tint
           : shadeColor(backgroundColor, -20),
@@ -106,7 +106,7 @@ export default function ButtonBase({
         styles.button,
         {
           backgroundColor: bgColor,
-          borderColor: disabled ? '#ccc' : borderColor,
+          borderColor: disabled ? colors.border : borderColor,
         },
         style,
       ]}

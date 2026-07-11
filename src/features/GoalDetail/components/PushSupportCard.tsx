@@ -247,7 +247,7 @@ export default function PushSupportCard({
                 set="fa6"
                 iconStyle="solid"
                 size={15}
-                color={colors.onboardingInk}
+                color={colors.tactileMomentumSecondary}
               />
             </View>
 
@@ -275,7 +275,7 @@ export default function PushSupportCard({
                 set="fa6"
                 iconStyle="solid"
                 size={15}
-                color={colors.onboardingInk}
+                color={colors.tactileMomentumSecondary}
               />
             </View>
             <TextElement

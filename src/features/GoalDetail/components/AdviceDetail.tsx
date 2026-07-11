@@ -185,7 +185,7 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.surface,
     },
     highlightedCard: {
-      backgroundColor: colors.onPrimary,
+      backgroundColor: colors.adviceIconBackground,
       borderWidth: 1,
       borderColor: colors.adviceBgHard,
     },

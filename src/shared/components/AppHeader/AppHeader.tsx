@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import Icon from '@shared/components/Icons/Icon'; // assumes you have an icon component
@@ -7,6 +7,7 @@ import { ms } from 'react-native-size-matters';
 import { isAndroid } from '@shared/utils/constants';
 import { Width } from '../Spacing';
 import Ripple from '../Buttons/Ripple';
+import BackButton from '../Buttons/BackButton';
 import TextElement from '../TextElement/TextElement';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,6 +15,7 @@ type Props = {
   title?: string;
   showTitle?: boolean;
   showNavigation?: boolean;
+  left?: React.ReactNode;
   right?: React.ReactNode;
   showCross?: boolean;
   inDevelopment?: boolean;
@@ -23,6 +25,7 @@ export default function AppHeader({
   title = '',
   showTitle = true,
   showNavigation = true,
+  left = null,
   right = null,
   showCross = false,
   inDevelopment = false,
@@ -31,7 +34,9 @@ export default function AppHeader({
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const insets = useSafeAreaInsets();
-  const androidTopOffset = isAndroid ? insets.top : 0;
+  const androidApiVersion =
+    typeof Platform.Version === 'number' ? Platform.Version : Number(Platform.Version);
+  const androidTopOffset = isAndroid && androidApiVersion < 35 ? insets.top : 0;
 
   const handleGoBack = () => {
     // In nested navigators, `goBack()` on the child may be a no-op when the child
@@ -50,17 +55,16 @@ export default function AppHeader({
     <>
       <View style={[styles.container, { marginTop: androidTopOffset }]}>
         <View style={styles.leftSide}>
-          {showCross ? (
-            <Ripple onPress={handleGoBack}>
-              <Icon set="ion" name="close" size={26} color={colors.text} />
-            </Ripple>
-          ) : showNavigation ? (
-            <Ripple onPress={handleGoBack}>
-              <Icon set="ion" name="chevron-back" size={24} color={colors.tabActive} />
-            </Ripple>
-          ) : (
-            <View style={styles.side} />
-          )}
+          {left ??
+            (showCross ? (
+              <Ripple onPress={handleGoBack}>
+                <Icon set="ion" name="close" size={26} color={colors.text} />
+              </Ripple>
+            ) : showNavigation ? (
+              <BackButton onPress={handleGoBack} />
+            ) : (
+              <View style={styles.side} />
+            ))}
         </View>
 
         <View style={styles.titleRow}>

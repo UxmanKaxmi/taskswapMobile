@@ -55,7 +55,12 @@ export default function TagHelperCard({
             <>
               <View style={styles.promptLeft}>
                 <View style={styles.promptIconCircle}>
-                  <Icon set="ion" name="add" size={ms(22)} color={colors.tactileMomentumSecondary} />
+                  <Icon
+                    set="ion"
+                    name="add"
+                    size={ms(22)}
+                    color={colors.tactileMomentumSecondary}
+                  />
                 </View>
 
                 <View style={styles.promptTextWrap}>
@@ -183,7 +188,7 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: 26,
       borderWidth: 1.5,
       borderStyle: 'dashed',
-      borderColor: '#E5E3DA',
+      borderColor: colors.onboardingLine,
       paddingVertical: vs(10),
       paddingHorizontal: ms(18),
     },

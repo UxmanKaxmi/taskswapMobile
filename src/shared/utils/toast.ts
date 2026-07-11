@@ -35,12 +35,19 @@ export const showToast = ({ type, title, message }: ShowToastOptions) => {
   });
 };
 
-export const showPushToast = ({ pusherName, message }: PushToastProps) => {
+export const showPushToast = ({ pusherName, message, onPress }: PushToastProps) => {
   Toast.show({
     type: 'push' as any,
     props: {
       pusherName,
       message,
+      // Wrap so a tap dismisses the pill before running the caller's handler.
+      onPress: onPress
+        ? () => {
+            Toast.hide();
+            onPress();
+          }
+        : undefined,
     },
     position: 'bottom',
     bottomOffset: 110,

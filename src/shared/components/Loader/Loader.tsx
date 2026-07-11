@@ -14,7 +14,7 @@ export default function AppLoader({ visible }: AppLoaderProps) {
   return (
     <AppModal transparent visible={visible} animationType="fade" statusBarTranslucent>
       <View style={styles.overlay}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={colors.onboardingPush} />
       </View>
     </AppModal>
   );

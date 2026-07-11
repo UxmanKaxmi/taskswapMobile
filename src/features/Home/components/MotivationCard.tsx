@@ -35,6 +35,8 @@ import { useSendCheer } from '@features/Goals/hooks/useGoalCheer';
 import Icon from '@shared/components/Icons/Icon';
 import { showToast } from '@shared/utils/toast';
 import { CHEER_PRESETS } from '@features/Goals/constants/cheerPresets';
+import { useMorphSource } from '@shared/morph/useMorphElement';
+import { resolveAppTextStyle } from '@shared/theme/fonts';
 
 type Props = {
   task: MotivationGoal;
@@ -50,6 +52,10 @@ function MotivationCard({ task, onPressCard }: Props) {
   const { user } = useAuth();
   const { openCheerSheet, openModal } = useModal();
   const { avatar, name = 'John Doe', createdAt, text, helpers = [] } = task;
+  const { setRef, start, flyingId } = useMorphSource();
+  // Hide the real header/text/button only once the clones are actually moving
+  // (not at tap), so there is no swap-flicker before the flight begins.
+  const isMorphingAway = flyingId === task.id;
   const { data: pushData } = useGoalPushes(task.id);
   const { mutate: togglePush, isPending } = useToggleGoalPush(task.id);
   const sendCheer = useSendCheer(task.id);
@@ -73,6 +79,124 @@ function MotivationCard({ task, onPressCard }: Props) {
     () => task.avatarColor ?? getAvatarColor(task.userId || name),
     [name, task.avatarColor, task.userId],
   );
+
+  const handleCardPress = useCallback(() => {
+    const showsPushButton = task.userId !== user?.id;
+    const navigate = () => onPressCard(task);
+    // Measure (one frame) BEFORE navigating so the clones are on screen and the
+    // detail screen's target registration can never race the morph start.
+    start(task.id, {
+      // Author block flies as a snapshot node (avatar isn't text).
+      header: {
+        node: (
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
+            <Avatar
+              uri={avatar || null}
+              fallback={name}
+              size={ms(42)}
+              borderColor={colors.onboardingCard}
+              fallbackStyle={{ borderWidth: 0, backgroundColor: avatarColor }}
+              textStyle={{ color: colors.tactileMomentumSecondary, fontWeight: '800' }}
+            />
+            <View style={{ paddingTop: vs(2) }}>
+              <TextElement
+                style={{
+                  fontSize: ms(16),
+                  lineHeight: ms(19),
+                  fontWeight: '800',
+                  color: colors.onboardingInk,
+                }}
+              >
+                {toShortName(name)}
+              </TextElement>
+              <TextElement
+                style={{
+                  fontSize: ms(13),
+                  lineHeight: ms(16),
+                  color: colors.onboardingMuted,
+                  fontWeight: '500',
+                }}
+              >
+                {timeAgo(createdAt)}
+              </TextElement>
+            </View>
+          </View>
+        ),
+      },
+      text: {
+        text: stripOuterQuotes(text),
+        style: {
+          borderRadius: 28,
+          backgroundColor: colors.onboardingCard,
+          fontSize: ms(20),
+          textColor: colors.onboardingInk,
+          paddingHorizontal: ms(20),
+          paddingVertical: vs(14),
+          align: 'flex-start',
+          // Card-colored surface lifting off the card: ease it in so its
+          // inflated rect doesn't pop over neighboring card content.
+          surfaceFadeIn: true,
+          // Must match styles.taskText exactly (font family included) or the
+          // clone visibly reflows the instant it replaces the real text.
+          textStyle: resolveAppTextStyle([
+            {
+              fontSize: ms(20),
+              lineHeight: ms(24),
+              fontWeight: '700',
+              letterSpacing: 0,
+              color: colors.onboardingInk,
+            },
+          ]),
+        },
+      },
+      ...(showsPushButton
+        ? {
+            button: {
+              text: 'Push',
+              // The measured rect IS the button (its padding is inside it), so
+              // no extra inflation, and radii match the real pill/CTA exactly.
+              style: {
+                borderRadius: ms(24),
+                backgroundColor: colors.onboardingPush,
+                fontSize: ms(14),
+                textColor: colors.tactileMomentumSecondary,
+                paddingHorizontal: 0,
+                paddingVertical: 0,
+                align: 'center',
+              },
+              // Fly the real button look (label + arrow icon), not bare text.
+              sourceNode: (
+                <PushButton
+                  onPress={() => {}}
+                  active={hasPushed || justPushed}
+                  taskType={GoalTypeEnum.Motivation}
+                  variant="push"
+                  label="Push"
+                  activeLabel="Pushed"
+                  size="sm"
+                  buttonStyle={styles.pushButton}
+                  textStyle={styles.pushButtonText}
+                />
+              ),
+            },
+          }
+        : {}),
+    }).then(navigate, navigate);
+  }, [
+    start,
+    task,
+    text,
+    user?.id,
+    colors,
+    onPressCard,
+    avatar,
+    name,
+    createdAt,
+    avatarColor,
+    hasPushed,
+    justPushed,
+    styles,
+  ]);
   const feedProgressText =
     task?.progressUpdates
       ?.map(update => stripOuterQuotes(update?.text ?? '').trim())
@@ -254,12 +378,13 @@ function MotivationCard({ task, onPressCard }: Props) {
     <Animated.View style={{ transform: [{ translateX: cardNudgeX }] }}>
       <Shadow size="tint" color="rgba(0, 0, 0, 0.08)" style={styles.shadowWrap}>
         <View style={styles.card}>
-          <Pressable
-            style={({ pressed }) => pressed && styles.pressed}
-            onPress={() => onPressCard(task)}
-          >
+          <Pressable style={({ pressed }) => pressed && styles.pressed} onPress={handleCardPress}>
             <View style={styles.headerRow}>
-              <View style={styles.identityRow}>
+              <View
+                ref={setRef('header')}
+                collapsable={false}
+                style={[styles.identityRow, isMorphingAway && styles.morphHidden]}
+              >
                 <View style={styles.avatarWrap}>
                   <Avatar
                     uri={avatar || null}
@@ -308,7 +433,13 @@ function MotivationCard({ task, onPressCard }: Props) {
               </View>
             </View>
 
-            <TextElement style={styles.taskText}>{stripOuterQuotes(text)}</TextElement>
+            <View
+              ref={setRef('text')}
+              collapsable={false}
+              style={isMorphingAway && styles.morphHidden}
+            >
+              <TextElement style={styles.taskText}>{stripOuterQuotes(text)}</TextElement>
+            </View>
 
             {progressText ? (
               <View style={styles.progressBlock}>
@@ -355,18 +486,24 @@ function MotivationCard({ task, onPressCard }: Props) {
               </View>
 
               {!isOwner && (
-                <PushButton
-                  onPress={handlePush}
-                  loading={isPending}
-                  active={hasPushed || justPushed}
-                  taskType={GoalTypeEnum.Motivation}
-                  variant="push"
-                  label="Push"
-                  activeLabel="Pushed"
-                  size="sm"
-                  buttonStyle={styles.pushButton}
-                  textStyle={styles.pushButtonText}
-                />
+                <View
+                  ref={setRef('button')}
+                  collapsable={false}
+                  style={isMorphingAway && styles.morphHidden}
+                >
+                  <PushButton
+                    onPress={handlePush}
+                    loading={isPending}
+                    active={hasPushed || justPushed}
+                    taskType={GoalTypeEnum.Motivation}
+                    variant="push"
+                    label="Push"
+                    activeLabel="Pushed"
+                    size="sm"
+                    buttonStyle={styles.pushButton}
+                    textStyle={styles.pushButtonText}
+                  />
+                </View>
               )}
             </View>
           </Pressable>
@@ -462,6 +599,9 @@ const createStyles = (colors: ThemeColors) =>
     },
     pressed: {
       opacity: 0.96,
+    },
+    morphHidden: {
+      opacity: 0,
     },
     headerRow: {
       flexDirection: 'row',

@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ms, vs } from 'react-native-size-matters';
 
 import { AppNavigationProp } from '@navigation/types/navigation';
-import Ripple from '@shared/components/Buttons/Ripple';
+import BackButton from '@shared/components/Buttons/BackButton';
 import Icon from '@shared/components/Icons/Icon';
 import Layout from '@shared/components/Layout/Layout';
 import Row from '@shared/components/Layout/Row';
@@ -28,6 +28,9 @@ const CHANGE_TYPE_LABELS: Record<ChangeType, string> = {
 
 const CHANGE_ICON_MAP: Record<string, { set: 'fa6' | 'ion'; name: string }> = {
   '✨': { set: 'fa6', name: 'wand-magic-sparkles' },
+  '🥸': { set: 'fa6', name: 'user-secret' },
+  '🪄': { set: 'fa6', name: 'wand-sparkles' },
+  '✍️': { set: 'fa6', name: 'pen-to-square' },
   '👆': { set: 'fa6', name: 'hand-point-up' },
   '🧹': { set: 'fa6', name: 'broom' },
   '🌙': { set: 'fa6', name: 'moon' },
@@ -78,9 +81,7 @@ export default function ChangelogScreen() {
     >
       <View style={styles.content}>
         <Row align="center" justify="flex-start" style={styles.header}>
-          <Ripple style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Icon set="ion" name="chevron-back" size={22} color={colors.onboardingInk} />
-          </Ripple>
+          <BackButton onPress={() => navigation.goBack()} />
         </Row>
 
         <View style={styles.copyBlock}>
@@ -191,16 +192,6 @@ const createStyles = (colors: ThemeColors) =>
     },
     header: {
       marginBottom: vs(16),
-    },
-    backButton: {
-      width: ms(42),
-      height: ms(42),
-      borderRadius: ms(21),
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.onboardingLine,
     },
     copyBlock: {
       marginBottom: vs(18),

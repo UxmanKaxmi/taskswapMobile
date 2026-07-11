@@ -18,9 +18,7 @@ export const AnimatedBootSplash = ({ onAnimationEnd }: Props) => {
     manifest: require('../../../assets/bootsplash/manifest.json'),
 
     logo: require('../../../assets/bootsplash/logo.png'),
-    // darkLogo: require("../assets/bootsplash/dark-logo.png"),
-    // brand: require("../assets/bootsplash/brand.png"),
-    // darkBrand: require("../assets/bootsplash/dark-brand.png"),
+    darkLogo: require('../../../assets/bootsplash/dark-logo.png'),
 
     statusBarTranslucent: true,
     navigationBarTranslucent: true,

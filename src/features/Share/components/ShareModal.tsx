@@ -429,7 +429,7 @@ const createStyles = (colors: ThemeColors) =>
 
     // ===== Preview card =====
     previewCard: {
-      backgroundColor: '#EFEFEA',
+      backgroundColor: colors.inputBackground,
       borderRadius: ms(20),
       padding: spacing.md,
     },
