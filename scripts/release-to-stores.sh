@@ -2,7 +2,10 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-RELEASE_ENV_FILE="${RELEASE_ENV_FILE:-.env.release.local}"
+# Credentials live in .env.stores.local: it is gitignored and, unlike
+# .env.release.local, no other script overwrites it (ios-dev-release clobbers
+# .env.release.local with LAN URLs on every run).
+RELEASE_ENV_FILE="${RELEASE_ENV_FILE:-.env.stores.local}"
 
 load_release_env() {
   local env_file="$RELEASE_ENV_FILE"
@@ -64,7 +67,9 @@ PLAY_STORE_TRACK="${PLAY_STORE_TRACK:-internal}"
 PLAY_STORE_RELEASE_STATUS="${PLAY_STORE_RELEASE_STATUS:-completed}"
 GOOGLE_PLAY_JSON_KEY="${GOOGLE_PLAY_JSON_KEY:-${SUPPLY_JSON_KEY:-}}"
 if [ -z "$GOOGLE_PLAY_JSON_KEY" ]; then
-  GOOGLE_PLAY_JSON_KEY="$(first_matching_file "$HOME/Downloads/*play*.json $HOME/Downloads/*google*.json $HOME/Downloads/taskswap-*.json" || true)"
+  # google-services.json is deliberately not matched: it is a Firebase client
+  # config, not an upload credential.
+  GOOGLE_PLAY_JSON_KEY="$(first_matching_file "$HOME/Downloads/*play*.json $HOME/Downloads/taskswap-*.json" || true)"
 fi
 
 TEMP_FILES=()
@@ -106,7 +111,7 @@ Required for Google Play:
   GOOGLE_PLAY_JSON_KEY=/absolute/path/to/google-play-service-account.json
 
 Useful overrides:
-  RELEASE_ENV_FILE=.env.release.local
+  RELEASE_ENV_FILE=.env.stores.local
   PLAY_STORE_TRACK=internal|alpha|beta|production
   PLAY_STORE_RELEASE_STATUS=completed|draft|inProgress|halted
   APP_ENV_FILE=.env.prod
