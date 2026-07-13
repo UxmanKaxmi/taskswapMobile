@@ -55,6 +55,11 @@ IOS_EXPORT_DIR="${IOS_EXPORT_DIR:-$ROOT_DIR/ios/build-testflight/export}"
 IOS_DERIVED_DATA_PATH="${IOS_DERIVED_DATA_PATH:-$ROOT_DIR/ios/build-testflight/DerivedData}"
 IOS_CODE_SIGN_IDENTITY="${IOS_CODE_SIGN_IDENTITY:-Apple Distribution}"
 IOS_ALLOW_XCODE_ACCOUNT_UPLOAD="${IOS_ALLOW_XCODE_ACCOUNT_UPLOAD:-false}"
+# Export signing: "manual" with a named profile avoids Apple's cloud-signing
+# permission requirement, which our API key does not have (regenerating the
+# Xcode-managed profile fails with "Cloud signing permission error").
+IOS_SIGNING_STYLE="${IOS_SIGNING_STYLE:-automatic}"
+IOS_PROVISIONING_PROFILE="${IOS_PROVISIONING_PROFILE:-}"
 
 APP_STORE_CONNECT_API_KEY_PATH="${APP_STORE_CONNECT_API_KEY_PATH:-${ASC_API_KEY_PATH:-}}"
 if [ -z "$APP_STORE_CONNECT_API_KEY_PATH" ]; then
@@ -112,6 +117,8 @@ Required for Google Play:
 
 Useful overrides:
   RELEASE_ENV_FILE=.env.stores.local
+  IOS_SIGNING_STYLE=manual            # with IOS_PROVISIONING_PROFILE, skips cloud signing
+  IOS_PROVISIONING_PROFILE='PushMeUp App Store 2026-07'
   PLAY_STORE_TRACK=internal|alpha|beta|production
   PLAY_STORE_RELEASE_STATUS=completed|draft|inProgress|halted
   APP_ENV_FILE=.env.prod
@@ -295,6 +302,20 @@ write_ios_export_options() {
   local export_options_path="$1"
   local destination="${2:-export}"
 
+  local signing_block
+  if [ "$IOS_SIGNING_STYLE" = "manual" ] && [ -n "$IOS_PROVISIONING_PROFILE" ]; then
+    signing_block="  <key>signingStyle</key>
+  <string>manual</string>
+  <key>provisioningProfiles</key>
+  <dict>
+    <key>${IOS_BUNDLE_ID}</key>
+    <string>${IOS_PROVISIONING_PROFILE}</string>
+  </dict>"
+  else
+    signing_block="  <key>signingStyle</key>
+  <string>automatic</string>"
+  fi
+
   cat >"$export_options_path" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -308,8 +329,7 @@ write_ios_export_options() {
   <false/>
   <key>method</key>
   <string>app-store-connect</string>
-  <key>signingStyle</key>
-  <string>automatic</string>
+${signing_block}
   <key>signingCertificate</key>
   <string>${IOS_CODE_SIGN_IDENTITY}</string>
   <key>stripSwiftSymbols</key>
