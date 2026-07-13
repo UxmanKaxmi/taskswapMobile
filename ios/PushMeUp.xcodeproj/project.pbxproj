@@ -350,7 +350,7 @@
 				CODE_SIGN_ENTITLEMENTS = PushMeUp/PushMeUp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_TEAM = ZW59CUVSS3;
 				ENABLE_BITCODE = NO;
 				ENVFILE = .env.dev;
@@ -391,7 +391,7 @@
 				CODE_SIGN_ENTITLEMENTS = PushMeUp/PushMeUp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_TEAM = ZW59CUVSS3;
 				ENVFILE = .env.prod;
 				INFOPLIST_FILE = PushMeUp/Info.plist;

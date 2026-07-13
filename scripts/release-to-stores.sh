@@ -80,8 +80,12 @@ Usage:
   bash scripts/release-to-stores.sh [--ios-only|--android-only] [--skip-build] [--no-bump-build]
 
 Default behavior:
-  Increments build numbers, then builds and uploads both iOS and Android.
-  Build numbers are not incremented when --skip-build is used.
+  Increments the shared build number in app.json (the single source of truth
+  for iOS, Android, and the in-app version label), then builds and uploads
+  both platforms. The bump is skipped when --skip-build is used.
+
+  Releasing platforms in two separate runs? Pass --no-bump-build on the
+  second run so both stores ship the same build number.
 
 Required for TestFlight:
   Set all three for App Store Connect API-key auth:
@@ -137,87 +141,34 @@ require_cmd() {
   command -v "$1" >/dev/null 2>&1 || fail "$1 is required but was not found in PATH."
 }
 
-max_int() {
-  local max="$1"
-  shift
-
-  for value in "$@"; do
-    if [ "$value" -gt "$max" ]; then
-      max="$value"
-    fi
-  done
-
-  printf '%s\n' "$max"
-}
-
-get_android_version_code() {
-  local value
-  value="$(sed -n 's/^[[:space:]]*versionCode[[:space:]]\{1,\}\([0-9]\{1,\}\).*/\1/p' "$ROOT_DIR/android/app/build.gradle" | head -n 1)"
-  [ -n "$value" ] || fail "Could not read Android versionCode from android/app/build.gradle."
-  printf '%s\n' "$value"
-}
-
-get_ios_build_numbers() {
-  sed -n 's/^[[:space:]]*CURRENT_PROJECT_VERSION = \([0-9]\{1,\}\);.*/\1/p' \
-    "$ROOT_DIR/ios/PushMeUp.xcodeproj/project.pbxproj" |
-    sort -n |
-    uniq
-}
-
-bump_android_version_code() {
-  local next_build="$1"
-
-  perl -0pi -e "s/(versionCode\\s+)\\d+/\${1}${next_build}/" "$ROOT_DIR/android/app/build.gradle"
-}
-
-bump_ios_build_number() {
-  local next_build="$1"
-
-  perl -0pi -e "s/(CURRENT_PROJECT_VERSION = )\\d+(;)/\${1}${next_build}\${2}/g" \
-    "$ROOT_DIR/ios/PushMeUp.xcodeproj/project.pbxproj"
-}
-
+# app.json is the single source of truth for the app version: JS constants,
+# android/app/build.gradle, and the Xcode "Sync App Version" build phase all
+# read it, so bumping this one number bumps every platform.
 bump_build_numbers() {
+  require_cmd node
   require_cmd perl
 
-  local android_build=""
-  local ios_builds=""
-  local ios_build
   local next_build
+  next_build="$(
+    node -e '
+      const fs = require("fs");
+      const path = process.argv[1];
+      const appJson = JSON.parse(fs.readFileSync(path, "utf8"));
+      if (!Number.isInteger(appJson.build)) {
+        throw new Error("app.json is missing an integer \"build\" field.");
+      }
+      appJson.build += 1;
+      fs.writeFileSync(path, JSON.stringify(appJson, null, 2) + "\n");
+      process.stdout.write(String(appJson.build));
+    ' "$ROOT_DIR/app.json"
+  )" || fail "Could not bump the build number in app.json."
 
-  if [ "$RUN_ANDROID" = true ]; then
-    android_build="$(get_android_version_code)"
-  fi
+  # Keep the Xcode fallback in step so the project UI shows the real number
+  # (the build phase stamps app.json's value into the built Info.plist).
+  perl -0pi -e "s/(CURRENT_PROJECT_VERSION = )\\d+(;)/\${1}${next_build}\${2}/g" \
+    "$ROOT_DIR/ios/PushMeUp.xcodeproj/project.pbxproj"
 
-  if [ "$RUN_IOS" = true ]; then
-    ios_builds="$(get_ios_build_numbers)"
-    [ -n "$ios_builds" ] || fail "Could not read iOS CURRENT_PROJECT_VERSION from ios/PushMeUp.xcodeproj/project.pbxproj."
-  fi
-
-  if [ "$RUN_ANDROID" = true ] && [ "$RUN_IOS" = true ]; then
-    next_build="$android_build"
-    for ios_build in $ios_builds; do
-      if [ "$ios_build" -gt "$next_build" ]; then
-        next_build="$ios_build"
-      fi
-    done
-  elif [ "$RUN_ANDROID" = true ]; then
-    next_build="$android_build"
-  else
-    next_build="$(printf '%s\n' "$ios_builds" | tail -n 1)"
-  fi
-
-  next_build=$((next_build + 1))
-
-  if [ "$RUN_ANDROID" = true ]; then
-    bump_android_version_code "$next_build"
-    log "Android versionCode bumped to $next_build"
-  fi
-
-  if [ "$RUN_IOS" = true ]; then
-    bump_ios_build_number "$next_build"
-    log "iOS CURRENT_PROJECT_VERSION bumped to $next_build"
-  fi
+  log "Build bumped to $next_build in app.json (gradle + Xcode + JS all read it)"
 }
 
 set_tmp_envfile() {
