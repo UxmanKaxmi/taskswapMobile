@@ -19,6 +19,7 @@ import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 import {
   type ComingSoonModalPayload,
   type CheerModalPayload,
+  type CircleMembersModalPayload,
   type InfoModalPayload,
   type ModalPayloadMap,
   type ModalState,
@@ -40,6 +41,7 @@ type ModalContextType = {
   openCheerSheet: (payload: CheerModalPayload) => void;
   openComingSoonSheet: (payload: ComingSoonModalPayload) => void;
   openReportTaskSheet: (payload: ReportTaskModalPayload) => void;
+  openCircleMembersSheet: (payload: CircleMembersModalPayload) => void;
 };
 
 const ModalContext = createContext<ModalContextType | null>(null);
@@ -108,6 +110,13 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     [openModal],
   );
 
+  const openCircleMembersSheet = useCallback(
+    (payload: CircleMembersModalPayload) => {
+      openModal('circleMembers', payload);
+    },
+    [openModal],
+  );
+
   const onSheetDismiss = useCallback(() => {
     const closedModal = activeModalRef.current;
     const closeAction = nextCloseActionRef.current;
@@ -164,6 +173,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
         openCheerSheet,
         openComingSoonSheet,
         openReportTaskSheet,
+        openCircleMembersSheet,
       }}
     >
       {children}

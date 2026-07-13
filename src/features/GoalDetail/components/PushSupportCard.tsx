@@ -1,5 +1,5 @@
 import React, { ReactNode, useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Shadow } from '@shared/components/Shadow/ShadowComponent';
 import TextElement from '@shared/components/TextElement/TextElement';
 import { Icon } from '@shared/components/Icons';
@@ -7,6 +7,7 @@ import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { getFirstName, timeAgo } from '@shared/utils/helperFunctions';
 import HelperAvatarStack from '@features/Home/components/HelperAvatarStack';
 import { ms, vs } from 'react-native-size-matters';
+import { useModal } from '@shared/components/ModalProvider';
 
 type PushEvent = {
   createdAt?: string;
@@ -49,6 +50,7 @@ export default function PushSupportCard({
 }: Props) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const { openCircleMembersSheet } = useModal();
   /* --------------------------------------------------
      0️⃣ Normalize users (presence only, NOT intent)
   -------------------------------------------------- */
@@ -225,10 +227,32 @@ export default function PushSupportCard({
 
     return [me, ...otherUsers];
   }, [didUserPush, users, otherUsers, currentUserId]);
+  const supportMembers = useMemo(
+    () =>
+      displayUsers.map(user => ({
+        userId: user.id,
+        name: user.name,
+        avatar: user.avatar ?? '',
+        displayName: getFirstName(user.name) || user.name,
+        status: 'Pushed this',
+      })),
+    [displayUsers],
+  );
+
+  const openSupportersSheet = React.useCallback(() => {
+    if (supportMembers.length === 0) return;
+    openCircleMembersSheet({
+      title: 'People who pushed this',
+      subtitle: `${supportMembers.length} ${
+        supportMembers.length === 1 ? 'person' : 'people'
+      } sent support`,
+      currentUserId,
+      members: supportMembers,
+    });
+  }, [currentUserId, openCircleMembersSheet, supportMembers]);
 
   const showSelfPushOnlyFooter =
     didUserPush && otherPushCount === 0 && !hasCountOnly && !isEmptyState;
-  const showPushTogetherFooter = didUserPush && otherPushCount > 0;
   const iconName = 'bolt';
   const shouldShowDescription = !isEmptyState;
   const cheerSummaryParts = useMemo(() => buildCheerSummaryParts(cheerSummary), [cheerSummary]);
@@ -295,7 +319,12 @@ export default function PushSupportCard({
 
           {displayUsers.length > 0 && (
             <>
-              <View style={styles.avatars}>
+              <Pressable
+                style={({ pressed }) => [styles.avatars, pressed && styles.inlinePressed]}
+                onPress={openSupportersSheet}
+                accessibilityRole="button"
+                accessibilityLabel="Show everyone who pushed this"
+              >
                 <HelperAvatarStack
                   helpers={displayUsers}
                   size={40}
@@ -303,7 +332,7 @@ export default function PushSupportCard({
                   moreStyle={styles.supportCountBubble}
                   moreTextStyle={styles.supportCountText}
                 />
-              </View>
+              </Pressable>
 
               {/* <View style={styles.summaryDivider} /> */}
             </>
@@ -311,13 +340,27 @@ export default function PushSupportCard({
 
           {/* Description */}
           {shouldShowDescription &&
-            (showSelfPushOnlyFooter ? (
+            (displayUsers.length > 0 ? (
+              <Pressable
+                onPress={openSupportersSheet}
+                accessibilityRole="button"
+                accessibilityLabel="Show everyone who pushed this"
+                style={({ pressed }) => pressed && styles.inlinePressed}
+              >
+                {showSelfPushOnlyFooter ? (
+                  <View style={styles.selfPushFooterRow}>
+                    <View style={styles.dot} />
+                    <TextElement style={styles.description}>{description}</TextElement>
+                  </View>
+                ) : (
+                  <TextElement style={styles.description}>{description}</TextElement>
+                )}
+              </Pressable>
+            ) : showSelfPushOnlyFooter ? (
               <View style={styles.selfPushFooterRow}>
                 <View style={styles.dot} />
                 <TextElement style={styles.description}>{description}</TextElement>
               </View>
-            ) : showPushTogetherFooter ? (
-              <TextElement style={styles.description}>{description}</TextElement>
             ) : (
               <TextElement style={styles.description}>{description}</TextElement>
             ))}
@@ -467,6 +510,11 @@ const createStyles = (colors: ThemeColors) =>
     },
     avatars: {
       marginBottom: vs(16),
+      alignSelf: 'flex-start',
+      borderRadius: 999,
+    },
+    inlinePressed: {
+      opacity: 0.65,
     },
     summaryDivider: {
       height: StyleSheet.hairlineWidth,

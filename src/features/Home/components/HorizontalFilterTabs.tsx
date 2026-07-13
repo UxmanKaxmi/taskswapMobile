@@ -8,7 +8,7 @@ import TextElement from '@shared/components/TextElement/TextElement';
 import { spacing, ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { MODAL_TOP_RADIUS } from '@shared/constants/modal';
 
-export type FeedSortKey = 'all' | 'needs_push' | 'new' | 'almost_there';
+export type FeedSortKey = 'all' | 'needs_push' | 'new' | 'almost_there' | 'circles';
 
 type FeedSortOption = {
   key: FeedSortKey;
@@ -41,6 +41,12 @@ const FEED_SORT_OPTIONS: FeedSortOption[] = [
     label: 'Almost there',
     description: 'Posts with momentum that need one more nudge.',
     icon: 'rocket',
+  },
+  {
+    key: 'circles',
+    label: 'Circles',
+    description: 'Goals people are doing together.',
+    icon: 'circle-nodes',
   },
 ];
 

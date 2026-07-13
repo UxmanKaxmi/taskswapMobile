@@ -12,9 +12,16 @@ const MAX_TICKS = 12;
 type Props = {
   createdAt?: string;
   pushCount: number;
+  // Circle detail reuses these stat boxes with its own wording
+  // ("pushes across the circle" instead of "pushes received").
+  pushesLabel?: string;
 };
 
-export default function MotivationStatsHeader({ createdAt, pushCount }: Props) {
+export default function MotivationStatsHeader({
+  createdAt,
+  pushCount,
+  pushesLabel = 'pushes received',
+}: Props) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const dayCount = React.useMemo(() => {
@@ -48,7 +55,7 @@ export default function MotivationStatsHeader({ createdAt, pushCount }: Props) {
       <View style={styles.boxesRow}>
         <View style={[styles.box, styles.boxDark]}>
           <TextElement style={[styles.boxValue, styles.boxValueDark]}>{pushCount}</TextElement>
-          <TextElement style={[styles.boxLabel, styles.boxLabelDark]}>pushes received</TextElement>
+          <TextElement style={[styles.boxLabel, styles.boxLabelDark]}>{pushesLabel}</TextElement>
         </View>
 
         <View style={[styles.box, styles.boxLight]}>

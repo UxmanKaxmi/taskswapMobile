@@ -27,6 +27,12 @@ export const lightColors = {
   onboardingMuted: '#73757D',
   onboardingLine: '#E6E6DF',
 
+  // Circles identity (purple, prototype direction C)
+  circleAccent: '#6C4CE1',
+  circleAccentSoft: '#ECE6FB',
+  circleAccentLine: '#C9BAF3',
+  circleAccentGhost: 'rgba(108, 76, 225, 0.06)',
+
   // Neutral
   background: '#F7F8F4', // warm off-white
   card: '#FFFFFF',
@@ -108,6 +114,12 @@ export const darkColors: ThemeColors = {
   onboardingDoneSoft: '#14352A',
   onboardingMuted: '#9BA0AA',
   onboardingLine: '#2B2C35',
+
+  // Circles identity (lighter accent for dark surfaces, deep soft fills)
+  circleAccent: '#B4A3F5',
+  circleAccentSoft: '#2A2145',
+  circleAccentLine: '#4A3E78',
+  circleAccentGhost: 'rgba(180, 163, 245, 0.10)',
 
   // Neutral
   background: '#101014',

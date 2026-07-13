@@ -126,6 +126,7 @@
 				F1A2B3C4D5E6F70809101112 /* Generate Hermes dSYM */,
 				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
 				AFB27CAAA58597E3D5CDE299 /* [CP-User] [RNFB] Core Configuration */,
+				A11C0DE5A9955EDF00AB1234 /* Sync App Version From app.json */,
 			);
 			buildRules = (
 			);
@@ -184,6 +185,22 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		A11C0DE5A9955EDF00AB1234 /* Sync App Version From app.json */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../app.json",
+			);
+			name = "Sync App Version From app.json";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nAPP_JSON=\"$SRCROOT/../app.json\"\nPLIST=\"$TARGET_BUILD_DIR/$INFOPLIST_PATH\"\nVERSION=$(/usr/bin/plutil -extract version raw -o - \"$APP_JSON\")\nBUILD=$(/usr/bin/plutil -extract build raw -o - \"$APP_JSON\")\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $VERSION\" \"$PLIST\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD\" \"$PLIST\"\n";
+		};
 		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -333,7 +350,7 @@
 				CODE_SIGN_ENTITLEMENTS = PushMeUp/PushMeUp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				DEVELOPMENT_TEAM = ZW59CUVSS3;
 				ENABLE_BITCODE = NO;
 				ENVFILE = .env.dev;
@@ -374,7 +391,7 @@
 				CODE_SIGN_ENTITLEMENTS = PushMeUp/PushMeUp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				DEVELOPMENT_TEAM = ZW59CUVSS3;
 				ENVFILE = .env.prod;
 				INFOPLIST_FILE = PushMeUp/Info.plist;

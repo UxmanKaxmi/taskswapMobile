@@ -13,6 +13,9 @@ export type FeatureFlags = {
   hintFirstPushGiven: boolean;
   hintCheerDiscovery: boolean;
   hintFirstResponse: boolean;
+  // Circles ("do it together") — global kill switch served by the backend.
+  // Defaults OFF so a failed flag fetch hides circle entry points entirely.
+  circles: boolean;
 };
 
 export type FeatureFlagsResponse = {
@@ -29,6 +32,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   hintFirstPushGiven: true,
   hintCheerDiscovery: true,
   hintFirstResponse: true,
+  circles: false,
 };
 
 export const normalizeFeatureFlags = (raw?: Partial<FeatureFlags> | null): FeatureFlags => ({

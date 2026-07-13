@@ -4,9 +4,10 @@ import { useNavigation } from '@react-navigation/native';
 import { ms, vs } from 'react-native-size-matters';
 import type { LaunchModalProps } from '../launchModals.registry';
 import LaunchModalShell from '../components/LaunchModalShell';
+import Icon from '@shared/components/Icons/Icon';
 import Row from '@shared/components/Layout/Row';
 import TextElement from '@shared/components/TextElement/TextElement';
-import { ThemeColors, useThemedStyles } from '@shared/theme';
+import { ThemeColors, useTheme, useThemedStyles } from '@shared/theme';
 import { LATEST_RELEASE } from '@features/MyProfile/data/changelog';
 import { APP_VERSION_LABEL } from '@shared/utils/constants';
 
@@ -14,6 +15,7 @@ const BODY_CHANGE_LIMIT = 4;
 
 export default function WhatsNewModal({ visible, onDismiss, onHidden }: LaunchModalProps) {
   const navigation = useNavigation<any>();
+  const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
   const handleSeeChangelog = useCallback(() => {
@@ -32,7 +34,19 @@ export default function WhatsNewModal({ visible, onDismiss, onHidden }: LaunchMo
         <View style={styles.changeList}>
           {LATEST_RELEASE.changes.slice(0, BODY_CHANGE_LIMIT).map(change => (
             <Row key={change.text} align="flex-start" justify="flex-start" style={styles.changeRow}>
-              <TextElement style={styles.changeEmoji}>{change.emoji}</TextElement>
+              {change.emoji === '⭕' ? (
+                <View style={styles.changeIconSlot}>
+                  <Icon
+                    set="fa6"
+                    name="circle-nodes"
+                    iconStyle="solid"
+                    size={ms(17)}
+                    color={colors.tactileMomentumPrimary}
+                  />
+                </View>
+              ) : (
+                <TextElement style={styles.changeEmoji}>{change.emoji}</TextElement>
+              )}
               <TextElement style={styles.changeText}>{change.text}</TextElement>
             </Row>
           ))}
@@ -61,6 +75,12 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: ms(20),
       lineHeight: ms(20),
       textAlign: 'center',
+    },
+    changeIconSlot: {
+      width: ms(30),
+      minHeight: ms(20),
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     changeText: {
       flex: 1,

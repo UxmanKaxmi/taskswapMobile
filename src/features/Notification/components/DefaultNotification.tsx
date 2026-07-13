@@ -15,6 +15,7 @@ import GoalProgressUpdateNotification from './GoalProgressUpdateNotification';
 import GoalCompletedNotification from './GoalCompletedNotification';
 import MotivationSystemNotification from './MotivationSystemNotification';
 import GoalCheerNotification from './GoalCheerNotification';
+import CircleNotification from './CircleNotification';
 
 type Props = {
   item: NotificationDTO;
@@ -22,6 +23,11 @@ type Props = {
 };
 
 export default function NotificationCard({ item, onPress }: Props) {
+  // Circles: one row component for every circle-* type.
+  if (item.type?.startsWith('circle-')) {
+    return <CircleNotification item={item} onPress={onPress} />;
+  }
+
   switch (item.type) {
     case 'follow':
       return <FollowNotification item={item} onPress={onPress} />;

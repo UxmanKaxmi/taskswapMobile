@@ -23,7 +23,13 @@ export interface NotificationDTO {
     | 'task-motivation-help-push-reminder'
     | 'task-progress-update'
     | 'commentMention'
-    | 'task-completed';
+    | 'task-completed'
+    | 'circle-invite'
+    | 'circle-member-joined'
+    | 'circle-progress-update'
+    | 'circle-member-done'
+    | 'circle-complete'
+    | 'circle-dissolved';
 
   message: string;
   read: boolean;

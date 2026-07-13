@@ -14,6 +14,8 @@ import BottomTabsIOS from './BottomTabsIOS';
 import BottomTabsAndroid from './BottomTabsAndroid';
 import AddGoalNavigator from '@features/AddGoal/navigation/AddGoalNavigator';
 import GoalDetailScreen from '@features/GoalDetail/screens/GoalDetailScreen';
+import CircleDetailScreen from '@features/Circles/screens/CircleDetailScreen';
+import JoinCircleScreen from '@features/Circles/screens/JoinCircleScreen';
 import SendFeedbackScreen from '@features/MyProfile/screens/SendFeedbackScreen';
 import YourImpactScreen from '@features/MyProfile/screens/YourImpactScreen';
 import ChangelogScreen from '@features/MyProfile/screens/ChangelogScreen';
@@ -32,6 +34,17 @@ export default function AppNavigator() {
         // Fade (not slide) so the shared-element morph overlay reads as the
         // transition instead of competing with a horizontal push.
         options={{ animation: 'fade', animationDuration: 320 }}
+      />
+      {/* Circles ("do it together") */}
+      <Stack.Screen
+        name="CircleDetail"
+        component={CircleDetailScreen}
+        options={{ animation: 'fade', animationDuration: 320 }}
+      />
+      <Stack.Screen
+        name="JoinCircle"
+        component={JoinCircleScreen}
+        options={{ animation: 'slide_from_bottom', animationDuration: 300 }}
       />
       {/* Add Goal Modal */}
       <Stack.Screen

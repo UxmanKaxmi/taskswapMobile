@@ -20,9 +20,25 @@ import AppLogo from '@shared/components/AppLogo';
 import PrimaryButton from '@shared/components/Buttons/PrimaryButton';
 import AppModal from '@shared/components/AppModal/AppModal';
 import { useAuth } from '@features/Auth/AuthProvider';
+import { toShareableCircleLink } from '@features/Circles/utils/inviteLink';
+
+// Circles reuse this exact full-screen share flow (poster capture included);
+// the payload replaces the Goal-derived copy with circle copy.
+export type CircleSharePayload = {
+  id: string;
+  goalText: string;
+  createdAt: string;
+  totalPushes: number;
+  memberCount: number;
+  doneCount: number;
+  isComplete: boolean;
+  viewerIsMember: boolean;
+  members: { userId: string; name: string; avatar: string }[];
+};
 
 type Props = {
-  task: Goal;
+  task?: Goal;
+  circle?: CircleSharePayload;
   visible: boolean;
   onClose: () => void;
   /**
@@ -62,7 +78,7 @@ const SHARE_BUTTON_LABELS: Record<GoalType, string> = {
 };
 
 const SHARE_MESSAGE = (text: string, name?: string) =>
-  `"${stripOuterQuotes(text)}" — ${toShortName(name) || 'PushMeUp'}`;
+  `"${stripOuterQuotes(text)}" by ${toShortName(name) || 'PushMeUp'}`;
 
 type ShareCopy = {
   modalTitle: string;
@@ -175,6 +191,46 @@ function buildShareCopy({
   };
 }
 
+function buildCircleShareCopy(circle: CircleSharePayload): ShareCopy {
+  if (circle.isComplete) {
+    if (circle.viewerIsMember) {
+      return {
+        modalTitle: 'Share the win',
+        modalSubtitle: 'All of you followed through. Show it off.',
+        posterTitle: 'We did it together',
+        posterSubtitle: `${circle.doneCount} of us said we'd do it. ${circle.doneCount} of us did.`,
+        buttonLabel: 'Share the win',
+      };
+    }
+
+    return {
+      modalTitle: 'Share their win',
+      modalSubtitle: 'A whole circle followed through.',
+      posterTitle: 'They did it together',
+      posterSubtitle: `${circle.doneCount} of them said they'd do it. All of them did.`,
+      buttonLabel: 'Share the win',
+    };
+  }
+
+  if (circle.viewerIsMember) {
+    return {
+      modalTitle: 'Share your circle',
+      modalSubtitle: 'Share it so friends can push the whole circle forward.',
+      posterTitle: "We're doing it together",
+      posterSubtitle: `${circle.memberCount} of us, one sentence.`,
+      buttonLabel: 'Share the circle',
+    };
+  }
+
+  return {
+    modalTitle: 'Share this circle',
+    modalSubtitle: 'More people means more pushes for everyone in it.',
+    posterTitle: "They're doing it together",
+    posterSubtitle: `${circle.memberCount} people, one sentence.`,
+    buttonLabel: 'Share the circle',
+  };
+}
+
 function pushCountLabel(count: number) {
   return `${count} ${count === 1 ? 'push' : 'pushes'}`;
 }
@@ -183,8 +239,62 @@ function pushCountLabel(count: number) {
 const waitForLayout = () => new Promise<void>(r => setTimeout(r, 80));
 
 // Reusable preview card shown in the sheet and baked into the shared image
-function SharePreviewCard({ task }: { task: Goal }) {
+function SharePreviewCard({ task, circle }: { task?: Goal; circle?: CircleSharePayload }) {
   const styles = useThemedStyles(createStyles);
+
+  if (circle) {
+    return (
+      <View style={styles.previewCard}>
+        <View style={styles.previewHeader}>
+          <View style={styles.previewStack}>
+            {circle.members.slice(0, 4).map((member, index) =>
+              member.avatar ? (
+                <Image
+                  key={member.userId}
+                  source={{ uri: member.avatar }}
+                  style={[styles.previewStackAvatar, index > 0 && styles.previewStackOverlap]}
+                />
+              ) : (
+                <View
+                  key={member.userId}
+                  style={[
+                    styles.previewStackAvatar,
+                    styles.previewStackFallback,
+                    index > 0 && styles.previewStackOverlap,
+                  ]}
+                >
+                  <TextElement style={styles.previewStackInitial}>
+                    {member.name?.[0]?.toUpperCase() ?? '?'}
+                  </TextElement>
+                </View>
+              ),
+            )}
+          </View>
+          <View style={styles.previewHeaderText}>
+            <TextElement style={styles.previewName}>
+              {circle.memberCount} doing it together
+            </TextElement>
+            <TextElement style={styles.previewMeta} color="muted">
+              on PushMeUp · {timeAgo(circle.createdAt)}
+            </TextElement>
+          </View>
+        </View>
+
+        <TextElement style={styles.previewQuote} numberOfLines={3}>
+          “{stripOuterQuotes(circle.goalText)}”
+        </TextElement>
+
+        <View style={styles.previewFooter}>
+          <AppLogo size="sm" align="left" />
+          <TextElement style={styles.previewPushes} color="muted">
+            {pushCountLabel(circle.totalPushes)}
+          </TextElement>
+        </View>
+      </View>
+    );
+  }
+
+  if (!task) return null;
   const pushCount = task.pushCount ?? 0;
 
   return (
@@ -213,7 +323,7 @@ function SharePreviewCard({ task }: { task: Goal }) {
   );
 }
 
-export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
+export default function ShareModal({ task, circle, visible, onClose, isOwner }: Props) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const [isSharing, setIsSharing] = useState(false);
@@ -223,14 +333,26 @@ export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
   // ✅ Capture ONLY the hidden share poster (off-screen)
   const posterShotRef = useRef<ViewShotRef | null>(null);
 
-  const taskType = task.type as GoalType;
-  const typeLabel = TYPE_LABELS[taskType] ?? 'Goal';
+  const taskType = (task?.type ?? 'motivation') as GoalType;
+  const typeLabel = circle ? 'Circle' : (TYPE_LABELS[taskType] ?? 'Goal');
   // Prefer the caller-provided ownership flag; fall back to id comparison.
-  const resolvedIsOwner = isOwner ?? (!!user?.id && task.userId === user.id);
+  const resolvedIsOwner = isOwner ?? (!!user?.id && !!task && task.userId === user.id);
   const shareCopy = useMemo(
-    () => buildShareCopy({ task, typeLabel, currentUserId: user?.id, isOwner: resolvedIsOwner }),
-    [task, typeLabel, user?.id, resolvedIsOwner],
+    () =>
+      circle
+        ? buildCircleShareCopy(circle)
+        : buildShareCopy({
+            task: task as Goal,
+            typeLabel,
+            currentUserId: user?.id,
+            isOwner: resolvedIsOwner,
+          }),
+    [circle, task, typeLabel, user?.id, resolvedIsOwner],
   );
+
+  const shareMessage = circle
+    ? `"${stripOuterQuotes(circle.goalText)}". We're doing it together on PushMeUp: ${toShareableCircleLink(circle.id)}`
+    : SHARE_MESSAGE(task?.text ?? '', task?.name);
 
   const handleShare = useCallback(async () => {
     if (!posterShotRef.current) return;
@@ -254,7 +376,7 @@ export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
       const result = await Share.share({
         url: normalizedUri,
         title: `${typeLabel} from PushMeUp`,
-        message: SHARE_MESSAGE(task.text, task.name),
+        message: shareMessage,
       });
 
       if (result.action === Share.sharedAction) {
@@ -275,7 +397,7 @@ export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
     } finally {
       setIsSharing(false);
     }
-  }, [onClose, task.name, task.text, typeLabel]);
+  }, [onClose, shareMessage, typeLabel]);
 
   return (
     <AppModal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -310,7 +432,7 @@ export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
             {shareCopy.modalSubtitle}
           </TextElement>
 
-          <SharePreviewCard task={task} />
+          <SharePreviewCard task={task} circle={circle} />
         </View>
 
         <View style={[styles.footer, { paddingBottom: insets.bottom + vs(12) }]}>
@@ -356,7 +478,7 @@ export default function ShareModal({ task, visible, onClose, isOwner }: Props) {
               {shareCopy.posterSubtitle}
             </TextElement>
 
-            <SharePreviewCard task={task} />
+            <SharePreviewCard task={task} circle={circle} />
 
             <TextElement style={styles.branding} color="muted">
               PushMeUp • pushmeup.app
@@ -445,6 +567,33 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: ms(22),
       backgroundColor: colors.muted,
       marginRight: spacing.sm,
+    },
+
+    previewStack: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginRight: spacing.sm,
+    },
+    previewStackAvatar: {
+      width: ms(38),
+      height: ms(38),
+      borderRadius: ms(19),
+      backgroundColor: colors.muted,
+      borderWidth: 2,
+      borderColor: colors.card,
+    },
+    previewStackOverlap: {
+      marginLeft: -ms(12),
+    },
+    previewStackFallback: {
+      backgroundColor: colors.onboardingPush,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    previewStackInitial: {
+      fontSize: ms(15),
+      fontWeight: '800',
+      color: colors.tactileMomentumSecondary,
     },
 
     previewHeaderText: {

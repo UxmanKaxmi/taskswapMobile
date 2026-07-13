@@ -34,6 +34,26 @@
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
+      <!-- App Links: circle invites (/c/<token>) and circle detail
+           (/circles/<id>). Verified against
+           https://pushmeup.app/.well-known/assetlinks.json -->
+      <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="https" android:host="pushmeup.app" />
+        <data android:scheme="https" android:host="www.pushmeup.app" />
+        <data android:pathPrefix="/c/" />
+        <data android:pathPrefix="/circles/" />
+      </intent-filter>
+      <!-- Custom scheme (pushmeup://c/<token>) — needs no server-side
+           verification, so local/dev link testing works everywhere. -->
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="pushmeup" />
+      </intent-filter>
     </activity>
   </application>
 </manifest>

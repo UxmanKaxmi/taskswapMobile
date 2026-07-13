@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, Share } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ms, vs } from 'react-native-size-matters';
 
@@ -32,6 +32,15 @@ import { useFollowers } from '@features/User/hooks/useFollowers';
 import { useFollowing } from '@features/User/hooks/useFollowing';
 import { FEELING_OPTIONS, FeelingValue, normalizeFeelingValue } from '@shared/utils/feelings';
 import Icon from '@shared/components/Icons/Icon';
+import { useFeatureFlags } from '@shared/featureFlags';
+import DoItTogetherCard, {
+  CIRCLE_MAX_INVITEES,
+} from '@features/Circles/components/DoItTogetherCard';
+import { useCreateCircle } from '@features/Circles/hooks/useCircles';
+import { toShareableInviteLink } from '@features/Circles/utils/inviteLink';
+import { hasSeenCirclesIntro, markCirclesIntroSeen } from '@features/Circles/circlesIntro.storage';
+import type { CreateCircleResponse } from '@features/Circles/types/circles.types';
+import { showToast } from '@shared/utils/toast';
 
 type Props = NativeStackScreenProps<AddGoalStackParamList, 'AddMotivation'>;
 
@@ -53,9 +62,13 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
   const [helpers, setHelpers] = useState<HelperUser[]>([]);
   const [showHelperModal, setShowHelperModal] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [doTogether, setDoTogether] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const { mutate: createGoal, isPending } = useCreateGoal();
+  const { mutate: createCircle, isPending: isCreatingCircle } = useCreateCircle();
+  const { flags } = useFeatureFlags();
+  const circlesEnabled = flags.circles;
   const { data: followers = [] } = useFollowers(!!user);
   const { data: following = [] } = useFollowing();
   const friends = useMemo(() => {
@@ -73,6 +86,7 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
     setText(draft.text ?? '');
     setSelectedFeeling(normalizeFeelingValue(draft.feeling) ?? undefined);
     setIsAnonymous(draft.isAnonymous === true);
+    setDoTogether(draft.doTogether === true);
   }, [route.params?.draft]);
 
   useEffect(() => {
@@ -113,7 +127,39 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
     setIsAnonymous(true);
     // Anonymous goals can't tag friends — contradiction in terms.
     setHelpers([]);
+    // Circles and anonymity are mutually exclusive: everyone in a circle
+    // shows up as themselves (mirrors the server-side rejection).
+    setDoTogether(false);
   }, []);
+
+  const enableTogether = React.useCallback(() => {
+    setDoTogether(true);
+    setIsAnonymous(false);
+    // Selected friends carry over: as helpers when solo, as in-app circle
+    // invitees when doing it together (capped at 4 seats).
+    setHelpers(prev => prev.slice(0, CIRCLE_MAX_INVITEES));
+  }, []);
+
+  const handleToggleTogether = React.useCallback(
+    async (next: boolean) => {
+      if (!next) {
+        setDoTogether(false);
+        return;
+      }
+
+      // First flip ever: walk through what a circle is before enabling.
+      // (Dev builds always show the intro — see circlesIntro.storage.)
+      const seen = await hasSeenCirclesIntro();
+      if (!seen) {
+        await markCirclesIntroSeen();
+        openModal('circlesIntro', { onStartCircle: enableTogether });
+        return;
+      }
+
+      enableTogether();
+    },
+    [enableTogether, openModal],
+  );
 
   const handleToggleAnonymous = React.useCallback(async () => {
     if (isAnonymous) {
@@ -175,6 +221,23 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
     [navigation, openModal, rootNavigation],
   );
 
+  // The invite share sheet IS the moment for a circle post (spec §4): the
+  // goal is live immediately, invites go out via the OS sheet right after.
+  const handleCircleCreated = React.useCallback(
+    (created: CreateCircleResponse) => {
+      setSuccess(true);
+      resetToHomeRoot(rootNavigation ?? navigation);
+
+      setTimeout(() => {
+        showToast({ type: 'success', title: 'Your circle is live' });
+        void Share.share({
+          message: `Hey. I'm starting "${created.circle.goalText}" on PushMeUp and I want you in my circle. Join me: ${toShareableInviteLink(created.inviteLink)}`,
+        });
+      }, 350);
+    },
+    [navigation, rootNavigation],
+  );
+
   useEffect(() => {
     const draft = route.params?.draft;
     if (!user) return;
@@ -183,12 +246,34 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
     if (hasAutoSubmittedRef.current) return;
 
     hasAutoSubmittedRef.current = true;
+
+    if (draft.doTogether && circlesEnabled) {
+      createCircle(
+        {
+          goalText: draft.text,
+          feeling: normalizeFeelingValue(draft.feeling) ?? undefined,
+          inviteUserIds: draft.helpers?.slice(0, CIRCLE_MAX_INVITEES),
+        },
+        { onSuccess: handleCircleCreated },
+      );
+      return;
+    }
+
     createGoal(draft, {
       onSuccess: task => {
         handleGoalCreated(task);
       },
     });
-  }, [createGoal, handleGoalCreated, route.params?.draft, route.params?.submitAfterAuth, user]);
+  }, [
+    circlesEnabled,
+    createCircle,
+    createGoal,
+    handleCircleCreated,
+    handleGoalCreated,
+    route.params?.draft,
+    route.params?.submitAfterAuth,
+    user,
+  ]);
 
   function onSubmit() {
     if (!canSubmit) return;
@@ -199,12 +284,17 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
       return;
     }
 
+    const wantsCircle = doTogether && circlesEnabled && !isAnonymous;
+
     const payload: CreateGoalPayload = {
       type: GoalTypeEnum.Motivation,
       text: text.trim(),
       feeling: selectedFeeling,
+      // With "do it together" on, selected friends are circle invitees (the
+      // draft carries them in `helpers` so they survive the auth redirect).
       helpers: isAnonymous ? [] : helpers.map(helper => helper.id),
       isAnonymous,
+      doTogether: wantsCircle,
     };
 
     if (!user) {
@@ -217,6 +307,18 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
         },
         authContext: 'AddGoal',
       });
+      return;
+    }
+
+    if (wantsCircle) {
+      createCircle(
+        {
+          goalText: payload.text,
+          feeling: selectedFeeling,
+          inviteUserIds: helpers.slice(0, CIRCLE_MAX_INVITEES).map(helper => helper.id),
+        },
+        { onSuccess: handleCircleCreated },
+      );
       return;
     }
 
@@ -234,13 +336,17 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
         <AnimatedBottomButtonWithHeader
           title="Post it"
           visible={canSubmit && !success}
-          isLoading={isPending}
+          isLoading={isPending || isCreatingCircle}
           onPress={onSubmit}
           buttonColor={colors.tactileMomentumPrimary}
           containerColor={colors.onboardingPaper}
           textColor={colors.tactileMomentumSecondary}
           // buttonStyle={styles.postButton}
-          buttonHeader="Once posted, people here can push you forward."
+          buttonHeader={
+            doTogether && circlesEnabled
+              ? 'Your circle starts as soon as you post.'
+              : 'Once posted, people here can push you forward.'
+          }
           style={{ bottom: isAndroid ? vs(-20) : vs(0) }}
         />
       }
@@ -334,20 +440,30 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
         />
 
         {!isAnonymous ? (
-          <TagHelperCard
-            variant="prompt"
-            helpers={helpers}
-            onPress={() => setShowHelperModal(true)}
-            taskType={GoalTypeEnum.Motivation}
-            headerLabel="TAG A FRIEND  —"
-            headerSuffix="optional"
-            title="Tag someone who keeps you honest"
-            subtitle="They'll get a nudge to push you."
-          />
+          circlesEnabled ? (
+            // "Do it together" replaces the Tag-a-friend stub (spec §8).
+            <DoItTogetherCard
+              enabled={doTogether}
+              onToggle={next => void handleToggleTogether(next)}
+              invitees={doTogether ? helpers : []}
+              onPressInvitees={() => setShowHelperModal(true)}
+            />
+          ) : (
+            <TagHelperCard
+              variant="prompt"
+              helpers={helpers}
+              onPress={() => setShowHelperModal(true)}
+              taskType={GoalTypeEnum.Motivation}
+              headerLabel="TAG A FRIEND ·"
+              headerSuffix="optional"
+              title="Tag someone who keeps you honest"
+              subtitle="They'll get a nudge to push you."
+            />
+          )
         ) : null}
         {/* <View style={styles.footerCopy}>
           <TextElement variant="body" style={styles.footerText} color="onboardingMuted">
-            Your goal is visible to the community. First pushes usually land within minutes — no one
+            Your goal is visible to the community. First pushes usually land within minutes. No one
             posts into silence.
           </TextElement>
         </View> */}
@@ -359,6 +475,15 @@ export default function AddMotivationScreen({ navigation, route }: Props) {
           friends={friends}
           onConfirm={ids => {
             const selectedHelpers = friends.filter(friend => ids.includes(friend.id));
+            // Circles hold you and 4 friends; solo helper-tagging is uncapped.
+            if (doTogether && circlesEnabled && selectedHelpers.length > CIRCLE_MAX_INVITEES) {
+              showToast({
+                type: 'info',
+                title: `Circles hold you and ${CIRCLE_MAX_INVITEES} friends`,
+              });
+              setHelpers(selectedHelpers.slice(0, CIRCLE_MAX_INVITEES));
+              return;
+            }
             setHelpers(selectedHelpers);
           }}
         />

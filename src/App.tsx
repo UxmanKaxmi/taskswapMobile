@@ -21,6 +21,7 @@ import { MorphProvider } from '@shared/morph/MorphProvider';
 import { navigationRef } from './navigation/navigationRef';
 import NotificationNavigationBridge from './lib/notifications/NotificationNavigationBridge';
 import { setNotificationNavigationReady } from './lib/notifications/notificationNavigation';
+import { initDeepLinks } from './lib/deeplinks/deepLinkBridge';
 import { queryClient } from './lib/react-query/client';
 
 const loginImage = require('@assets/images/loginImage5.png');
@@ -107,6 +108,10 @@ export default function App() {
     if (asset?.uri) {
       Image.prefetch(asset.uri);
     }
+  }, []);
+
+  useEffect(() => {
+    return initDeepLinks();
   }, []);
 
   useEffect(() => {

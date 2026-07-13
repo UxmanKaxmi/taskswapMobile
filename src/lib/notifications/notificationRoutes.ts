@@ -24,6 +24,8 @@ export type NotificationPayload = {
   commentId?: string | null;
   pushCount?: string | null;
   taskCount?: string | null;
+  circleId?: string | null;
+  token?: string | null;
   type?: string;
 };
 
@@ -31,6 +33,24 @@ export type NotificationRoute =
   | {
       screen: 'GoalDetail';
       params: NonNullable<AppStackParamList['GoalDetail']>;
+      authCopy: {
+        title: string;
+        subtitle: string;
+        cta: string;
+      };
+    }
+  | {
+      screen: 'CircleDetail';
+      params: AppStackParamList['CircleDetail'];
+      authCopy: {
+        title: string;
+        subtitle: string;
+        cta: string;
+      };
+    }
+  | {
+      screen: 'JoinCircle';
+      params: AppStackParamList['JoinCircle'];
       authCopy: {
         title: string;
         subtitle: string;
@@ -72,6 +92,12 @@ const AUTH_COPY_HOME = {
   cta: 'Log In to Support',
 };
 
+const AUTH_COPY_CIRCLE = {
+  title: 'Open Your Circle',
+  subtitle: "Log in to see how everyone's doing and push them forward.",
+  cta: 'Log In to View',
+};
+
 function toStringOrUndefined(value: unknown): string | undefined {
   if (typeof value === 'string' && value.trim()) return value.trim();
   if (typeof value === 'number' && Number.isFinite(value)) return String(value);
@@ -82,6 +108,20 @@ function getGoalIdFromDeeplinkPath(deeplinkPath?: string | null) {
   if (!deeplinkPath) return undefined;
 
   const match = deeplinkPath.match(/^\/tasks\/([^/?#]+)/i);
+  return match?.[1];
+}
+
+function getCircleIdFromDeeplinkPath(deeplinkPath?: string | null) {
+  if (!deeplinkPath) return undefined;
+
+  const match = deeplinkPath.match(/^\/circles\/([^/?#]+)/i);
+  return match?.[1];
+}
+
+function getInviteTokenFromDeeplinkPath(deeplinkPath?: string | null) {
+  if (!deeplinkPath) return undefined;
+
+  const match = deeplinkPath.match(/^\/c\/([^/?#]+)/i);
   return match?.[1];
 }
 
@@ -105,6 +145,8 @@ export function normalizeNotificationPayload(data: unknown): NotificationPayload
     commentId: toStringOrUndefined(payload.commentId),
     pushCount: toStringOrUndefined(payload.pushCount),
     taskCount: toStringOrUndefined(payload.taskCount),
+    circleId: toStringOrUndefined(payload.circleId),
+    token: toStringOrUndefined(payload.token),
     type: toStringOrUndefined(payload.type),
   };
 }
@@ -156,6 +198,32 @@ export function getNotificationRoute(data: unknown): NotificationRoute {
   const payload = normalizeNotificationPayload(data);
   const notificationType = (payload.notificationType ?? payload.type ?? '').toLowerCase();
   const taskId = payload.taskId ?? getGoalIdFromDeeplinkPath(payload.deeplinkPath);
+  const circleId = payload.circleId ?? getCircleIdFromDeeplinkPath(payload.deeplinkPath);
+
+  // Circle notifications deep-link to the circle detail — except invites,
+  // which land on the join screen (mood picker + Join button).
+  if (notificationType.startsWith('circle-')) {
+    if (notificationType === 'circle-invite') {
+      const token = payload.token ?? getInviteTokenFromDeeplinkPath(payload.deeplinkPath);
+      if (token) {
+        return {
+          screen: 'JoinCircle',
+          params: { token },
+          authCopy: AUTH_COPY_CIRCLE,
+        };
+      }
+      return buildInboxFallbackRoute();
+    }
+
+    if (!circleId) {
+      return buildInboxFallbackRoute();
+    }
+    return {
+      screen: 'CircleDetail',
+      params: { circleId },
+      authCopy: AUTH_COPY_CIRCLE,
+    };
+  }
 
   switch (notificationType) {
     case NOTIFICATION_DEEP_LINK_TYPES.TASK_MOTIVATION_HELP_PUSH_REMINDER:

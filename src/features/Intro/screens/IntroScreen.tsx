@@ -57,7 +57,7 @@ const introExamples: IntroContent[] = [
   {
     heading: 'Take the win.',
     headingAccent: 'Pass it on.',
-    subtitle: 'Mark it done, feel the momentum — then push someone else forward.',
+    subtitle: 'Mark it done, feel the momentum. Then push someone else forward.',
     prompt: 'Go for my first run in three weeks',
     feeling: 'Momentum built',
     responseMode: 'done',

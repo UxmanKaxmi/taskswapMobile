@@ -2,6 +2,7 @@ import { api } from '@shared/api/axios';
 import { Goal } from '../types/goals';
 import { ApiRoute, buildRoute } from '@shared/api/apiRoutes';
 import { CreateGoalPayload } from '@features/AddGoal';
+import type { CircleFeedCard } from '@features/Circles/types/circles.types';
 
 export const TASK_PAGE_LIMIT = 20;
 
@@ -9,6 +10,9 @@ export type FeedSortKey = 'all' | 'needs_push' | 'new' | 'almost_there';
 
 export type GoalPage = {
   data: Goal[];
+  // One card per circle, first page only; present when the server has the
+  // circles flag on and this client asked for them (includeCircles).
+  circles?: CircleFeedCard[];
   meta: {
     hasMore: boolean;
     nextCursor: string | null;
@@ -34,6 +38,9 @@ export async function getGoalsPage(
       cursor: cursor ?? undefined,
       limit,
       sort,
+      // This build renders circle cards; the server only returns them when
+      // its own kill switch is on, so this is always safe to send.
+      includeCircles: 1,
     },
   });
   return response.data;

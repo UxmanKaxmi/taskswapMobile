@@ -66,6 +66,26 @@ export type RevealGoalModalPayload = {
   onReveal: () => void | Promise<void>;
 };
 
+export type CircleMembersModalPayload = {
+  title?: string;
+  subtitle?: string;
+  currentUserId?: string;
+  members: {
+    userId: string;
+    name: string;
+    avatar: string;
+    displayName: string;
+    status: string;
+  }[];
+};
+
+export type CirclesIntroModalPayload = {
+  // Called after the sheet closes when the user commits from the last slide
+  // (flips the composer's "Start a Circle" toggle on).
+  onStartCircle?: () => void;
+  primaryActionLabel?: string;
+};
+
 export type ModalPayloadMap = {
   info: InfoModalPayload;
   reminderMessage: ReminderMessageModalPayload;
@@ -77,6 +97,8 @@ export type ModalPayloadMap = {
   reportTask: ReportTaskModalPayload;
   anonymousPostingInfo: AnonymousPostingInfoModalPayload;
   revealGoal: RevealGoalModalPayload;
+  circleMembers: CircleMembersModalPayload;
+  circlesIntro: CirclesIntroModalPayload;
 };
 
 export type ModalType = keyof ModalPayloadMap;
@@ -121,5 +143,9 @@ export type ModalState =
   | {
       type: 'revealGoal';
       payload: RevealGoalModalPayload;
+    }
+  | {
+      type: 'circleMembers';
+      payload: CircleMembersModalPayload;
     }
   | null;

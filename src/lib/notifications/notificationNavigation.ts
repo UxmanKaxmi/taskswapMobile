@@ -66,7 +66,11 @@ function navigateRoute(route: NotificationRoute) {
     return;
   }
 
-  if (!authSnapshot.isAuthenticated) {
+  // Circle surfaces are public (signed-out viewers see cards and detail;
+  // invite landings gate at the Join button) — skip the auth wall for them.
+  const isPublicScreen = route.screen === 'CircleDetail' || route.screen === 'JoinCircle';
+
+  if (!authSnapshot.isAuthenticated && !isPublicScreen) {
     const redirectTo =
       route.screen === 'NotificationMainScreen' ? ('Notification' as const) : route.screen;
 
@@ -78,9 +82,13 @@ function navigateRoute(route: NotificationRoute) {
     return;
   }
 
-  if (route.screen === 'GoalDetail') {
+  if (
+    route.screen === 'GoalDetail' ||
+    route.screen === 'CircleDetail' ||
+    route.screen === 'JoinCircle'
+  ) {
     navigationRef.navigate('App', {
-      screen: 'GoalDetail',
+      screen: route.screen,
       params: route.params,
     } as any);
     return;
@@ -139,6 +147,13 @@ export function handleNotificationRoute(
 
   flushPendingRoute();
   return true;
+}
+
+// URL deep links (universal links) reuse the same pending-route machinery as
+// notification taps: queued until navigation + auth state are ready.
+export function enqueueNotificationRoute(route: NotificationRoute) {
+  pendingRoute = route;
+  flushPendingRoute();
 }
 
 export function __resetNotificationNavigationState() {

@@ -31,7 +31,7 @@ export function useReferralLink(channel?: Channel) {
         },
         share: {
           message:
-            data?.share?.message ?? 'Join me on GoalSwap — manage and share your tasks easily!',
+            data?.share?.message ?? 'Join me on PushMeUp. Post a goal and get real pushes from people who want you to win.',
           title: data?.share?.title ?? 'Invite to GoalSwap',
         },
       } as ReferralLinkResponse;

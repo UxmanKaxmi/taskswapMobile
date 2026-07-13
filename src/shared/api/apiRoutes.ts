@@ -12,6 +12,8 @@ export enum ApiRoute {
   FEATURE_FLAGS = '/features',
   FEEDBACK = '/feedback',
   BEATS = '/beats',
+  CIRCLES = '/circles',
+  INVITES = '/invites',
 }
 
 // ✅ Builder functions for dynamic API routes
@@ -81,6 +83,17 @@ export const buildRoute = {
 
   // ✅ Cheer
   cheerBeat: (beatId: string) => `${ApiRoute.BEATS}/${beatId}/cheer`,
+
+  // ✅ Circles ("do it together")
+  createCircle: () => `${ApiRoute.CIRCLES}`,
+  circle: (circleId: string) => `${ApiRoute.CIRCLES}/${circleId}`,
+  circleInvites: (circleId: string) => `${ApiRoute.CIRCLES}/${circleId}/invites`,
+  circleLeave: (circleId: string) => `${ApiRoute.CIRCLES}/${circleId}/leave`,
+  circlePushAll: (circleId: string) => `${ApiRoute.CIRCLES}/${circleId}/push-all`,
+  circleInviteJoin: (token: string) => `${ApiRoute.INVITES}/${token}/join`,
+  circleInvitePreview: (token: string) => `${ApiRoute.INVITES}/${token}/preview`,
+  circleNudge: (circleId: string, userId: string) =>
+    `${ApiRoute.CIRCLES}/${circleId}/members/${userId}/nudge`,
 
   // ✅ First-time hints ("beats" in the product spec — named hints on the
   // wire because /beats already belongs to cheerable content beats)

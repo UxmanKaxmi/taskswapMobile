@@ -228,6 +228,19 @@ export default function NotificationMainScreen() {
 
   const handleNotificationPress = useCallback(
     (item: NotificationDTO) => {
+      // Circles: invites open the join screen; everything else opens the
+      // circle detail.
+      if (item.type?.startsWith('circle-')) {
+        if (item.type === 'circle-invite' && item.metadata?.token) {
+          navigation.navigate('JoinCircle', { token: item.metadata.token });
+          return;
+        }
+        if (item.metadata?.circleId) {
+          navigation.navigate('CircleDetail', { circleId: item.metadata.circleId });
+        }
+        return;
+      }
+
       switch (item.type) {
         case 'follow':
           if (item.sender?.id) {

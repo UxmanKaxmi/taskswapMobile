@@ -45,6 +45,10 @@ import ReminderCard from '../components/ReminderCard';
 import AdviceCard from '../components/AdviceCard';
 import HorizontalFilterTabs, { type FeedSortKey } from '../components/HorizontalFilterTabs';
 import { useAuth } from '@features/Auth/AuthProvider';
+import { useFeatureFlags } from '@shared/featureFlags';
+import CircleCard from '@features/Circles/components/CircleCard';
+import { mergeCirclesIntoFeed } from '@features/Circles/utils/feedMerge';
+import type { CircleFeedCard } from '@features/Circles/types/circles.types';
 import { navigateToGoalDetails, useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 import { LaunchModalHost } from '@features/LaunchModals';
 import { haptics } from '@shared/utils/haptics';
@@ -75,6 +79,7 @@ const FEED_SORT_LABELS: Record<FeedSortKey, string> = {
   needs_push: 'Needs a push',
   new: 'New',
   almost_there: 'Almost there',
+  circles: 'Circles',
 };
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
@@ -99,7 +104,9 @@ export default function HomeScreen() {
     hasNextPage,
     isFetching,
     isFetchingNextPage,
-  } = useGoalsQuery(feedSort);
+    // "Circles" is a client-side lens: fetch the plain feed (circle cards ride
+    // its first page) and render only the circle items.
+  } = useGoalsQuery(feedSort === 'circles' ? 'all' : feedSort);
   const {
     data: homeSummary,
     isLoading: isHomeSummaryLoading,
@@ -266,12 +273,31 @@ export default function HomeScreen() {
     });
   }, [data]);
 
+  // Circle cards ride the first feed page (server emits them only while the
+  // circles kill switch is on); the client flag gates rendering too, so
+  // flipping it off hides cards without a release.
+  const { flags } = useFeatureFlags();
+  const circleCards = useMemo<CircleFeedCard[]>(() => {
+    if (!flags.circles) return [];
+    return data?.pages[0]?.circles ?? [];
+  }, [data, flags.circles]);
+
   const compactGoalDay = homeSummary?.compactStatus.streakDay ?? 0;
   const compactPushCount = homeSummary?.compactStatus.pushedTodayCount ?? 0;
 
   // Show every task in the feed, including the viewer's own goals. (Your newest
   // goal also appears in the "YOUR GOAL" summary card above the list.)
   const feedGoals = flattenedGoals;
+
+  // One circle card per circle above the solo cards — never N member cards.
+  const feedItems = useMemo<(Goal | CircleFeedCard)[]>(() => {
+    if (feedSort === 'circles') {
+      // The Circles tab is "my circles", newest first. The server's
+      // activity-recency order stays for the merged feed only.
+      return [...circleCards].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    }
+    return mergeCirclesIntoFeed(circleCards, feedGoals, feedSort);
+  }, [circleCards, feedGoals, feedSort]);
 
   // Feed spotlight priority: post your first goal > give your first push >
   // discover cheering. Each lower hint yields while a higher one is pending.
@@ -444,7 +470,14 @@ export default function HomeScreen() {
     ]);
   }, [navigation, secondaryItems]);
 
-  const keyExtractor = useCallback((item: Goal) => item.id, []);
+  const keyExtractor = useCallback((item: Goal | CircleFeedCard) => item.id, []);
+
+  const onPressCircle = useCallback(
+    (card: CircleFeedCard) => {
+      navigation.navigate('CircleDetail', { circleId: card.id });
+    },
+    [navigation],
+  );
 
   const onNoopGoalAction = useCallback((_task: Goal) => {}, []);
 
@@ -466,8 +499,12 @@ export default function HomeScreen() {
     [checkAuthThenNavigate],
   );
 
-  const renderGoalNew = useCallback<ListRenderItem<Goal>>(
+  const renderGoalNew = useCallback<ListRenderItem<Goal | CircleFeedCard>>(
     ({ item }) => {
+      if ('kind' in item) {
+        return <CircleCard card={item} onPress={onPressCircle} />;
+      }
+
       switch (item.type) {
         case GoalTypeEnum.Decision:
           return <DecisionCard task={item as any} onPressCard={onPressGoal as any} />;
@@ -496,7 +533,7 @@ export default function HomeScreen() {
           return null;
       }
     },
-    [handleShareMotivation, onNoopGoalAction, onPressGoal, onSuggestAdvice],
+    [handleShareMotivation, onNoopGoalAction, onPressCircle, onPressGoal, onSuggestAdvice],
   );
 
   return (
@@ -602,7 +639,7 @@ export default function HomeScreen() {
       <AnimatedFlatList
         ref={listRef as any}
         style={styles.list}
-        data={feedGoals}
+        data={feedItems}
         renderItem={renderGoalNew as any}
         keyExtractor={keyExtractor as any}
         onScroll={scrollHandler}
@@ -611,7 +648,11 @@ export default function HomeScreen() {
           <View style={styles.emptyContainer}>
             <Height size={20} />
             <TextElement variant="body" color="placeHolder">
-              {isLoading ? 'Loading the feed...' : 'Someone needs a push. Be the first.'}
+              {isLoading
+                ? 'Loading the feed...'
+                : feedSort === 'circles'
+                  ? 'No circles yet. Start one from the composer with "Do it together".'
+                  : 'Someone needs a push. Be the first.'}
             </TextElement>
           </View>
         }

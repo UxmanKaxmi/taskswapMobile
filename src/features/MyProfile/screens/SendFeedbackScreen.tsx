@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
-import Config from 'react-native-config';
 import { ms, vs } from 'react-native-size-matters';
 
 import { useAuth } from '@features/Auth/AuthProvider';
@@ -28,7 +27,7 @@ import Height from '@shared/components/Spacing/Height';
 import AnimatedBottomButton, {
   BOTTOM_BUTTON_HEIGHT,
 } from '@shared/components/Buttons/AnimatedBottomButton';
-import { isIOS } from '@shared/utils/constants';
+import { APP_VERSION_LABEL, isIOS } from '@shared/utils/constants';
 
 const FEEDBACK_CATEGORIES: Array<{ label: string; value: FeedbackCategory }> = [
   { label: 'Something is confusing', value: 'confusing' },
@@ -51,10 +50,9 @@ export default function SendFeedbackScreen() {
 
   const deviceContext = useMemo(() => {
     const platformConstants = Platform.constants as Record<string, any>;
-    const nativeConfig = Config as Record<string, string | undefined>;
 
     return {
-      appVersion: nativeConfig.APP_VERSION || nativeConfig.VERSION || '0.0.1',
+      appVersion: APP_VERSION_LABEL,
       platform: Platform.OS as FeedbackPayload['platform'],
       osVersion: String(Platform.Version),
       device:
@@ -135,7 +133,7 @@ export default function SendFeedbackScreen() {
                 <Icon set="ion" name="checkmark" size={26} color={colors.onboardingInk} />
               </View>
               <TextElement style={styles.successText}>
-                Thank you — this helps us make PushMeUp better.
+                Thank you. This helps us make PushMeUp better.
               </TextElement>
             </View>
           ) : (

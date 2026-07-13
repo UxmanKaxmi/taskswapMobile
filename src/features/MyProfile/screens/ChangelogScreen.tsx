@@ -41,6 +41,10 @@ const CHANGE_ICON_MAP: Record<string, { set: 'fa6' | 'ion'; name: string }> = {
   '🎯': { set: 'fa6', name: 'bullseye' },
   '🔑': { set: 'fa6', name: 'key' },
   '🎨': { set: 'fa6', name: 'palette' },
+  '⭕': { set: 'fa6', name: 'circle-dot' },
+  '✉️': { set: 'fa6', name: 'envelope' },
+  '👋': { set: 'fa6', name: 'hand' },
+  '🗞️': { set: 'fa6', name: 'newspaper' },
 };
 
 function groupChanges(changes: ChangelogChange[]) {

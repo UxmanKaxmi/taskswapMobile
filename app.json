@@ -1,4 +1,6 @@
 {
   "name": "PushMeUp",
-  "displayName": "Push Me Up"
+  "displayName": "Push Me Up",
+  "version": "1.0",
+  "build": 23
 }

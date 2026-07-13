@@ -143,6 +143,7 @@ export default function AnimatedBottomButtonWithHeader({
         <View
           style={[
             styles.sheet,
+            styles.sheetElevated,
             {
               backgroundColor: containerColor ?? colors.card,
               minHeight: sheetMinHeight,
@@ -211,9 +212,18 @@ const styles = StyleSheet.create({
 
     ...platformShadow({
       color: '#000',
-      opacity: 0.15,
+      opacity: 0.18,
       radius: 12,
       offset: { width: 0, height: -4 },
+    }),
+  },
+
+  sheetElevated: {
+    ...platformShadow({
+      color: '#000',
+      opacity: 0.34,
+      radius: 24,
+      offset: { width: 0, height: -10 },
     }),
   },
 

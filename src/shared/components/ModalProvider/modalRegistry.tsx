@@ -11,6 +11,8 @@ import CompleteGoalConfirmationModalContent from './modals/CompleteGoalConfirmat
 import ReportTaskModalContent from './modals/ReportTaskModalContent';
 import AnonymousPostingInfoModalContent from './modals/AnonymousPostingInfoModalContent';
 import RevealGoalModalContent from './modals/RevealGoalModalContent';
+import CircleMembersModalContent from './modals/CircleMembersModalContent';
+import CirclesIntroModalContent from './modals/CirclesIntroModalContent';
 import { type ModalPayloadMap, type ModalType } from './modalTypes';
 
 type RenderContext = {
@@ -98,6 +100,19 @@ export const modalRegistry: { [K in ModalType]: ModalDefinition<K> } = {
     snapPoints: [],
     render: (payload, { closeModal }) => (
       <RevealGoalModalContent payload={payload} closeModal={closeModal} />
+    ),
+  },
+  circleMembers: {
+    snapPoints: ['45%'],
+    scrollable: true,
+    render: (payload, { closeModal }) => (
+      <CircleMembersModalContent payload={payload} closeModal={closeModal} />
+    ),
+  },
+  circlesIntro: {
+    snapPoints: [],
+    render: (payload, { closeModal }) => (
+      <CirclesIntroModalContent payload={payload} closeModal={closeModal} />
     ),
   },
 };

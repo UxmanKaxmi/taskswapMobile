@@ -89,6 +89,14 @@ export type AppStackParamList = {
       }
     | undefined;
 
+  // Circles ("do it together")
+  CircleDetail: {
+    circleId: string;
+  };
+  JoinCircle: {
+    token: string;
+  };
+
   // friend flows (opened from Friends tab)
   FindFriendsScreen:
     | {

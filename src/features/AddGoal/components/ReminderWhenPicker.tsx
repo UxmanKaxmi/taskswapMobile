@@ -135,7 +135,7 @@ export default function ReminderWhenPicker({
 
       {!removeBottomDescription && (
         <TextElement color={'reminderBgHardest'} style={styles.noteText}>
-          Just a heads-up — reminders need to be at least 2 hours from now
+          Just a heads-up: reminders need to be at least 2 hours from now
         </TextElement>
       )}
     </View>

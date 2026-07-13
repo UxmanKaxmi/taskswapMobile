@@ -175,10 +175,15 @@ function ProgressBeatCard({
       <View style={styles.cardHeader}>
         <View style={styles.dateRow}>
           {isHighlighted ? <PulsingDot /> : null}
-          <TextElement style={styles.dateText}>{date}</TextElement>
+          <TextElement style={styles.dateText} numberOfLines={1}>
+            {date}
+          </TextElement>
           {time ? <TextElement style={styles.dotSep}>•</TextElement> : null}
           {time ? (
-            <TextElement style={[styles.clockText, isMostCheered && styles.clockTextMost]}>
+            <TextElement
+              style={[styles.clockText, isMostCheered && styles.clockTextMost]}
+              numberOfLines={1}
+            >
               {time}
             </TextElement>
           ) : null}
@@ -188,12 +193,7 @@ function ProgressBeatCard({
             <Icon set="ion" name="sparkles" size={ms(9)} color={colors.tactileMomentumSecondary} />
             <TextElement style={styles.mostCheeredText}>MOST CHEERED</TextElement>
           </View>
-        ) : (
-          <View style={styles.mostCheeredPillAbsent}>
-            {/* <Icon set="ion" name="sparkles" size={ms(9)} color={colors.onboardingPushDeep} /> */}
-            <TextElement style={styles.mostCheeredText}></TextElement>
-          </View>
-        )}
+        ) : null}
       </View>
 
       <TextElement style={styles.rowLabel}>{rowLabel}</TextElement>
@@ -562,7 +562,7 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: ms(7),
-      flexShrink: 1,
+      flexShrink: 0,
     },
     dateText: {
       fontSize: ms(12),
@@ -570,6 +570,7 @@ const createStyles = (colors: ThemeColors) =>
       fontWeight: '900',
       letterSpacing: 0.6,
       color: colors.placeHolder,
+      flexShrink: 0,
     },
     dotSep: {
       fontSize: ms(12),
@@ -583,6 +584,7 @@ const createStyles = (colors: ThemeColors) =>
       fontWeight: '700',
       letterSpacing: 0.3,
       color: colors.onboardingMuted,
+      flexShrink: 0,
     },
     clockTextMost: {
       // color: colors.onboardingPushDeep,
@@ -594,16 +596,6 @@ const createStyles = (colors: ThemeColors) =>
       flexShrink: 0,
       backgroundColor: colors.onboardingPush,
       borderRadius: 16,
-      paddingHorizontal: ms(8),
-      paddingVertical: vs(4),
-    },
-    mostCheeredPillAbsent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      // gap: ms(5),
-      flexShrink: 0,
-      // backgroundColor: colors.tactileMomentumSecondary,
-      // borderRadius: 16,
       paddingHorizontal: ms(8),
       paddingVertical: vs(4),
     },

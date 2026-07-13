@@ -1,6 +1,6 @@
 // src/features/tasks/screens/GoalDetailScreen.tsx
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { AppStackParamList } from '@navigation/types/navigation';
@@ -8,7 +8,6 @@ import { Layout } from '@shared/components/Layout';
 import AppHeader from '@shared/components/AppHeader/AppHeader';
 import GoalModerationMenu from '@features/Home/components/GoalModerationMenu';
 import { buildQueryKey } from '@shared/constants/queryKeys';
-import AppLoader from '@shared/components/Loader/Loader';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getGoalByIdAPI } from '@features/Home/api/api';
 import { GoalDetailHeader } from '../components/GoalDetailHeader';
@@ -69,6 +68,7 @@ import OutlineButton from '@shared/components/Buttons/OutlineButton';
 import PushButton from '@shared/components/PushButton';
 import CompletionBurst from '../components/CompletionBurst';
 import { useSendCheer } from '@features/Goals/hooks/useGoalCheer';
+import { getLatestCheerableBeat } from '@features/Home/components/MotivationCard';
 import { SpotlightFirstResponse, useFirstTimeHintVisibility } from '@features/FirstTimeHints';
 
 export default function GoalDetailScreen({
@@ -256,6 +256,25 @@ export default function GoalDetailScreen({
   const hasVoted = task?.hasVoted;
   const hasReminded = task?.hasReminded;
   const canViewerCheer = Boolean(hasPushed && !isOwner && !isCompleted);
+
+  // Mirror the Home card's cheer affordance in the detail footer: when a pusher
+  // opens a goal they've backed and the latest beat is still open to cheers,
+  // surface the same Cheer button in the animated bottom bar.
+  const latestCheerableBeat = React.useMemo(
+    () => getLatestCheerableBeat(task?.beats),
+    [task?.beats],
+  );
+  const latestBeatCheeringOpen = Boolean(
+    latestCheerableBeat?.isCheeringOpen === true ||
+    (latestCheerableBeat?.isLatest && latestCheerableBeat?.isCheeringOpen !== false),
+  );
+  const canCheerLatestBeat =
+    !isOwner &&
+    !isCompleted &&
+    hasPushed &&
+    Boolean(latestCheerableBeat?.beatId) &&
+    latestBeatCheeringOpen &&
+    !latestCheerableBeat?.callerHasCheered;
   const resolvedHighlightBeatId = highlightBeatId ?? beatId ?? progressUpdateId;
 
   const { emoji } = getTypeVisual(task?.type ?? GoalTypeEnum.Advice);
@@ -304,7 +323,7 @@ export default function GoalDetailScreen({
             setCompletionBurstKey(key => key + 1);
             showToast({
               type: 'success',
-              title: 'Completed — you followed through.',
+              title: 'Completed. You followed through.',
             });
 
             // The reveal moment: claiming a hidden struggle at the moment of
@@ -869,6 +888,30 @@ export default function GoalDetailScreen({
       );
     }
 
+    // Pusher viewing a goal they've backed: mirror the Home card's Cheer button
+    // in the bottom bar so they can cheer the latest beat without scrolling.
+    if (
+      task.type === GoalTypeEnum.Motivation &&
+      !isCompleted &&
+      !isOwner &&
+      hasPushed &&
+      canCheerLatestBeat &&
+      latestCheerableBeat
+    ) {
+      return (
+        <AnimatedBottomButtonWithHeader
+          visible
+          title={`Cheer ${getFirstName(task.name)}`}
+          onPress={() => handleCheerPress(latestCheerableBeat)}
+          isLoading={sendCheer.isPending}
+          buttonColor={colors.onboardingPush}
+          textColor={colors.tactileMomentumSecondary}
+          containerColor={colors.onboardingCard}
+          buttonHeader="Send some encouragement their way."
+        />
+      );
+    }
+
     if (task.type === GoalTypeEnum.Decision && !hasVoted) {
       return (
         <AnimatedBottomButtonWithHeader
@@ -938,6 +981,10 @@ export default function GoalDetailScreen({
     adviceText,
     shouldOpenComposerDirectly,
     hasPushed,
+    canCheerLatestBeat,
+    latestCheerableBeat,
+    handleCheerPress,
+    sendCheer.isPending,
     hasShareUpdateRecipients,
     isShareUpdateCoolingDown,
     canShareProgressUpdate,
@@ -1191,7 +1238,17 @@ export default function GoalDetailScreen({
   }, [task?.type, renderAdvice, renderMotivation, renderDecision]);
 
   if (isLoading) {
-    return <AppLoader visible />;
+    // In-screen loading state, NOT the AppLoader modal: the modal's opaque
+    // overlay fades in above the navigator and reads as a white flash when
+    // arriving with only a taskId (circle lanes, notifications, deep links).
+    return (
+      <Layout allowPaddingVertical allowPaddingHorizontal>
+        <AppHeader left={<BackButton onPress={handleUnavailableGoBack} />} />
+        <View style={styles.loadingState}>
+          <ActivityIndicator size="large" color={colors.onboardingPush} />
+        </View>
+      </Layout>
+    );
   }
 
   if (taskError || !task) {
@@ -1416,6 +1473,11 @@ const styles = StyleSheet.create({
   },
   headerAction: {
     paddingHorizontal: ms(5),
+  },
+  loadingState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   errorScreen: {
     flex: 1,

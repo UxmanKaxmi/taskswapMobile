@@ -1,5 +1,13 @@
 import React from 'react';
-import { Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
+import {
+  GestureResponderEvent,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  TextStyle,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { ms, vs } from 'react-native-size-matters';
 import { ThemeColors, platformShadow, useTheme, useThemedStyles } from '@shared/theme';
 import { GoalType } from '@features/Goals/types/goals';
@@ -26,6 +34,8 @@ interface PushButtonProps {
   backgroundColor?: string;
   textColor?: string;
   borderColor?: string;
+  stopPropagation?: boolean;
+  accessibilityLabel?: string;
 }
 
 export default function PushButton({
@@ -46,6 +56,8 @@ export default function PushButton({
   backgroundColor,
   textColor,
   borderColor = 'transparent',
+  stopPropagation = false,
+  accessibilityLabel,
 }: PushButtonProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
@@ -78,12 +90,16 @@ export default function PushButton({
           if (isLocked) return;
           haptics.selection();
         }}
-        onPress={() => {
+        onPress={(event: GestureResponderEvent) => {
+          if (stopPropagation) {
+            event.stopPropagation?.();
+          }
           if (isLocked) return;
           onPress();
         }}
         disabled={isLocked}
         accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
         accessibilityState={{ disabled: isLocked, selected: active }}
         style={({ pressed }) => [
           styles.pillBase,

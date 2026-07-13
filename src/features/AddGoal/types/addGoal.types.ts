@@ -13,4 +13,7 @@ export interface CreateGoalPayload {
   deliverAt?: string | null; // For motivation tasks
   helpers?: string[]; // IDs of users to assign as helpers
   isAnonymous?: boolean; // Post under a generated alias
+  // Client-only: routes the post to POST /circles instead of POST /tasks.
+  // Carried on auth-redirect drafts so "do it together" survives login.
+  doTogether?: boolean;
 }

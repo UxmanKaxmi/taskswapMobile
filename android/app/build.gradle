@@ -90,6 +90,13 @@ def enableProguardInReleaseBuilds = true
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+/**
+ * Single source of truth for the app version: app.json at the repo root.
+ * constants.ts (JS) and an Xcode build phase read the same file, so bumping
+ * app.json is the whole release version bump.
+ */
+def appJson = new groovy.json.JsonSlurper().parse(file("$rootDir/../app.json"))
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -100,8 +107,8 @@ android {
         applicationId "com.pushmeup.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 22
-        versionName "1.0"
+        versionCode appJson.build
+        versionName appJson.version
     }
     signingConfigs {
         debug {

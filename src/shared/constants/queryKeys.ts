@@ -18,6 +18,8 @@ export enum QueryKeys {
   ReferralLink = 'referral-link',
   Push = 'push',
   BlockedUsers = 'blocked-users',
+  Circle = 'circle',
+  CircleInvite = 'circle-invite',
 }
 
 export const buildQueryKey = {
@@ -52,4 +54,8 @@ export const buildQueryKey = {
 
   //for Goal Pushes
   pushesForGoal: (taskId: string) => [QueryKeys.Push, taskId],
+
+  // Circles
+  circleById: (circleId: string) => [QueryKeys.Circle, circleId],
+  circleInvitePreview: (token: string) => [QueryKeys.CircleInvite, token],
 };

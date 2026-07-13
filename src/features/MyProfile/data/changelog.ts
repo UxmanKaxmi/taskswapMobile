@@ -10,6 +10,13 @@
 //
 // NOTE: each emoji must have a matching icon in CHANGE_ICON_MAP in
 // ChangelogScreen.tsx, or it falls back to the sparkle icon on that screen.
+//
+// The TOP entry's version comes from app.json (via APP_VERSION_LABEL), so it
+// always matches the build you ship. When a release goes out, pin the
+// now-previous entry to its literal version string before starting the next
+// top entry.
+
+import { APP_VERSION_LABEL } from '@shared/utils/constants';
 
 export type ChangeType = 'new' | 'improved' | 'fixed';
 
@@ -30,6 +37,54 @@ export type ChangelogEntry = {
 };
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    // Dynamic: whatever build ships from app.json is what this entry claims.
+    version: APP_VERSION_LABEL,
+    date: 'Jul 13, 2026',
+    title: 'Circles: do it together',
+    changes: [
+      {
+        type: 'new',
+        emoji: '⭕',
+        text: 'Circles: commit to one sentence with up to 4 friends. Everyone gets their own goal. Same words, own momentum.',
+      },
+      {
+        type: 'new',
+        emoji: '✉️',
+        text: 'Invite friends right in the app, or send an invite link anywhere.',
+      },
+      {
+        type: 'new',
+        emoji: '✍️',
+        text: 'Share one update a day with your circle, and cheer each other on.',
+      },
+      {
+        type: 'new',
+        emoji: '👋',
+        text: 'Nudge a circle-mate. A quiet "thinking of you", softer than a push.',
+      },
+      {
+        type: 'new',
+        emoji: '🗞️',
+        text: "Every circle has an activity feed of everyone's good moments.",
+      },
+      {
+        type: 'improved',
+        emoji: '⚡',
+        text: 'Push a whole circle forward in one tap, right from the feed.',
+      },
+      {
+        type: 'improved',
+        emoji: '🎯',
+        text: 'New Circles filter on the home feed.',
+      },
+      {
+        type: 'fixed',
+        emoji: '🧹',
+        text: 'Squashed some bugs for a smoother experience.',
+      },
+    ],
+  },
   {
     version: '1.0 (21)',
     date: 'Jul 6, 2026',
@@ -58,7 +113,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         type: 'improved',
         emoji: '✍️',
-        text: 'Post shorter goals and updates — the minimum dropped from 50 to 15 characters.',
+        text: 'Post shorter goals and updates. The minimum dropped from 50 to 15 characters.',
       },
       {
         type: 'fixed',
