@@ -9,7 +9,7 @@ import { useAuth } from '@features/Auth/AuthProvider';
 import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 import { getFeelingLabel } from '@shared/utils/feelings';
 import { getFirstName, toShortName } from '@shared/utils/helperFunctions';
-import { showToast } from '@shared/utils/toast';
+import { showPushToast } from '@shared/utils/toast';
 import PushTicks from '@shared/components/PushTicks/PushTicks';
 import PushButton from '@shared/components/PushButton';
 import { useModal } from '@shared/components/ModalProvider';
@@ -82,6 +82,10 @@ export default function CircleCard({ card, onPress }: Props) {
   const checkAuthThenNavigate = useCheckAuthThenNavigate();
   const pushAll = usePushAllCircle(card.id, user?.id);
   const memberNames = useMemo(() => getMemberDisplayNames(card.members), [card.members]);
+  const viewerIsCircleMember = useMemo(
+    () => card.members.some(member => member.userId === user?.id),
+    [card.members, user?.id],
+  );
   const memberRows = useMemo(
     () =>
       card.members.map((member, index) => ({
@@ -104,11 +108,16 @@ export default function CircleCard({ card, onPress }: Props) {
       onSuccess: result => {
         setPushedAll(true);
         if (result.pushed.length > 0) {
-          showToast({ type: 'success', title: 'You pushed the whole circle forward' });
+          showPushToast({
+            pusherName: 'You',
+            message: viewerIsCircleMember
+              ? 'just pushed the others forward'
+              : 'just pushed everyone forward',
+          });
         }
       },
     });
-  }, [checkAuthThenNavigate, pushAll, pushedAll]);
+  }, [checkAuthThenNavigate, pushAll, pushedAll, viewerIsCircleMember]);
 
   const onPressRoster = useCallback(
     (event: GestureResponderEvent) => {

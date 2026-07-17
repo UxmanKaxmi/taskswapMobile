@@ -22,7 +22,7 @@ import { useCheckAuthThenNavigate } from '@navigation/types/navigationUtils';
 import { buildQueryKey } from '@shared/constants/queryKeys';
 import { useAuth } from '@features/Auth/AuthProvider';
 import { useModal } from '@shared/components/ModalProvider';
-import { showToast } from '@shared/utils/toast';
+import { showPushToast, showToast } from '@shared/utils/toast';
 
 import CircleAvatarStack from '../components/CircleAvatarStack';
 import CircleLaneCard from '../components/CircleLaneCard';
@@ -40,7 +40,7 @@ import {
   useReactToUpdate,
   useShareCircleUpdate,
 } from '../hooks/useCircles';
-import { getFirstName, stripOuterQuotes } from '@shared/utils/helperFunctions';
+import { getFirstName, stripOuterQuotes, toShortName } from '@shared/utils/helperFunctions';
 import { formatRoster } from '../utils/roster';
 import { getCircleDayNumber } from '../utils/circleDay';
 import type { CircleActivityEvent, CircleLane } from '../types/circles.types';
@@ -72,6 +72,9 @@ export default function CircleDetailScreen({ navigation, route }: Props) {
   const [view, setView] = useState<DetailView>('circle');
   const [updateSheetVisible, setUpdateSheetVisible] = useState(false);
   const [shareVisible, setShareVisible] = useState(false);
+  const isComplete = circle?.status === 'complete';
+  const isDissolved = circle?.status === 'dissolved';
+  const isMember = Boolean(circle?.viewer.isMember);
 
   // Fresh member state whenever the screen regains focus (A4 pattern).
   useFocusEffect(
@@ -92,7 +95,17 @@ export default function CircleDetailScreen({ navigation, route }: Props) {
     (lane: CircleLane) => {
       if (!checkAuthThenNavigate()) return;
       if (!lane.taskId || lane.hasPushed) return;
-      pushLane.mutate({ taskId: lane.taskId });
+      pushLane.mutate(
+        { taskId: lane.taskId },
+        {
+          onSuccess: () => {
+            showPushToast({
+              pusherName: 'You',
+              message: `just pushed ${toShortName(lane.name)} forward`,
+            });
+          },
+        },
+      );
     },
     [checkAuthThenNavigate, pushLane],
   );
@@ -227,11 +240,14 @@ export default function CircleDetailScreen({ navigation, route }: Props) {
     pushAll.mutate(undefined, {
       onSuccess: result => {
         if (result.pushed.length > 0) {
-          showToast({ type: 'success', title: 'You pushed the whole circle forward' });
+          showPushToast({
+            pusherName: 'You',
+            message: isMember ? 'just pushed the others forward' : 'just pushed everyone forward',
+          });
         }
       },
     });
-  }, [checkAuthThenNavigate, pushAll]);
+  }, [checkAuthThenNavigate, isMember, pushAll]);
 
   const onPressInvite = useCallback(() => {
     createInvite.mutate(undefined, {
@@ -266,9 +282,6 @@ export default function CircleDetailScreen({ navigation, route }: Props) {
     setShareVisible(true);
   }, []);
 
-  const isComplete = circle?.status === 'complete';
-  const isDissolved = circle?.status === 'dissolved';
-  const isMember = Boolean(circle?.viewer.isMember);
   const viewerLaneDone = circle?.lanes.some(
     lane => lane.userId === user?.id && lane.state === 'done',
   );

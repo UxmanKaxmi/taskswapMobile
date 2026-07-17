@@ -41,8 +41,11 @@
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
+        <!-- Apex only: GitHub Pages 301-redirects www to the apex, and
+             Google's asset-links verifier rejects redirects, so a www host
+             here can never verify. www links still reach the app via the
+             browser redirect to the apex landing page. -->
         <data android:scheme="https" android:host="pushmeup.app" />
-        <data android:scheme="https" android:host="www.pushmeup.app" />
         <data android:pathPrefix="/c/" />
         <data android:pathPrefix="/circles/" />
       </intent-filter>
