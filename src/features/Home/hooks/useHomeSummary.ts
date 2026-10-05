@@ -12,7 +12,7 @@ export function useHomeSummary() {
   const utcOffsetMinutes = getLocalUtcOffsetMinutes();
 
   return useQuery({
-    queryKey: buildQueryKey.homeSummary(utcOffsetMinutes),
+    queryKey: buildQueryKey.homeSummary(user?.id, utcOffsetMinutes),
     queryFn: () => getHomeSummaryAPI(utcOffsetMinutes),
     enabled: !!user && isFocused,
   });

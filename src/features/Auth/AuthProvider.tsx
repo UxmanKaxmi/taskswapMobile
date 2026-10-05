@@ -15,7 +15,7 @@ import { useGoogleAuth } from './api/useGoogleAuth';
 import { useAppleAuth } from './api/useAppleAuth';
 import type { AuthProviderName } from './api/types';
 import { showToast } from '@shared/utils/toast';
-import { queryClient } from '@lib/react-query/client';
+import { clearPersistedQueryCache, queryClient } from '@lib/react-query/client';
 import {
   registerBackendSessionRefresh,
   registerSignOut,
@@ -246,6 +246,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     // Then clear EVERYTHING
     queryClient.clear();
+    await clearPersistedQueryCache();
 
     delete api.defaults.headers.common['Authorization'];
 

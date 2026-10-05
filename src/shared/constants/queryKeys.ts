@@ -40,7 +40,13 @@ export const buildQueryKey = {
   notifications: () => [QueryKeys.Notification],
   myProfile: () => [QueryKeys.MyProfile],
   myImpact: () => [QueryKeys.MyImpact],
-  homeSummary: (utcOffsetMinutes?: number) => [QueryKeys.HomeSummary, utcOffsetMinutes],
+  homeSummary: (userIdOrUtcOffsetMinutes?: string | number, utcOffsetMinutes?: number) => {
+    if (typeof userIdOrUtcOffsetMinutes === 'string') {
+      return [QueryKeys.HomeSummary, userIdOrUtcOffsetMinutes, utcOffsetMinutes];
+    }
+
+    return [QueryKeys.HomeSummary, userIdOrUtcOffsetMinutes];
+  },
   searchFriends: (query: string, includeFollowed: boolean = true) => [
     QueryKeys.SearchFriends,
     query,

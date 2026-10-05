@@ -22,7 +22,7 @@ import { navigationRef } from './navigation/navigationRef';
 import NotificationNavigationBridge from './lib/notifications/NotificationNavigationBridge';
 import { setNotificationNavigationReady } from './lib/notifications/notificationNavigation';
 import { initDeepLinks } from './lib/deeplinks/deepLinkBridge';
-import { queryClient } from './lib/react-query/client';
+import { queryClient, restorePersistedQueryCache } from './lib/react-query/client';
 
 const loginImage = require('@assets/images/loginImage5.png');
 
@@ -86,7 +86,8 @@ function ThemedApp() {
 }
 
 export default function App() {
-  const [visible, setVisible] = useState(true);
+  const [bootSplashVisible, setBootSplashVisible] = useState(true);
+  const [queryCacheReady, setQueryCacheReady] = useState(false);
 
   useEffect(() => {
     console.log('✅ Firebase apps:', firebase.apps);
@@ -118,8 +119,22 @@ export default function App() {
     incrementAppLaunchCount().catch(() => {});
   }, []);
 
-  return visible ? (
-    <AnimatedBootSplash onAnimationEnd={() => setVisible(false)} />
+  useEffect(() => {
+    let isMounted = true;
+
+    restorePersistedQueryCache()
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) setQueryCacheReady(true);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  return bootSplashVisible || !queryCacheReady ? (
+    <AnimatedBootSplash onAnimationEnd={() => setBootSplashVisible(false)} />
   ) : (
     <ThemeProvider>
       <ThemedApp />

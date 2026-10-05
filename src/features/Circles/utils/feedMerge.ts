@@ -4,6 +4,11 @@ import type { CircleFeedCard } from '../types/circles.types';
 
 type FeedGoal = Goal & { latestActivityAt?: string; pushCount?: number };
 
+// Each branch must compare the SAME key the backend sorts that feed by,
+// or circles land in the wrong place. Server order (getFeedOrderBy):
+//   all / new     -> createdAt DESC
+//   almost_there  -> latestActivityAt DESC
+//   needs_push    -> pushCount ASC
 function circleBelongsBefore(circle: CircleFeedCard, goal: FeedGoal, sort: FeedSortKey): boolean {
   switch (sort) {
     case 'needs_push':
@@ -14,7 +19,10 @@ function circleBelongsBefore(circle: CircleFeedCard, goal: FeedGoal, sort: FeedS
     case 'new':
     case 'all':
     default:
-      return circle.latestActivityAt >= (goal.createdAt ?? '');
+      // Sorted by creation, so place the circle by when it was created, not
+      // by its latest activity — else any push or update in the circle bumps
+      // its activity to "now" and floats it to the top of the feed.
+      return circle.createdAt >= (goal.createdAt ?? '');
   }
 }
 
